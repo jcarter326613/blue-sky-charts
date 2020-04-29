@@ -10,14 +10,14 @@
 import Vue from 'vue'
 import MyMap from 'vfr-green-map'
 
-Vue.use(MyMap, {el: "cesiumContainer"})
-
+Vue.use(MyMap)
+ 
 export default Vue.component("interactivemap", {
     data: function() {
         return {"message": "Hello world"};
     },
     mounted: function() {
-        this.$createMap("#cesiumContainer");
+        this.$createMap("cesiumContainer");
     }
 })
 </script>
