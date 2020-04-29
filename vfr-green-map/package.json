@@ -1,0 +1,16 @@
+{
+  "name": "vfr-green-map",
+  "version": "1.0.0",
+  "description": "This README would normally document whatever steps are necessary to get your application up and running.",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"test command here\""
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://jcarter123@bitbucket.org/jcarter123/vfr-green-map.git"
+  },
+  "author": "",
+  "license": "ISC",
+  "homepage": "https://bitbucket.org/jcarter123/vfr-green-map#readme"
+}
