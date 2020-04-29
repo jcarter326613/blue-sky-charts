@@ -10,6 +10,10 @@
     "type": "git",
     "url": "git+https://jcarter123@bitbucket.org/jcarter123/vfr-green-map.git"
   },
+  "dependencies": {
+    "jquery": "^3.5.0",
+    "@types/jquery": "^3.3.36"
+  },
   "author": "",
   "license": "ISC",
   "homepage": "https://bitbucket.org/jcarter123/vfr-green-map#readme"

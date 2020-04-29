@@ -3,7 +3,7 @@
 Compiling and exporting
 ```
 # Compile
-tsc *.ts*
+tsc *.ts
 
 # Create package
 npm pack
