@@ -6,25 +6,29 @@ import { PointRadial } from '../coordinates/point-radial'
 import { SubMapView } from './sub-map-view';
 
 export class NavigableMap extends CanvasElement {
-    private containerDiv: JQuery<HTMLElement>;
+    // Map state variables
+    private context: CanvasRenderingContext2D | null;
     private mapViews: Array<SubMapPosition>;
+    private origin: PointRadial;
+
+    // Mouse event variables
     private isDragging: boolean;
     private mouseDownPoint: Point2d;
-    private origin: Point2d;
-    private originalOrigin: Point2d;
-    private context: CanvasRenderingContext2D | null;
+    private originalOrigin: PointRadial;
 
+    // html element variables
     private containerWidth: number;
     private containerHeight: number;
+    private containerDiv: JQuery<HTMLElement>;
 
     constructor(elementId: string) {
         super();
 
         this.mouseDownPoint = new Point2d();
-        this.originalOrigin = new Point2d();
+        this.originalOrigin = new PointRadial();
+        this.origin = new PointRadial();
         this.mapViews = new Array<SubMapPosition>();
         this.isDragging = false;
-        this.origin = new Point2d();
 
         let jQueryElement = $("#" + elementId);
         if (jQueryElement.length != 1) {
@@ -37,10 +41,10 @@ export class NavigableMap extends CanvasElement {
         let canvasObjHtml = $(canvasObj);
         this.containerDiv.append(canvasObjHtml);
 
-        this.containerWidth = 300;
-        this.containerHeight = 400;
-        canvasObjHtml.attr("width", "300px");
-        canvasObjHtml.attr("height", "400px");
+        this.containerWidth = 400;
+        this.containerHeight = 300;
+        canvasObjHtml.attr("width", "400px");
+        canvasObjHtml.attr("height", "300px");
         this.context = canvasObj.getContext("2d");
 
         this.addMouseListeners();
@@ -60,6 +64,7 @@ export class NavigableMap extends CanvasElement {
     }
 
     public render(context: CanvasRenderingContext2D | null = null): void {
+        // Get the context objet and clear the drawing area
         if (context == null) {
             context = this.context;
             if ( context == null )
@@ -67,11 +72,18 @@ export class NavigableMap extends CanvasElement {
         }
         context.clearRect(0, 0, this.containerWidth, this.containerHeight);
 
+        // Call the base render function
         super.render(context);
 
+        //Setup the view transformation so that the radial origin is in the center of the viewing area
         context.save();
-        context.translate(this.origin.x, this.origin.y);
+        context.translate(this.containerWidth / 2, this.containerHeight / 2);
 
+        let origin2d = CoordinateConverstion.convertPointRadialToPoint2d(this.origin);
+        context.translate(origin2d.x, origin2d.y);
+
+        context.fillRect(-10, -5, 20, 10);
+        /*
         this.mapViews.forEach(mapPosition => {
             if ( context == null )
                 return;
@@ -83,6 +95,8 @@ export class NavigableMap extends CanvasElement {
             mapPosition.getSubMapView().render(context);
             context.restore();
         })
+        */
+
         context.restore();
     }
 
@@ -113,8 +127,12 @@ export class NavigableMap extends CanvasElement {
             if ( event === undefined || event.offsetX === undefined || event.offsetY === undefined )
                 return;
     
-            this.origin.x = this.originalOrigin.x + (event.offsetX - this.mouseDownPoint.x)
-            this.origin.y = this.originalOrigin.y + (event.offsetY - this.mouseDownPoint.y)
+            let originalOrigin2d = CoordinateConverstion.convertPointRadialToPoint2d(this.originalOrigin);
+            this.origin.setRadius(this.originalOrigin.getRadius() + (event.offsetY - this.mouseDownPoint.y));
+            this.origin.setAnglePercentage(this.originalOrigin.getAngle() + (event.offsetX - this.mouseDownPoint.x) / 200);
+
+            //this.origin.x = this.originalOrigin.x + (event.offsetX - this.mouseDownPoint.x)
+            //this.origin.y = this.originalOrigin.y + (event.offsetY - this.mouseDownPoint.y)
             this.render();
         }
     }
@@ -124,8 +142,8 @@ export class NavigableMap extends CanvasElement {
             if ( event === undefined || event.offsetX === undefined || event.offsetY === undefined )
                 return;
     
-            this.origin.x = this.originalOrigin.x + (event.offsetX - this.mouseDownPoint.x);
-            this.origin.y = this.originalOrigin.y + (event.offsetY - this.mouseDownPoint.y);
+            //this.origin.x = this.originalOrigin.x + (event.offsetX - this.mouseDownPoint.x);
+            //this.origin.y = this.originalOrigin.y + (event.offsetY - this.mouseDownPoint.y);
             this.isDragging = false;
             this.render();
         }

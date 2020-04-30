@@ -1,3 +1,8 @@
+
+/**
+ * Our radial coordinates are given with zero pointing along the positive x axis and 
+ * 90 degrees pointing along the positive y axis.
+ */
 export class PointRadial {
     private radius: number;
     private angle: number;
@@ -5,9 +10,16 @@ export class PointRadial {
     constructor(angle: number = 0, radius: number = 0) {
         this.radius = 0;
         this.angle = 0;
-        
+
         this.setAnglePercentage(angle);
         this.setRadius(radius);
+    }
+
+    public clone(): PointRadial {
+        let retVal = new PointRadial();
+        retVal.radius = this.radius;
+        retVal.angle = this.angle;
+        return retVal;
     }
 
     public setAnglePercentage(angle: number): void {
@@ -21,6 +33,10 @@ export class PointRadial {
 
     public getAngle(): number {
         return this.angle;
+    }
+
+    public getAngleRadians(): number {
+        return this.angle * Math.PI * 2;
     }
 
     public setRadius(radius: number): void {
