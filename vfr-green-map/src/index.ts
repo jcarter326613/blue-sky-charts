@@ -1,4 +1,4 @@
-import { NavigableMap } from './navigable_map';
+import { NavigableMap } from './view/navigable-map';
 
 let MapPlugin: any = {}
 MapPlugin.install = function testMapModule(Vue: any, options: any) {

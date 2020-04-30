@@ -1,0 +1,8 @@
+#!/bin/bash
+set -e
+
+
+tsc --build --clean
+tsc --build
+npm pack
+tsc --build --clean
