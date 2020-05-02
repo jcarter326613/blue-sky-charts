@@ -31,6 +31,10 @@ export class PointRadial {
         this.angle = angle;
     }
 
+    public setAngleRadians(angle: number): void {
+        this.setAnglePercentage(angle / (Math.PI * 2));
+    }
+
     public getAngle(): number {
         return this.angle;
     }

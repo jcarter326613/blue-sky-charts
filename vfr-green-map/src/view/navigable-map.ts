@@ -13,8 +13,11 @@ export class NavigableMap extends CanvasElement {
 
     // Mouse event variables
     private isDragging: boolean;
-    private mouseDownPoint: Point2d;
-    private originalOrigin: PointRadial;
+    private mouseDownPointGlobal2d: Point2d;
+    private mouseDownPointGlobalRadial: PointRadial;
+    private mouseDownPoint2d: Point2d;
+    private originalOriginGlobal2d: Point2d;
+    private originalOriginGlobalRadial: PointRadial;
 
     // html element variables
     private containerWidth: number;
@@ -24,8 +27,12 @@ export class NavigableMap extends CanvasElement {
     constructor(elementId: string) {
         super();
 
-        this.mouseDownPoint = new Point2d();
-        this.originalOrigin = new PointRadial();
+        this.mouseDownPointGlobal2d = new Point2d();
+        this.mouseDownPointGlobalRadial = new PointRadial();
+        this.mouseDownPoint2d = new Point2d();
+        this.originalOriginGlobal2d = new Point2d();
+        this.originalOriginGlobalRadial = new PointRadial();
+
         this.origin = new PointRadial();
         this.mapViews = new Array<SubMapPosition>();
         this.isDragging = false;
@@ -45,6 +52,9 @@ export class NavigableMap extends CanvasElement {
         this.containerHeight = 300;
         canvasObjHtml.attr("width", "400px");
         canvasObjHtml.attr("height", "300px");
+        canvasObjHtml.css("border-width", "5px");
+        canvasObjHtml.css("border-color", "black");
+        canvasObjHtml.css("border-style", "solid");
         this.context = canvasObj.getContext("2d");
 
         this.addMouseListeners();
@@ -82,20 +92,17 @@ export class NavigableMap extends CanvasElement {
         let origin2d = CoordinateConverstion.convertPointRadialToPoint2d(this.origin);
         context.translate(origin2d.x, origin2d.y);
 
-        context.fillRect(-10, -5, 20, 10);
-        /*
         this.mapViews.forEach(mapPosition => {
             if ( context == null )
                 return;
             context.save();
             let radialPosition: PointRadial = mapPosition.getPosition();
-            let position = CoordinateConverstion.convertPointRadialToPoint2d(radialPosition, new PointRadial());
+            let position = CoordinateConverstion.convertPointRadialToPoint2d(radialPosition);
             context.translate(position.x, position.y);
 
             mapPosition.getSubMapView().render(context);
             context.restore();
         })
-        */
 
         context.restore();
     }
@@ -115,10 +122,15 @@ export class NavigableMap extends CanvasElement {
         event.stopPropagation();
         event.preventDefault();
 
-        this.mouseDownPoint = new Point2d();
-        this.mouseDownPoint.x = event.offsetX;
-        this.mouseDownPoint.y = event.offsetY;
-        this.originalOrigin = this.origin.clone();
+        let origin2d = CoordinateConverstion.convertPointRadialToPoint2d(this.origin);
+        let x2d = event.offsetX - (this.containerWidth / 2) + origin2d.x;
+        let y2d = event.offsetY - (this.containerHeight / 2) + origin2d.y;
+        
+        this.mouseDownPointGlobal2d = new Point2d(x2d, y2d);
+        this.mouseDownPointGlobalRadial = CoordinateConverstion.convertPoint2dToPointRadial(this.mouseDownPointGlobal2d);
+        this.mouseDownPoint2d = new Point2d(event.offsetX, event.offsetY);
+        this.originalOriginGlobal2d = CoordinateConverstion.convertPointRadialToPoint2d(this.origin);
+        this.originalOriginGlobalRadial = this.origin.clone();
         this.isDragging = true;
     }
 
@@ -127,26 +139,26 @@ export class NavigableMap extends CanvasElement {
             if ( event === undefined || event.offsetX === undefined || event.offsetY === undefined )
                 return;
     
-            let originalOrigin2d = CoordinateConverstion.convertPointRadialToPoint2d(this.originalOrigin);
-            this.origin.setRadius(this.originalOrigin.getRadius() + (event.offsetY - this.mouseDownPoint.y));
-            this.origin.setAnglePercentage(this.originalOrigin.getAngle() + (event.offsetX - this.mouseDownPoint.x) / 200);
+            let xTravel = event.offsetX - this.mouseDownPoint2d.x;
+            let yTravel = event.offsetY - this.mouseDownPoint2d.y;
+            let newMouseDownPointGlobal2d = new Point2d(this.mouseDownPointGlobal2d.x + xTravel,
+                this.mouseDownPointGlobal2d.y + yTravel);
+            let newMouseDownPointGlobalRadial = CoordinateConverstion.convertPoint2dToPointRadial(newMouseDownPointGlobal2d);
+            let angleDelta = newMouseDownPointGlobalRadial.getAngle() - this.mouseDownPointGlobalRadial.getAngle();
+            let radiusDelta = newMouseDownPointGlobalRadial.getRadius() - this.mouseDownPointGlobalRadial.getRadius();
 
-            //this.origin.x = this.originalOrigin.x + (event.offsetX - this.mouseDownPoint.x)
-            //this.origin.y = this.originalOrigin.y + (event.offsetY - this.mouseDownPoint.y)
+            let newOriginGlobalRadial = new PointRadial(this.originalOriginGlobalRadial.getAngle() + angleDelta,
+                this.originalOriginGlobalRadial.getRadius() + radiusDelta);
+            if (newOriginGlobalRadial.getRadius() < 0)
+                newOriginGlobalRadial.setRadius(0);
+            this.origin = newOriginGlobalRadial;
+
             this.render();
         }
     }
 
     private mouseUp(event: JQuery.Event): void {
-        if (this.isDragging) {
-            if ( event === undefined || event.offsetX === undefined || event.offsetY === undefined )
-                return;
-    
-            //this.origin.x = this.originalOrigin.x + (event.offsetX - this.mouseDownPoint.x);
-            //this.origin.y = this.originalOrigin.y + (event.offsetY - this.mouseDownPoint.y);
-            this.isDragging = false;
-            this.render();
-        }
+        this.isDragging = false;
     }
 };
 
