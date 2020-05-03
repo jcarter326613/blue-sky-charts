@@ -3,9 +3,9 @@ export class Color {
     public green: number;
     public blue: number;
 
-    constructor() {
-        this.red = 0;
-        this.green = 0;
-        this.blue = 0;
+    constructor(red: number = 0, green: number = 0, blue: number = 0) {
+        this.red = red;
+        this.green = green;
+        this.blue = blue;
     }
 }

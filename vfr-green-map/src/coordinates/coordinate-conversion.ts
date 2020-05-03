@@ -11,8 +11,11 @@ export class CoordinateConverstion {
 
     public static convertPoint2dToPointRadial(point2d: Point2d): PointRadial {
         let retVal = new PointRadial();
+        let radians = Math.atan(point2d.y / point2d.x);
+        if (point2d.x < 0)
+            radians += Math.PI
+        retVal.setAngleRadians(radians);
         retVal.setRadius(Math.sqrt(point2d.x ** 2 + point2d.y ** 2));
-        retVal.setAngleRadians(Math.atan(point2d.y / point2d.x));
         return retVal;
     }
 }

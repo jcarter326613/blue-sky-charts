@@ -15,6 +15,7 @@ export class SubMapView extends CanvasElement {
 
     public render(context: CanvasRenderingContext2D) {
         super.render(context);
+        context.fillStyle = `rgb(${this.backgroundColor.red},${this.backgroundColor.green},${this.backgroundColor.blue})`;
         context.fillRect(0, 0, 50, 50);
     }
 }
