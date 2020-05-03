@@ -99,7 +99,7 @@ export class NavigableMap extends CanvasElement {
         //Setup the view transformation so that the radial origin is in the center of the viewing area
         context.save();
         
-        context.translate(this.containerWidth / 2, this.containerHeight / 2);
+        context.translate(this.containerWidth / 2, 0);
 
         let originRadial = CoordinateConverstion.convertPoint2dToPointRadial(this.origin);
         context.translate(0, -originRadial.getRadius());
@@ -108,6 +108,11 @@ export class NavigableMap extends CanvasElement {
 
         context.fillRect(-2, 0, 4, 500);
         context.fillRect(0, -2, 500, 4);
+        context.rotate(-Math.PI / 4)
+        context.fillRect(-2, 0, 4, 500);
+        context.rotate(Math.PI / 2)
+        context.fillRect(-2, 0, 4, 500);
+        context.rotate(-Math.PI / 4)
 
         this.mapViews.forEach(mapPosition => {
             if ( context == null )
@@ -140,7 +145,7 @@ export class NavigableMap extends CanvasElement {
         event.preventDefault();
 
         let x2d = event.offsetX - (this.containerWidth / 2) + this.origin.x;
-        let y2d = event.offsetY - (this.containerHeight / 2) + this.origin.y;
+        let y2d = event.offsetY + this.origin.y;
         
         this.mouseDownPointGlobal2d = new Point2d(x2d, y2d);
         this.mouseDownPointGlobalRadial = CoordinateConverstion.convertPoint2dToPointRadial(this.mouseDownPointGlobal2d);
@@ -157,22 +162,16 @@ export class NavigableMap extends CanvasElement {
     
             let xTravel = event.offsetX - this.mouseDownPoint2d.x;
             let yTravel = event.offsetY - this.mouseDownPoint2d.y;
-            xTravel = -50;
-            yTravel = 0;
+            //xTravel = -50;
+            //yTravel = 0;
 
             let newMouseDownPointGlobal2d = new Point2d(this.mouseDownPointGlobal2d.x + xTravel,
                 this.mouseDownPointGlobal2d.y + yTravel);
-            let angleDelta = 
-            /*
-            let newMouseDownPointGlobal2d = new Point2d(this.mouseDownPointGlobal2d.x - xTravel,
-                this.mouseDownPointGlobal2d.y - yTravel);
             let newMouseDownPointGlobalRadial = CoordinateConverstion.convertPoint2dToPointRadial(newMouseDownPointGlobal2d);
             let angleDelta = newMouseDownPointGlobalRadial.getAngle() - this.mouseDownPointGlobalRadial.getAngle();
-            let radiusDelta = newMouseDownPointGlobalRadial.getRadius() - this.mouseDownPointGlobalRadial.getRadius();
-            */
-
-            let newOriginGlobalRadial = new PointRadial(this.originalOriginGlobalRadial.getAngle() + angleDelta,
-                this.originalOriginGlobalRadial.getRadius() + radiusDelta);
+            
+            let newOriginGlobalRadial = new PointRadial(this.originalOriginGlobalRadial.getAngle() - angleDelta,
+                this.originalOriginGlobalRadial.getRadius());
             if (newOriginGlobalRadial.getRadius() < this.minOriginRadius)
                 newOriginGlobalRadial.setRadius(this.minOriginRadius);
             this.origin = CoordinateConverstion.convertPointRadialToPoint2d(newOriginGlobalRadial);
