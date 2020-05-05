@@ -9,5 +9,6 @@ https://rasterio.readthedocs.io/en/latest/index.html
 # System setup for map crop definition
 `
 sudo apt-get install python-tk
+sudo apt-get install python3-tk
 pip3 install pillow
 `
