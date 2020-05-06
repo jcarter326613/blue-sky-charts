@@ -34,6 +34,7 @@ if version_requested == None or len(version_requested) == 0:
 else:
     version = int(version_requested)
 map_inventory[map_name]["version"] = version
+map_inventory[map_name]["tile_width"] = 256
 
 # Download the zip file and extract it
 zip_url = "https://aeronav.faa.gov/content/aeronav/sectional_files/{}_{}.zip".format(map_name, version)
