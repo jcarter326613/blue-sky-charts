@@ -34,7 +34,7 @@ if version_requested == None or len(version_requested) == 0:
 else:
     version = int(version_requested)
 map_inventory[map_name]["version"] = version
-map_inventory[map_name]["tile_width"] = 256
+map_inventory[map_name]["tileWidth"] = 256
 
 # Download the zip file and extract it
 zip_url = "https://aeronav.faa.gov/content/aeronav/sectional_files/{}_{}.zip".format(map_name, version)
@@ -55,10 +55,10 @@ mi.write_inventory_metadata(map_inventory)
 
 # Define the crop area
 existing_bounds = None
-if "map_bounds" in map_inventory[map_name]:
-    existing_bounds = map_inventory[map_name]["map_bounds"]
+if "mapBounds" in map_inventory[map_name]:
+    existing_bounds = map_inventory[map_name]["mapBounds"]
 map_bounds = define_crops(tif_file, existing_bounds)
 if map_bounds != None and len(map_bounds) > 0:
     map_bounds.append(map_bounds[0])
-    map_inventory[map_name]["map_bounds"] = map_bounds
+    map_inventory[map_name]["mapBounds"] = map_bounds
     mi.write_inventory_metadata(map_inventory)

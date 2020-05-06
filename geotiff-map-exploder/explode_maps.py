@@ -79,11 +79,11 @@ def explode_maps():
     for map_name in inventory:
         map_definition = inventory[map_name]
 
-        if "tile_width" not in map_definition:
+        if "tileWidth" not in map_definition:
             print("Missing tile width for map " + map_name)
             exit()
 
-        tile_width = map_definition["tile_width"]
+        tile_width = map_definition["tileWidth"]
         image_cache_folder = "maps/{}_SEC_{}".format(map_name, map_definition["version"])
         image_path = image_cache_folder + ".tif"
         if not path.exists(image_cache_folder):
