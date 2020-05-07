@@ -2,9 +2,10 @@ import * as $ from 'jquery'
 import { CanvasElement } from './canvas-element';
 import { CoordinateConverstion } from '../coordinates/coordinate-conversion'
 import { Point2d } from '../coordinates/point-2d'
+import { PointGeo } from '../coordinates/point-geo'
 import { PointRadial } from '../coordinates/point-radial'
+import { SubMapModel } from '../models/sub-map-model';
 import { SubMapView } from './sub-map-view';
-import { Color } from '../color';
 
 export class NavigableMap extends CanvasElement {
     // Map state variables
@@ -61,8 +62,8 @@ export class NavigableMap extends CanvasElement {
         this.context = canvasObj.getContext("2d");
 
         this.addMouseListeners();
-        this.initializeMapModel();
         this.render();
+        this.retrieveConfiguration();
     }
 
     private addMouseListeners(): void {
@@ -71,13 +72,33 @@ export class NavigableMap extends CanvasElement {
         this.containerDiv.mouseup((event: JQuery.Event) => this.mouseUp(event));
     }
 
-    private initializeMapModel(): void {
-        this.mapViews.push(new SubMapPosition(new SubMapView(), new PointRadial(0.25, 150)));
-        this.mapViews.push(new SubMapPosition(new SubMapView(), new PointRadial(0, 150)));
-        this.mapViews.push(new SubMapPosition(new SubMapView(), new PointRadial(-0.25 / 2, 150)));
+    private initializeMapModel(data: Record<string, SubMapModel>): void {
+        for (let key in data) {
+            let subMapModel = data[key];
+            let subMapView = new SubMapView();
 
-        this.mapViews[1].getSubMapView().setBackgroundColor(new Color(255, 0, 0));
-        this.mapViews[1].getSubMapView().setBackgroundColor(new Color(0, 255, 0));
+            if (subMapModel.fileExtent == null)
+                continue;
+
+            let centerPointGeo = new PointGeo();
+            centerPointGeo.longitude = (subMapModel.fileExtent.topLeft.longitude + subMapModel.fileExtent.topRight.longitude) / 2;
+            centerPointGeo.latitude = (subMapModel.fileExtent.topLeft.latitude + subMapModel.fileExtent.bottomLeft.latitude) / 2;
+
+            let centerPoint = new PointRadial();
+            centerPoint.setAnglePercentage(centerPointGeo.longitude)
+
+            this.mapViews.push(new SubMapPosition(subMapView, centerPoint));
+            this.origin = centerPoint;
+        }
+    }
+
+    private retrieveConfiguration(): void {
+        let thisObj = this;
+        $.getJSON("file:///home/jason/Code/Business/geotiff-map-exploder/maps/metadata.json",
+            function(data: Record<string, SubMapModel>) {
+                thisObj.initializeMapModel(data);
+                thisObj.render();
+            });
     }
 
     public render(context: CanvasRenderingContext2D | null = null): void {
