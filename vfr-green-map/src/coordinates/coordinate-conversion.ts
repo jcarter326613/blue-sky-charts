@@ -28,4 +28,42 @@ export class CoordinateConverstion {
         retVal.setRadius(Math.sqrt(point2d.x ** 2 + point2d.y ** 2));
         return retVal;
     }
+
+    /**
+     * Returns a 2 dimensional point with respect to an observer at the origin with the negative y axis
+     * pointing to the radial point (0,0).
+     * @param point The point to convert to 2d
+     * @param origin The location of the observer
+     */
+    public static getRelativePoint2d(point: PointRadial, origin: PointRadial): Point2d {
+        let angleDiff = point.getAngleRadians() - origin.getAngleRadians();
+        let retVal = new Point2d();
+
+        // Get the divide by zero cases
+        if (angleDiff == 0) {
+            retVal.x = 0;
+            retVal.y = point.getRadius() - origin.getRadius();
+            return retVal;
+        } else if (angleDiff == Math.PI) {
+            retVal.x = 0;
+            retVal.y = -(point.getRadius() + origin.getRadius());
+            return retVal;
+        } else if (angleDiff == Math.PI / 2) {
+            retVal.x = -point.getRadius();
+            retVal.y = -origin.getRadius();
+        } else if (angleDiff == 3 * Math.PI / 2) {
+            retVal.x = point.getRadius();
+            retVal.y = -origin.getRadius();
+        }
+ 
+        // Calculate the typical case
+        if (angleDiff > Math.PI) {
+            angleDiff = -(1 - angleDiff)
+        }
+
+        retVal.x = point.getRadius() * Math.sin(angleDiff)
+        retVal.y = (point.getRadius() * Math.cos(angleDiff)) - origin.getRadius()
+
+        return retVal;
+    }
 }

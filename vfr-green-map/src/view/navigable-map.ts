@@ -170,16 +170,52 @@ export class NavigableMap {
             context.rotate(-radialPosition.getAngleRadians())
             context.translate(-originalWidth / 2, -originalHeight / 2);
 
-            let viewport = new Box2d(originalWidth / 2 - this.containerWidth / 2, 
-                originalHeight / 2 - this.containerHeight / 2,
-                originalWidth / 2 + this.containerWidth / 2, 
-                originalHeight / 2 + this.containerHeight / 2)
+            let viewport = this.calculateViewport(radialPosition);
+            viewport.upperLeft.x += originalWidth / 2;
+            viewport.lowerRight.x += originalWidth / 2;
+            viewport.upperLeft.y += originalHeight / 2;
+            viewport.lowerRight.y += originalHeight / 2;
 
             mapPosition.getSubMapView().render(context, viewport, 1);
             context.restore();
         })
 
         context.restore();
+    }
+
+    private calculateViewport(radialPosition: PointRadial): Box2d {
+        // Find the v corners in radial coordinates
+        let topAngleDiff = Math.atan((this.containerWidth / 2) / this.origin.getRadius());
+        let upperLeft = new PointRadial();
+        let upperRight = new PointRadial();
+        upperLeft.setAngleRadians(this.origin.getAngleRadians() - topAngleDiff)
+        upperRight.setAngleRadians(this.origin.getAngleRadians() + topAngleDiff)
+        let upperRadius = this.origin.getRadius() / Math.cos(topAngleDiff)
+        upperLeft.setRadius(upperRadius);
+        upperRight.setRadius(upperRadius);
+
+        let bottomAngleDiff = Math.atan((this.containerWidth / 2) / (this.origin.getRadius() + this.containerHeight));
+        let bottomLeft = new PointRadial();
+        let bottomRight = new PointRadial();
+        bottomLeft.setAngleRadians(this.origin.getAngleRadians() - bottomAngleDiff)
+        bottomRight.setAngleRadians(this.origin.getAngleRadians() + bottomAngleDiff)
+        let lowerRadius = (this.origin.getRadius() + this.containerHeight) / Math.cos(bottomAngleDiff)
+        bottomLeft.setRadius(lowerRadius);
+        bottomRight.setRadius(lowerRadius);
+
+        // Convert v corners to 2d relative to map center
+        let upperLeft2d = CoordinateConverstion.getRelativePoint2d(upperLeft, radialPosition);
+        let upperRight2d = CoordinateConverstion.getRelativePoint2d(upperRight, radialPosition);
+        let bottomLeft2d = CoordinateConverstion.getRelativePoint2d(bottomLeft, radialPosition);
+        let bottomRight2d = CoordinateConverstion.getRelativePoint2d(bottomRight, radialPosition);
+
+        // Expand corners
+        let finalViewport = new Box2d();
+        finalViewport.upperLeft.x = Math.min(upperLeft2d.x, upperRight2d.x, bottomLeft2d.x, bottomRight2d.x);
+        finalViewport.upperLeft.y = Math.min(upperLeft2d.y, upperRight2d.y, bottomLeft2d.y, bottomRight2d.y);
+        finalViewport.lowerRight.x = Math.max(upperLeft2d.x, upperRight2d.x, bottomLeft2d.x, bottomRight2d.x);
+        finalViewport.lowerRight.y = Math.max(upperLeft2d.y, upperRight2d.y, bottomLeft2d.y, bottomRight2d.y);
+        return finalViewport;
     }
 
     /* Mouse handler events */

@@ -19,6 +19,7 @@ export class SubMapView implements TileReceiver {
     private renderVersion: number;
     private context: CanvasRenderingContext2D | null;
     private contextTransform: DOMMatrix | null;
+    private scaledTileWidth: number;
     
     constructor(tileProvider: TileProvider) {
         this.originalMapWidth = 0;
@@ -32,6 +33,7 @@ export class SubMapView implements TileReceiver {
         this.renderVersion = 0;
         this.context = null;
         this.contextTransform = null;
+        this.scaledTileWidth = 0;
     }
 
     public initialize(model: SubMapModel, name: string): boolean {
@@ -68,13 +70,17 @@ export class SubMapView implements TileReceiver {
 
         if ( this.contextTransform == null || this.context == null )
             return;
+
+        let tileX = location.x * this.scaledTileWidth;
+        let tileWidth = this.scaledTileWidth;
+        let scaledTileHeight = this.scaledTileWidth * this.tileHeight / this.tileWidth
+        let tileY = location.y * scaledTileHeight;
+        let tileHeight = scaledTileHeight;
         
         let currentTransform = this.context.getTransform();
         this.context.setTransform(this.contextTransform);
-        this.context.drawImage(tile, this.originalMapWidth / 2, this.originalMapHeight / 2);
+        this.context.drawImage(tile, tileX, tileY, tileWidth, tileHeight);
         this.context.setTransform(currentTransform);
-
-        //console.log(`Tile received (${location.x}, ${location.y}.  Version ${data as number}.  src ${tile.src})`);
     }
 
     /**
@@ -107,6 +113,7 @@ export class SubMapView implements TileReceiver {
             zoomLevel--;
             numTilesAcross = 2 ** zoomLevel;
         }
+        this.scaledTileWidth = m / numTilesAcross;
         let originalImageTileWidth = this.originalMapWidth / numTilesAcross
         let originalImageTileHeight = this.originalMapHeight / numTilesAcross
 
