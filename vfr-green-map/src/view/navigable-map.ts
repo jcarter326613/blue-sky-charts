@@ -15,7 +15,8 @@ export class NavigableMap {
     private context: CanvasRenderingContext2D | null;
     private mapViews: Array<SubMapPosition>;
     private origin: PointRadial;
-    private readonly minOriginRadius: number
+    private readonly minOriginRadius: number;
+    private scale: number;
 
     // Mouse event variables
     private isDragging: boolean;
@@ -31,6 +32,7 @@ export class NavigableMap {
     constructor(elementId: string) {
         this.tileProvider = new TileProvider();
         this.minOriginRadius = 1;
+        this.scale = 0.1;
 
         this.mouseDownPoint2d = new Point2d();
         this.mouseDownOriginRadial = new PointRadial();
@@ -142,7 +144,7 @@ export class NavigableMap {
         
         context.translate(this.containerWidth / 2, 0);
 
-        context.translate(0, -this.origin.getRadius());
+        context.translate(0, -this.origin.getRadius() * this.scale);
         context.rotate(this.origin.getAngleRadians());
 
         context.fillRect(-2, 0, 4, 500);
@@ -162,21 +164,28 @@ export class NavigableMap {
             if ( context == null )
                 return;
             context.save();
-            let radialPosition: PointRadial = mapPosition.getPosition();
-            let position = CoordinateConverstion.convertPointRadialToPoint2d(radialPosition);
-            let originalWidth = mapPosition.getSubMapView().getOriginalWidth();
-            let originalHeight = mapPosition.getSubMapView().getOriginalHeight()
-            context.translate(position.x, position.y);
-            context.rotate(-radialPosition.getAngleRadians())
-            context.translate(-originalWidth / 2, -originalHeight / 2);
 
+            // Calculate the viewport from the perspective of the un modified sub map
+            let radialPosition: PointRadial = mapPosition.getPosition();
+            let originalWidth = mapPosition.getSubMapView().getOriginalWidth();
+            let originalHeight = mapPosition.getSubMapView().getOriginalHeight();
             let viewport = this.calculateViewport(radialPosition);
             viewport.upperLeft.x += originalWidth / 2;
             viewport.lowerRight.x += originalWidth / 2;
             viewport.upperLeft.y += originalHeight / 2;
             viewport.lowerRight.y += originalHeight / 2;
 
-            mapPosition.getSubMapView().render(context, viewport, 1);
+            // Position the map appropriately on the canvas considering the current scale            
+            radialPosition.setRadius(radialPosition.getRadius() * this.scale)
+            let position = CoordinateConverstion.convertPointRadialToPoint2d(radialPosition);
+            originalWidth *= this.scale;
+            originalHeight *= this.scale;
+            context.translate(position.x, position.y);
+            context.rotate(-radialPosition.getAngleRadians())
+            context.translate(-originalWidth / 2, -originalHeight / 2);
+
+            // Draw the submap
+            mapPosition.getSubMapView().render(context, viewport, this.scale);
             context.restore();
         })
 
@@ -185,7 +194,7 @@ export class NavigableMap {
 
     private calculateViewport(radialPosition: PointRadial): Box2d {
         // Find the v corners in radial coordinates
-        let topAngleDiff = Math.atan((this.containerWidth / 2) / this.origin.getRadius());
+        let topAngleDiff = Math.atan((this.containerWidth / (2 * this.scale)) / this.origin.getRadius());
         let upperLeft = new PointRadial();
         let upperRight = new PointRadial();
         upperLeft.setAngleRadians(this.origin.getAngleRadians() - topAngleDiff)
@@ -194,12 +203,13 @@ export class NavigableMap {
         upperLeft.setRadius(upperRadius);
         upperRight.setRadius(upperRadius);
 
-        let bottomAngleDiff = Math.atan((this.containerWidth / 2) / (this.origin.getRadius() + this.containerHeight));
+        let bottomAngleDiff = Math.atan((this.containerWidth / (2 * this.scale)) / 
+            (this.origin.getRadius() + (this.containerHeight / this.scale)));
         let bottomLeft = new PointRadial();
         let bottomRight = new PointRadial();
         bottomLeft.setAngleRadians(this.origin.getAngleRadians() - bottomAngleDiff)
         bottomRight.setAngleRadians(this.origin.getAngleRadians() + bottomAngleDiff)
-        let lowerRadius = (this.origin.getRadius() + this.containerHeight) / Math.cos(bottomAngleDiff)
+        let lowerRadius = (this.origin.getRadius() + (this.containerHeight / this.scale)) / Math.cos(bottomAngleDiff)
         bottomLeft.setRadius(lowerRadius);
         bottomRight.setRadius(lowerRadius);
 
