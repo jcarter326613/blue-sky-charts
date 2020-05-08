@@ -32,20 +32,20 @@ def _explode_map_helper(image_cache_folder, zoom_level, original_image, original
     cropped_image.save(zoom_directory + "/{}_{}.jpg".format(this_xy[0], this_xy[1]), "JPEG")
 
     # Check if we've zoomed far enough
-    if (original_image_dimensions[0] / (2 ** zoom_level)) <= tile_width or zoom_level > 5:
+    if (original_image_dimensions[0] / (2 ** zoom_level)) <= tile_width or zoom_level > 6:
         return
 
     # Split the image into 4 equal parts and recurse
     next_coordinate = (this_xy[0] * 2, this_xy[1] * 2)
 
     _explode_map_helper(image_cache_folder, zoom_level + 1, original_image, original_image_dimensions, \
-        next_coordinate)
+        next_coordinate, tile_width)
     _explode_map_helper(image_cache_folder, zoom_level + 1, original_image, original_image_dimensions, \
-        (next_coordinate[0] + 1, next_coordinate[1]))
+        (next_coordinate[0] + 1, next_coordinate[1]), tile_width)
     _explode_map_helper(image_cache_folder, zoom_level + 1, original_image, original_image_dimensions, \
-        (next_coordinate[0], next_coordinate[1] + 1))
+        (next_coordinate[0], next_coordinate[1] + 1), tile_width)
     _explode_map_helper(image_cache_folder, zoom_level + 1, original_image, original_image_dimensions, \
-        (next_coordinate[0] + 1, next_coordinate[1] + 1))
+        (next_coordinate[0] + 1, next_coordinate[1] + 1), tile_width)
 
 def explode_map(name, definition, image_cache_folder, image_location, tile_width):
     print("Exploding map " + name)
@@ -55,7 +55,7 @@ def explode_map(name, definition, image_cache_folder, image_location, tile_width
     Image.MAX_IMAGE_PIXELS = 300000000
     image = Image.open(image_location)
 
-    print("Expected max zoom level: {}".format(math.log2(image.width)))
+    print("Expected max zoom level: ciel({})".format(math.log2(image.width / tile_width)))
 
     _explode_map_helper(image_cache_folder, 0, image, (image.width, image.height), (0, 0), tile_width)
 

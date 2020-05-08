@@ -1,5 +1,25 @@
 {
     "Bethel": {
+        "fileExtent": {
+            "bottomLeft": {
+                "latitude": 59.484141,
+                "longitude": -173.791229
+            },
+            "bottomRight": {
+                "latitude": 59.488927,
+                "longitude": -161.308193
+            },
+            "topLeft": {
+                "latitude": 64.112461,
+                "longitude": -174.799935
+            },
+            "topRight": {
+                "latitude": 64.117994,
+                "longitude": -160.315193
+            }
+        },
+        "imageHeight": 12244,
+        "imageWidth": 16666,
         "mapBounds": [
             [
                 2083,
