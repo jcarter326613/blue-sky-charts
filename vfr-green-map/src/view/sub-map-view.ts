@@ -20,6 +20,7 @@ export class SubMapView implements TileReceiver {
     private context: CanvasRenderingContext2D | null;
     private contextTransform: DOMMatrix | null;
     private scaledTileWidth: number;
+    private renderRegion: Box2d;    //Delete this.  FOr debugging only
     
     constructor(tileProvider: TileProvider) {
         this.originalMapWidth = 0;
@@ -34,6 +35,7 @@ export class SubMapView implements TileReceiver {
         this.context = null;
         this.contextTransform = null;
         this.scaledTileWidth = 0;
+        this.renderRegion = new Box2d();
     }
 
     public initialize(model: SubMapModel, name: string): boolean {
@@ -80,6 +82,14 @@ export class SubMapView implements TileReceiver {
         let currentTransform = this.context.getTransform();
         this.context.setTransform(this.contextTransform);
         this.context.drawImage(tile, tileX, tileY, tileWidth, tileHeight);
+        this.context.beginPath();
+        this.context.moveTo(this.renderRegion.upperLeft.x, this.renderRegion.upperLeft.y)
+        this.context.lineTo(this.renderRegion.lowerRight.x, this.renderRegion.lowerRight.y)
+        this.context.stroke();
+        this.context.beginPath();
+        this.context.moveTo(this.renderRegion.lowerRight.x, this.renderRegion.upperLeft.y)
+        this.context.lineTo(this.renderRegion.upperLeft.x, this.renderRegion.lowerRight.y)
+        this.context.stroke();
         this.context.setTransform(currentTransform);
     }
 
@@ -104,6 +114,7 @@ export class SubMapView implements TileReceiver {
         this.renderVersion++
         this.context = context;
         this.contextTransform = context.getTransform();
+        this.renderRegion = region;
 
         // Figure out the size of what we are drawing
         let m = this.originalMapWidth * scale

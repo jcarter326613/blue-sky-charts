@@ -32,7 +32,7 @@ export class NavigableMap {
     constructor(elementId: string) {
         this.tileProvider = new TileProvider();
         this.minOriginRadius = 1;
-        this.scale = 0.1;
+        this.scale = 0.9;
 
         this.mouseDownPoint2d = new Point2d();
         this.mouseDownOriginRadial = new PointRadial();
@@ -144,7 +144,7 @@ export class NavigableMap {
         
         context.translate(this.containerWidth / 2, 0);
 
-        context.translate(0, -this.origin.getRadius() * this.scale);
+        context.translate(0, -this.origin.getRadius());
         context.rotate(this.origin.getAngleRadians());
 
         context.fillRect(-2, 0, 4, 500);
@@ -170,19 +170,17 @@ export class NavigableMap {
             let originalWidth = mapPosition.getSubMapView().getOriginalWidth();
             let originalHeight = mapPosition.getSubMapView().getOriginalHeight();
             let viewport = this.calculateViewport(radialPosition);
-            viewport.upperLeft.x += originalWidth / 2;
-            viewport.lowerRight.x += originalWidth / 2;
-            viewport.upperLeft.y += originalHeight / 2;
-            viewport.lowerRight.y += originalHeight / 2;
+            viewport.upperLeft.x += originalWidth * this.scale / 2;
+            viewport.lowerRight.x += originalWidth * this.scale / 2;
+            viewport.upperLeft.y += originalHeight * this.scale / 2;
+            viewport.lowerRight.y += originalHeight * this.scale / 2;
 
             // Position the map appropriately on the canvas considering the current scale            
-            radialPosition.setRadius(radialPosition.getRadius() * this.scale)
+            radialPosition.setRadius(radialPosition.getRadius())
             let position = CoordinateConverstion.convertPointRadialToPoint2d(radialPosition);
-            originalWidth *= this.scale;
-            originalHeight *= this.scale;
             context.translate(position.x, position.y);
             context.rotate(-radialPosition.getAngleRadians())
-            context.translate(-originalWidth / 2, -originalHeight / 2);
+            context.translate(-originalWidth * this.scale / 2, -originalHeight * this.scale / 2);
 
             // Draw the submap
             mapPosition.getSubMapView().render(context, viewport, this.scale);
