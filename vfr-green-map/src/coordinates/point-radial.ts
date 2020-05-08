@@ -22,6 +22,10 @@ export class PointRadial {
         return retVal;
     }
 
+    public setAngleDegrees (angle: number): void {
+        this.setAnglePercentage(angle / 360);
+    }
+
     public setAnglePercentage(angle: number): void {
         if (angle < 0) {
             angle += Math.ceil(-angle);

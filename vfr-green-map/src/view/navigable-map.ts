@@ -1,13 +1,16 @@
 import * as $ from 'jquery'
-import { CanvasElement } from './canvas-element';
+import { Box2d } from '../coordinates/box-2d'
 import { CoordinateConverstion } from '../coordinates/coordinate-conversion'
 import { Point2d } from '../coordinates/point-2d'
 import { PointGeo } from '../coordinates/point-geo'
 import { PointRadial } from '../coordinates/point-radial'
-import { SubMapModel } from '../models/sub-map-model';
-import { SubMapView } from './sub-map-view';
+import { SubMapModel } from '../models/sub-map-model'
+import { SubMapView } from './sub-map-view'
+import { TileProvider } from './tile-provider'
 
-export class NavigableMap extends CanvasElement {
+export class NavigableMap {
+    private tileProvider: TileProvider;
+
     // Map state variables
     private context: CanvasRenderingContext2D | null;
     private mapViews: Array<SubMapPosition>;
@@ -26,8 +29,7 @@ export class NavigableMap extends CanvasElement {
     private debugDiv: JQuery<HTMLElement>;
 
     constructor(elementId: string) {
-        super();
-
+        this.tileProvider = new TileProvider();
         this.minOriginRadius = 1;
 
         this.mouseDownPoint2d = new Point2d();
@@ -74,19 +76,44 @@ export class NavigableMap extends CanvasElement {
 
     private initializeMapModel(data: Record<string, SubMapModel>): void {
         for (let key in data) {
+            // Create the new submap
             let subMapModel = data[key];
-            let subMapView = new SubMapView();
 
-            if (subMapModel.fileExtent == null)
+            if (subMapModel.fileExtent == null || subMapModel.imageWidth == null || subMapModel.imageHeight == null)
                 continue;
 
+            let subMapView = new SubMapView(this.tileProvider);
+            if (!subMapView.initialize(subMapModel, key))
+                continue;
+
+            // Calculate the center of the submap
             let centerPointGeo = new PointGeo();
-            centerPointGeo.longitude = (subMapModel.fileExtent.topLeft.longitude + subMapModel.fileExtent.topRight.longitude) / 2;
-            centerPointGeo.latitude = (subMapModel.fileExtent.topLeft.latitude + subMapModel.fileExtent.bottomLeft.latitude) / 2;
+            if (subMapModel.fileExtent.topLeft.longitude < -90 && 
+                subMapModel.fileExtent.bottomRight.longitude > 90) {
+                centerPointGeo.longitude = (subMapModel.fileExtent.topLeft.longitude + 
+                    subMapModel.fileExtent.bottomRight.longitude) / 2;
+            } else {
+                centerPointGeo.longitude = (subMapModel.fileExtent.topLeft.longitude + 
+                    subMapModel.fileExtent.bottomRight.longitude) / 2;
+            }
+            centerPointGeo.latitude = (subMapModel.fileExtent.topLeft.latitude + 
+                subMapModel.fileExtent.bottomRight.latitude) / 2;
+
+            let bottomLeft = subMapModel.fileExtent.bottomLeft;
+            let bottomAngleDiff = 0;
+            if (bottomLeft.longitude > 0 && centerPointGeo.longitude < 0)
+                bottomAngleDiff = centerPointGeo.longitude + 360 - bottomLeft.longitude
+            else
+                bottomAngleDiff = centerPointGeo.longitude - bottomLeft.longitude
+            let bottomAngleDiffRadians = Math.PI * 2 * bottomAngleDiff / 360.0
 
             let centerPoint = new PointRadial();
-            centerPoint.setAnglePercentage(centerPointGeo.longitude)
+            centerPoint.setAngleDegrees(centerPointGeo.longitude + 180)
+            let centerPointRadius = 0.5 * (subMapModel.imageWidth / Math.tan(bottomAngleDiffRadians) - subMapModel.imageHeight)
+            centerPoint.setRadius(centerPointRadius)
 
+            // Add the map to the list of map views and set the origin to be the center of the map
+            // This will need to change in the future to not set the center like this
             this.mapViews.push(new SubMapPosition(subMapView, centerPoint));
             this.origin = centerPoint;
         }
@@ -94,7 +121,7 @@ export class NavigableMap extends CanvasElement {
 
     private retrieveConfiguration(): void {
         let thisObj = this;
-        $.getJSON("file:///home/jason/Code/Business/geotiff-map-exploder/maps/metadata.json",
+        $.getJSON("/metadata.json",
             function(data: Record<string, SubMapModel>) {
                 thisObj.initializeMapModel(data);
                 thisObj.render();
@@ -110,9 +137,6 @@ export class NavigableMap extends CanvasElement {
         }
         context.clearRect(0, 0, this.containerWidth, this.containerHeight);
  
-        // Call the base render function
-        super.render(context);
-
         //Setup the view transformation so that the radial origin is in the center of the viewing area
         context.save();
         
@@ -140,9 +164,18 @@ export class NavigableMap extends CanvasElement {
             context.save();
             let radialPosition: PointRadial = mapPosition.getPosition();
             let position = CoordinateConverstion.convertPointRadialToPoint2d(radialPosition);
+            let originalWidth = mapPosition.getSubMapView().getOriginalWidth();
+            let originalHeight = mapPosition.getSubMapView().getOriginalHeight()
             context.translate(position.x, position.y);
+            context.rotate(-radialPosition.getAngleRadians())
+            context.translate(-originalWidth / 2, -originalHeight / 2);
 
-            mapPosition.getSubMapView().render(context);
+            let viewport = new Box2d(originalWidth / 2 - this.containerWidth / 2, 
+                originalHeight / 2 - this.containerHeight / 2,
+                originalWidth / 2 + this.containerWidth / 2, 
+                originalHeight / 2 + this.containerHeight / 2)
+
+            mapPosition.getSubMapView().render(context, viewport, 1);
             context.restore();
         })
 

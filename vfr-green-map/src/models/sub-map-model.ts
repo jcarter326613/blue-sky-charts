@@ -6,11 +6,15 @@ export class SubMapModel {
     public tileWidth: number | null;
     public version: string | null;
     public fileExtent: BoxGeo | null;
+    public imageWidth: number | null;
+    public imageHeight: number | null;
 
     constructor() {
         this.mapBounds = null;
         this.tileWidth = null;
         this.version = null;
         this.fileExtent = null;
+        this.imageWidth = null;
+        this.imageHeight = null;
     }
 };
