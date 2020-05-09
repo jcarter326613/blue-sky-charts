@@ -8,4 +8,11 @@ export class Box2d {
         this.upperLeft = new Point2d(upperLeftX, upperLeftY);
         this.lowerRight = new Point2d(lowerRightX, lowerRightY);
     }
+
+    public clone(): Box2d {
+        let newRect = new Box2d();
+        newRect.upperLeft = this.upperLeft.clone();
+        newRect.lowerRight = this.lowerRight.clone();
+        return newRect;
+    }
 }

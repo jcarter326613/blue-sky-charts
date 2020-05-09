@@ -32,7 +32,7 @@ export class NavigableMap {
     constructor(elementId: string) {
         this.tileProvider = new TileProvider();
         this.minOriginRadius = 1;
-        this.scale = 0.9;
+        this.scale = 1;
 
         this.mouseDownPoint2d = new Point2d();
         this.mouseDownOriginRadial = new PointRadial();
@@ -90,7 +90,7 @@ export class NavigableMap {
 
             // Calculate the center of the submap
             let centerPointGeo = new PointGeo();
-            if (subMapModel.fileExtent.topLeft.longitude < -90 && 
+            if (subMapModel.fileExtent.topLeft.longitude < -90 &&       //The contents of this if statement are wrong
                 subMapModel.fileExtent.bottomRight.longitude > 90) {
                 centerPointGeo.longitude = (subMapModel.fileExtent.topLeft.longitude + 
                     subMapModel.fileExtent.bottomRight.longitude) / 2;
@@ -117,7 +117,7 @@ export class NavigableMap {
             // Add the map to the list of map views and set the origin to be the center of the map
             // This will need to change in the future to not set the center like this
             this.mapViews.push(new SubMapPosition(subMapView, centerPoint));
-            this.origin = centerPoint;
+            this.origin = centerPoint.clone();
         }
     }
 
@@ -138,28 +138,10 @@ export class NavigableMap {
                 return;
         }
         context.clearRect(0, 0, this.containerWidth, this.containerHeight);
- 
+
         //Setup the view transformation so that the radial origin is in the center of the viewing area
         context.save();
         
-        context.translate(this.containerWidth / 2, 0);
-
-        context.translate(0, -this.origin.getRadius());
-        context.rotate(this.origin.getAngleRadians());
-
-        context.fillRect(-2, 0, 4, 500);
-        context.fillRect(0, -2, 500, 4);
-        context.rotate(-Math.PI / 4)
-        context.fillRect(-2, 0, 4, 500);
-        context.rotate(Math.PI / 2)
-        context.fillRect(-2, 0, 4, 500);
-        context.rotate(-Math.PI / 4)
-
-        context.save()
-        context.fillStyle = "rgb(0, 0, 255)";
-        context.fillRect(-2, 0, 4, -500);
-        context.restore();
-
         this.mapViews.forEach(mapPosition => {
             if ( context == null )
                 return;
@@ -167,20 +149,24 @@ export class NavigableMap {
 
             // Calculate the viewport from the perspective of the un modified sub map
             let radialPosition: PointRadial = mapPosition.getPosition();
+
             let originalWidth = mapPosition.getSubMapView().getOriginalWidth();
             let originalHeight = mapPosition.getSubMapView().getOriginalHeight();
             let viewport = this.calculateViewport(radialPosition);
-            viewport.upperLeft.x += originalWidth * this.scale / 2;
-            viewport.lowerRight.x += originalWidth * this.scale / 2;
-            viewport.upperLeft.y += originalHeight * this.scale / 2;
-            viewport.lowerRight.y += originalHeight * this.scale / 2;
+            let viewportO = this.calculateViewport(this.origin);
+            // Since the viewport is calculated as an area around the center of the map in the original unscaled size, we need to translate the
+            // viewport over the center of the unscaled map
+            viewport.upperLeft.x += originalWidth / 2;
+            viewport.lowerRight.x += originalWidth / 2;
+            viewport.upperLeft.y += originalHeight / 2;
+            viewport.lowerRight.y += originalHeight / 2;
 
-            // Position the map appropriately on the canvas considering the current scale            
-            radialPosition.setRadius(radialPosition.getRadius())
-            let position = CoordinateConverstion.convertPointRadialToPoint2d(radialPosition);
-            context.translate(position.x, position.y);
-            context.rotate(-radialPosition.getAngleRadians())
-            context.translate(-originalWidth * this.scale / 2, -originalHeight * this.scale / 2);
+            let angleDiff = radialPosition.getAngleRadians() - this.origin.getAngleRadians();
+            context.translate(this.containerWidth / 2, 0);
+            context.translate(0, -this.origin.getRadius());
+            context.rotate(-angleDiff);
+            context.translate(0, radialPosition.getRadius());
+            context.translate(-originalWidth / 2, -originalHeight / 2);
 
             // Draw the submap
             mapPosition.getSubMapView().render(context, viewport, this.scale);
@@ -190,6 +176,12 @@ export class NavigableMap {
         context.restore();
     }
 
+    /**
+     * Returns the viewport in unscaled coordinates.  The viewport shrinks below the origin as the scale increases.
+     * @param radialPosition The center position of the map we are calculatign the viewport position for.
+     * @returns The viewport relative to the map position given with -y pointing towards the center of the radial
+     *  coordinate system.
+     */
     private calculateViewport(radialPosition: PointRadial): Box2d {
         // Find the v corners in radial coordinates
         let topAngleDiff = Math.atan((this.containerWidth / (2 * this.scale)) / this.origin.getRadius());

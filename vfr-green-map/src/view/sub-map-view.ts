@@ -101,6 +101,7 @@ export class SubMapView implements TileReceiver {
      */
     public render(context: CanvasRenderingContext2D, region: Box2d, scale: number) {
         // Validate the region
+        region = region.clone();
         if ( region.upperLeft.x < 0 )
             region.upperLeft.x = 0;
         else if ( region.upperLeft.x >= this.originalMapWidth )
@@ -114,7 +115,11 @@ export class SubMapView implements TileReceiver {
         this.renderVersion++
         this.context = context;
         this.contextTransform = context.getTransform();
-        this.renderRegion = region;
+        this.renderRegion = region.clone();
+        this.renderRegion.upperLeft.x *= scale;
+        this.renderRegion.upperLeft.y *= scale;
+        this.renderRegion.lowerRight.x *= scale;
+        this.renderRegion.lowerRight.y *= scale;
 
         // Figure out the size of what we are drawing
         let m = this.originalMapWidth * scale
@@ -145,12 +150,5 @@ export class SubMapView implements TileReceiver {
                     this, this.renderVersion);
             }
         }
-
-        /*
-        context.fillStyle = "rgb(200, 0, 0)"
-        context.fillRect(0, 0, this.originalMapWidth / 2, this.originalMapHeight / 2);
-        context.fillStyle = "rgb(0, 0, 0)"
-        context.fillRect(this.originalMapWidth / 2 - 25, this.originalMapHeight / 2 - 25, 50, 50);        
-        */
     }
 }

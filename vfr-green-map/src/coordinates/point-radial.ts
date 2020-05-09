@@ -22,8 +22,12 @@ export class PointRadial {
         return retVal;
     }
 
-    public setAngleDegrees (angle: number): void {
+    public setAngleDegrees(angle: number): void {
         this.setAnglePercentage(angle / 360);
+    }
+
+    public getAngleDegrees(): number {
+        return this.angle * 360;
     }
 
     public setAnglePercentage(angle: number): void {
@@ -35,12 +39,12 @@ export class PointRadial {
         this.angle = angle;
     }
 
-    public setAngleRadians(angle: number): void {
-        this.setAnglePercentage(angle / (Math.PI * 2));
+    public getAnglePercentage(): number {
+        return this.angle;
     }
 
-    public getAngle(): number {
-        return this.angle;
+    public setAngleRadians(angle: number): void {
+        this.setAnglePercentage(angle / (Math.PI * 2));
     }
 
     public getAngleRadians(): number {
