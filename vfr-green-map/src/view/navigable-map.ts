@@ -32,7 +32,7 @@ export class NavigableMap {
     constructor(elementId: string) {
         this.tileProvider = new TileProvider();
         this.minOriginRadius = 1;
-        this.scale = 1;
+        this.scale = 0.5;
 
         this.mouseDownPoint2d = new Point2d();
         this.mouseDownOriginRadial = new PointRadial();
@@ -163,10 +163,10 @@ export class NavigableMap {
 
             let angleDiff = radialPosition.getAngleRadians() - this.origin.getAngleRadians();
             context.translate(this.containerWidth / 2, 0);
-            context.translate(0, -this.origin.getRadius());
+            context.translate(0, -this.origin.getRadius() * this.scale);
             context.rotate(-angleDiff);
-            context.translate(0, radialPosition.getRadius());
-            context.translate(-originalWidth / 2, -originalHeight / 2);
+            context.translate(0, radialPosition.getRadius() * this.scale);
+            context.translate(-originalWidth * this.scale / 2, -originalHeight * this.scale / 2);
 
             // Draw the submap
             mapPosition.getSubMapView().render(context, viewport, this.scale);
@@ -243,13 +243,13 @@ export class NavigableMap {
             if ( event === undefined || event.offsetX === undefined || event.offsetY === undefined )
                 return;
     
-            let xMouseDownOffsetFromCenter = this.mouseDownPoint2d.x - this.containerWidth / 2;
-            let yMouseDownOffsetFromTrueOrigin = this.mouseDownPoint2d.y + this.mouseDownOriginRadial.getRadius();
+            let xMouseDownOffsetFromCenter = (this.mouseDownPoint2d.x - this.containerWidth / 2) / this.scale;
+            let yMouseDownOffsetFromTrueOrigin = this.mouseDownPoint2d.y / this.scale + this.mouseDownOriginRadial.getRadius();
             let angleMouseDownFromTrueOrigin = Math.atan(xMouseDownOffsetFromCenter / yMouseDownOffsetFromTrueOrigin);
             let rMouseDownFromTrueOrigin = xMouseDownOffsetFromCenter / Math.sin(angleMouseDownFromTrueOrigin);
 
-            let xMouseMoveOffsetFromCenter = event.offsetX - this.containerWidth / 2;
-            let yMouseMoveOffsetFromTrueOrigin = event.offsetY + this.mouseDownOriginRadial.getRadius();
+            let xMouseMoveOffsetFromCenter = (event.offsetX - this.containerWidth / 2) / this.scale;
+            let yMouseMoveOffsetFromTrueOrigin = event.offsetY / this.scale + this.mouseDownOriginRadial.getRadius();
             let angleMouseMoveFromTrueOrigin = Math.atan(xMouseMoveOffsetFromCenter / yMouseMoveOffsetFromTrueOrigin);
 
             let angleDifference = angleMouseMoveFromTrueOrigin - angleMouseDownFromTrueOrigin;
@@ -260,7 +260,7 @@ export class NavigableMap {
             let newOriginRadial = new PointRadial();
             newOriginRadial.setAngleRadians(this.mouseDownOriginRadial.getAngleRadians() - (angleDifference + 
                 properMouseMoveAngleDifference));
-            newOriginRadial.setRadius(properMouseMoveYFromTrueOrigin - event.offsetY);
+            newOriginRadial.setRadius(properMouseMoveYFromTrueOrigin - event.offsetY / this.scale);
             if ( newOriginRadial.getRadius() >= this.minOriginRadius )
                 this.origin = newOriginRadial;
 
