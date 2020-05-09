@@ -13,6 +13,8 @@ export class NavigableMap {
 
     // Map state variables
     private context: CanvasRenderingContext2D | null;
+    private bufferContext: CanvasRenderingContext2D | null;
+    private bufferCanvasObj: HTMLCanvasElement;
     private mapViews: Array<SubMapPosition>;
     private origin: PointRadial;
     private readonly minOriginRadius: number;
@@ -58,12 +60,19 @@ export class NavigableMap {
 
         this.containerWidth = 400;
         this.containerHeight = 300;
-        canvasObjHtml.attr("width", "400px");
-        canvasObjHtml.attr("height", "300px");
+        canvasObj.width = this.containerWidth;
+        canvasObj.height = this.containerHeight;
         canvasObjHtml.css("border-width", "5px");
         canvasObjHtml.css("border-color", "black");
         canvasObjHtml.css("border-style", "solid");
         this.context = canvasObj.getContext("2d");
+
+        this.bufferCanvasObj = document.createElement("canvas");
+        let bufferCanvasObjHtml = $(this.bufferCanvasObj);
+        this.containerDiv.append(bufferCanvasObjHtml);
+        this.bufferCanvasObj.width = this.containerWidth;
+        this.bufferCanvasObj.height = this.containerHeight;
+        this.bufferContext = this.bufferCanvasObj.getContext("2d");
 
         this.addMouseListeners();
         this.render();
@@ -130,18 +139,15 @@ export class NavigableMap {
             });
     }
 
-    public render(context: CanvasRenderingContext2D | null = null): void {
-        // Get the context objet and clear the drawing area
-        if (context == null) {
-            context = this.context;
-            if ( context == null )
-                return;
-        }
+    public render(): void {
+        if (this.bufferContext == null || this.context == null)
+            return;
+
+        let context = this.bufferContext;
+        //let context = this.context;
+        context.save();
         context.clearRect(0, 0, this.containerWidth, this.containerHeight);
 
-        //Setup the view transformation so that the radial origin is in the center of the viewing area
-        context.save();
-        
         this.mapViews.forEach(mapPosition => {
             if ( context == null )
                 return;
@@ -174,6 +180,19 @@ export class NavigableMap {
         })
 
         context.restore();
+
+        //Transfer the buffer onto the visible context
+        let buffer = this.bufferContext.getImageData(0, 0, this.bufferCanvasObj.width, this.bufferCanvasObj.height);
+        this.context.putImageData(buffer, 0, 0);
+
+        /*
+        let thisObj = this;
+        requestAnimationFrame(function() {
+            if (thisObj.context != null) {
+                thisObj.context.drawImage(thisObj.bufferCanvasObj, 0, 0);
+            }
+        });
+        */
     }
 
     /**

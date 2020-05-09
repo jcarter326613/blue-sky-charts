@@ -23,6 +23,7 @@ export class TileProvider {
         } else {
             let url = `/${mapName}_SEC_${mapVersion}/${zoomLevel}/${location.x}_${location.y}.jpg`;
             tileRequest = new TileRequest(receiver, location, data, url);
+            this.tileCache[key] = tileRequest
         }
     }
 
