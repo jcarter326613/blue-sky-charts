@@ -16,7 +16,6 @@
   },
   "dependencies": {
     "@types/jquery": "^3.3.36",
-    "@types/jquery-mousewheel": "^3.1.8",
     "jquery": "^3.5.0",
     "jquery-mousewheel": "^3.1.13"
   },

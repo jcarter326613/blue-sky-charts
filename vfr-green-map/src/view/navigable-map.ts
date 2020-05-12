@@ -1,6 +1,6 @@
 
 import * as $ from 'jquery'
-import { JQueryMousewheelEventObject } from 'jquery-mousewheel'
+import { JQueryMousewheelEventObject } from '../types/jquery-mousewheel'
 import { Box2d } from '../coordinates/box-2d'
 import { CoordinateConverstion } from '../coordinates/coordinate-conversion'
 import { Point2d } from '../coordinates/point-2d'
