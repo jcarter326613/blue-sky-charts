@@ -15,8 +15,10 @@
     "url": "git+https://jcarter123@bitbucket.org/jcarter123/vfr-green-map.git"
   },
   "dependencies": {
+    "@types/jquery": "^3.3.36",
+    "@types/jquery-mousewheel": "^3.1.8",
     "jquery": "^3.5.0",
-    "@types/jquery": "^3.3.36"
+    "jquery-mousewheel": "^3.1.13"
   },
   "author": "",
   "license": "ISC",

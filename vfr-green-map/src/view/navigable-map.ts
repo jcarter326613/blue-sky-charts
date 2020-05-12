@@ -1,4 +1,6 @@
+
 import * as $ from 'jquery'
+import { JQueryMousewheelEventObject } from 'jquery-mousewheel'
 import { Box2d } from '../coordinates/box-2d'
 import { CoordinateConverstion } from '../coordinates/coordinate-conversion'
 import { Point2d } from '../coordinates/point-2d'
@@ -8,17 +10,19 @@ import { SubMapModel } from '../models/sub-map-model'
 import { SubMapView } from './sub-map-view'
 import { TileProvider } from './tile-provider'
 
+declare function require(module: string): any;
+
 export class NavigableMap {
     private tileProvider: TileProvider;
 
     // Map state variables
     private context: CanvasRenderingContext2D | null;
-    private bufferContext: CanvasRenderingContext2D | null;
-    private bufferCanvasObj: HTMLCanvasElement;
     private mapViews: Array<SubMapPosition>;
     private origin: PointRadial;
     private readonly minOriginRadius: number;
     private scale: number;
+    private scaleDriver: number;
+    private readonly maxScaleDriver: number;
 
     // Mouse event variables
     private isDragging: boolean;
@@ -32,9 +36,13 @@ export class NavigableMap {
     private debugDiv: JQuery<HTMLElement>;
 
     constructor(elementId: string) {
+        require("jquery-mousewheel");
+
         this.tileProvider = new TileProvider();
         this.minOriginRadius = 1;
-        this.scale = 0.5;
+        this.maxScaleDriver = 20;
+        this.scaleDriver = 10;
+        this.scale = 1 / this.scaleDriver;
 
         this.mouseDownPoint2d = new Point2d();
         this.mouseDownOriginRadial = new PointRadial();
@@ -67,13 +75,6 @@ export class NavigableMap {
         canvasObjHtml.css("border-style", "solid");
         this.context = canvasObj.getContext("2d");
 
-        this.bufferCanvasObj = document.createElement("canvas");
-        let bufferCanvasObjHtml = $(this.bufferCanvasObj);
-        this.containerDiv.append(bufferCanvasObjHtml);
-        this.bufferCanvasObj.width = this.containerWidth;
-        this.bufferCanvasObj.height = this.containerHeight;
-        this.bufferContext = this.bufferCanvasObj.getContext("2d");
-
         this.addMouseListeners();
         this.render();
         this.retrieveConfiguration();
@@ -83,6 +84,7 @@ export class NavigableMap {
         this.containerDiv.mousedown((event: JQuery.Event) => this.mouseDown(event));
         this.containerDiv.mousemove((event: JQuery.Event) => this.mouseMove(event));
         this.containerDiv.mouseup((event: JQuery.Event) => this.mouseUp(event));
+        this.containerDiv.mousewheel((event: JQueryMousewheelEventObject) => this.mouseScroll(event))
     }
 
     private initializeMapModel(data: Record<string, SubMapModel>): void {
@@ -140,11 +142,10 @@ export class NavigableMap {
     }
 
     public render(): void {
-        if (this.bufferContext == null || this.context == null)
+        if (this.context == null)
             return;
 
-        let context = this.bufferContext;
-        //let context = this.context;
+        let context = this.context;
         context.save();
         context.clearRect(0, 0, this.containerWidth, this.containerHeight);
 
@@ -180,19 +181,6 @@ export class NavigableMap {
         })
 
         context.restore();
-
-        //Transfer the buffer onto the visible context
-        let buffer = this.bufferContext.getImageData(0, 0, this.bufferCanvasObj.width, this.bufferCanvasObj.height);
-        this.context.putImageData(buffer, 0, 0);
-
-        /*
-        let thisObj = this;
-        requestAnimationFrame(function() {
-            if (thisObj.context != null) {
-                thisObj.context.drawImage(thisObj.bufferCanvasObj, 0, 0);
-            }
-        });
-        */
     }
 
     /**
@@ -238,8 +226,32 @@ export class NavigableMap {
     }
 
     /* Mouse handler events */
+    private mouseScroll(event: JQueryMousewheelEventObject): void {
+        if ( event === undefined )
+            return;
+
+        event.stopPropagation();
+        event.preventDefault();
+
+        //let zoomAmount = event.deltaY * event.deltaFactor;
+
+        if (event.deltaY > 0 ) {
+            this.scaleDriver += 1;
+            if ( this.scaleDriver > this.maxScaleDriver ) {
+                this.scaleDriver = this.maxScaleDriver;
+            }
+        } else {
+            this.scaleDriver -= 1;
+            if (this.scaleDriver < 1) {
+                this.scaleDriver = 1;
+            }
+        }
+        this.scale = 1 / this.scaleDriver;
+        this.render();
+    }
+
     private mouseDown(event: JQuery.Event): void {
-        if ( event == undefined || event.offsetX == undefined || event.offsetY == undefined )
+        if ( event === undefined || event.offsetX === undefined || event.offsetY === undefined )
             return;
 
         // Detect if the mouse event is outside the canvas
