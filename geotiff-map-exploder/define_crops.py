@@ -51,6 +51,8 @@ def define_crops(tif_path, existing_points):
     _canvas.bind("<Button-1>", _left_down_callback)
     _canvas.bind("<Button-3>", _right_down_callback)
     _canvas.bind("<Button-2>", _middle_down_callback)
+    _canvas.bind("<Left>", _middle_down_callback)
+    _canvas.focus_set()
     tkinter.mainloop()
 
     # Correct the points for the scaled image

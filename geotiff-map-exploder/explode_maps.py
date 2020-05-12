@@ -32,7 +32,7 @@ def _explode_map_helper(image_cache_folder, zoom_level, original_image, original
     cropped_image.save(zoom_directory + "/{}_{}.jpg".format(this_xy[0], this_xy[1]), "JPEG")
 
     # Check if we've zoomed far enough
-    if (original_image_dimensions[0] / (2 ** zoom_level)) <= tile_width or zoom_level > 6:
+    if (original_image_dimensions[0] / (2 ** zoom_level)) <= tile_width or zoom_level > 7:
         return
 
     # Split the image into 4 equal parts and recurse
