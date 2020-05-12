@@ -111,6 +111,15 @@ export class SubMapView implements TileReceiver {
         else if ( region.upperLeft.y >= this.originalMapHeight )
             region.upperLeft.y = this.originalMapHeight;
 
+        if ( region.lowerRight.x < 0 )
+            region.lowerRight.x = 0;
+        else if ( region.lowerRight.x >= this.originalMapWidth )
+            region.lowerRight.x = this.originalMapWidth;
+        if ( region.lowerRight.y < 0 )
+            region.lowerRight.y = 0;
+        else if ( region.lowerRight.y >= this.originalMapHeight )
+            region.lowerRight.y = this.originalMapHeight;
+
         // Increase the render version to prevent old requests from rendering
         this.renderVersion++
         this.context = context;
