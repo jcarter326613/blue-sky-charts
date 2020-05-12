@@ -1,8 +1,7 @@
 <template>
-  <div>
-    <interactivemap />
-    test content
-    {{ message }}
+  <div class="frame">
+    <div class="expandingFrameElement" id="mapContainer"><interactivemap parentId="mapContainer"/></div>
+    <div class="staticFrameElement">test content {{ message }}</div>
   </div>
 </template>
 
@@ -16,3 +15,21 @@ export default Vue.extend({
   }
 })
 </script>
+
+<style scoped>
+.frame {
+    display: flex;
+    position: absolute;
+    height: 100%;
+    width: 100%;
+    flex-direction: column;
+    align-items: stretch;
+}
+.expandingFrameElement {
+    flex-grow: 1;
+    font-size: 0px;
+}
+.staticFrameElement {
+    flex-grow: 0;
+}
+</style>

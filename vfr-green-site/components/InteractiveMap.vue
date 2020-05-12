@@ -1,10 +1,4 @@
-<template>
-    <div>
-        test map
-        {{ message }}
-        <div id="cesiumContainer"></div>
-    </div>
-</template>
+<template></template>
 
 <script lang="javascript">
 import Vue from 'vue'
@@ -14,10 +8,14 @@ Vue.use(MyMap)
  
 export default Vue.component("interactivemap", {
     data: function() {
-        return {"message": "Hello world"};
+        return {};
     },
     mounted: function() {
-        this.$createMap("cesiumContainer");
+        this.$createMap(this.parentId);
+    },
+    props: ["parentId"],
+    render: function() {
+        return []
     }
 })
 </script>
