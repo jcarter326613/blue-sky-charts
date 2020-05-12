@@ -32,8 +32,9 @@ export class NavigableMap {
     // html element variables
     private containerWidth: number;
     private containerHeight: number;
+    private canvasObjHtml: JQuery<HTMLElement>;
     private containerDiv: JQuery<HTMLElement>;
-    private debugDiv: JQuery<HTMLElement>;
+    //private debugDiv: JQuery<HTMLElement>;
 
     constructor(elementId: string) {
         require("jquery-mousewheel");
@@ -43,6 +44,8 @@ export class NavigableMap {
         this.maxScaleDriver = 20;
         this.scaleDriver = 10;
         this.scale = 1 / this.scaleDriver;
+        this.containerWidth = 0;
+        this.containerHeight = 0;
 
         this.mouseDownPoint2d = new Point2d();
         this.mouseDownOriginRadial = new PointRadial();
@@ -58,33 +61,47 @@ export class NavigableMap {
         this.containerDiv = jQueryElement;
 
         // Create a debug text div
-        this.debugDiv = $(document.createElement("div"));
-        this.containerDiv.append(this.debugDiv);
+        //this.debugDiv = $(document.createElement("div"));
+        //this.containerDiv.append(this.debugDiv);
 
         // Create canvas object and place it in the div
         let canvasObj = document.createElement("canvas");
-        let canvasObjHtml = $(canvasObj);
-        this.containerDiv.append(canvasObjHtml);
-
-        this.containerWidth = 400;
-        this.containerHeight = 300;
-        canvasObj.width = this.containerWidth;
-        canvasObj.height = this.containerHeight;
-        canvasObjHtml.css("border-width", "5px");
-        canvasObjHtml.css("border-color", "black");
-        canvasObjHtml.css("border-style", "solid");
+        this.canvasObjHtml = $(canvasObj);
+        this.containerDiv.append(this.canvasObjHtml);
         this.context = canvasObj.getContext("2d");
 
-        this.addMouseListeners();
+        this.setSize();
+        this.addEventListeners();
         this.render();
         this.retrieveConfiguration();
     }
 
-    private addMouseListeners(): void {
+    private addEventListeners(): void {
         this.containerDiv.mousedown((event: JQuery.Event) => this.mouseDown(event));
         this.containerDiv.mousemove((event: JQuery.Event) => this.mouseMove(event));
         this.containerDiv.mouseup((event: JQuery.Event) => this.mouseUp(event));
         this.containerDiv.mousewheel((event: JQueryMousewheelEventObject) => this.mouseScroll(event))
+
+        // Setup the window resize listener
+        let thisObject = this;
+        $(window).resize(function() {
+            requestAnimationFrame(function(){
+                thisObject.setSize();
+                thisObject.render();
+            })
+        });
+    }
+
+    private setSize(): void {
+        let width = this.containerDiv.width();
+        let height = this.containerDiv.height();
+
+        if ( width !== undefined && height !== undefined ) {
+            this.containerWidth = width;
+            this.containerHeight = height;
+            this.canvasObjHtml.attr("width", width);
+            this.canvasObjHtml.attr("height", height);
+        }
     }
 
     private initializeMapModel(data: Record<string, SubMapModel>): void {
@@ -160,7 +177,6 @@ export class NavigableMap {
             let originalWidth = mapPosition.getSubMapView().getOriginalWidth();
             let originalHeight = mapPosition.getSubMapView().getOriginalHeight();
             let viewport = this.calculateViewport(radialPosition);
-            let viewportO = this.calculateViewport(this.origin);
             // Since the viewport is calculated as an area around the center of the map in the original unscaled size, we need to translate the
             // viewport over the center of the unscaled map
             viewport.upperLeft.x += originalWidth / 2;
@@ -229,6 +245,12 @@ export class NavigableMap {
     private mouseScroll(event: JQueryMousewheelEventObject): void {
         if ( event === undefined )
             return;
+
+        // Detect if the mouse event is outside the canvas
+        if (event.offsetX < 0 || this.containerWidth < event.offsetX ||
+            event.offsetY < 0 || this.containerHeight < event.offsetY) {
+            return;
+        }
 
         event.stopPropagation();
         event.preventDefault();
