@@ -82,14 +82,6 @@ export class SubMapView implements TileReceiver {
         let currentTransform = this.context.getTransform();
         this.context.setTransform(this.contextTransform);
         this.context.drawImage(tile, tileX, tileY, tileWidth, tileHeight);
-        this.context.beginPath();
-        this.context.moveTo(this.renderRegion.upperLeft.x, this.renderRegion.upperLeft.y)
-        this.context.lineTo(this.renderRegion.lowerRight.x, this.renderRegion.lowerRight.y)
-        this.context.stroke();
-        this.context.beginPath();
-        this.context.moveTo(this.renderRegion.lowerRight.x, this.renderRegion.upperLeft.y)
-        this.context.lineTo(this.renderRegion.upperLeft.x, this.renderRegion.lowerRight.y)
-        this.context.stroke();
         this.context.setTransform(currentTransform);
     }
 

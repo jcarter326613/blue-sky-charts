@@ -142,9 +142,23 @@ export class NavigableMap {
             let centerPointRadius = 0.5 * (subMapModel.imageWidth / Math.tan(bottomAngleDiffRadians) - subMapModel.imageHeight)
             centerPoint.setRadius(centerPointRadius)
 
+            //Calculate the map prescale factor
+            let topRight = subMapModel.fileExtent.topRight;
+            let theta2 = (subMapModel.imageHeight / 2) / (subMapModel.imageWidth / 2);
+            let theta1: number;
+            if (topRight.longitude < 0 && centerPointGeo.longitude > 0) {
+                theta1 = (topRight.longitude + 360) - centerPointGeo.longitude;
+            } else {
+                theta1 = topRight.longitude - centerPointGeo.longitude;
+            }
+            theta1 = (theta1 / 360) * Math.PI * 2
+            theta2 = (theta2 / 360) * Math.PI * 2
+            let x = (centerPoint.getRadius() * Math.tan(theta1)) / (1 + Math.tan(theta1) * Math.tan(theta2))
+            let mapPrescale = x / (subMapModel.imageWidth / 2);
+
             // Add the map to the list of map views and set the origin to be the center of the map
             // This will need to change in the future to not set the center like this
-            this.mapViews.push(new SubMapPosition(subMapView, centerPoint));
+            this.mapViews.push(new SubMapPosition(subMapView, centerPoint, mapPrescale));
             this.origin = centerPoint.clone();
         }
     }
@@ -173,10 +187,11 @@ export class NavigableMap {
 
             // Calculate the viewport from the perspective of the un modified sub map
             let radialPosition: PointRadial = mapPosition.getPosition();
+            let mapFitScale = mapPosition.getPreScale();
 
             let originalWidth = mapPosition.getSubMapView().getOriginalWidth();
             let originalHeight = mapPosition.getSubMapView().getOriginalHeight();
-            let viewport = this.calculateViewport(radialPosition);
+            let viewport = this.calculateViewport(radialPosition, mapFitScale);
             // Since the viewport is calculated as an area around the center of the map in the original unscaled size, we need to translate the
             // viewport over the center of the unscaled map
             viewport.upperLeft.x += originalWidth / 2;
@@ -189,10 +204,10 @@ export class NavigableMap {
             context.translate(0, -this.origin.getRadius() * this.scale);
             context.rotate(-angleDiff);
             context.translate(0, radialPosition.getRadius() * this.scale);
-            context.translate(-originalWidth * this.scale / 2, -originalHeight * this.scale / 2);
+            context.translate(-originalWidth * this.scale * mapFitScale / 2, -originalHeight * this.scale * mapFitScale / 2);
 
             // Draw the submap
-            mapPosition.getSubMapView().render(context, viewport, this.scale);
+            mapPosition.getSubMapView().render(context, viewport, this.scale * mapFitScale);
             context.restore();
         })
 
@@ -205,9 +220,9 @@ export class NavigableMap {
      * @returns The viewport relative to the map position given with -y pointing towards the center of the radial
      *  coordinate system.
      */
-    private calculateViewport(radialPosition: PointRadial): Box2d {
+    private calculateViewport(radialPosition: PointRadial, preScaleFactor: number): Box2d {
         // Find the v corners in radial coordinates
-        let topAngleDiff = Math.atan((this.containerWidth / (2 * this.scale)) / this.origin.getRadius());
+        let topAngleDiff = Math.atan((this.containerWidth / (2 * this.scale * preScaleFactor)) / this.origin.getRadius());
         let upperLeft = new PointRadial();
         let upperRight = new PointRadial();
         upperLeft.setAngleRadians(this.origin.getAngleRadians() - topAngleDiff)
@@ -216,13 +231,13 @@ export class NavigableMap {
         upperLeft.setRadius(upperRadius);
         upperRight.setRadius(upperRadius);
 
-        let bottomAngleDiff = Math.atan((this.containerWidth / (2 * this.scale)) / 
-            (this.origin.getRadius() + (this.containerHeight / this.scale)));
+        let bottomAngleDiff = Math.atan((this.containerWidth / (2 * this.scale * preScaleFactor)) / 
+            (this.origin.getRadius() + (this.containerHeight / this.scale * preScaleFactor)));
         let bottomLeft = new PointRadial();
         let bottomRight = new PointRadial();
         bottomLeft.setAngleRadians(this.origin.getAngleRadians() - bottomAngleDiff)
         bottomRight.setAngleRadians(this.origin.getAngleRadians() + bottomAngleDiff)
-        let lowerRadius = (this.origin.getRadius() + (this.containerHeight / this.scale)) / Math.cos(bottomAngleDiff)
+        let lowerRadius = (this.origin.getRadius() + (this.containerHeight / this.scale * preScaleFactor)) / Math.cos(bottomAngleDiff)
         bottomLeft.setRadius(lowerRadius);
         bottomRight.setRadius(lowerRadius);
 
@@ -257,7 +272,7 @@ export class NavigableMap {
 
         //let zoomAmount = event.deltaY * event.deltaFactor;
 
-        if (event.deltaY > 0 ) {
+        if (event.deltaY < 0 ) {
             this.scaleDriver += 1;
             if ( this.scaleDriver > this.maxScaleDriver ) {
                 this.scaleDriver = this.maxScaleDriver;
@@ -329,10 +344,12 @@ export class NavigableMap {
 class SubMapPosition {
     private subMapView: SubMapView;
     private centerLocation: PointRadial;
+    private preScale: number;
 
-    constructor(subMap: SubMapView, centerLocation: PointRadial = new PointRadial()) {
+    constructor(subMap: SubMapView, centerLocation: PointRadial = new PointRadial(), preScale: number = 1) {
         this.subMapView = subMap;
         this.centerLocation = centerLocation;
+        this.preScale = preScale
     }
 
     public setPosition(location: PointRadial): void {
@@ -341,6 +358,10 @@ class SubMapPosition {
 
     public getPosition(): PointRadial {
         return this.centerLocation;
+    }
+
+    public getPreScale(): number {
+        return this.preScale;
     }
 
     public getSubMapView(): SubMapView {
