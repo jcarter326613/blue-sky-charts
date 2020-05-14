@@ -2,6 +2,7 @@
 import * as $ from 'jquery'
 import { JQueryMousewheelEventObject } from '../types/jquery-mousewheel'
 import { Box2d } from '../coordinates/box-2d'
+import { BoxGeo } from '../coordinates/box-geo'
 import { CoordinateConverstion } from '../coordinates/coordinate-conversion'
 import { Point2d } from '../coordinates/point-2d'
 import { PointGeo } from '../coordinates/point-geo'
@@ -12,7 +13,7 @@ import { TileProvider } from './tile-provider'
 
 declare function require(module: string): any;
 
-export class NavigableMap {
+export class NavigableMapRadial {
     private tileProvider: TileProvider;
 
     // Map state variables
@@ -112,24 +113,26 @@ export class NavigableMap {
             if (subMapModel.fileExtent == null || subMapModel.imageWidth == null || subMapModel.imageHeight == null)
                 continue;
 
+            let fileExtent = BoxGeo.createFromModel(subMapModel.fileExtent);
+
             let subMapView = new SubMapView(this.tileProvider);
             if (!subMapView.initialize(subMapModel, key))
                 continue;
 
             // Calculate the center of the submap
             let centerPointGeo = new PointGeo();
-            if (subMapModel.fileExtent.topLeft.longitude < -90 &&       //The contents of this if statement are wrong
-                subMapModel.fileExtent.bottomRight.longitude > 90) {
-                centerPointGeo.longitude = (subMapModel.fileExtent.topLeft.longitude + 
-                    subMapModel.fileExtent.bottomRight.longitude) / 2;
+            if (fileExtent.getTopLeft().longitude < -90 &&       //The contents of this if statement are wrong
+                fileExtent.getBottomRight().longitude > 90) {
+                centerPointGeo.longitude = (fileExtent.getTopLeft().longitude + 
+                    fileExtent.getBottomRight().longitude) / 2;
             } else {
-                centerPointGeo.longitude = (subMapModel.fileExtent.topLeft.longitude + 
-                    subMapModel.fileExtent.bottomRight.longitude) / 2;
+                centerPointGeo.longitude = (fileExtent.getTopLeft().longitude + 
+                    fileExtent.getBottomRight().longitude) / 2;
             }
-            centerPointGeo.latitude = (subMapModel.fileExtent.topLeft.latitude + 
-                subMapModel.fileExtent.bottomRight.latitude) / 2;
+            centerPointGeo.latitude = (fileExtent.getTopLeft().latitude + 
+                fileExtent.getBottomRight().latitude) / 2;
 
-            let bottomLeft = subMapModel.fileExtent.bottomLeft;
+            let bottomLeft = fileExtent.getBottomLeft();
             let bottomAngleDiff = 0;
             if (bottomLeft.longitude > 0 && centerPointGeo.longitude < 0)
                 bottomAngleDiff = centerPointGeo.longitude + 360 - bottomLeft.longitude
@@ -143,7 +146,7 @@ export class NavigableMap {
             centerPoint.setRadius(centerPointRadius)
 
             //Calculate the map prescale factor
-            let topRight = subMapModel.fileExtent.topRight;
+            let topRight = fileExtent.getTopRight();
             let theta2 = (subMapModel.imageHeight / 2) / (subMapModel.imageWidth / 2);
             let theta1: number;
             if (topRight.longitude < 0 && centerPointGeo.longitude > 0) {

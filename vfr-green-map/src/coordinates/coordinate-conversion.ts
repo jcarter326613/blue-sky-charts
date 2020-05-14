@@ -1,7 +1,11 @@
 import { Point2d } from './point-2d'
+import { PointGeo } from './point-geo'
 import { PointRadial } from './point-radial'
 
 export class CoordinateConverstion {
+    public static MAX_X_MERCATOR: number = 256;
+    public static MAX_Y_MERCATOR: number = 256;
+
     /**
      * Converts 2d points to radial points.  A radial point with angle 0 and radius 1 is along the 
      * positive y axis on the 2d point and positivity goes towards the positive x axis.
@@ -65,5 +69,38 @@ export class CoordinateConverstion {
         retVal.y = (point.getRadius() * Math.cos(angleDiff)) - origin.getRadius()
 
         return retVal;
+    }
+ 
+    /**
+     * Converts the given longitude and latitude to a Web Mercator projection where the upper left is (0,0) and the lower right is (256, 256)
+     * https://en.wikipedia.org/wiki/Web_Mercator_projection#Formulas
+     * @param geoPoint 
+     */
+    public static convertToWebMercator(geoPoint: PointGeo): Point2d {
+        let newPoint = new Point2d();
+
+        let longitude = geoPoint.longitude * 2 * Math.PI / 360
+        let latitude = geoPoint.latitude * 2 * Math.PI / 360
+
+        newPoint.x = (256 / (2 * Math.PI)) * (longitude + Math.PI)
+        newPoint.y = (256 / (2 * Math.PI)) * (Math.PI - Math.log(Math.tan((Math.PI / 4) + (latitude / 2))))
+
+        return newPoint;
+    }
+
+    /**
+     * Converts the given x,y coordinates to latitude and longitude.  Min x and y are (0,0) and max is (256, 256).
+     * @param point2d 
+     */
+    public static convertFromWebMercator(point2d: Point2d): PointGeo {
+        let newPoint = new PointGeo();
+
+        newPoint.longitude = point2d.x * 2 * Math.PI / 256 - Math.PI;
+        newPoint.latitude = 2 * Math.atan(Math.exp(Math.PI - ((point2d.y * 2 * Math.PI) / 256))) - Math.PI / 2;
+
+        newPoint.longitude = newPoint.longitude * 360 / (2 * Math.PI)
+        newPoint.latitude = newPoint.latitude * 360 / (2 * Math.PI)
+
+        return newPoint;
     }
 }

@@ -1,13 +1,14 @@
 import { Point2d } from "coordinates/point-2d";
 import { BoxGeo } from "coordinates/box-geo";
+import { BoxGeoModel } from "./box-geo-model";
 
 export class SubMapModel {
     public mapBounds: Array<Point2d> | null;
     public tileWidth: number | null;
     public version: string | null;
-    public fileExtent: BoxGeo | null;
     public imageWidth: number | null;
     public imageHeight: number | null;
+    public fileExtent: BoxGeoModel | null;
 
     constructor() {
         this.mapBounds = null;

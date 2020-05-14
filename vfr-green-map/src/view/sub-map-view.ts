@@ -125,6 +125,8 @@ export class SubMapView implements TileReceiver {
         // Figure out the size of what we are drawing
         let m = this.originalMapWidth * scale
         let zoomLevel = Math.ceil(Math.log(m / this.tileWidth) / Math.log(2))
+        if (zoomLevel < 0)
+            zoomLevel = 0;
         let numTilesAcross = 2 ** zoomLevel;
         while ( numTilesAcross > this.originalMapWidth && zoomLevel > 0 ) {
             zoomLevel--;

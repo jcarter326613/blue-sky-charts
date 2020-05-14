@@ -3,8 +3,8 @@ export class PointGeo {
     public longitude: number;
     public latitude: number;
 
-    constructor() {
-        this.longitude = 0;
-        this.latitude = 0;
+    constructor(longitude: number = 0, latitude: number = 0) {
+        this.longitude = longitude;
+        this.latitude = latitude;
     }
 }

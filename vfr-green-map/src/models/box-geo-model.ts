@@ -1,0 +1,15 @@
+import { PointGeo } from '../coordinates/point-geo';
+
+export class BoxGeoModel {
+    public topLeft: PointGeo;
+    public topRight: PointGeo;
+    public bottomLeft: PointGeo;
+    public bottomRight: PointGeo;
+
+    constructor() {
+        this.topLeft = new PointGeo();
+        this.topRight = new PointGeo();
+        this.bottomLeft = new PointGeo();
+        this.bottomRight = new PointGeo();
+    }
+};
