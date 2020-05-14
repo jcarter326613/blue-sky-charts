@@ -2,24 +2,24 @@
     "Bethel": {
         "fileExtent": {
             "bottomLeft": {
-                "latitude": 59.484141,
-                "longitude": -173.791229
+                "latitude": 59.484166,
+                "longitude": -174.799935
             },
             "bottomRight": {
-                "latitude": 59.488927,
-                "longitude": -161.308193
+                "latitude": 59.484166,
+                "longitude": -160.315137
             },
             "topLeft": {
-                "latitude": 64.112461,
+                "latitude": 64.288374,
                 "longitude": -174.799935
             },
             "topRight": {
-                "latitude": 64.117994,
-                "longitude": -160.315193
+                "latitude": 64.288374,
+                "longitude": -160.315137
             }
         },
-        "imageHeight": 12244,
-        "imageWidth": 16666,
+        "imageHeight": 12671,
+        "imageWidth": 17960,
         "mapBounds": [
             [
                 2083,
@@ -92,24 +92,24 @@
     "Kodiak": {
         "fileExtent": {
             "bottomLeft": {
-                "latitude": 55.468363,
-                "longitude": -162.560702
+                "latitude": 55.468257,
+                "longitude": -163.382182
             },
             "bottomRight": {
-                "latitude": 55.492629,
-                "longitude": -151.446626
+                "latitude": 55.468257,
+                "longitude": -150.696382
             },
             "topLeft": {
-                "latitude": 60.116867,
+                "latitude": 60.282682,
                 "longitude": -163.382182
             },
             "topRight": {
-                "latitude": 60.14462,
-                "longitude": -150.696079
+                "latitude": 60.282682,
+                "longitude": -150.696382
             }
         },
-        "imageHeight": 12282,
-        "imageWidth": 16612,
+        "imageHeight": 12690,
+        "imageWidth": 17749,
         "mapBounds": [
             [
                 1822,
@@ -218,24 +218,24 @@
     "McGrath": {
         "fileExtent": {
             "bottomLeft": {
-                "latitude": 59.441529,
-                "longitude": -163.199283
+                "latitude": 59.441525,
+                "longitude": -164.222972
             },
             "bottomRight": {
-                "latitude": 59.459997,
-                "longitude": -150.854897
+                "latitude": 59.441525,
+                "longitude": -149.892799
             },
             "topLeft": {
-                "latitude": 64.087193,
+                "latitude": 64.267613,
                 "longitude": -164.222972
             },
             "topRight": {
-                "latitude": 64.108551,
-                "longitude": -149.892642
+                "latitude": 64.267613,
+                "longitude": -149.892799
             }
         },
-        "imageHeight": 12291,
-        "imageWidth": 16499,
+        "imageHeight": 12727,
+        "imageWidth": 17784,
         "mapBounds": [
             [
                 2574,
@@ -284,24 +284,24 @@
     "Nome": {
         "fileExtent": {
             "bottomLeft": {
-                "latitude": 63.460365,
-                "longitude": -172.122486
+                "latitude": 63.460193,
+                "longitude": -173.605245
             },
             "bottomRight": {
-                "latitude": 63.492265,
-                "longitude": -157.998815
+                "latitude": 63.460193,
+                "longitude": -156.637998
             },
             "topLeft": {
-                "latitude": 68.071834,
+                "latitude": 68.30867,
                 "longitude": -173.605245
             },
             "topRight": {
-                "latitude": 68.110212,
-                "longitude": -156.63825
+                "latitude": 68.30867,
+                "longitude": -156.637998
             }
         },
-        "imageHeight": 12250,
-        "imageWidth": 16626,
+        "imageHeight": 12801,
+        "imageWidth": 18243,
         "mapBounds": [
             [
                 4245,

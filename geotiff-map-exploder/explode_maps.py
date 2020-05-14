@@ -3,6 +3,7 @@ import math
 import numpy as np
 import pandas as pd
 import rasterio
+import gdal_util
 
 from os import mkdir
 from os import path
@@ -59,21 +60,6 @@ def explode_map(name, definition, image_cache_folder, image_location, tile_width
 
     _explode_map_helper(image_cache_folder, 0, image, (image.width, image.height), (0, 0), tile_width)
 
-def convert_tiff_to_rgb(image_file):
-    new_filename = ".".join(image_file.split(".")[0:-1]) + "_RGB.png"
-    if path.exists(new_filename):
-        return new_filename
-
-    print("Converting color pallet image to rgb")
-
-    docker_command = "docker run --rm -v /home:/home osgeo/gdal:alpine-ultrasmall-latest gdal_translate -b 1 -expand rgb $PWD/{} $PWD/{}".format(
-        image_file, new_filename
-    )
-    system(docker_command)
-
-    return new_filename
-
-
 def explode_maps():
     inventory = mi.read_inventory_metadata()
     for map_name in inventory:
@@ -84,10 +70,10 @@ def explode_maps():
             exit()
 
         tile_width = map_definition["tileWidth"]
+        image_path = "maps/{}_SEC_{}_WEB.tif".format(map_name, map_definition["version"])
         image_cache_folder = "maps/{}_SEC_{}".format(map_name, map_definition["version"])
-        image_path = image_cache_folder + ".tif"
         if not path.exists(image_cache_folder):
-            rgb_image_path = convert_tiff_to_rgb(image_path)
+            rgb_image_path = gdal_util.convert_tiff_to_rgb(image_path)
             explode_map(map_name, map_definition, image_cache_folder, rgb_image_path, tile_width)
 
-explode_maps() 
+explode_maps()

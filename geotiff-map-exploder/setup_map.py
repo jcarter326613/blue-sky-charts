@@ -1,4 +1,5 @@
 
+import gdal_util
 import map_inventory as mi
 import rasterio
 import rasterio.features
@@ -10,6 +11,40 @@ import zipfile
 
 from define_crops import define_crops
 from os import path
+
+def getExtent(projectionType, src, geom):
+    geom_lat_long = rasterio.warp.transform_geom(
+        src.crs, projectionType, geom, precision=6)
+    if geom_lat_long["type"] != "Polygon" or \
+        len(geom_lat_long["coordinates"]) != 1 or len(geom_lat_long["coordinates"][0]) != 5:
+        print("Error in reading geometry")
+        exit()
+    file_extent = {
+        "topLeft": {
+            "longitude": geom_lat_long["coordinates"][0][0][0],
+            "latitude": geom_lat_long["coordinates"][0][0][1]
+        },
+        "bottomLeft": {
+            "longitude": geom_lat_long["coordinates"][0][1][0],
+            "latitude": geom_lat_long["coordinates"][0][1][1]
+        },
+        "bottomRight": {
+            "longitude": geom_lat_long["coordinates"][0][2][0],
+            "latitude": geom_lat_long["coordinates"][0][2][1]
+        },
+        "topRight": {
+            "longitude": geom_lat_long["coordinates"][0][3][0],
+            "latitude": geom_lat_long["coordinates"][0][3][1]
+        }
+    }
+    if file_extent["topLeft"]["longitude"] > file_extent["topRight"]["longitude"] or \
+        file_extent["bottomLeft"]["longitude"] > file_extent["bottomRight"]["longitude"] or \
+        file_extent["topLeft"]["latitude"] < file_extent["bottomLeft"]["longitude"] or \
+        file_extent["topRight"]["latitude"] < file_extent["bottomRight"]["longitude"]:
+        print("Geometry error.  Points not in correct order")
+        exit()
+
+    return file_extent
 
 # Get the name and url of the map to process
 print("What map would you like to process?")
@@ -55,45 +90,15 @@ with zipfile.ZipFile(zip_file) as z:
     with open(tif_file, "wb") as f:
         f.write(z.read("{} SEC {}.tif".format(map_name, version)))
 
-# Get the geographic and physical bounds of the image
-with rasterio.open(tif_file) as src:
+# Create the web mercator image
+web_tiff_path = gdal_util.convert_tiff_to_web_mercator(tif_file)
+
+# Get the geographic and physical bounds of the normal image
+with rasterio.open(web_tiff_path) as src:
     mask = src.dataset_mask()
     for geom, val in rasterio.features.shapes(
             mask, transform=src.transform): 
-
-        geom_lat_long = rasterio.warp.transform_geom(
-            src.crs, 'EPSG:4326', geom, precision=6)
-        if geom_lat_long["type"] != "Polygon" or \
-            len(geom_lat_long["coordinates"]) != 1 or len(geom_lat_long["coordinates"][0]) != 5:
-            print("Error in reading geometry")
-            exit()
-        file_extent = {
-            "topLeft": {
-                "longitude": geom_lat_long["coordinates"][0][0][0],
-                "latitude": geom_lat_long["coordinates"][0][0][1]
-            },
-            "bottomLeft": {
-                "longitude": geom_lat_long["coordinates"][0][1][0],
-                "latitude": geom_lat_long["coordinates"][0][1][1]
-            },
-            "bottomRight": {
-                "longitude": geom_lat_long["coordinates"][0][2][0],
-                "latitude": geom_lat_long["coordinates"][0][2][1]
-            },
-            "topRight": {
-                "longitude": geom_lat_long["coordinates"][0][3][0],
-                "latitude": geom_lat_long["coordinates"][0][3][1]
-            }
-        }
-        if file_extent["topLeft"]["longitude"] > file_extent["topRight"]["longitude"] or \
-            file_extent["bottomLeft"]["longitude"] > file_extent["bottomRight"]["longitude"] or \
-            file_extent["topLeft"]["latitude"] < file_extent["bottomLeft"]["longitude"] or \
-            file_extent["topRight"]["latitude"] < file_extent["bottomRight"]["longitude"]:
-            print("Geometry error.  Points not in correct order")
-            exit()
-
-        map_inventory[map_name]["fileExtent"] = file_extent
-
+        map_inventory[map_name]["fileExtent"] = getExtent("EPSG:4326", src, geom)
         map_inventory[map_name]["imageWidth"] = src.width
         map_inventory[map_name]["imageHeight"] = src.height
 
