@@ -21,7 +21,7 @@ export class TileProvider {
             else
                 tileRequest.setReceiver(receiver, data);
         } else {
-            let url = `/${mapName}_SEC_${mapVersion}/${zoomLevel}/${location.x}_${location.y}.jpg`;
+            let url = `/${mapName}_SEC_${mapVersion}/${zoomLevel}/${location.x}_${location.y}.png`;
             tileRequest = new TileRequest(receiver, location, data, url);
             this.tileCache[key] = tileRequest
         }

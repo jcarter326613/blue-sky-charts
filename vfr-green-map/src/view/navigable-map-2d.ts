@@ -41,7 +41,7 @@ export class NavigableMap2d {
         require("jquery-mousewheel");
 
         this.tileProvider = new TileProvider();
-        this.maxScaleDriver = 60;
+        this.maxScaleDriver = 60*3*2;
         this.scaleDriver = 10;
         this.scale = 1 / this.scaleDriver;
         this.containerWidth = 0;
@@ -171,7 +171,6 @@ export class NavigableMap2d {
                 let mapShiftY = (mapPosition2d.upperLeft.y - this.origin2d.y) * this.containerHeight / viewportMercatorHeight
  
                 context.translate(this.containerWidth / 2, this.containerHeight / 2);
-                //context.translate(-originalWidth * mapScale / 2, -originalHeight * mapScale / 2);
                 context.translate(mapShiftX, mapShiftY);
 
                 // Figure out the part of the map we want to draw in 2d coordinates relative to the upper left corner
@@ -225,12 +224,12 @@ export class NavigableMap2d {
         //let zoomAmount = event.deltaY * event.deltaFactor;
 
         if (event.deltaY < 0 ) {
-            this.scaleDriver += 1;
+            this.scaleDriver += 10;
             if ( this.scaleDriver > this.maxScaleDriver ) {
                 this.scaleDriver = this.maxScaleDriver;
             }
         } else {
-            this.scaleDriver -= 1;
+            this.scaleDriver -= 10;
             if (this.scaleDriver < 1) {
                 this.scaleDriver = 1;
             }
