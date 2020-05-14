@@ -7,6 +7,7 @@ import rasterio.features
 import rasterio.warp
 import shutil
 import sys
+import tqdm
 import urllib.request
 import zipfile
 
@@ -18,27 +19,44 @@ def getExtent(projectionType, src, geom):
     geom_lat_long = rasterio.warp.transform_geom(
         src.crs, projectionType, geom, precision=6)
     if geom_lat_long["type"] != "Polygon" or \
-        len(geom_lat_long["coordinates"]) != 1 or len(geom_lat_long["coordinates"][0]) != 5:
+        len(geom_lat_long["coordinates"]) != 1 or len(geom_lat_long["coordinates"][0]) < 4:
         print("Error in reading geometry")
         exit()
+    
+    min_longitude = geom_lat_long["coordinates"][0][0][0]
+    min_latitude = geom_lat_long["coordinates"][0][0][1]
+    max_longitude = min_longitude
+    max_latitude = min_latitude
+
+    for thisGeom in geom_lat_long["coordinates"][0]:
+        if min_longitude > thisGeom[0]:
+            min_longitude = thisGeom[0]
+        if min_latitude > thisGeom[1]:
+            min_latitude = thisGeom[1]
+        if max_longitude < thisGeom[0]:
+            max_longitude = thisGeom[0]
+        if max_latitude < thisGeom[1]:
+            max_latitude = thisGeom[1]
+
     file_extent = {
         "topLeft": {
-            "longitude": geom_lat_long["coordinates"][0][0][0],
-            "latitude": geom_lat_long["coordinates"][0][0][1]
+            "longitude": min_longitude,
+            "latitude": max_latitude
         },
         "bottomLeft": {
-            "longitude": geom_lat_long["coordinates"][0][1][0],
-            "latitude": geom_lat_long["coordinates"][0][1][1]
+            "longitude": min_longitude,
+            "latitude": min_latitude
         },
         "bottomRight": {
-            "longitude": geom_lat_long["coordinates"][0][2][0],
-            "latitude": geom_lat_long["coordinates"][0][2][1]
+            "longitude": max_longitude,
+            "latitude": min_latitude
         },
         "topRight": {
-            "longitude": geom_lat_long["coordinates"][0][3][0],
-            "latitude": geom_lat_long["coordinates"][0][3][1]
+            "longitude": max_longitude,
+            "latitude": max_latitude
         }
     }
+
     if file_extent["topLeft"]["longitude"] > file_extent["topRight"]["longitude"] or \
         file_extent["bottomLeft"]["longitude"] > file_extent["bottomRight"]["longitude"] or \
         file_extent["topLeft"]["latitude"] < file_extent["bottomLeft"]["longitude"] or \
@@ -141,9 +159,27 @@ web_tiff_path = gdal_util.convert_tiff_to_web_mercator(tif_file, geojsonObj)
 # Get the geographic and physical bounds of the web image
 with rasterio.open(web_tiff_path) as src:
     mask = src.dataset_mask()
+    file_extent = None
+    print("Finding extents")
     for geom, val in rasterio.features.shapes(
             mask, transform=src.transform): 
-        map_inventory[map_name]["fileExtent"] = getExtent("EPSG:4326", src, geom)
-        map_inventory[map_name]["imageWidth"] = src.width
-        map_inventory[map_name]["imageHeight"] = src.height
+        new_extent = getExtent("EPSG:4326", src, geom)
+        if file_extent is None:
+            file_extent = new_extent
+        else:
+            if file_extent["topLeft"]["latitude"] < new_extent["topLeft"]["latitude"]:
+                file_extent["topLeft"]["latitude"] = new_extent["topLeft"]["latitude"]
+                file_extent["topRight"]["latitude"] = new_extent["topLeft"]["latitude"]
+            if file_extent["topLeft"]["longitude"] > new_extent["topLeft"]["longitude"]:
+                file_extent["topLeft"]["longitude"] = new_extent["topLeft"]["longitude"]
+                file_extent["bottomLeft"]["longitude"] = new_extent["topLeft"]["longitude"]
+            if file_extent["bottomRight"]["latitude"] > new_extent["bottomRight"]["latitude"]:
+                file_extent["bottomRight"]["latitude"] = new_extent["bottomRight"]["latitude"]
+                file_extent["bottomLeft"]["latitude"] = new_extent["bottomRight"]["latitude"]
+            if file_extent["bottomRight"]["longitude"] < new_extent["bottomRight"]["longitude"]:
+                file_extent["bottomRight"]["longitude"] = new_extent["bottomRight"]["longitude"]
+                file_extent["topRight"]["longitude"] = new_extent["bottomRight"]["longitude"]
+    map_inventory[map_name]["fileExtent"] = file_extent
+    map_inventory[map_name]["imageWidth"] = src.width
+    map_inventory[map_name]["imageHeight"] = src.height
 mi.write_inventory_metadata(map_inventory)
