@@ -149,7 +149,8 @@ export class NavigableMap2d {
 
         let context = this.context;
         context.save();
-        context.clearRect(0, 0, this.containerWidth, this.containerHeight);
+        context.fillStyle = "rgb(50,50,50)";
+        context.fillRect(0, 0, this.containerWidth, this.containerHeight);
 
         this.mapViews.forEach(submap => {
             if ( context == null )
