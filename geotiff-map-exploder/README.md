@@ -14,6 +14,7 @@ https://rasterio.readthedocs.io/en/latest/index.html
 sudo apt-get install python-tk
 sudo apt-get install python3-tk
 pip3 install pillow
+pip3 install pyproj
 `
 
 # Trying to convert tiffs to rgb band manually

@@ -30,7 +30,7 @@ def _explode_map_helper(image_cache_folder, zoom_level, original_image, original
 
     # Resize the image and write it out
     cropped_image.thumbnail((tile_width, tile_width), Image.ANTIALIAS)
-    cropped_image.save(zoom_directory + "/{}_{}.jpg".format(this_xy[0], this_xy[1]), "JPEG")
+    cropped_image.save(zoom_directory + "/{}_{}.png".format(this_xy[0], this_xy[1]), "PNG")
 
     # Check if we've zoomed far enough
     if (original_image_dimensions[0] / (2 ** zoom_level)) <= tile_width or zoom_level > 7:

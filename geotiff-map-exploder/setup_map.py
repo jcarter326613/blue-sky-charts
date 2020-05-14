@@ -1,5 +1,6 @@
 
 import gdal_util
+import json
 import map_inventory as mi
 import rasterio
 import rasterio.features
@@ -11,6 +12,7 @@ import zipfile
 
 from define_crops import define_crops
 from os import path
+from pyproj import Proj, transform
 
 def getExtent(projectionType, src, geom):
     geom_lat_long = rasterio.warp.transform_geom(
@@ -90,10 +92,53 @@ with zipfile.ZipFile(zip_file) as z:
     with open(tif_file, "wb") as f:
         f.write(z.read("{} SEC {}.tif".format(map_name, version)))
 
-# Create the web mercator image
-web_tiff_path = gdal_util.convert_tiff_to_web_mercator(tif_file)
+# Define the crop area
+existing_bounds = None
+if "mapBounds" in map_inventory[map_name]:
+    with rasterio.open(tif_file) as src:
+        existing_bounds = map_inventory[map_name]["mapBounds"]
+        for i in range(len(existing_bounds)):
+            bound = existing_bounds[i]
+            outProj = Proj(src.crs.to_proj4())
+            inProj = Proj('epsg:4326')
+            meterX, meterY = transform(inProj,outProj, bound[1], bound[0])
+            y, x = src.index(meterX, meterY)
+            existing_bounds[i] = (x, y)
 
-# Get the geographic and physical bounds of the normal image
+map_bounds = define_crops(tif_file, existing_bounds)
+if map_bounds != None and len(map_bounds) > 2:
+    with rasterio.open(tif_file) as src:
+        for i in range(len(map_bounds)):
+            bound = map_bounds[i]
+            meterX, meterY = src.xy(row=bound[1], col=bound[0])
+            inProj = Proj(src.crs.to_proj4())
+            outProj = Proj('epsg:4326')
+            map_bounds[i] = transform(inProj,outProj, meterX, meterY)
+            map_bounds[i] = [map_bounds[i][1], map_bounds[i][0]]
+    map_bounds.append(map_bounds[0])
+    map_inventory[map_name]["mapBounds"] = map_bounds
+    mi.write_inventory_metadata(map_inventory)
+else:
+    print("No bounds given.")
+    exit()
+
+# Create the cropped image
+geojsonGeometryObject = {}
+geojsonGeometryObject["type"] = "Polygon"
+geojsonGeometryObject["coordinates"] = [map_bounds]
+
+geojsonFeatureObject = {}
+geojsonFeatureObject["type"] = "Feature"
+geojsonFeatureObject["geometry"] = geojsonGeometryObject
+
+geojsonObj = {}
+geojsonObj["type"] = "FeatureCollection"
+geojsonObj["features"] = [geojsonFeatureObject]
+
+# Create the web mercator image
+web_tiff_path = gdal_util.convert_tiff_to_web_mercator(tif_file, geojsonObj)
+
+# Get the geographic and physical bounds of the web image
 with rasterio.open(web_tiff_path) as src:
     mask = src.dataset_mask()
     for geom, val in rasterio.features.shapes(
@@ -101,13 +146,4 @@ with rasterio.open(web_tiff_path) as src:
         map_inventory[map_name]["fileExtent"] = getExtent("EPSG:4326", src, geom)
         map_inventory[map_name]["imageWidth"] = src.width
         map_inventory[map_name]["imageHeight"] = src.height
-
-# Define the crop area
-existing_bounds = None
-if "mapBounds" in map_inventory[map_name]:
-    existing_bounds = map_inventory[map_name]["mapBounds"]
-map_bounds = define_crops(tif_file, existing_bounds)
-if map_bounds != None and len(map_bounds) > 0:
-    map_bounds.append(map_bounds[0])
-    map_inventory[map_name]["mapBounds"] = map_bounds
-    mi.write_inventory_metadata(map_inventory)
+mi.write_inventory_metadata(map_inventory)
