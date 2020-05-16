@@ -15,8 +15,7 @@
     "url": "git+https://jcarter123@bitbucket.org/jcarter123/adds-data-collector.git"
   },
   "dependencies": {
-    "jquery": "^3.5.0",
-    "@types/jquery": "^3.3.36"
+    "aws-sdk": "^2.678.0"
   },
   "author": "",
   "license": "ISC",
