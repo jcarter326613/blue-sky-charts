@@ -1,0 +1,5 @@
+#!/bin/bash
+set -e
+
+./compile
+./node_modules/serverless/bin/serverless deploy --verbose

@@ -1,0 +1,10 @@
+service: adds-data-collection
+provider:
+  name: aws
+  runtime: nodejs12.x
+
+functions:
+  divide:
+    handler: index.handler
+    events:
+      - http: GET handler
