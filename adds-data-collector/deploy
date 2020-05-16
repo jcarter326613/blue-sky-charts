@@ -1,5 +1,7 @@
 #!/bin/bash
 set -e
 
-./compile
+tsc --build --clean
+tsc --build
 ./node_modules/serverless/bin/serverless deploy --verbose
+tsc --build --clean

@@ -4,7 +4,17 @@ provider:
   runtime: nodejs12.x
 
 functions:
-  divide:
-    handler: index.handler
+  collect:
+    handler: src/index.handler
     events:
       - http: GET handler
+
+package:
+  exclude:
+    - src/*.ts
+    - package.json
+    - package-lock.json
+    - README.md
+    - tsconfig.json
+    - compile
+    - deploy

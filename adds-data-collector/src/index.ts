@@ -1,3 +1,3 @@
-export function handler(event: any): string {
-    return "test";
+export const handler = async (event: any = {}): Promise<any> => {
+    return "success";
 }

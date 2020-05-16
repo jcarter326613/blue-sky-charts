@@ -2,7 +2,6 @@
   "name": "adds-data-collector",
   "version": "1.0.0",
   "description": "This README would normally document whatever steps are necessary to get your application up and running.",
-  "type": "module",
   "main": "src/index.js",
   "exports": {
     "./": "./src/"
@@ -14,10 +13,9 @@
     "type": "git",
     "url": "git+https://jcarter123@bitbucket.org/jcarter123/adds-data-collector.git"
   },
-  "dependencies": {
-    "aws-sdk": "^2.678.0"
-  },
+  "dependencies": {},
   "devDependencies": {
+    "aws-sdk": "^2.678.0",
     "serverless": "^1.71.1"
   },
   "author": "",
