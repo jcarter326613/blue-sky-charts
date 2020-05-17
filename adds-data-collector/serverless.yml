@@ -5,13 +5,14 @@ provider:
 
 functions:
   collect:
-    handler: src/index.handler
+    handler: src/main/index.handler
     events:
       - http: GET handler
 
 package:
   exclude:
     - src/*.ts
+    - src/test
     - package.json
     - package-lock.json
     - README.md

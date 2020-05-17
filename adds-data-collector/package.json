@@ -14,7 +14,8 @@
     "url": "git+https://jcarter123@bitbucket.org/jcarter123/adds-data-collector.git"
   },
   "dependencies": {
-    "aws-sdk": "^2.678.0"
+    "aws-sdk": "^2.678.0",
+    "fast-xml-parser": "^3.16.0"
   },
   "devDependencies": {
     "serverless": "^1.71.1"
