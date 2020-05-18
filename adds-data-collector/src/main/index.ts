@@ -1,5 +1,6 @@
 import * as AWS from 'aws-sdk';
 import {AddsFileLoader} from './adds-file-loader';
+import {parse} from 'fast-xml-parser'
 import {IncomingMessage} from "http";
 import {MetarFileLoader} from './metar-file-loader';
 
@@ -14,15 +15,15 @@ export const handler = async (event: any = {}): Promise<any> => {
     // For each dataserver file
     fileLoaders.forEach((loader: AddsFileLoader) => {
         // Download the file
-        loader.retrieve((message: IncomingMessage) => {
+        loader.retrieve((message: string) => {
             // Put the results into something that allows us to seperate the tile contents
+            var jsonObj = parse(message);
+            console.log(jsonObj)
 
             // For each zoom level
 
             // Write out the data to s3
         });
-
-        
     });
 
 
@@ -31,7 +32,7 @@ export const handler = async (event: any = {}): Promise<any> => {
 
 
 
-
+/*
     AWS.config.region = "us-east-1";
 
     // Create S3 service object
@@ -50,6 +51,6 @@ export const handler = async (event: any = {}): Promise<any> => {
             console.log("Success in here", data.Location);
         }
     });
-    
+    */
     return "success";
 }
