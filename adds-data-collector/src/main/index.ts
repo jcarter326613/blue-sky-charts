@@ -17,14 +17,14 @@ export const handler = async (event: any = {}): Promise<any> => {
     });
 }
 
-let writeFiles = (zoomLevel: number, fileName: string, data: string): void => {
+let writeFiles = (dataset: string, zoomLevel: number, fileName: string, data: string): void => {
     AWS.config.region = "us-east-1";
 
     // Create S3 service object
     let s3 = new AWS.S3({apiVersion: '2006-03-01'});
 
     // Write the object to the bucket
-    let key = fileName;
+    let key = `${dataset}/${zoomLevel}/${fileName}`;
     let params = {
         Bucket: s3BucketName,
         Key: key,

@@ -1,4 +1,4 @@
-import { Point2d } from 'coordinates'
+import { PointWebMercator } from 'coordinates'
 
 export class MultiGrid {
     private maxZoom: number;
@@ -18,7 +18,7 @@ export class MultiGrid {
      * @param data 
      * @param priority 
      */
-    public addObject( webMercatorLocation: Point2d, data: any, priority: number ): void {
+    public addObject( webMercatorLocation: PointWebMercator, data: any, priority: number ): void {
         let newEntry = new MultiGridEntry(data, priority);
         for (let currentZoom = this.minZoom; currentZoom <= this.maxZoom; currentZoom++) {
             // Make sure we have the current zoom in the grid
@@ -29,8 +29,9 @@ export class MultiGrid {
             let thisGridZoomLevel = this.grids[currentZoom];
 
             // Get the proper cell for this zoom level
-            let thisCellX = 0;
-            let thisCellY = 0;
+            let thisCellPoint = webMercatorLocation.getCellForZoom(currentZoom);
+            let thisCellX = thisCellPoint.x;
+            let thisCellY = thisCellPoint.y;
 
             // Make sure the grid has the proper cell
             while ( thisGridZoomLevel.length < thisCellY + 1 ) {

@@ -1,5 +1,5 @@
 import { AddsFileLoader } from './adds-file-loader'
-import { CoordinateConversion, Point2d, PointGeo } from 'coordinates'
+import { CoordinateConversion, PointGeo, PointWebMercator } from 'coordinates'
 import { LayerConfiguration } from './layer-configuration'
 import { MultiGrid } from './multi-grid'
 
@@ -10,11 +10,12 @@ export class MetarFileLoader extends AddsFileLoader {
 
     constructor() {
         super(MetarFileLoader.url);
-        this.layerConfiguration = new LayerConfiguration("metar")
+        this.layerConfiguration = new LayerConfiguration("metar");
+        this.layerConfiguration.maxZoom = 4;
     }
 
-    public generateFiles(callback: (zoomLevel: number, fileName: string, data: string) => void): void {
-        let skyConditionMultiGrid = new MultiGrid();
+    public generateFiles(callback: (dataset: string, zoomLevel: number, fileName: string, data: string) => void): void {
+        let skyConditionMultiGrid = new MultiGrid(this.layerConfiguration.maxZoom);
 
         this.retrieve((jsonObject: any) => {
             if (jsonObject.METAR === undefined) {
@@ -35,11 +36,13 @@ export class MetarFileLoader extends AddsFileLoader {
             });
 
             // Write out the zoom files
-            skyConditionMultiGrid.forEach(callback);
+            skyConditionMultiGrid.forEach((zoomLevel: number, fileName: string, data: string): void => {
+                callback("metar/ceiling", zoomLevel, fileName, data);
+            });
         });
     }
 
-    private getWebMercatorLocation(metar: any): Point2d | undefined {
+    private getWebMercatorLocation(metar: any): PointWebMercator | undefined {
         if (metar.latitude === undefined || metar.longitude === undefined) {
             console.error(`Location information missing for metar station ${metar.station_id}`);
             return undefined;
