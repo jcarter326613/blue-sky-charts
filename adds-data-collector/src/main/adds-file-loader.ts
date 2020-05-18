@@ -1,33 +1,58 @@
+
+import {parse} from 'fast-xml-parser'
 import { IncomingMessage } from "http";
 import { get } from "https";
+import { pipeline } from 'stream';
+import { createGunzip } from 'zlib';
 
-export class AddsFileLoader {
+export abstract class AddsFileLoader {
     private readonly url: string;
 
     constructor(url: string) {
         this.url = url;
     }
 
-    public retrieve(successCallback: (data: string) => void, 
+    public abstract generateFiles(): void;
+
+    protected retrieve(
+        successCallback: (data: any) => void, 
         errorCallback: ((statusCode: number | undefined , data: string | undefined) => void) | undefined = undefined): void {
         
+        // Make the http request
         get(this.url, (response: IncomingMessage) => {
-            
             if ( response.statusCode !== undefined && response.statusCode >= 200 && response.statusCode < 300 ) {
                 let data: string = "";
-                response.on("data", (chunk: any) => {
+
+                // Create the unzip pipeline
+                let unzipStream = createGunzip();
+                response.pipe(unzipStream);
+
+                // Handle the data coming in on the unzip pipeline
+                unzipStream.on("data", (chunk: any) => {
                     data += chunk as string
                 });
-                response.on("end", () => {
-                    successCallback(data);
+                unzipStream.on("end", () => {
+                    var jsonObj = parse(data);
+                    if ( jsonObj !== undefined && jsonObj.response !== undefined && jsonObj.response.data !== undefined ) {
+                        if ( jsonObj.response.errors !== undefined && jsonObj.response.errors != "" ) {
+                            console.error(`Error reported by ADDS server. ${jsonObj.response.errors}`);
+                        } else if ( jsonObj.response.warnings !== undefined && jsonObj.response.warnings != "" ) {
+                            console.error(`Warnings reported by ADDS server. ${jsonObj.response.warnings}`);
+                        } else {
+                            successCallback(jsonObj.response.data);
+                        }
+                    } else {
+                        console.error(`Empty file retrieved from ${this.url}`);
+                    }
                 });
-                response.on("error", () => {
+                unzipStream.on("error", () => {
                     console.error(`Error during download from ${this.url}.`);
                     if ( errorCallback !== undefined ) {
                         errorCallback(response.statusCode, undefined);
                     }
                 })
             } else {
+                // The http request failed.  Report the error and leave.
                 let message: string | undefined = undefined;
                 if ( response.readable ) {
                     message = response.read();

@@ -1,7 +1,5 @@
 import * as AWS from 'aws-sdk';
 import {AddsFileLoader} from './adds-file-loader';
-import {parse} from 'fast-xml-parser'
-import {IncomingMessage} from "http";
 import {MetarFileLoader} from './metar-file-loader';
 
 let s3BucketName: string = "vfr-green-artifacts-245819277863";
@@ -15,15 +13,7 @@ export const handler = async (event: any = {}): Promise<any> => {
     // For each dataserver file
     fileLoaders.forEach((loader: AddsFileLoader) => {
         // Download the file
-        loader.retrieve((message: string) => {
-            // Put the results into something that allows us to seperate the tile contents
-            var jsonObj = parse(message);
-            console.log(jsonObj)
-
-            // For each zoom level
-
-            // Write out the data to s3
-        });
+        loader.generateFiles();
     });
 
 
