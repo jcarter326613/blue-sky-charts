@@ -13,34 +13,27 @@ export const handler = async (event: any = {}): Promise<any> => {
     // For each dataserver file
     fileLoaders.forEach((loader: AddsFileLoader) => {
         // Download the file
-        loader.generateFiles();
+        loader.generateFiles(writeFiles);
     });
+}
 
-
-
-
-
-
-
-/*
+let writeFiles = (zoomLevel: number, fileName: string, data: string): void => {
     AWS.config.region = "us-east-1";
 
     // Create S3 service object
     let s3 = new AWS.S3({apiVersion: '2006-03-01'});
 
-    // Create the parameters for calling createBucket
-    var bucketParams = {
-        Bucket: "srgsgkhesgkuhseg-example"
+    // Write the object to the bucket
+    let key = fileName;
+    let params = {
+        Bucket: s3BucketName,
+        Key: key,
+        Body: data,
+        StorageClass: "STANDARD"
     };
-    
-    // call S3 to create the bucket
-    s3.createBucket(bucketParams, function(err, data) {
+    s3.putObject(params, function(err, data) {
         if (err) {
-            console.log("Error in here", err);
-        } else {
-            console.log("Success in here", data.Location);
+            console.error(`Error uploading file ${key} to S3.  Error: ${err}`);
         }
     });
-    */
-    return "success";
 }

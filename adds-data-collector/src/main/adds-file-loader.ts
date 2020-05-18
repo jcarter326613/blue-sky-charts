@@ -12,7 +12,7 @@ export abstract class AddsFileLoader {
         this.url = url;
     }
 
-    public abstract generateFiles(): void;
+    public abstract generateFiles(callback: (zoomLevel: number, fileName: string, data: string) => void): void;
 
     protected retrieve(
         successCallback: (data: any) => void, 
@@ -32,7 +32,7 @@ export abstract class AddsFileLoader {
                     data += chunk as string
                 });
                 unzipStream.on("end", () => {
-                    var jsonObj = parse(data);
+                    var jsonObj = parse(data, {ignoreAttributes: false});
                     if ( jsonObj !== undefined && jsonObj.response !== undefined && jsonObj.response.data !== undefined ) {
                         if ( jsonObj.response.errors !== undefined && jsonObj.response.errors != "" ) {
                             console.error(`Error reported by ADDS server. ${jsonObj.response.errors}`);

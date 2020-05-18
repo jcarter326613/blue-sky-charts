@@ -15,7 +15,8 @@
   },
   "dependencies": {
     "aws-sdk": "^2.678.0",
-    "fast-xml-parser": "^3.16.0"
+    "coordinates": "file:../coordinates/coordinates-1.0.0.tgz",
+    "fast-xml-parser": "^3.17.0"
   },
   "devDependencies": {
     "serverless": "^1.71.1"
