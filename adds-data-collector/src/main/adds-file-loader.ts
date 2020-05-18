@@ -2,7 +2,6 @@
 import {parse} from 'fast-xml-parser'
 import { IncomingMessage } from "http";
 import { get } from "https";
-import { pipeline } from 'stream';
 import { createGunzip } from 'zlib';
 
 export abstract class AddsFileLoader {
@@ -12,14 +11,16 @@ export abstract class AddsFileLoader {
         this.url = url;
     }
 
-    public abstract generateFiles(callback: (dataset: string, zoomLevel: number, fileName: string, data: string) => void): void;
+    public abstract async generateFiles(callback: (dataset: string, zoomLevel: number, fileName: string, data: string) => void): Promise<void>;
 
-    protected retrieve(
+    protected async retrieve(
         successCallback: (data: any) => void, 
-        errorCallback: ((statusCode: number | undefined , data: string | undefined) => void) | undefined = undefined): void {
+        errorCallback: ((statusCode: number | undefined , data: string | undefined) => void) | undefined = undefined): Promise<void> {
         
         // Make the http request
-        get(this.url, (response: IncomingMessage) => {
+        console.log("test3a");
+        await new Promise((resolve) => get(this.url, (response: IncomingMessage) => {
+            console.log("test3b");
             if ( response.statusCode !== undefined && response.statusCode >= 200 && response.statusCode < 300 ) {
                 let data: string = "";
 
@@ -44,12 +45,14 @@ export abstract class AddsFileLoader {
                     } else {
                         console.error(`Empty file retrieved from ${this.url}`);
                     }
+                    resolve();
                 });
                 unzipStream.on("error", () => {
                     console.error(`Error during download from ${this.url}.`);
                     if ( errorCallback !== undefined ) {
                         errorCallback(response.statusCode, undefined);
                     }
+                    resolve();
                 })
             } else {
                 // The http request failed.  Report the error and leave.
@@ -61,7 +64,8 @@ export abstract class AddsFileLoader {
                 if ( errorCallback !== undefined ) {
                     errorCallback(response.statusCode, message);
                 }
+                resolve();
             }
-        });
+        }));
     }
 };

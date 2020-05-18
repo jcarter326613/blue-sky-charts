@@ -11,10 +11,10 @@ export const handler = async (event: any = {}): Promise<any> => {
     fileLoaders.push(new MetarFileLoader());
 
     // For each dataserver file
-    fileLoaders.forEach((loader: AddsFileLoader) => {
-        // Download the file
-        loader.generateFiles(writeFiles);
-    });
+    for ( let i = 0; i < fileLoaders.length; i++ ) {
+        let loader = fileLoaders[i];
+        await loader.generateFiles(writeFiles);
+    }
 }
 
 let writeFiles = (dataset: string, zoomLevel: number, fileName: string, data: string): void => {

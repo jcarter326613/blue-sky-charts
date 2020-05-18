@@ -14,10 +14,12 @@ export class MetarFileLoader extends AddsFileLoader {
         this.layerConfiguration.maxZoom = 4;
     }
 
-    public generateFiles(callback: (dataset: string, zoomLevel: number, fileName: string, data: string) => void): void {
+    public async generateFiles(callback: (dataset: string, zoomLevel: number, fileName: string, data: string) => void): Promise<void> {
         let skyConditionMultiGrid = new MultiGrid(this.layerConfiguration.maxZoom);
+        console.log("t3")
 
-        this.retrieve((jsonObject: any) => {
+        await this.retrieve((jsonObject: any) => {
+            console.log("t4")
             if (jsonObject.METAR === undefined) {
                 console.error("METAR file download did not have METAR elements")
             }
