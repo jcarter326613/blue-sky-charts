@@ -1,5 +1,4 @@
-import { Point2d } from "coordinates/point-2d";
-import { BoxGeo } from "coordinates/box-geo";
+import { Point2d } from "coordinates";
 import { BoxGeoModel } from "./box-geo-model";
 
 export class SubMapModel {

@@ -16,6 +16,7 @@
   },
   "dependencies": {
     "@types/jquery": "^3.3.36",
+    "coordinates": "file:../coordinates/coordinates-1.0.0.tgz",
     "jquery": "^3.5.0",
     "jquery-mousewheel": "^3.1.13"
   },

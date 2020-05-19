@@ -1,4 +1,4 @@
-import { PointGeo } from '../coordinates/point-geo';
+import { BoxGeo, PointGeo } from 'coordinates';
 
 export class BoxGeoModel {
     public topLeft: PointGeo;
@@ -11,5 +11,9 @@ export class BoxGeoModel {
         this.topRight = new PointGeo();
         this.bottomLeft = new PointGeo();
         this.bottomRight = new PointGeo();
+    }
+
+    public static createBoxGeoFromModel(model: BoxGeoModel): BoxGeo {
+        return new BoxGeo(model.topLeft, model.bottomRight, model.topRight, model.bottomLeft);
     }
 };

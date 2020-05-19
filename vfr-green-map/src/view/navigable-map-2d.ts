@@ -1,20 +1,21 @@
 
 import * as $ from 'jquery'
 import { JQueryMousewheelEventObject } from '../types/jquery-mousewheel'
-import { Box2d } from '../coordinates/box-2d'
-import { BoxGeo } from '../coordinates/box-geo'
-import { CoordinateConverstion } from '../coordinates/coordinate-conversion'
-import { Point2d } from '../coordinates/point-2d'
-import { PointGeo } from '../coordinates/point-geo'
-import { PointRadial } from '../coordinates/point-radial'
+import { Box2d, PointWebMercator } from 'coordinates'
+import { CoordinateConversion } from 'coordinates'
+import { ISubMapView } from './i-sub-map-view'
+import { Point2d } from 'coordinates'
 import { SubMapModel } from '../models/sub-map-model'
-import { SubMapView } from './sub-map-view'
-import { TileProvider } from './tile-provider'
+import { MapTileView } from './map-tile-view'
+import { TileProvider } from '../resources/tile-provider'
+import { MapDataView } from './map-data-view'
+import { DataProvider } from '../resources/data-provider'
 
 declare function require(module: string): any;
 
 export class NavigableMap2d {
     private tileProvider: TileProvider;
+    private dataProvider: DataProvider;
 
     // Map state variables
     private context: CanvasRenderingContext2D | null;
@@ -41,6 +42,7 @@ export class NavigableMap2d {
         require("jquery-mousewheel");
 
         this.tileProvider = new TileProvider();
+        this.dataProvider = new DataProvider();
         this.maxScaleDriver = 60*3*2;
         this.scaleDriver = 10;
         this.scale = 1 / this.scaleDriver;
@@ -113,18 +115,23 @@ export class NavigableMap2d {
             if (subMapModel.fileExtent == null || subMapModel.imageWidth == null || subMapModel.imageHeight == null)
                 continue;
 
-            let fileExtent = BoxGeo.createFromModel(subMapModel.fileExtent);
-            let fileExtent2dUpperLeft = CoordinateConverstion.convertToWebMercator(fileExtent.getTopLeft());
-            let fileExtent2dLowerRight = CoordinateConverstion.convertToWebMercator(fileExtent.getBottomRight());
-            let fileExtent2d = new Box2d(fileExtent2dUpperLeft.x, fileExtent2dUpperLeft.y, fileExtent2dLowerRight.x, fileExtent2dLowerRight.y);
-            let subMapView = new SubMapView(this.tileProvider);
-            if (!subMapView.initialize(subMapModel, key))
+            let subMapView = new MapTileView(this.tileProvider);
+            let fileExtent = subMapView.initialize(subMapModel, key);
+            if (fileExtent === undefined)
                 continue;
+
+            let fileExtent2dUpperLeft = CoordinateConversion.convertToWebMercator(fileExtent.getTopLeft());
+            let fileExtent2dLowerRight = CoordinateConversion.convertToWebMercator(fileExtent.getBottomRight());
+            let fileExtent2d = new Box2d(fileExtent2dUpperLeft.x, fileExtent2dUpperLeft.y, fileExtent2dLowerRight.x, fileExtent2dLowerRight.y);
 
             // Add the map to the list of map views and set the origin to be the center of the map
             // This will need to change in the future to not set the center like this
             this.mapViews.push(new SubMapPosition(subMapView, fileExtent2d));
-            this.origin2d = CoordinateConverstion.convertToWebMercator(fileExtent.getTopLeft());
+
+            // Create a data view for proof of concept
+            let dataView = new MapDataView(this.dataProvider);
+            this.mapViews.push(new SubMapPosition(dataView, new Box2d(0, 0, PointWebMercator.MAX_X_MERCATOR, PointWebMercator.MAX_Y_MERCATOR)));
+            this.origin2d = CoordinateConversion.convertToWebMercator(fileExtent.getTopLeft());
         }
     }
 
@@ -283,10 +290,10 @@ export class NavigableMap2d {
 };
 
 class SubMapPosition {
-    private subMapView: SubMapView;
+    private subMapView: ISubMapView;
     private location: Box2d;
 
-    constructor(subMap: SubMapView, location: Box2d) {
+    constructor(subMap: ISubMapView, location: Box2d) {
         this.subMapView = subMap;
         this.location = location;
     }
@@ -299,7 +306,7 @@ class SubMapPosition {
         return this.location;
     }
 
-    public getSubMapView(): SubMapView {
+    public getSubMapView(): ISubMapView {
         return this.subMapView;
     }
 }

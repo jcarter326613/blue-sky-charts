@@ -1,5 +1,5 @@
-import { Point2d } from "../coordinates/point-2d"
-import { TileReceiver } from "./tile-receiver";
+import { Point2d } from "coordinates"
+import { ITileReceiver } from "./i-tile-receiver";
 
 export class TileProvider {
     private tileCache: Record<string, TileRequest>;
@@ -9,7 +9,7 @@ export class TileProvider {
     }
 
     public retrieveTile(mapName: string, mapVersion: string, zoomLevel: number, location: Point2d, 
-            receiver: TileReceiver, data: any): void {
+            receiver: ITileReceiver, data: any): void {
         let key = this.createKey(mapName, zoomLevel, location);
         let tileRequest: TileRequest;
 
@@ -35,11 +35,11 @@ export class TileProvider {
 class TileRequest {
     private loaded: boolean;
     private tileImage: HTMLImageElement;
-    private receiver: TileReceiver | null;
+    private receiver: ITileReceiver | null;
     private location: Point2d | null;
     private data: any | null;
 
-    constructor(receiver: TileReceiver, location: Point2d, data: any, url: string) {
+    constructor(receiver: ITileReceiver, location: Point2d, data: any, url: string) {
         this.loaded = false;
         this.receiver = receiver;
         this.location = location;
@@ -60,7 +60,7 @@ class TileRequest {
         this.tileImage.src = url;
     }
 
-    public setReceiver(receiver: TileReceiver, data: any) {
+    public setReceiver(receiver: ITileReceiver, data: any) {
         this.receiver = receiver;
         this.data = data;
     }

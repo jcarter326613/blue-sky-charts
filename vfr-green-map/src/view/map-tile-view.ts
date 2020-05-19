@@ -1,16 +1,16 @@
-import { Box2d } from '../coordinates/box-2d'
-import { Point2d } from '../coordinates/point-2d'
+import { BoxGeoModel } from '../models/box-geo-model'
+import { Box2d, BoxGeo, Point2d } from 'coordinates'
+import { ISubMapView } from './i-sub-map-view'
 import { SubMapModel } from '../models/sub-map-model'
-import { TileProvider } from './tile-provider'
-import { TileReceiver } from './tile-receiver';
+import { TileProvider } from '../resources/tile-provider'
+import { ITileReceiver } from '../resources/i-tile-receiver';
 
-export class SubMapView implements TileReceiver {
+export class MapTileView implements ISubMapView, ITileReceiver {
     // Metadata
     private originalMapWidth: number;
     private originalMapHeight: number;
     private tileWidth: number;
     private tileHeight: number;
-    private maxZoom: number;
     private mapName: string;
     private mapVersion: string;
 
@@ -20,14 +20,12 @@ export class SubMapView implements TileReceiver {
     private context: CanvasRenderingContext2D | null;
     private contextTransform: DOMMatrix | null;
     private scaledTileWidth: number;
-    private renderRegion: Box2d;    //Delete this.  FOr debugging only
     
     constructor(tileProvider: TileProvider) {
         this.originalMapWidth = 0;
         this.originalMapHeight = 0;
         this.tileWidth = 0;
         this.tileHeight = 0;
-        this.maxZoom = 0;
         this.mapName = "";
         this.mapVersion = "0";
         this.tileProvider = tileProvider;
@@ -35,13 +33,12 @@ export class SubMapView implements TileReceiver {
         this.context = null;
         this.contextTransform = null;
         this.scaledTileWidth = 0;
-        this.renderRegion = new Box2d();
     }
 
-    public initialize(model: SubMapModel, name: string): boolean {
+    public initialize(model: SubMapModel, name: string): BoxGeo | undefined {
         if (model.imageHeight == null || model.imageWidth == null || model.tileWidth == null || 
-            model.version == null)
-            return false;
+            model.version == null || model.fileExtent == null)
+            return undefined;
 
         this.originalMapWidth = model.imageWidth;
         this.originalMapHeight = model.imageHeight;
@@ -55,7 +52,7 @@ export class SubMapView implements TileReceiver {
         else
             this.tileWidth = Math.round(this.tileHeight * this.originalMapWidth / this.originalMapHeight)
 
-        return true;
+        return BoxGeoModel.createBoxGeoFromModel(model.fileExtent);
     }
 
     public getOriginalWidth(): number {
@@ -116,11 +113,6 @@ export class SubMapView implements TileReceiver {
         this.renderVersion++
         this.context = context;
         this.contextTransform = context.getTransform();
-        this.renderRegion = region.clone();
-        this.renderRegion.upperLeft.x *= scale;
-        this.renderRegion.upperLeft.y *= scale;
-        this.renderRegion.lowerRight.x *= scale;
-        this.renderRegion.lowerRight.y *= scale;
 
         // Figure out the size of what we are drawing
         let m = this.originalMapWidth * scale
