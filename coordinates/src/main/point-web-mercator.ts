@@ -1,8 +1,8 @@
 import {Point2d} from './point-2d'
 
 export class PointWebMercator extends Point2d {
-    private static MAX_X_MERCATOR: number = 256;
-    private static MAX_Y_MERCATOR: number = 256;
+    public static readonly MAX_X_MERCATOR: number = 256;
+    public static readonly MAX_Y_MERCATOR: number = 256;
 
     constructor(x: number = 0, y: number = 0) {
         super(x, y);
