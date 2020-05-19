@@ -1,7 +1,8 @@
 
-import {parse} from 'fast-xml-parser'
-import { IncomingMessage } from "http";
-import { get } from "https";
+import { EasyAwait } from './easy-await'
+import { parse } from 'fast-xml-parser'
+import { IncomingMessage } from 'http';
+import { get } from 'https';
 import { createGunzip } from 'zlib';
 
 export abstract class AddsFileLoader {
@@ -11,16 +12,15 @@ export abstract class AddsFileLoader {
         this.url = url;
     }
 
-    public abstract async generateFiles(callback: (dataset: string, zoomLevel: number, fileName: string, data: string) => void): Promise<void>;
+    public abstract generateFiles(callback: (dataset: string, zoomLevel: number, fileName: string, data: string) => void): void;
 
-    protected async retrieve(
+    protected retrieve(
         successCallback: (data: any) => void, 
-        errorCallback: ((statusCode: number | undefined , data: string | undefined) => void) | undefined = undefined): Promise<void> {
+        errorCallback: ((statusCode: number | undefined , data: string | undefined) => void) | undefined = undefined): void {
         
         // Make the http request
-        console.log("test3a");
-        await new Promise((resolve) => get(this.url, (response: IncomingMessage) => {
-            console.log("test3b");
+        EasyAwait.instance.startThread();
+        get(this.url, (response: IncomingMessage) => {
             if ( response.statusCode !== undefined && response.statusCode >= 200 && response.statusCode < 300 ) {
                 let data: string = "";
 
@@ -45,27 +45,27 @@ export abstract class AddsFileLoader {
                     } else {
                         console.error(`Empty file retrieved from ${this.url}`);
                     }
-                    resolve();
+                    EasyAwait.instance.endThread();
                 });
                 unzipStream.on("error", () => {
                     console.error(`Error during download from ${this.url}.`);
                     if ( errorCallback !== undefined ) {
                         errorCallback(response.statusCode, undefined);
                     }
-                    resolve();
-                })
+                    EasyAwait.instance.endThread();
+                });
             } else {
                 // The http request failed.  Report the error and leave.
                 let message: string | undefined = undefined;
                 if ( response.readable ) {
                     message = response.read();
                 }
-                console.error(`$error requesting data from '${this.url}'.  Status code ${response.statusCode}.  Message ${message}.`)
+                console.error(`Error requesting data from '${this.url}'.  Status code ${response.statusCode}.  Message ${message}.`)
                 if ( errorCallback !== undefined ) {
                     errorCallback(response.statusCode, message);
                 }
-                resolve();
+                EasyAwait.instance.endThread();
             }
-        }));
+        });
     }
 };

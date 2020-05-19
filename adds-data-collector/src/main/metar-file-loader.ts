@@ -1,5 +1,6 @@
 import { AddsFileLoader } from './adds-file-loader'
 import { CoordinateConversion, PointGeo, PointWebMercator } from 'coordinates'
+import { EasyAwait } from './easy-await'
 import { LayerConfiguration } from './layer-configuration'
 import { MultiGrid } from './multi-grid'
 
@@ -14,14 +15,14 @@ export class MetarFileLoader extends AddsFileLoader {
         this.layerConfiguration.maxZoom = 4;
     }
 
-    public async generateFiles(callback: (dataset: string, zoomLevel: number, fileName: string, data: string) => void): Promise<void> {
+    public generateFiles(callback: (dataset: string, zoomLevel: number, fileName: string, data: string) => void): void {
         let skyConditionMultiGrid = new MultiGrid(this.layerConfiguration.maxZoom);
-        console.log("t3")
 
-        await this.retrieve((jsonObject: any) => {
-            console.log("t4")
+        this.retrieve((jsonObject: any) => {
             if (jsonObject.METAR === undefined) {
                 console.error("METAR file download did not have METAR elements")
+                EasyAwait.instance.endThread();
+                return;
             }
 
             // Go through each metar and place it in its correct zoom cells

@@ -2,6 +2,15 @@ service: adds-data-collection
 provider:
   name: aws
   runtime: nodejs12.x
+  memorySize: 256
+  timeout: 5
+  iamRoleStatements:
+    - Effect: 'Allow'
+      Action:
+        - 's3:PutObject'
+        - 's3:PutObjectAcl'
+      Resource:
+        - 'arn:aws:s3:::vfr-green-artifacts-245819277863/*'
 
 functions:
   collect:

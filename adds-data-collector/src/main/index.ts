@@ -1,20 +1,27 @@
 import * as AWS from 'aws-sdk';
 import {AddsFileLoader} from './adds-file-loader';
+import {EasyAwait} from './easy-await'
 import {MetarFileLoader} from './metar-file-loader';
 
 let s3BucketName: string = "vfr-green-artifacts-245819277863";
 let maxPerTile: number = 5;
 
 export const handler = async (event: any = {}): Promise<any> => {
+    EasyAwait.instance.initialize();
+
     // Create the list of file loaders
     let fileLoaders: Array<AddsFileLoader> = new Array<AddsFileLoader>();
     fileLoaders.push(new MetarFileLoader());
 
-    // For each dataserver file
-    for ( let i = 0; i < fileLoaders.length; i++ ) {
-        let loader = fileLoaders[i];
-        await loader.generateFiles(writeFiles);
-    }
+    EasyAwait.instance.startThread();
+
+    // Process each dataserver file
+    fileLoaders.forEach((loader) => {
+        loader.generateFiles(writeFiles);
+    });
+
+    EasyAwait.instance.endThread();
+    await EasyAwait.instance.join();
 }
 
 let writeFiles = (dataset: string, zoomLevel: number, fileName: string, data: string): void => {
@@ -31,9 +38,12 @@ let writeFiles = (dataset: string, zoomLevel: number, fileName: string, data: st
         Body: data,
         StorageClass: "STANDARD"
     };
+    
+    EasyAwait.instance.startThread();
     s3.putObject(params, function(err, data) {
         if (err) {
             console.error(`Error uploading file ${key} to S3.  Error: ${err}`);
         }
+        EasyAwait.instance.endThread();
     });
 }
