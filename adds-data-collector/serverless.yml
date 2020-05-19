@@ -3,7 +3,7 @@ provider:
   name: aws
   runtime: nodejs12.x
   memorySize: 256
-  timeout: 5
+  timeout: 15
   iamRoleStatements:
     - Effect: 'Allow'
       Action:
