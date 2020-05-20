@@ -59,8 +59,19 @@ export class MapDataView implements ISubMapView, IDataReceiver {
         let currentTransform = this.context.getTransform();
         this.context.setTransform(this.contextTransform);
 
-        this.context.strokeStyle = "rgb(0, 255, 0)";
-        this.context.strokeText(data.ceiling, location.x * this.contextScale, location.y * this.contextScale);
+        //Write out the ceiling
+        let lineHeight = this.context.measureText('M').width * 1.2;
+        let textDimensions = this.context.measureText(data.ceiling);
+        let textRect = new Box2d(location.x * this.contextScale - textDimensions.width / 2, location.y * this.contextScale - lineHeight / 2,
+            location.x * this.contextScale + textDimensions.width / 2, location.y * this.contextScale + lineHeight / 2);
+        this.context.strokeStyle = "rgb(0,0,0)";
+        this.context.fillStyle = "rgb(255,255,255)";
+        this.context.fillRect(textRect.getUpperLeft().x - 3, textRect.getUpperLeft().y - 3, 
+            textRect.getDimensions().x + 6, textRect.getDimensions().y + 6);
+        this.context.strokeRect(textRect.getUpperLeft().x - 3, textRect.getUpperLeft().y - 3, 
+            textRect.getDimensions().x + 6, textRect.getDimensions().y + 6);
+
+        this.context.strokeText(data.ceiling, textRect.getUpperLeft().x, textRect.getLowerRight().y);
         
         this.context.setTransform(currentTransform);
     }
