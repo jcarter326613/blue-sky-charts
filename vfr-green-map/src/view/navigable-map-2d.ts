@@ -130,6 +130,7 @@ export class NavigableMap2d {
 
             // Create a data view for proof of concept
             let dataView = new MapDataView(this.dataProvider);
+            dataView.initialize();
             this.mapViews.push(new SubMapPosition(dataView, new Box2d(0, 0, PointWebMercator.MAX_X_MERCATOR, PointWebMercator.MAX_Y_MERCATOR)));
             this.origin2d = CoordinateConversion.convertToWebMercator(fileExtent.getTopLeft());
         }
@@ -149,10 +150,10 @@ export class NavigableMap2d {
             return;
 
         let viewport2d = this.calculateViewport();
-        let viewportMercatorWidth = viewport2d.lowerRight.x - viewport2d.upperLeft.x;
-        let viewportMercatorHeight = viewport2d.lowerRight.y - viewport2d.upperLeft.y;
+        let viewportMercatorWidth = viewport2d.getLowerRight().x - viewport2d.getUpperLeft().x;
+        let viewportMercatorHeight = viewport2d.getLowerRight().y - viewport2d.getUpperLeft().y;
 
-        this.debugDiv.text(`viewport width: ${viewport2d.lowerRight.x - viewport2d.upperLeft.x}, height: ${viewport2d.lowerRight.y - viewport2d.upperLeft.y}`);
+        this.debugDiv.text(`viewport width: ${viewport2d.getLowerRight().x - viewport2d.getUpperLeft().x}, height: ${viewport2d.getLowerRight().y - viewport2d.getUpperLeft().y}`);
 
         let context = this.context;
         context.save();
@@ -171,22 +172,22 @@ export class NavigableMap2d {
                 let originalWidth = submap.getSubMapView().getOriginalWidth();
                 let originalHeight = submap.getSubMapView().getOriginalHeight();
 
-                let mapMercatorWidth = mapPosition2d.lowerRight.x - mapPosition2d.upperLeft.x;
-                let mapMercatorHeight = mapPosition2d.lowerRight.y - mapPosition2d.upperLeft.y;
+                let mapMercatorWidth = mapPosition2d.getLowerRight().x - mapPosition2d.getUpperLeft().x;
+                let mapMercatorHeight = mapPosition2d.getLowerRight().y - mapPosition2d.getUpperLeft().y;
                 let mapScale = (this.containerWidth * mapMercatorWidth) / (originalWidth * viewportMercatorWidth);
 
-                let mapShiftX = (mapPosition2d.upperLeft.x - this.origin2d.x) * this.containerWidth / viewportMercatorWidth
-                let mapShiftY = (mapPosition2d.upperLeft.y - this.origin2d.y) * this.containerHeight / viewportMercatorHeight
+                let mapShiftX = (mapPosition2d.getUpperLeft().x - this.origin2d.x) * this.containerWidth / viewportMercatorWidth
+                let mapShiftY = (mapPosition2d.getUpperLeft().y - this.origin2d.y) * this.containerHeight / viewportMercatorHeight
  
                 context.translate(this.containerWidth / 2, this.containerHeight / 2);
                 context.translate(mapShiftX, mapShiftY);
 
                 // Figure out the part of the map we want to draw in 2d coordinates relative to the upper left corner
                 let subMapDrawSection = new Box2d(
-                    originalWidth * (viewportOverlap2d.upperLeft.x - mapPosition2d.upperLeft.x) / mapMercatorWidth,
-                    originalHeight * (viewportOverlap2d.upperLeft.y - mapPosition2d.upperLeft.y) / mapMercatorHeight,
-                    originalWidth * (viewportOverlap2d.lowerRight.x - mapPosition2d.upperLeft.x) / mapMercatorWidth,
-                    originalHeight * (viewportOverlap2d.lowerRight.y - mapPosition2d.upperLeft.y) / mapMercatorHeight);
+                    originalWidth * (viewportOverlap2d.getUpperLeft().x - mapPosition2d.getUpperLeft().x) / mapMercatorWidth,
+                    originalHeight * (viewportOverlap2d.getUpperLeft().y - mapPosition2d.getUpperLeft().y) / mapMercatorHeight,
+                    originalWidth * (viewportOverlap2d.getLowerRight().x - mapPosition2d.getUpperLeft().x) / mapMercatorWidth,
+                    originalHeight * (viewportOverlap2d.getLowerRight().y - mapPosition2d.getUpperLeft().y) / mapMercatorHeight);
 
                 // Draw the submap
                 submap.getSubMapView().render(context, subMapDrawSection, mapScale);

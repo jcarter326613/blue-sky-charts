@@ -91,23 +91,23 @@ export class MapTileView implements ISubMapView, ITileReceiver {
     public render(context: CanvasRenderingContext2D, region: Box2d, scale: number) {
         // Validate the region
         region = region.clone();
-        if ( region.upperLeft.x < 0 )
-            region.upperLeft.x = 0;
-        else if ( region.upperLeft.x >= this.originalMapWidth )
-            region.upperLeft.x = this.originalMapWidth;
-        if ( region.upperLeft.y < 0 )
-            region.upperLeft.y = 0;
-        else if ( region.upperLeft.y >= this.originalMapHeight )
-            region.upperLeft.y = this.originalMapHeight;
+        if ( region.getUpperLeft().x < 0 )
+            region.getUpperLeft().x = 0;
+        else if ( region.getUpperLeft().x >= this.originalMapWidth )
+            region.getUpperLeft().x = this.originalMapWidth;
+        if ( region.getUpperLeft().y < 0 )
+            region.getUpperLeft().y = 0;
+        else if ( region.getUpperLeft().y >= this.originalMapHeight )
+            region.getUpperLeft().y = this.originalMapHeight;
 
-        if ( region.lowerRight.x < 0 )
-            region.lowerRight.x = 0;
-        else if ( region.lowerRight.x >= this.originalMapWidth )
-            region.lowerRight.x = this.originalMapWidth;
-        if ( region.lowerRight.y < 0 )
-            region.lowerRight.y = 0;
-        else if ( region.lowerRight.y >= this.originalMapHeight )
-            region.lowerRight.y = this.originalMapHeight;
+        if ( region.getLowerRight().x < 0 )
+            region.getLowerRight().x = 0;
+        else if ( region.getLowerRight().x >= this.originalMapWidth )
+            region.getLowerRight().x = this.originalMapWidth;
+        if ( region.getLowerRight().y < 0 )
+            region.getLowerRight().y = 0;
+        else if ( region.getLowerRight().y >= this.originalMapHeight )
+            region.getLowerRight().y = this.originalMapHeight;
 
         // Increase the render version to prevent old requests from rendering
         this.renderVersion++
@@ -129,10 +129,10 @@ export class MapTileView implements ISubMapView, ITileReceiver {
         let originalImageTileHeight = this.originalMapHeight / numTilesAcross
 
         // Ensure we aren't looping too much
-        let startX = Math.floor(region.upperLeft.x / originalImageTileWidth);
-        let endX = Math.ceil(region.lowerRight.x / originalImageTileWidth);
-        let startY = Math.floor(region.upperLeft.y / originalImageTileHeight);
-        let endY = Math.ceil(region.lowerRight.y / originalImageTileHeight)
+        let startX = Math.floor(region.getUpperLeft().x / originalImageTileWidth);
+        let endX = Math.ceil(region.getLowerRight().x / originalImageTileWidth);
+        let startY = Math.floor(region.getUpperLeft().y / originalImageTileHeight);
+        let endY = Math.ceil(region.getLowerRight().y / originalImageTileHeight)
 
         if (endX - startX > 20 || endY - startY > 20)
             return;

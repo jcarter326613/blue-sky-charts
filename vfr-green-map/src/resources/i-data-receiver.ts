@@ -1,6 +1,6 @@
 
-import { Point2d } from 'coordinates'
+import { PointWebMercator } from 'coordinates'
 
 export interface IDataReceiver {
-    receiveData(location: Point2d, data: any): void
+    receiveData(location: PointWebMercator, data: any): void
 }
