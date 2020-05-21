@@ -1,8 +1,8 @@
 import { Point2d } from './point-2d'
 
 export class Box2d {
-    public upperLeft: Point2d;
-    public lowerRight: Point2d;
+    private upperLeft: Point2d;
+    private lowerRight: Point2d;
 
     constructor(upperLeftX: number = 0, upperLeftY: number = 0, lowerRightX: number = 0, lowerRightY: number = 0) {
         this.upperLeft = new Point2d(upperLeftX, upperLeftY);
@@ -34,11 +34,15 @@ export class Box2d {
         return newBox;
     }
 
-    public getTopLeft(): Point2d {
+    public getUpperLeft(): Point2d {
         return this.upperLeft;
     }
 
-    public getBottomRight(): Point2d {
+    public getLowerRight(): Point2d {
         return this.lowerRight;
+    }
+
+    public getDimensions(): Point2d {
+        return new Point2d(this.lowerRight.x - this.upperLeft.x, this.lowerRight.y - this.upperLeft.y);
     }
 }

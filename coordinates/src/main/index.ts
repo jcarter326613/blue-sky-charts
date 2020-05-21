@@ -1,5 +1,6 @@
 export {Box2d} from './box-2d';
 export {BoxGeo} from './box-geo';
+export {BoxWebMercator} from './box-web-mercator';
 export {CoordinateConversion} from './coordinate-conversion';
 export {Point2d} from './point-2d';
 export {PointGeo} from './point-geo';

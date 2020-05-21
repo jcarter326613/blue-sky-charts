@@ -1,3 +1,5 @@
+import { BoxGeo } from './box-geo'
+import { BoxWebMercator } from './box-web-mercator'
 import { Point2d } from './point-2d'
 import { PointGeo } from './point-geo'
 import { PointRadial } from './point-radial'
@@ -100,5 +102,11 @@ export class CoordinateConversion {
         newPoint.latitude = newPoint.latitude * 360 / (2 * Math.PI)
 
         return newPoint;
+    }
+
+    public static convertBoxMercatorToBoxGeo(boxMercator: BoxWebMercator): BoxGeo {
+        let boxGeo = new BoxGeo(CoordinateConversion.convertFromWebMercator(boxMercator.getTopLeft()),
+            CoordinateConversion.convertFromWebMercator(boxMercator.getBottomRight()));
+        return boxGeo;
     }
 }
