@@ -13,6 +13,7 @@ export class MapTileView implements ISubMapView, ITileReceiver {
     private tileHeight: number;
     private mapName: string;
     private mapVersion: string;
+    private maxZoom: number;
 
     // Rendering
     private tileProvider: TileProvider;
@@ -28,6 +29,7 @@ export class MapTileView implements ISubMapView, ITileReceiver {
         this.tileHeight = 0;
         this.mapName = "";
         this.mapVersion = "0";
+        this.maxZoom = 0;
         this.tileProvider = tileProvider;
         this.renderVersion = 0;
         this.context = null;
@@ -37,7 +39,7 @@ export class MapTileView implements ISubMapView, ITileReceiver {
 
     public initialize(model: SubMapModel, name: string): BoxGeo | undefined {
         if (model.imageHeight == null || model.imageWidth == null || model.tileWidth == null || 
-            model.version == null || model.fileExtent == null)
+            model.version == null || model.fileExtent == null || model.maxZoom == null)
             return undefined;
 
         this.originalMapWidth = model.imageWidth;
@@ -46,6 +48,7 @@ export class MapTileView implements ISubMapView, ITileReceiver {
         this.tileHeight = model.tileWidth;
         this.mapName = name;
         this.mapVersion = model.version;
+        this.maxZoom = model.maxZoom;
 
         if (this.originalMapWidth > this.originalMapHeight)
             this.tileHeight = Math.round(this.tileWidth * this.originalMapHeight / this.originalMapWidth)
@@ -119,11 +122,9 @@ export class MapTileView implements ISubMapView, ITileReceiver {
         let zoomLevel = Math.ceil(Math.log(m / this.tileWidth) / Math.log(2))
         if (zoomLevel < 0)
             zoomLevel = 0;
+        if (zoomLevel > this.maxZoom)
+            zoomLevel = this.maxZoom;
         let numTilesAcross = 2 ** zoomLevel;
-        while ( numTilesAcross > this.originalMapWidth && zoomLevel > 0 ) {
-            zoomLevel--;
-            numTilesAcross = 2 ** zoomLevel;
-        }
         this.scaledTileWidth = m / numTilesAcross;
         let originalImageTileWidth = this.originalMapWidth / numTilesAcross
         let originalImageTileHeight = this.originalMapHeight / numTilesAcross

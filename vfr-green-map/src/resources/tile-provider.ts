@@ -3,9 +3,11 @@ import { ITileReceiver } from "./i-tile-receiver";
 
 export class TileProvider {
     private tileCache: Record<string, TileRequest>;
+    private mapRoot: string;
 
-    constructor() {
+    constructor(mapRoot: string) {
         this.tileCache = {};
+        this.mapRoot = mapRoot;
     }
 
     public retrieveTile(mapName: string, mapVersion: string, zoomLevel: number, location: Point2d, 
@@ -21,7 +23,7 @@ export class TileProvider {
             else
                 tileRequest.setReceiver(receiver, data);
         } else {
-            let url = `/${mapName}_SEC_${mapVersion}/${zoomLevel}/${location.x}_${location.y}.png`;
+            let url = `${this.mapRoot}/${mapName}_SEC_${mapVersion}/${zoomLevel}/${location.x}_${location.y}.png`;
             tileRequest = new TileRequest(receiver, location, data, url);
             this.tileCache[key] = tileRequest
         }

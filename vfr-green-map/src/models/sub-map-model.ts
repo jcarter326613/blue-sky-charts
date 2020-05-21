@@ -8,6 +8,7 @@ export class SubMapModel {
     public imageWidth: number | null;
     public imageHeight: number | null;
     public fileExtent: BoxGeoModel | null;
+    public maxZoom: number | null;
 
     constructor() {
         this.mapBounds = null;
@@ -16,5 +17,6 @@ export class SubMapModel {
         this.fileExtent = null;
         this.imageWidth = null;
         this.imageHeight = null;
+        this.maxZoom = null;
     }
 };

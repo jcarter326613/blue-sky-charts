@@ -38,14 +38,14 @@ export class NavigableMap2d {
     private containerDiv: JQuery<HTMLElement>;
     private debugDiv: JQuery<HTMLElement>;
 
-    constructor(elementId: string) {
+    constructor(elementId: string, mapRoot: string) {
         require("jquery-mousewheel");
 
-        this.tileProvider = new TileProvider();
+        this.tileProvider = new TileProvider(mapRoot);
         this.dataProvider = new DataProvider();
-        this.maxScaleDriver = 60*3*2;
-        this.scaleDriver = 10;
-        this.scale = 1 / this.scaleDriver;
+        this.maxScaleDriver = 12;
+        this.scaleDriver = 0;
+        this.scale = 1 / (2 ** this.scaleDriver);
         this.containerWidth = 0;
         this.containerHeight = 0;
         this.zoom0PixelsPerLongitude = 20;
@@ -76,7 +76,7 @@ export class NavigableMap2d {
         this.setSize();
         this.addEventListeners();
         this.render();
-        this.retrieveConfiguration();
+        this.retrieveConfiguration(`${mapRoot}/metadata.json`);
     }
 
     private addEventListeners(): void {
@@ -136,9 +136,9 @@ export class NavigableMap2d {
         }
     }
 
-    private retrieveConfiguration(): void {
+    private retrieveConfiguration(mapConfigurationFile: string): void {
         let thisObj = this;
-        $.getJSON("/metadata.json",
+        $.getJSON(mapConfigurationFile,
             function(data: Record<string, SubMapModel>) {
                 thisObj.initializeMapModel(data);
                 thisObj.render();
@@ -258,17 +258,17 @@ export class NavigableMap2d {
         //let zoomAmount = event.deltaY * event.deltaFactor;
 
         if (event.deltaY < 0 ) {
-            this.scaleDriver += 10;
+            this.scaleDriver += .25;
             if ( this.scaleDriver > this.maxScaleDriver ) {
                 this.scaleDriver = this.maxScaleDriver;
             }
         } else {
-            this.scaleDriver -= 10;
-            if (this.scaleDriver < 1) {
-                this.scaleDriver = 1;
+            this.scaleDriver -= .25;
+            if (this.scaleDriver < 0) {
+                this.scaleDriver = 0;
             }
         }
-        this.scale = 1 / this.scaleDriver;
+        this.scale = 1 / (2 ** this.scaleDriver);
         this.render();
     }
 
