@@ -12,7 +12,7 @@ export abstract class AddsFileLoader {
         this.url = url;
     }
 
-    public abstract generateFiles(callback: (dataset: string, zoomLevel: number, fileName: string, data: string) => void): void;
+    public abstract generateFiles(callback: (dataset: string, fileName: string, data: string) => void): void;
 
     protected retrieve(
         successCallback: (data: any) => void, 

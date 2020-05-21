@@ -4,7 +4,6 @@ import {EasyAwait} from './easy-await'
 import {MetarFileLoader} from './metar-file-loader';
 
 let s3BucketName: string = "vfr-green-artifacts-245819277863";
-let maxPerTile: number = 5;
 
 export const handler = async (event: any = {}): Promise<any> => {
     EasyAwait.instance.initialize();
@@ -24,14 +23,14 @@ export const handler = async (event: any = {}): Promise<any> => {
     await EasyAwait.instance.join();
 }
 
-let writeFiles = (dataset: string, zoomLevel: number, fileName: string, data: string): void => {
+let writeFiles = (dataset: string, fileName: string, data: string): void => {
     AWS.config.region = "us-east-1";
 
     // Create S3 service object
     let s3 = new AWS.S3({apiVersion: '2006-03-01'});
 
     // Write the object to the bucket
-    let key = `${dataset}/${zoomLevel}/${fileName}`;
+    let key = `${dataset}/${fileName}`;
     let params = {
         Bucket: s3BucketName,
         Key: key,

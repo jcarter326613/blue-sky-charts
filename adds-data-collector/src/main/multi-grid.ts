@@ -1,14 +1,20 @@
 import { PointWebMercator } from 'coordinates'
 
 export class MultiGrid {
-    private maxZoom: number;
-    private minZoom: number;
-    private grids: Array<Array<Array<MultiGridEntry | null>>>;
+    private baseZoom: number;
+    private fileGrid: Array<Array<Array<any>>>;
 
-    constructor(maxZoom: number = 0, minZoom: number = 0) {
-        this.maxZoom = maxZoom;
-        this.minZoom = minZoom;
-        this.grids = new Array<Array<Array<MultiGridEntry | null>>>();
+    constructor(baseZoom: number = 2) {
+        this.baseZoom = baseZoom;
+        this.fileGrid = new Array<Array<Array<any>>>();
+        let cellsAcross = 2 ** baseZoom;
+        for ( let y = 0; y < cellsAcross; y++ ) {
+            let yArray = new Array<Array<any>>();
+            for ( let x = 0; x < cellsAcross; x++ ) {
+                yArray.push(new Array());
+            }
+            this.fileGrid.push(yArray);
+        }
     }
 
     /**
@@ -18,62 +24,27 @@ export class MultiGrid {
      * @param data 
      * @param priority 
      */
-    public addObject( webMercatorLocation: PointWebMercator, data: any, priority: number ): void {
-        let newEntry = new MultiGridEntry(data, priority);
-        for (let currentZoom = this.minZoom; currentZoom <= this.maxZoom; currentZoom++) {
-            // Make sure we have the current zoom in the grid
-            let cellsAcross = 2 ** currentZoom;
-            while ( this.grids.length < currentZoom + 1 ) {
-                this.grids.push(new Array<Array<MultiGridEntry | null>>());
-            }
-            let thisGridZoomLevel = this.grids[currentZoom];
+    public addObject( webMercatorLocation: PointWebMercator, data: any): void {
+        // Get the proper cell for this zoom level
+        let thisCellPoint = webMercatorLocation.getCellForZoom(this.baseZoom);
+        let thisCellX = thisCellPoint.x;
+        let thisCellY = thisCellPoint.y;
 
-            // Get the proper cell for this zoom level
-            let thisCellPoint = webMercatorLocation.getCellForZoom(currentZoom);
-            let thisCellX = thisCellPoint.x;
-            let thisCellY = thisCellPoint.y;
-
-            // Make sure the grid has the proper cell
-            while ( thisGridZoomLevel.length < thisCellY + 1 ) {
-                thisGridZoomLevel.push(new Array<MultiGridEntry | null>());
-            }
-            let thisGridZoomLevelY = thisGridZoomLevel[thisCellY];
-            while ( thisGridZoomLevelY.length < thisCellX + 1 ) {
-                thisGridZoomLevelY.push(null);
-            }
-
-            // Put this data in the cell if its priority is higher
-            let cellContents = thisGridZoomLevelY[thisCellX];
-            if (cellContents === null || cellContents.priority < priority) {
-                thisGridZoomLevelY[thisCellX] = new MultiGridEntry(data, priority);
-            }
-        }
+        // Put this data in the cell if its priority is higher
+        let cellContents = this.fileGrid[thisCellY][thisCellX];
+        cellContents.push(data);
     }
 
-    public forEach(callback: (zoomLevel: number, fileName: string, data: string) => void): void {
-        for (let currentZoom = 0; currentZoom < this.grids.length; currentZoom++) {
-            let thisGridZoom = this.grids[currentZoom];
-            for (let currentY = 0; currentY < thisGridZoom.length; currentY++) {
-                let thisGridY = thisGridZoom[currentY];
-                for (let currentX = 0; currentX < thisGridY.length; currentX++) {
-                    let data = thisGridY[currentX];
-                    if ( data != null ) {
-                        callback(currentZoom, `${currentX}_${currentY}.json`, JSON.stringify(data.data));
-                    } else {
-                        callback(currentZoom, `${currentX}_${currentY}.json`, "{}");
-                    }
-                }
+    /**
+     * Iterates through all the files that should be written out
+     * @param callback Receives the files and associated contents, one at a time.
+     */
+    public forEach(callback: (fileName: string, data: string) => void): void {
+        for (let currentY = 0; currentY < this.fileGrid.length; currentY++) {
+            let thisGridY = this.fileGrid[currentY];
+            for (let currentX = 0; currentX < thisGridY.length; currentX++) {
+                callback(`${currentX}_${currentY}.json`, JSON.stringify(thisGridY[currentX]));
             }
         }
-    }
-}
-
-class MultiGridEntry {
-    public data: any;
-    public priority: number;
-
-    constructor(data: any, priority: number) {
-        this.data = data;
-        this.priority = priority;
     }
 }

@@ -12,10 +12,10 @@ export class MetarFileLoader extends AddsFileLoader {
     constructor() {
         super(MetarFileLoader.url);
         this.layerConfiguration = new LayerConfiguration("metar");
-        this.layerConfiguration.maxZoom = 4;
+        this.layerConfiguration.maxZoom = 2;
     }
 
-    public generateFiles(callback: (dataset: string, zoomLevel: number, fileName: string, data: string) => void): void {
+    public generateFiles(callback: (dataset: string, fileName: string, data: string) => void): void {
         let skyConditionMultiGrid = new MultiGrid(this.layerConfiguration.maxZoom);
 
         this.retrieve((jsonObject: any) => {
@@ -27,40 +27,56 @@ export class MetarFileLoader extends AddsFileLoader {
 
             // Go through each metar and place it in its correct zoom cells
             jsonObject.METAR.forEach((metar: any) => {
-                let location = this.getWebMercatorLocation(metar);
-                if ( location !== undefined ) {
+                let geoLocation = this.getGeoLocation(metar);
+                if ( geoLocation !== undefined ) {
+                    let ceilingObj = {
+                        "latitude": geoLocation.latitude,
+                        "longitude": geoLocation.longitude,
+                        "ceiling": <number|undefined>undefined
+                    };
+
+                    let mercatorLocation = CoordinateConversion.convertToWebMercator(geoLocation);
                     let skyConditionList = this.extractSkyCondition(metar.sky_condition);
-                    if ( skyConditionList.length == 0 ) {
-                        skyConditionMultiGrid.addObject(location, skyConditionList, -MetarFileLoader.MAX_METAR_CELING);
-                    } else {
-                        skyConditionMultiGrid.addObject(location, skyConditionList, -skyConditionList[0].elevation);
+                    let elevation: number | undefined = undefined;
+                    if ( skyConditionList.length > 0 ) {
+                        for ( let condition of skyConditionList ) {
+                            if ( condition.skyCover == "OVC" || condition.skyCover == "BKN") {
+                                ceilingObj["ceiling"] = condition.elevation
+                                elevation = skyConditionList[0].elevation
+                                break;
+                            }
+                        }
                     }
+
+                    if ( elevation === undefined ) {
+                        elevation = MetarFileLoader.MAX_METAR_CELING
+                    }
+                    skyConditionMultiGrid.addObject(mercatorLocation, ceilingObj);
                 }
             });
 
             // Write out the zoom files
-            skyConditionMultiGrid.forEach((zoomLevel: number, fileName: string, data: string): void => {
-                callback("metar/ceiling", zoomLevel, fileName, data);
+            skyConditionMultiGrid.forEach((fileName: string, data: string): void => {
+                callback("metar", fileName, data);
             });
         });
     }
 
-    private getWebMercatorLocation(metar: any): PointWebMercator | undefined {
+    private getGeoLocation(metar: any): PointGeo | undefined {
         if (metar.latitude === undefined || metar.longitude === undefined) {
             console.error(`Location information missing for metar station ${metar.station_id}`);
             return undefined;
         }
 
-        let latitude: number = parseInt(metar.latitude);
-        let longitude: number = parseInt(metar.longitude);
+        let latitude: number = parseFloat(metar.latitude);
+        let longitude: number = parseFloat(metar.longitude);
 
         if (Number.isNaN(latitude) || Number.isNaN(longitude)) {
             console.error(`Location information corrupted for metar station ${metar.station_id}`);
             return undefined;
         }
 
-        let pointGeo = new PointGeo(longitude, latitude);
-        return CoordinateConversion.convertToWebMercator(pointGeo);
+        return new PointGeo(longitude, latitude);
     }
 
     private extractSkyCondition(skyCondition: any): Array<SkyCondition> {
@@ -86,6 +102,7 @@ export class MetarFileLoader extends AddsFileLoader {
             skyCondition.forEach((condition: any) => addConditionFunction(condition));
         }
 
+        skyConditionList.sort((a, b) => a.elevation < b.elevation ? -1 : a.elevation > b.elevation ? 1 : 0);
         return skyConditionList;
     }
 }
