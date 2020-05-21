@@ -70,7 +70,7 @@ def explode_maps():
             exit()
 
         tile_width = map_definition["tileWidth"]
-        image_path = "maps/{}_SEC_{}_WEB.tif".format(map_name, map_definition["version"])
+        image_path = "maps/{}_SEC_{}_WEB_CROPPED.tif".format(map_name, map_definition["version"])
         image_cache_folder = "maps/{}_SEC_{}".format(map_name, map_definition["version"])
         if not path.exists(image_cache_folder):
             png_image_path = gdal_util.convert_tiff_to_png(image_path)

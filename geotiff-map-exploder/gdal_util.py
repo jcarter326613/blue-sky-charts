@@ -18,9 +18,22 @@ def convert_tiff_to_png(image_file):
 
     return new_filename
 
-def convert_tiff_to_web_mercator(image_file, geojsonObj):
-    alpha_filename = ".".join(image_file.split(".")[0:-1]) + "_ALPHA.tif"
+def convert_tiff_to_web_mercator(image_file):
     new_filename = ".".join(image_file.split(".")[0:-1]) + "_WEB.tif"
+    if path.exists(new_filename):
+        return new_filename
+
+    print("Warping to Web Mercator")
+    docker_command = "docker run --rm -v /home:/home osgeo/gdal:alpine-ultrasmall-latest gdalwarp -t_srs EPSG:3857 $PWD/{} $PWD/{}".format(
+        image_file, new_filename
+    )
+    system(docker_command)
+
+    return new_filename
+
+def convert_web_mercator_to_cropped(image_file, geojsonObj):
+    alpha_filename = ".".join(image_file.split(".")[0:-1]) + "_ALPHA.tif"
+    new_filename = ".".join(image_file.split(".")[0:-1]) + "_CROPPED.tif"
     geojson_filename = ".".join(image_file.split(".")[0:-1]) + "_CROP.geojson"
     if path.exists(new_filename):
         return new_filename
@@ -37,9 +50,9 @@ def convert_tiff_to_web_mercator(image_file, geojsonObj):
     )
     system(docker_command)
     
-    print("Warping to Web Mercator")
+    print("Cropping image")
 
-    docker_command = "docker run --rm -v /home:/home osgeo/gdal:alpine-ultrasmall-latest gdalwarp -t_srs EPSG:3857 -cutline $PWD/{} -crop_to_cutline $PWD/{} $PWD/{}".format(
+    docker_command = "docker run --rm -v /home:/home osgeo/gdal:alpine-ultrasmall-latest gdalwarp -cutline $PWD/{} -crop_to_cutline $PWD/{} $PWD/{}".format(
         geojson_filename, alpha_filename, new_filename
     )
     system(docker_command)
