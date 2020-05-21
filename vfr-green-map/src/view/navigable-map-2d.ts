@@ -1,7 +1,7 @@
 
 import * as $ from 'jquery'
 import { JQueryMousewheelEventObject } from '../types/jquery-mousewheel'
-import { Box2d, PointWebMercator } from 'coordinates'
+import { Box2d, PointWebMercator, PointGeo } from 'coordinates'
 import { CoordinateConversion } from 'coordinates'
 import { ISubMapView } from './i-sub-map-view'
 import { Point2d } from 'coordinates'
@@ -20,7 +20,7 @@ export class NavigableMap2d {
     // Map state variables
     private context: CanvasRenderingContext2D | null;
     private mapViews: Array<SubMapPosition>;
-    private origin2d: Point2d;
+    private origin2d: PointWebMercator;
     private scale: number;
     private scaleDriver: number;
     private readonly maxScaleDriver: number;
@@ -53,7 +53,7 @@ export class NavigableMap2d {
         this.mouseDownClient = new Point2d();
         this.mouseDownOrigin2d = new Point2d();
 
-        this.origin2d = new Point2d();
+        this.origin2d = new PointWebMercator();
         this.mapViews = new Array<SubMapPosition>();
         this.isDragging = false;
 
@@ -160,7 +160,7 @@ export class NavigableMap2d {
         context.fillStyle = "rgb(50,50,50)";
         context.fillRect(0, 0, this.containerWidth, this.containerHeight);
 
-        this.mapViews.forEach(submap => {
+        this.mapViews.forEach((submap) => {
             if ( context == null )
                 return;
             context.save();
@@ -194,6 +194,31 @@ export class NavigableMap2d {
             }
             context.restore();
         })
+
+        // Draw test X
+        let testPoints = [new PointGeo(-171.480591, 64.004777), new PointGeo(-156.73851, 64.004777),
+            new PointGeo(-171.480591, 68.289099), new PointGeo(-156.73851, 68.289099),
+            new PointGeo(-160, 64.004777), new PointGeo(-157.333, 66)];
+        testPoints.forEach((testXPositionGeo) => {
+            context.save();
+            
+            let testXPositionMercator = CoordinateConversion.convertToWebMercator(testXPositionGeo);
+
+            let drawX = (testXPositionMercator.x - this.origin2d.x) * this.containerWidth / viewportMercatorWidth;
+            let drawY = (testXPositionMercator.y - this.origin2d.y) * this.containerHeight / viewportMercatorHeight;
+
+            context.translate(this.containerWidth / 2, this.containerHeight / 2);
+            context.strokeStyle = "rgb(0,0,0)";
+            context.beginPath();
+            context.moveTo(drawX - 10, drawY - 10);
+            context.lineTo(drawX + 10, drawY + 10);
+            context.stroke();
+            context.beginPath();
+            context.moveTo(drawX + 10, drawY - 10);
+            context.lineTo(drawX - 10, drawY + 10);
+            context.stroke();
+            context.restore();
+        });
 
         context.restore();
     }
@@ -278,7 +303,7 @@ export class NavigableMap2d {
             let percentageClientTraverseX = xDifference / this.containerWidth;
             let percentageClientTraverseY = yDifference / this.containerHeight;
 
-            this.origin2d = new Point2d(this.mouseDownOrigin2d.x - viewportDimentions.x * percentageClientTraverseX,
+            this.origin2d = new PointWebMercator(this.mouseDownOrigin2d.x - viewportDimentions.x * percentageClientTraverseX,
                 this.mouseDownOrigin2d.y - viewportDimentions.y * percentageClientTraverseY);
 
             this.render();
