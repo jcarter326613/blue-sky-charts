@@ -502,6 +502,7 @@
         },
         "imageHeight": 11481,
         "imageWidth": 15907,
+        "imageHeightScale": 0.99875,
         "mapBounds": [
             [
                 -169.27809912308646,
