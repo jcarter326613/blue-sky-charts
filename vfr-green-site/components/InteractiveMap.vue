@@ -11,7 +11,7 @@ export default Vue.component("interactivemap", {
         return {};
     },
     mounted: function() {
-        this.$createMap(this.parentId);
+        this.$createMap(this.parentId, "/maps");
     },
     props: ["parentId"],
     render: function() {
