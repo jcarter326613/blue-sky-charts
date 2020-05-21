@@ -38,13 +38,18 @@ export class NavigableMap2d {
     private containerDiv: JQuery<HTMLElement>;
     private debugDiv: JQuery<HTMLElement>;
 
-    constructor(elementId: string, mapRoot: string) {
+    constructor(elementId: string, mapRoot: string, originLongitude: number | undefined, originLatitude: number | undefined,
+        zoom: number | undefined) {
         require("jquery-mousewheel");
 
         this.tileProvider = new TileProvider(mapRoot);
         this.dataProvider = new DataProvider();
         this.maxScaleDriver = 12;
-        this.scaleDriver = 2;
+        if ( zoom === undefined ) {
+            this.scaleDriver = 2;
+        } else {
+            this.scaleDriver = zoom;
+        }
         this.scale = 1 / (2 ** this.scaleDriver);
         this.containerWidth = 0;
         this.containerHeight = 0;
@@ -53,7 +58,11 @@ export class NavigableMap2d {
         this.mouseDownClient = new Point2d();
         this.mouseDownOrigin2d = new Point2d();
 
-        this.origin2d = new PointWebMercator();
+        if ( originLongitude !== undefined && originLatitude !== undefined ) {
+            this.origin2d = CoordinateConversion.convertToWebMercator(new PointGeo(originLongitude, originLatitude));
+        } else {
+            this.origin2d = new PointWebMercator();
+        }
         this.mapViews = new Array<SubMapPosition>();
         this.isDragging = false;
 
@@ -132,7 +141,6 @@ export class NavigableMap2d {
             let dataView = new MapDataView(this.dataProvider);
             dataView.initialize();
             this.mapViews.push(new SubMapPosition(dataView, new Box2d(0, 0, PointWebMercator.MAX_X_MERCATOR, PointWebMercator.MAX_Y_MERCATOR)));
-            this.origin2d = CoordinateConversion.convertToWebMercator(fileExtent.getTopLeft());
         }
     }
 
