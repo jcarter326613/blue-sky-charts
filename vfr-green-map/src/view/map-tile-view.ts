@@ -9,6 +9,8 @@ export class MapTileView implements ISubMapView, ITileReceiver {
     // Metadata
     private originalMapWidth: number;
     private originalMapHeight: number;
+    private imageWidthScale: number;
+    private imageHeightScale: number;
     private tileWidth: number;
     private tileHeight: number;
     private mapName: string;
@@ -25,6 +27,8 @@ export class MapTileView implements ISubMapView, ITileReceiver {
     constructor(tileProvider: TileProvider) {
         this.originalMapWidth = 0;
         this.originalMapHeight = 0;
+        this.imageWidthScale = 1;
+        this.imageHeightScale = 1;
         this.tileWidth = 0;
         this.tileHeight = 0;
         this.mapName = "";
@@ -41,6 +45,13 @@ export class MapTileView implements ISubMapView, ITileReceiver {
         if (model.imageHeight == null || model.imageWidth == null || model.tileWidth == null || 
             model.version == null || model.fileExtent == null || model.maxZoom == null)
             return undefined;
+
+        if ( model.imageWidthScale !== undefined ) {
+            this.imageWidthScale = model.imageWidthScale;
+        }
+        if ( model.imageHeightScale !== undefined ) {
+            this.imageHeightScale = model.imageHeightScale;
+        }
 
         this.originalMapWidth = model.imageWidth;
         this.originalMapHeight = model.imageHeight;
@@ -73,11 +84,11 @@ export class MapTileView implements ISubMapView, ITileReceiver {
         if ( this.contextTransform == null || this.context == null )
             return;
 
-        let tileX = location.x * this.scaledTileWidth;
-        let tileWidth = this.scaledTileWidth;
+        let tileX = location.x * this.scaledTileWidth * this.imageWidthScale;
+        let tileWidth = this.scaledTileWidth * this.imageWidthScale;
         let scaledTileHeight = this.scaledTileWidth * this.tileHeight / this.tileWidth
-        let tileY = location.y * scaledTileHeight;
-        let tileHeight = scaledTileHeight;
+        let tileY = location.y * scaledTileHeight * this.imageHeightScale;
+        let tileHeight = scaledTileHeight * this.imageHeightScale;
         
         let currentTransform = this.context.getTransform();
         this.context.setTransform(this.contextTransform);

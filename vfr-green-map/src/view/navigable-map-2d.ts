@@ -44,7 +44,7 @@ export class NavigableMap2d {
         this.tileProvider = new TileProvider(mapRoot);
         this.dataProvider = new DataProvider();
         this.maxScaleDriver = 12;
-        this.scaleDriver = 0;
+        this.scaleDriver = 2;
         this.scale = 1 / (2 ** this.scaleDriver);
         this.containerWidth = 0;
         this.containerHeight = 0;
@@ -196,9 +196,7 @@ export class NavigableMap2d {
         })
 
         // Draw test X
-        let testPoints = [new PointGeo(-171.480591, 64.004777), new PointGeo(-156.73851, 64.004777),
-            new PointGeo(-171.480591, 68.289099), new PointGeo(-156.73851, 68.289099),
-            new PointGeo(-160, 64.004777), new PointGeo(-157.333, 66)];
+        let testPoints = [new PointGeo(-171, 64.5), new PointGeo(-158.5, 64.5), new PointGeo(-158, 68)];
         testPoints.forEach((testXPositionGeo) => {
             context.save();
             
