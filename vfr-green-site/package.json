@@ -16,6 +16,7 @@
     "@nuxtjs/axios": "^5.3.6",
     "bootstrap": "^4.1.3",
     "bootstrap-vue": "^2.0.0",
+    "coordinates": "file:../coordinates/coordinates-1.0.0.tgz",
     "nuxt": "^2.12.2",
     "vfr-green-map": "file:../vfr-green-map/vfr-green-map-1.0.0.tgz"
   },
