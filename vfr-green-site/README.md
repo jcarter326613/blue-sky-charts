@@ -26,3 +26,9 @@ curl -sL https://deb.nodesource.com/setup_14.x | sudo -E bash -
 sudo apt-get install -y nodejs
 ```
 
+## Deploying
+```bash
+npm run generate
+aws s3 sync ./dist s3://vfr-green-artifacts-245819277863
+```
+
