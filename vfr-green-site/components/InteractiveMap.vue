@@ -11,9 +11,15 @@ export default Vue.component("interactivemap", {
         return {};
     },
     mounted: function() {
-        this.$createMap(this.parentId, "/maps");
+        this.arguments
+        this.$createMap(this.parentId, "/maps", this.originLongitude, this.originLatitude, this.zoom);
     },
-    props: ["parentId"],
+    props: [
+        "parentId",
+        "originLatitude",
+        "originLongitude",
+        "zoom"
+    ],
     render: function() {
         return []
     }

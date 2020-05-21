@@ -1,6 +1,7 @@
 <template>
   <div class="frame">
-    <div class="expandingFrameElement" id="mapContainer"><interactivemap parentId="mapContainer"/></div>
+    <div class="expandingFrameElement" id="mapContainer"><interactivemap parentId="mapContainer" 
+      :originLongitude="originLongitude" :originLatitude="originLatitude" :zoom="zoom"/></div>
     <div class="staticFrameElement">test content {{ message }}</div>
   </div>
 </template>
@@ -11,7 +12,12 @@ import "~/components/InteractiveMap.vue"
 
 export default Vue.extend({
   data: function() {
-      return {"message": "Hello world2"};
+      return {
+        "message": "Hello world2",
+        "originLongitude": this.$route.query.longitude,
+        "originLatitude": this.$route.query.latitude,
+        "zoom": this.$route.query.zoom
+      };
   }
 })
 </script>
