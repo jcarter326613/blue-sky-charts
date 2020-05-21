@@ -2,6 +2,7 @@
 import gdal_util
 import json
 import map_inventory as mi
+import math
 import rasterio
 import rasterio.features
 import rasterio.warp
@@ -14,6 +15,8 @@ import zipfile
 from define_crops import define_crops
 from os import path
 from pyproj import Proj, transform
+
+TILE_WIDTH = 256
 
 def getExtent(projectionType, src, geom):
     geom_lat_long = rasterio.warp.transform_geom(
@@ -93,7 +96,7 @@ if version_requested == None or len(version_requested) == 0:
 else:
     version = int(version_requested)
 map_inventory[map_name]["version"] = version
-map_inventory[map_name]["tileWidth"] = 256
+map_inventory[map_name]["tileWidth"] = TILE_WIDTH
 mi.write_inventory_metadata(map_inventory)
 
 # Download the zip file and extract it
@@ -183,4 +186,5 @@ with rasterio.open(cropped_tiff_path) as src:
     map_inventory[map_name]["fileExtent"] = file_extent
     map_inventory[map_name]["imageWidth"] = src.width
     map_inventory[map_name]["imageHeight"] = src.height
+    map_inventory[map_name]["maxZoom"] = math.ceil(math.log2(src.width / TILE_WIDTH))
 mi.write_inventory_metadata(map_inventory)
