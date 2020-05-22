@@ -1,9 +1,11 @@
+import gdal_util
 import map_inventory as mi
 import math
 import numpy as np
+import os
 import pandas as pd
 import rasterio
-import gdal_util
+import sys
 
 from os import mkdir
 from os import path
@@ -50,7 +52,6 @@ def _explode_map_helper(image_cache_folder, zoom_level, original_image, original
 
 def explode_map(name, definition, image_cache_folder, image_location, tile_width, max_zoom):
     print("Exploding map " + name)
-    mkdir(image_cache_folder)
 
     # Load the original image
     Image.MAX_IMAGE_PIXELS = 300000000
@@ -58,23 +59,38 @@ def explode_map(name, definition, image_cache_folder, image_location, tile_width
 
     print("Expected max zoom level: ciel({}), actual max zoom: {}".format(math.log2(image.width / tile_width), max_zoom))
 
-    _explode_map_helper(image_cache_folder, 0, image, (image.width, image.height), (0, 0), tile_width)
+    _explode_map_helper(image_cache_folder, 0, image, (image.width, image.height), (0, 0), tile_width, max_zoom)
 
-def explode_maps():
+def explode_maps(map_name, location_name):
+    if location_name not in ["local", "remote"]:
+        print("bad location")
+        exit()
+
     inventory = mi.read_inventory_metadata()
-    for map_name in inventory:
-        map_definition = inventory[map_name]
+    map_definition = inventory[map_name]
 
-        if "tileWidth" not in map_definition:
-            print("Missing tile width for map " + map_name)
-            exit()
+    if "tileWidth" not in map_definition:
+        print("Missing tile width for map " + map_name)
+        exit()
 
-        tile_width = map_definition["tileWidth"]
-        max_zoom = map_definition["maxZoom"]
-        image_path = "maps/{}_SEC_{}_WEB_CROPPED.tif".format(map_name, map_definition["version"])
-        image_cache_folder = "maps/{}_SEC_{}".format(map_name, map_definition["version"])
-        if not path.exists(image_cache_folder):
-            png_image_path = gdal_util.convert_tiff_to_png(image_path)
-            explode_map(map_name, map_definition, image_cache_folder, png_image_path, tile_width, max_zoom)
+    tile_width = map_definition["tileWidth"]
+    max_zoom = map_definition["maxZoom"]
+    image_path = "maps/{}_SEC_{}_WEB_CROPPED.tif".format(map_name, map_definition["version"])
+    image_cache_folder = "maps/tiles/{}_SEC_{}".format(map_name, map_definition["version"])
+    if os.path.exists("maps/tiles"):
+        os.system("rm -rf maps/tiles")
+    os.makedirs(image_cache_folder)
+    png_image_path = gdal_util.convert_tiff_to_png(image_path)
+    explode_map(map_name, map_definition, image_cache_folder, png_image_path, tile_width, max_zoom)
+    if location_name == "local":
+        if not os.path.exists("../vfr-green-site/static/maps/world-vfr/sectional"):
+            os.makedirs("../vfr-green-site/static/maps/world-vfr/sectional")
+        os.system("mv {} ../vfr-green-site/static/maps/world-vfr/sectional".format(image_cache_folder))
+    elif location_name == "remote":
+        os.system("aws s3 sync ./maps/tiles s3://vfr-green-artifacts-245819277863/maps/world-vfr/sectional")
 
-explode_maps()
+if len(sys.argv) != 3:
+    print("Usage python3 explode_maps.py <mapname> <local|remote>")
+    exit()
+    
+explode_maps(sys.argv[1], sys.argv[2])
