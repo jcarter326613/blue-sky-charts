@@ -112,7 +112,7 @@ else:
     urllib.request.urlretrieve(zip_url, zip_file)
 with zipfile.ZipFile(zip_file) as z:
     with open(tif_file, "wb") as f:
-        f.write(z.read("{} SEC {}.tif".format(map_name, version)))
+        f.write(z.read("{} SEC {}.tif".format(map_name.replace("_", " "), version)))
 
 # Create the web mercator image
 web_tiff_path = gdal_util.convert_tiff_to_web_mercator(tif_file)
