@@ -1,0 +1,7 @@
+#!/bin/bash
+set -e
+
+npm run generate
+rm -rf dist/maps
+rm -rf dist/metar
+aws s3 sync ./dist s3://vfr-green-artifacts-245819277863
