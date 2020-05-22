@@ -56,5 +56,7 @@ def convert_web_mercator_to_cropped(image_file, geojsonObj):
         geojson_filename, alpha_filename, new_filename
     )
     system(docker_command)
+    system("rm -f {}".format(alpha_filename))
+    system("rm -f {}".format(geojson_filename))
 
     return new_filename

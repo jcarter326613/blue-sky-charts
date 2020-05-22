@@ -3,6 +3,7 @@ import gdal_util
 import json
 import map_inventory as mi
 import math
+import os
 import rasterio
 import rasterio.features
 import rasterio.warp
@@ -188,3 +189,7 @@ with rasterio.open(cropped_tiff_path) as src:
     map_inventory[map_name]["imageHeight"] = src.height
     map_inventory[map_name]["maxZoom"] = math.ceil(math.log2(src.width / TILE_WIDTH))
 mi.write_inventory_metadata(map_inventory)
+
+# Cleanup intermediate files
+os.system("rm -f {}".format(tif_file))
+os.system("rm -f {}".format(web_tiff_path))
