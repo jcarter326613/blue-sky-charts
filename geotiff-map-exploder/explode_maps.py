@@ -88,7 +88,7 @@ def explode_maps(map_name, location_name):
         os.system("mv {} ../vfr-green-site/static/maps/world-vfr/sectional".format(image_cache_folder))
     elif location_name == "remote":
         os.system("aws s3 sync ./maps/tiles s3://vfr-green-artifacts-245819277863/maps/world-vfr/sectional")
-    os.system("rm -f {}*".format(png_image_path))
+    #os.system("rm -f {}*".format(png_image_path))
 
 if len(sys.argv) != 3:
     print("Usage python3 explode_maps.py <mapname> <local|remote>")
