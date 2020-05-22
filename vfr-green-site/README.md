@@ -32,3 +32,7 @@ npm run generate
 aws s3 sync ./dist s3://vfr-green-artifacts-245819277863
 ```
 
+## Troubleshooting deployment size
+```bash
+npm run build --analyze
+```

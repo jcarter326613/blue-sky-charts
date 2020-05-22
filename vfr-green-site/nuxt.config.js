@@ -39,10 +39,6 @@ export default {
   ** Nuxt.js modules
   */
   modules: [
-    // Doc: https://bootstrap-vue.js.org
-    'bootstrap-vue/nuxt',
-    // Doc: https://axios.nuxtjs.org/usage
-    '@nuxtjs/axios'
   ],
   /*
   ** Axios module configuration
@@ -54,6 +50,7 @@ export default {
   ** Build configuration
   */
   build: {
+    analyze: true,
     /*
     ** You can extend webpack config here
     */
