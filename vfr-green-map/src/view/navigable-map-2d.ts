@@ -21,6 +21,7 @@ export class NavigableMap2d {
     private context: CanvasRenderingContext2D | null;
     private mapViews: Array<SubMapPosition>;
     private origin2d: PointWebMercator;
+    private mark: PointWebMercator | undefined;
     private scale: number;
     private scaleDriver: number;
     private readonly maxScaleDriver: number;
@@ -39,16 +40,36 @@ export class NavigableMap2d {
     private debugDiv: JQuery<HTMLElement>;
 
     constructor(elementId: string, mapRoot: string, originLongitude: number | undefined, originLatitude: number | undefined,
-        zoom: number | undefined) {
+        zoom: number | undefined, markLongitude: number | undefined, markLatitude: number | undefined) {
         require("jquery-mousewheel");
 
-        this.tileProvider = new TileProvider(mapRoot);
-        this.dataProvider = new DataProvider();
-        this.maxScaleDriver = 12;
+        // Set all parameterized defaults
         if ( zoom === undefined ) {
             this.scaleDriver = 2;
         } else {
             this.scaleDriver = zoom;
+        }
+        if ( originLongitude !== undefined && originLatitude !== undefined ) {
+            this.origin2d = CoordinateConversion.convertToWebMercator(new PointGeo(originLongitude, originLatitude));
+        } else {
+            this.origin2d = new PointWebMercator();
+        }
+        if ( markLatitude !== undefined && markLongitude !== undefined ) {
+            if ( zoom === undefined ) {
+                this.scaleDriver = 8;
+            }
+            this.origin2d = CoordinateConversion.convertToWebMercator(new PointGeo(markLongitude, markLatitude));
+            this.mark = this.origin2d;
+        }
+
+        // Set all constant and derived defaults
+        this.tileProvider = new TileProvider(`${mapRoot}/sectional`);
+        this.dataProvider = new DataProvider();
+        this.maxScaleDriver = 12;
+        if ( this.scaleDriver > this.maxScaleDriver ) {
+            this.scaleDriver = this.maxScaleDriver;
+        } else if (this.scaleDriver < 0) {
+            this.scaleDriver = 0;
         }
         this.scale = 1 / (2 ** this.scaleDriver);
         this.containerWidth = 0;
@@ -58,14 +79,10 @@ export class NavigableMap2d {
         this.mouseDownClient = new Point2d();
         this.mouseDownOrigin2d = new Point2d();
 
-        if ( originLongitude !== undefined && originLatitude !== undefined ) {
-            this.origin2d = CoordinateConversion.convertToWebMercator(new PointGeo(originLongitude, originLatitude));
-        } else {
-            this.origin2d = new PointWebMercator();
-        }
         this.mapViews = new Array<SubMapPosition>();
         this.isDragging = false;
 
+        // Identify and store the html comtainer for this control
         let jQueryElement = $("#" + elementId);
         if (jQueryElement.length != 1) {
             throw new Error("Must specify a unique html element id to place the map in.");
@@ -204,27 +221,27 @@ export class NavigableMap2d {
         })
 
         // Draw test X
-        let testPoints = [new PointGeo(-171, 64.5), new PointGeo(-158.5, 64.5), new PointGeo(-158, 68)];
-        testPoints.forEach((testXPositionGeo) => {
-            context.save();
-            
-            let testXPositionMercator = CoordinateConversion.convertToWebMercator(testXPositionGeo);
+        if (this.mark != undefined) {
+            let testPoints = [this.mark];
+            testPoints.forEach((testXPositionMercator) => {
+                context.save();
+                
+                let drawX = (testXPositionMercator.x - this.origin2d.x) * this.containerWidth / viewportMercatorWidth;
+                let drawY = (testXPositionMercator.y - this.origin2d.y) * this.containerHeight / viewportMercatorHeight;
 
-            let drawX = (testXPositionMercator.x - this.origin2d.x) * this.containerWidth / viewportMercatorWidth;
-            let drawY = (testXPositionMercator.y - this.origin2d.y) * this.containerHeight / viewportMercatorHeight;
-
-            context.translate(this.containerWidth / 2, this.containerHeight / 2);
-            context.strokeStyle = "rgb(0,0,0)";
-            context.beginPath();
-            context.moveTo(drawX - 10, drawY - 10);
-            context.lineTo(drawX + 10, drawY + 10);
-            context.stroke();
-            context.beginPath();
-            context.moveTo(drawX + 10, drawY - 10);
-            context.lineTo(drawX - 10, drawY + 10);
-            context.stroke();
-            context.restore();
-        });
+                context.translate(this.containerWidth / 2, this.containerHeight / 2);
+                context.strokeStyle = "rgb(0,0,0)";
+                context.beginPath();
+                context.moveTo(drawX - 10, drawY - 10);
+                context.lineTo(drawX + 10, drawY + 10);
+                context.stroke();
+                context.beginPath();
+                context.moveTo(drawX + 10, drawY - 10);
+                context.lineTo(drawX - 10, drawY + 10);
+                context.stroke();
+                context.restore();
+            });
+        }
 
         context.restore();
     }
