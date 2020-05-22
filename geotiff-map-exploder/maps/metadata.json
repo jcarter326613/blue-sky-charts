@@ -20,6 +20,8 @@
         },
         "imageHeight": 12370,
         "imageWidth": 15923,
+        "imageHeightScale": 0.9993,
+        "imageWidthScale": 0.99997,
         "mapBounds": [
             [
                 -172.916346721909,
@@ -191,6 +193,8 @@
         },
         "imageHeight": 11447,
         "imageWidth": 15319,
+        "imageHeightScale": 1.0014,
+        "imageWidthScale": 0.99995,
         "mapBounds": [
             [
                 -157.90081992571479,
