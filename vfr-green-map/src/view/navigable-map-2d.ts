@@ -29,9 +29,12 @@ export class NavigableMap2d {
 
     // Mouse event variables
     private isDragging: boolean;
+    private isPinching: boolean;
     private mouseDownClient: Point2d;
     private mouseDownOrigin2d: Point2d;
     private touchMoveIdentifier: number;
+    private pinchClientPoint1: Point2d;
+    private pinchClientPoint2: Point2d;
 
     // html element variables
     private containerWidth: number;
@@ -72,7 +75,8 @@ export class NavigableMap2d {
         } else if (this.scaleDriver < 0) {
             this.scaleDriver = 0;
         }
-        this.scale = 1 / (2 ** this.scaleDriver);
+        this.scale = 0;
+        this.updateScale();
         this.containerWidth = 0;
         this.containerHeight = 0;
         this.zoom0PixelsPerLongitude = 20;
@@ -83,6 +87,9 @@ export class NavigableMap2d {
 
         this.mapViews = new Array<SubMapPosition>();
         this.isDragging = false;
+        this.isPinching = false;
+        this.pinchClientPoint1 = new Point2d();
+        this.pinchClientPoint2 = new Point2d();
 
         // Identify and store the html comtainer for this control
         let jQueryElement = $("#" + elementId);
@@ -93,6 +100,7 @@ export class NavigableMap2d {
 
         // Create a debug text div
         this.debugDiv = $(document.createElement("div"));
+        this.debugDiv.attr("style", "font-size: 14px;")
         this.containerDiv.append(this.debugDiv);
 
         // Create canvas object and place it in the div
@@ -105,6 +113,10 @@ export class NavigableMap2d {
         this.addEventListeners();
         this.render();
         this.retrieveConfiguration(`${mapRoot}/metadata.json`);
+    }
+
+    private updateScale(): void {
+        this.scale = 1 / (2 ** this.scaleDriver);
     }
 
     private addEventListeners(): void {
@@ -183,8 +195,6 @@ export class NavigableMap2d {
         let viewport2d = this.calculateViewport();
         let viewportMercatorWidth = viewport2d.getLowerRight().x - viewport2d.getUpperLeft().x;
         let viewportMercatorHeight = viewport2d.getLowerRight().y - viewport2d.getUpperLeft().y;
-
-        this.debugDiv.text(`viewport width: ${viewport2d.getLowerRight().x - viewport2d.getUpperLeft().x}, height: ${viewport2d.getLowerRight().y - viewport2d.getUpperLeft().y}`);
 
         let context = this.context;
         context.save();
@@ -297,7 +307,7 @@ export class NavigableMap2d {
                 this.scaleDriver = 0;
             }
         }
-        this.scale = 1 / (2 ** this.scaleDriver);
+        this.updateScale();
         this.render();
     }
 
@@ -359,18 +369,27 @@ export class NavigableMap2d {
 
     /* Touch handler events */
     private touchStart(event: JQuery.Event) : void {
-        if ( event === undefined || event.targetTouches === undefined || event.targetTouches.length != 1 ) {
+        if ( event !== undefined && event.targetTouches !== undefined ) {
+            this.debugDiv.text(`event.targetTouches.length: ${event.targetTouches.length}`);
+        }
+        if ( event === undefined || event.targetTouches === undefined ) {
             return;
         }
 
-        let touch = event.targetTouches[0];
-        if ( touch === undefined || touch.clientX === undefined || touch.clientY === undefined || touch.identifier === undefined ) {
-            return;
-        }
-        this.touchMoveIdentifier = touch.identifier;
-        if ( this.mouseDownHelper(touch.clientX, touch.clientY) ) {
-            event.preventDefault();
-            event.stopPropagation();
+        if ( event.targetTouches.length == 1 ) {
+            let touch = event.targetTouches[0];
+            if ( touch === undefined || touch.clientX === undefined || touch.clientY === undefined || touch.identifier === undefined ) {
+                return;
+            }
+            this.touchMoveIdentifier = touch.identifier;
+            if ( this.mouseDownHelper(touch.clientX, touch.clientY) ) {
+                event.preventDefault();
+                event.stopPropagation();
+            }
+        } else if ( event.targetTouches.length == 2 ) {
+            this.isDragging = false;
+            this.pinchClientPoint1 = new Point2d(event.targetTouches[0].clientX, event.targetTouches[0].clientY)
+            this.pinchClientPoint2 = new Point2d(event.targetTouches[1].clientX, event.targetTouches[1].clientY)
         }
     }
 
@@ -379,17 +398,41 @@ export class NavigableMap2d {
             return;
         }
 
-        let touch: Touch | undefined;
-        for ( let i = 0; i < event.targetTouches.length; i++ ) {
-            let thisTouch = event.targetTouches[i];
-            if ( thisTouch.identifier == this.touchMoveIdentifier ) {
-                touch = thisTouch;
-                break;
+        //Debug stuff
+        if ( event !== undefined && event.targetTouches !== undefined ) {
+            let t = `event.targetTouches.length: ${event.targetTouches.length}, this.touchMoveIdentifier: ${this.touchMoveIdentifier}, this.scale=${this.scale}, this.scaleDriver=${this.scaleDriver}`;
+            for ( let i = 0; i < event.targetTouches.length; i++ ) {
+                t += ` id[${i}]=${event.targetTouches[i].identifier}`;
             }
+            this.debugDiv.text(t);
         }
+        //End Debug stuff
 
-        if ( touch !== undefined ) {
-            this.mouseMoveHelper(touch.clientX, touch.clientY);
+        if ( event.targetTouches.length == 1 ) {
+            let touch: Touch | undefined = undefined;
+            for ( let i = 0; i < event.targetTouches.length; i++ ) {
+                let thisTouch = event.targetTouches[i];
+                if ( thisTouch.identifier == this.touchMoveIdentifier ) {
+                    touch = thisTouch;
+                    break;
+                }
+            }
+
+            if ( touch !== undefined ) {
+                this.mouseMoveHelper(touch.clientX, touch.clientY);
+            }
+        } else if ( event.targetTouches.length == 2 ) {
+            let touch1 = event.targetTouches[0]
+            let touch2 = event.targetTouches[1]
+            let newPoint1 = new Point2d(touch1.clientX, touch1.clientY);
+            let newPoint2 = new Point2d(touch1.clientX, touch1.clientY);
+
+            let originalDistance = this.pinchClientPoint1.calculateDistance(this.pinchClientPoint2);
+            let thisDistance = newPoint1.calculateDistance(newPoint2);
+
+            let targetScale = this.scale / (thisDistance / originalDistance)
+            this.scaleDriver = Math.log(1 / targetScale) / Math.log(2)
+            this.updateScale()
         }
     }
 
@@ -401,6 +444,8 @@ export class NavigableMap2d {
         
         if ( event.targetTouches.length == 0 ) {
             this.mouseUpHelper();
+        } else {
+            this.touchStart(event);
         }
     }
 };
