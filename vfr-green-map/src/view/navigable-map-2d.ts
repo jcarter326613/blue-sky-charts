@@ -35,13 +35,14 @@ export class NavigableMap2d {
     private touchMoveIdentifier: number;
     private pinchClientPoint1: Point2d;
     private pinchClientPoint2: Point2d;
+    private pinchOriginalScale: number;
 
     // html element variables
     private containerWidth: number;
     private containerHeight: number;
     private canvasObjHtml: JQuery<HTMLElement>;
     private containerDiv: JQuery<HTMLElement>;
-    private debugDiv: JQuery<HTMLElement>;
+    //private debugDiv: JQuery<HTMLElement>;
 
     constructor(elementId: string, mapRoot: string, originLongitude: number | undefined, originLatitude: number | undefined,
         zoom: number | undefined, markLongitude: number | undefined, markLatitude: number | undefined) {
@@ -90,6 +91,7 @@ export class NavigableMap2d {
         this.isPinching = false;
         this.pinchClientPoint1 = new Point2d();
         this.pinchClientPoint2 = new Point2d();
+        this.pinchOriginalScale = 0;
 
         // Identify and store the html comtainer for this control
         let jQueryElement = $("#" + elementId);
@@ -99,9 +101,11 @@ export class NavigableMap2d {
         this.containerDiv = jQueryElement;
 
         // Create a debug text div
+        /*
         this.debugDiv = $(document.createElement("div"));
         this.debugDiv.attr("style", "font-size: 14px;")
         this.containerDiv.append(this.debugDiv);
+        */
 
         // Create canvas object and place it in the div
         let canvasObj = document.createElement("canvas");
@@ -369,9 +373,6 @@ export class NavigableMap2d {
 
     /* Touch handler events */
     private touchStart(event: JQuery.Event) : void {
-        if ( event !== undefined && event.targetTouches !== undefined ) {
-            this.debugDiv.text(`event.targetTouches.length: ${event.targetTouches.length}`);
-        }
         if ( event === undefined || event.targetTouches === undefined ) {
             return;
         }
@@ -390,6 +391,7 @@ export class NavigableMap2d {
             this.isDragging = false;
             this.pinchClientPoint1 = new Point2d(event.targetTouches[0].clientX, event.targetTouches[0].clientY)
             this.pinchClientPoint2 = new Point2d(event.targetTouches[1].clientX, event.targetTouches[1].clientY)
+            this.pinchOriginalScale = this.scale
         }
     }
 
@@ -397,16 +399,6 @@ export class NavigableMap2d {
         if ( event === undefined || event.targetTouches === undefined || event.targetTouches.length === undefined ) {
             return;
         }
-
-        //Debug stuff
-        if ( event !== undefined && event.targetTouches !== undefined ) {
-            let t = `event.targetTouches.length: ${event.targetTouches.length}, this.touchMoveIdentifier: ${this.touchMoveIdentifier}, this.scale=${this.scale}, this.scaleDriver=${this.scaleDriver}`;
-            for ( let i = 0; i < event.targetTouches.length; i++ ) {
-                t += ` id[${i}]=${event.targetTouches[i].identifier}`;
-            }
-            this.debugDiv.text(t);
-        }
-        //End Debug stuff
 
         if ( event.targetTouches.length == 1 ) {
             let touch: Touch | undefined = undefined;
@@ -425,18 +417,26 @@ export class NavigableMap2d {
             let touch1 = event.targetTouches[0]
             let touch2 = event.targetTouches[1]
             let newPoint1 = new Point2d(touch1.clientX, touch1.clientY);
-            let newPoint2 = new Point2d(touch1.clientX, touch1.clientY);
+            let newPoint2 = new Point2d(touch2.clientX, touch2.clientY);
 
             let originalDistance = this.pinchClientPoint1.calculateDistance(this.pinchClientPoint2);
             let thisDistance = newPoint1.calculateDistance(newPoint2);
 
-            let targetScale = this.scale / (thisDistance / originalDistance)
+            let targetScale = this.pinchOriginalScale / (thisDistance / originalDistance)
             this.scaleDriver = Math.log(1 / targetScale) / Math.log(2)
+
+            if ( this.scaleDriver > this.maxScaleDriver ) {
+                this.scaleDriver = this.maxScaleDriver
+            } else if ( this.scaleDriver < 0 ) {
+                this.scaleDriver = 0;
+            }
+
             this.updateScale()
+            this.render();
         }
     }
 
-    private touchEnd(event: JQuery.Event) : void {
+    private touchEnd(event: JQuery.Event): void {
         if ( event === undefined || event.targetTouches === undefined || event.targetTouches.length === undefined ) {
             this.mouseUpHelper();
             return;
