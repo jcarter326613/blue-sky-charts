@@ -31,6 +31,7 @@ export class NavigableMap2d {
     private isDragging: boolean;
     private mouseDownClient: Point2d;
     private mouseDownOrigin2d: Point2d;
+    private touchMoveIdentifier: number;
 
     // html element variables
     private containerWidth: number;
@@ -78,6 +79,7 @@ export class NavigableMap2d {
 
         this.mouseDownClient = new Point2d();
         this.mouseDownOrigin2d = new Point2d();
+        this.touchMoveIdentifier = 0;
 
         this.mapViews = new Array<SubMapPosition>();
         this.isDragging = false;
@@ -110,6 +112,10 @@ export class NavigableMap2d {
         this.containerDiv.mousemove((event: JQuery.Event) => this.mouseMove(event));
         this.containerDiv.mouseup((event: JQuery.Event) => this.mouseUp(event));
         this.containerDiv.mousewheel((event: JQueryMousewheelEventObject) => this.mouseScroll(event))
+        this.containerDiv.on("touchstart", (event: JQuery.Event) => this.touchStart(event));
+        this.containerDiv.on("touchmove", (event: JQuery.Event) => this.touchMove(event));
+        this.containerDiv.on("touchend", (event: JQuery.Event) => this.touchEnd(event));
+        this.containerDiv.on("touchcancel", (event: JQuery.Event) => this.touchEnd(event));
 
         // Setup the window resize listener
         let thisObject = this;
@@ -299,28 +305,38 @@ export class NavigableMap2d {
         if ( event === undefined || event.offsetX === undefined || event.offsetY === undefined )
             return;
 
+        if (this.mouseDownHelper(event.offsetX, event.offsetY)) {
+            event.stopPropagation();
+            event.preventDefault();
+        }
+    }
+
+    private mouseDownHelper(offsetX: number, offsetY: number): boolean {
         // Detect if the mouse event is outside the canvas
-        if (event.offsetX < 0 || this.containerWidth < event.offsetX ||
-            event.offsetY < 0 || this.containerHeight < event.offsetY) {
-            return;
+        if (offsetX < 0 || this.containerWidth < offsetX ||
+            offsetY < 0 || this.containerHeight < offsetY) {
+            return false;
         }
 
-        // Continue with starting a drag state
-        event.stopPropagation();
-        event.preventDefault();
-
-        this.mouseDownClient = new Point2d(event.offsetX, event.offsetY);
+        // Continue with starting the drag state
+        this.mouseDownClient = new Point2d(offsetX, offsetY);
         this.mouseDownOrigin2d = this.origin2d.clone();
         this.isDragging = true;
+
+        return true;
     }
 
     private mouseMove(event: JQuery.Event): void {
-        if (this.isDragging) {
-            if ( event === undefined || event.offsetX === undefined || event.offsetY === undefined )
-                return;
+        if ( event === undefined || event.offsetX === undefined || event.offsetY === undefined )
+            return;
+
+        this.mouseMoveHelper(event.offsetX, event.offsetY);
+    }
     
-            let xDifference = event.offsetX - this.mouseDownClient.x;
-            let yDifference = event.offsetY - this.mouseDownClient.y;
+    private mouseMoveHelper(offsetX: number, offsetY: number): void {
+        if (this.isDragging) {
+            let xDifference = offsetX - this.mouseDownClient.x;
+            let yDifference = offsetY - this.mouseDownClient.y;
             let viewportDimentions = this.getViewportDimensions2d();
 
             let percentageClientTraverseX = xDifference / this.containerWidth;
@@ -334,7 +350,58 @@ export class NavigableMap2d {
     }
 
     private mouseUp(event: JQuery.Event): void {
+        this.mouseUpHelper();
+    }
+
+    private mouseUpHelper() {
         this.isDragging = false;
+    }
+
+    /* Touch handler events */
+    private touchStart(event: JQuery.Event) : void {
+        if ( event === undefined || event.targetTouches === undefined || event.targetTouches.length != 1 ) {
+            return;
+        }
+
+        let touch = event.targetTouches[0];
+        if ( touch === undefined || touch.clientX === undefined || touch.clientY === undefined || touch.identifier === undefined ) {
+            return;
+        }
+        this.touchMoveIdentifier = touch.identifier;
+        if ( this.mouseDownHelper(touch.clientX, touch.clientY) ) {
+            event.preventDefault();
+            event.stopPropagation();
+        }
+    }
+
+    private touchMove(event: JQuery.Event) : void {
+        if ( event === undefined || event.targetTouches === undefined || event.targetTouches.length === undefined ) {
+            return;
+        }
+
+        let touch: Touch | undefined;
+        for ( let i = 0; i < event.targetTouches.length; i++ ) {
+            let thisTouch = event.targetTouches[i];
+            if ( thisTouch.identifier == this.touchMoveIdentifier ) {
+                touch = thisTouch;
+                break;
+            }
+        }
+
+        if ( touch !== undefined ) {
+            this.mouseMoveHelper(touch.clientX, touch.clientY);
+        }
+    }
+
+    private touchEnd(event: JQuery.Event) : void {
+        if ( event === undefined || event.targetTouches === undefined || event.targetTouches.length === undefined ) {
+            this.mouseUpHelper();
+            return;
+        }
+        
+        if ( event.targetTouches.length == 0 ) {
+            this.mouseUpHelper();
+        }
     }
 };
 
