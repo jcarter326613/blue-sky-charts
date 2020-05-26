@@ -13,4 +13,8 @@ export class Point2d {
         retVal.y = this.y;
         return retVal;
     }
+
+    public calculateDistance(o: Point2d): number {
+        return Math.sqrt((this.x - o.x) ** 2 + (this.y - o.y) ** 2)
+    }
 }
