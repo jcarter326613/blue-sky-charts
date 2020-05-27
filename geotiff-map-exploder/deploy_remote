@@ -7,5 +7,5 @@ then
 fi
 mkdir ./maps/tiles
 
-cp ./maps/metadata.json ./maps/tiles/metadata.json
+python3 deploy_remote.py ./maps/tiles/metadata.json
 aws s3 sync ./maps/tiles s3://vfr-green-artifacts-245819277863/maps/world-vfr
