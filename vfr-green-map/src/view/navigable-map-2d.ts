@@ -205,6 +205,7 @@ export class NavigableMap2d {
         context.fillStyle = "rgb(50,50,50)";
         context.fillRect(0, 0, this.containerWidth, this.containerHeight);
 
+        this.tileProvider.clearQueue();
         this.mapViews.forEach((submap) => {
             if ( context == null )
                 return;
