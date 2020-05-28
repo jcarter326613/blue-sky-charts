@@ -109,4 +109,11 @@ export class CoordinateConversion {
             CoordinateConversion.convertFromWebMercator(boxMercator.getBottomRight()));
         return boxGeo;
     }
+
+    public static convertBoxGeoToBoxMercator(boxGeo: BoxGeo): BoxWebMercator {
+        let topLeft = CoordinateConversion.convertToWebMercator(boxGeo.getTopLeft());
+        let bottomRight = CoordinateConversion.convertToWebMercator(boxGeo.getBottomRight());
+        let boxMercator = new BoxWebMercator(topLeft.x, topLeft.y, bottomRight.x, bottomRight.y);
+        return boxMercator;
+    }
 }
