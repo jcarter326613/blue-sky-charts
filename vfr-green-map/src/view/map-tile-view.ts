@@ -13,6 +13,7 @@ export class MapTileView implements ISubMapView, ITileReceiver {
     private imageHeightScale: number;
     private tileWidth: number;
     private tileHeight: number;
+    private tileDimensionPercentage: Point2d;
     private mapName: string;
     private mapVersion: string;
     private maxZoom: number;
@@ -31,6 +32,7 @@ export class MapTileView implements ISubMapView, ITileReceiver {
         this.imageHeightScale = 1;
         this.tileWidth = 0;
         this.tileHeight = 0;
+        this.tileDimensionPercentage = new Point2d();
         this.mapName = "";
         this.mapVersion = "0";
         this.maxZoom = 0;
@@ -57,6 +59,7 @@ export class MapTileView implements ISubMapView, ITileReceiver {
         this.originalMapHeight = model.imageHeight;
         this.tileWidth = model.tileWidth;
         this.tileHeight = model.tileWidth;
+        this.tileDimensionPercentage = new Point2d(1, 1);
         this.mapName = name;
         this.mapVersion = model.version;
         this.maxZoom = model.maxZoom;
@@ -77,7 +80,7 @@ export class MapTileView implements ISubMapView, ITileReceiver {
         return this.originalMapHeight;
     }
 
-    public receiveTile(location: Point2d, tile: HTMLImageElement, data: any): void {
+    public receiveTile(location: Point2d, subsection: Box2d, tile: HTMLImageElement, data: any): void {
         if ( data as number != this.renderVersion )
             return;
 
@@ -92,7 +95,10 @@ export class MapTileView implements ISubMapView, ITileReceiver {
         
         let currentTransform = this.context.getTransform();
         this.context.setTransform(this.contextTransform);
-        this.context.drawImage(tile, tileX, tileY, tileWidth, tileHeight);
+        let upperLeft = subsection.getUpperLeft();
+        let dimensions = subsection.getDimensions();
+        this.context.drawImage(tile, upperLeft.x * tile.width, upperLeft.y * tile.height, dimensions.x * tile.width, dimensions.y * tile.height,
+            tileX, tileY, tileWidth, tileHeight);
         this.context.setTransform(currentTransform);
     }
 
@@ -154,7 +160,7 @@ export class MapTileView implements ISubMapView, ITileReceiver {
             for (let y = startY; y < endY; y++ ) {
                 // Get the tile image and request it be drawn
                 this.tileProvider.retrieveTile(this.mapName, this.mapVersion, zoomLevel, new Point2d(x,y), 
-                    this, this.renderVersion);
+                    this.tileDimensionPercentage, this, this.renderVersion);
             }
         }
     }
