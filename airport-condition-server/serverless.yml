@@ -1,0 +1,29 @@
+service: airport-condition-server
+provider:
+  name: aws
+  runtime: nodejs12.x
+  memorySize: 256
+  timeout: 2
+  iamRoleStatements:
+    - Effect: 'Allow'
+      Action:
+        - 's3:GetObject'
+      Resource:
+        - 'arn:aws:s3:::vfr-green-artifacts-245819277863/*'
+
+functions:
+  getConditions:
+    handler: src/main/index.handler
+    events:
+      - http: GET getConditions
+
+package:
+  exclude:
+    - src/*.ts
+    - src/test
+    - package.json
+    - package-lock.json
+    - README.md
+    - tsconfig.json
+    - compile
+    - deploy
