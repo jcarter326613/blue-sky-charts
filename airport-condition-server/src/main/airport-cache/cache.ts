@@ -3,6 +3,7 @@ import { AirportInformation } from './airport-information'
 
 export abstract class Cache {
     private fileCache: Record<string, Array<AirportInformation>>;
+    public static overrideCache: Cache | undefined;
 
     constructor() {
         this.fileCache = {};

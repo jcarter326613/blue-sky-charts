@@ -12,6 +12,7 @@ export class ConditionCompiler {
     private remainingFiles: number;
     private allConditions: Heap<AirportInformation>;
     private returnConditionList: Array<Condition> | undefined;
+    private buffer: PointGeo | undefined;
     
     constructor(cache: Cache) {
         this.cache = cache;
@@ -37,6 +38,7 @@ export class ConditionCompiler {
         let cellsLowerRight = cells.getLowerRight();
         this.remainingFiles = (cellsLowerRight.x - cellsUpperLeft.x + 1) * (cellsLowerRight.y - cellsUpperLeft.y + 1);
         this.allConditions.clear();
+        this.buffer = buffer;
         for ( let i = cellsUpperLeft.x; i <= cellsLowerRight.x; i++ ) {
             for ( let j = cellsUpperLeft.y; j <= cellsLowerRight.y; j++ ) {
                 EasyAwait.instance.startThread();
@@ -68,14 +70,31 @@ export class ConditionCompiler {
 
     private siftConditions(): void {
         this.returnConditionList = new Array<Condition>();
-        if ( !this.allConditions.isEmpty ) {
+        if ( this.buffer === undefined ) {
+            return;
+        }
+        while ( !this.allConditions.isEmpty ) {
             let info = this.allConditions.pop();
             if ( info !== undefined && info.latitude !== undefined && info.longitude !== undefined && info.ceiling !== undefined ) {
-                let condition = new Condition();
-                condition.latitude = info.latitude;
-                condition.longitude = info.longitude;
-                condition.value = info.ceiling.toString();
-                this.returnConditionList.push(condition);
+                let conflictFound = false;
+                for ( let priorCondition of this.returnConditionList ) {
+                    if ( priorCondition.latitude > info.latitude - this.buffer.latitude && 
+                        priorCondition.latitude < info.latitude + this.buffer.latitude &&
+                        priorCondition.longitude > info.longitude - this.buffer.longitude &&
+                        priorCondition.longitude < info.longitude + this.buffer.longitude ) {
+
+                        conflictFound = true;
+                        break;
+                    }
+                }
+
+                if ( !conflictFound ) {
+                    let condition = new Condition();
+                    condition.latitude = info.latitude;
+                    condition.longitude = info.longitude;
+                    condition.value = info.ceiling.toString();
+                    this.returnConditionList.push(condition);
+                }
             }
         }
     }

@@ -1,5 +1,7 @@
-import {BoxGeo, PointGeo, Point2d} from 'coordinates'
-import {EasyAwait} from './easy-await'
+import { Cache } from './airport-cache/cache'
+import { S3Cache } from './airport-cache/s3-cache'
+import { BoxGeo, PointGeo, Point2d } from 'coordinates'
+import { EasyAwait } from './easy-await'
 import { ConditionCompiler } from './condition-compiler';
 import { LocalCache } from './airport-cache/local-cache';
 
@@ -56,7 +58,13 @@ export const handler = async (event: any = {}): Promise<any> => {
     EasyAwait.instance.initialize();
     EasyAwait.instance.startThread();
 
-    let compiler = new ConditionCompiler(new LocalCache("./data/test"));
+    let cache: Cache;
+    if ( Cache.overrideCache !== undefined ) {
+        cache = Cache.overrideCache;
+    } else {
+        cache = new S3Cache("metar")
+    }
+    let compiler = new ConditionCompiler(cache);
     compiler.compileConditions(region, buffer);
     
     EasyAwait.instance.endThread();

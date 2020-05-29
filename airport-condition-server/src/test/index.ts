@@ -1,4 +1,8 @@
+import { Cache } from '../main/airport-cache/cache'
+import { LocalCache } from '../main/airport-cache/local-cache'
 import { handler } from '../main/index'
+
+Cache.overrideCache = new LocalCache("./data/test");
 
 let promise = handler({"queryStringParameters":{
     "startLongitude": -160,
