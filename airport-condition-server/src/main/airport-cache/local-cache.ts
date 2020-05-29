@@ -3,7 +3,7 @@ import { AirportInformation } from './airport-information';
 import { Cache } from './cache'
 import { readFile } from 'fs'
 import { join } from 'path'
-import { EasyAwait } from 'main/easy-await';
+import { EasyAwait } from '../easy-await';
 
 export class LocalCache extends Cache {
     private root: string;
@@ -22,6 +22,7 @@ export class LocalCache extends Cache {
 
         // Otherwise read the file in from disk and return it
         let fullPath = join(this.root, name);
+        EasyAwait.instance.startThread();
         readFile(fullPath, null, (err: NodeJS.ErrnoException | null, data: Buffer) => {
             if ( err != null ) {
                 EasyAwait.instance.reportFatalError(`Could not load aiport information from file ${fullPath}.  Error: ${err.message}.`);
@@ -33,6 +34,7 @@ export class LocalCache extends Cache {
                     EasyAwait.instance.reportFatalError(`Error parsing file ${fullPath}`);
                 }
             }
+            EasyAwait.instance.endThread();
         });
     }
 }

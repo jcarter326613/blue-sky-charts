@@ -1,16 +1,34 @@
+
+import { AirportInformation } from "./airport-cache/airport-information";
 import { Cache } from "./airport-cache/cache"
 import { Condition } from "./condition";
 import { BoxGeo, CoordinateConversion, PointGeo, PointWebMercator, Box2d } from "coordinates";
-import { AirportInformation } from "./airport-cache/airport-information";
+import { Heap } from 'ts-heap'
+import { EasyAwait } from "./easy-await";
 
 export class ConditionCompiler {
     private static readonly airportInformationZoomLevel = 2;
     private cache: Cache;
     private remainingFiles: number;
+    private allConditions: Heap<AirportInformation>;
+    private returnConditionList: Array<Condition> | undefined;
     
     constructor(cache: Cache) {
         this.cache = cache;
         this.remainingFiles = 0;
+
+        this.allConditions = new Heap<AirportInformation>((a, b) => {
+            if ( a.ceiling === undefined  ) {
+                if ( b.ceiling === undefined ) {
+                    return 0;
+                } else {
+                    return 1;
+                }
+            } else if ( b.ceiling === undefined ) {
+                return -1;
+            }
+            return a.ceiling - b.ceiling;
+        })
     }
 
     public compileConditions(region: BoxGeo, buffer: PointGeo): void {
@@ -18,22 +36,30 @@ export class ConditionCompiler {
         let cellsUpperLeft = cells.getUpperLeft();
         let cellsLowerRight = cells.getLowerRight();
         this.remainingFiles = (cellsLowerRight.x - cellsUpperLeft.x + 1) * (cellsLowerRight.y - cellsUpperLeft.y + 1);
-        for ( let i = cellsUpperLeft.x; i < cellsLowerRight.x; i++ ) {
-            for ( let j = cellsUpperLeft.y; j < cellsLowerRight.y; j++ ) {
+        this.allConditions.clear();
+        for ( let i = cellsUpperLeft.x; i <= cellsLowerRight.x; i++ ) {
+            for ( let j = cellsUpperLeft.y; j <= cellsLowerRight.y; j++ ) {
+                EasyAwait.instance.startThread();
                 this.cache.retrieveFile(`${i}_${j}.json`, (data: Array<AirportInformation>) => {
                     this.receiveFile(data);
+                    EasyAwait.instance.endThread();
                 });
             }
-        }
+        } 
     }
 
     public getConditions(): Array<Condition> {
-        let retList = new Array<Condition>();
-        return retList;
+        if ( this.returnConditionList !== undefined ) {
+            return this.returnConditionList;
+        }
+        return new Array<Condition>();
     }
 
-    private receiveFile(data: any): void {
+    private receiveFile(data: Array<AirportInformation>): void {
         this.remainingFiles--;
+        for ( let info of data ) {
+            this.allConditions.add(info);
+        }
 
         if (this.remainingFiles == 0) {
             this.siftConditions();
@@ -41,7 +67,17 @@ export class ConditionCompiler {
     }
 
     private siftConditions(): void {
-        
+        this.returnConditionList = new Array<Condition>();
+        if ( !this.allConditions.isEmpty ) {
+            let info = this.allConditions.pop();
+            if ( info !== undefined && info.latitude !== undefined && info.longitude !== undefined && info.ceiling !== undefined ) {
+                let condition = new Condition();
+                condition.latitude = info.latitude;
+                condition.longitude = info.longitude;
+                condition.value = info.ceiling.toString();
+                this.returnConditionList.push(condition);
+            }
+        }
     }
 
     private getCellsForRegion(region: BoxGeo): Box2d {

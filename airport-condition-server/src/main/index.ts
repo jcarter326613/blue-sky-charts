@@ -1,12 +1,11 @@
 import {BoxGeo, PointGeo, Point2d} from 'coordinates'
 import {EasyAwait} from './easy-await'
 import { ConditionCompiler } from './condition-compiler';
+import { LocalCache } from './airport-cache/local-cache';
 
 let s3BucketName: string = "vfr-green-artifacts-245819277863";
 
 export const handler = async (event: any = {}): Promise<any> => {
-    console.log(event);
-
     //Validate request
     if (!("queryStringParameters" in event)) {
         return {
@@ -57,7 +56,7 @@ export const handler = async (event: any = {}): Promise<any> => {
     EasyAwait.instance.initialize();
     EasyAwait.instance.startThread();
 
-    let compiler = new ConditionCompiler();
+    let compiler = new ConditionCompiler(new LocalCache("./data/test"));
     compiler.compileConditions(region, buffer);
     
     EasyAwait.instance.endThread();
