@@ -1,3 +1,10 @@
+/**
+ * Here's what we are going to do.  Create a lambda function which can respond to rest requests that returns a json similar to the one
+ * being injested here.  This control will over request a region and not request a new region until we leave those bounds.  We will have to bucket
+ * that request somehow and cache responses.  Bucketing is to allow cache hits.
+ * The parent map will tell us when a mouse is "down."
+ */
+
 import { BoxGeoModel } from "../models/box-geo-model"
 import { Box2d, BoxGeo, BoxWebMercator, Point2d, PointWebMercator, CoordinateConversion } from "coordinates"
 import { ISubMapView } from "./i-sub-map-view"
@@ -9,6 +16,7 @@ export class MapDataView implements ISubMapView, IDataReceiver {
     // Metadata
     private tileWidth: number;
     private tileHeight: number;
+    private fixedZoomLevel: number;
 
     // Rendering
     private dataProvider: DataProvider;
@@ -21,6 +29,7 @@ export class MapDataView implements ISubMapView, IDataReceiver {
         this.dataProvider = dataProvider;
         this.tileWidth = 0;
         this.tileHeight = 0;
+        this.fixedZoomLevel = 2;
     }
 
     public initialize(): BoxGeo | undefined {
@@ -82,6 +91,27 @@ export class MapDataView implements ISubMapView, IDataReceiver {
         this.contextScale = scale;
         this.contextRegion = region;
 
-        this.dataProvider.retrieveTile("metar", new Point2d(0, 0), this);
+        // Figure out the size of what we are drawing
+        let zoomLevel = this.fixedZoomLevel;
+        let numTilesAcross = 2 ** zoomLevel;
+        let originalImageTileWidth = this.getOriginalWidth() / numTilesAcross
+        let originalImageTileHeight = this.getOriginalHeight() / numTilesAcross
+
+        // Ensure we aren't looping too much
+        let startX = Math.floor(region.getUpperLeft().x / originalImageTileWidth);
+        let endX = Math.ceil(region.getLowerRight().x / originalImageTileWidth);
+        let startY = Math.floor(region.getUpperLeft().y / originalImageTileHeight);
+        let endY = Math.ceil(region.getLowerRight().y / originalImageTileHeight)
+
+        if (endX - startX > 20 || endY - startY > 20)
+            return;
+
+        // Request the tiles
+        // Get all the images to draw
+        for (let x = startX; x < endX; x++ ) {
+            for (let y = startY; y < endY; y++ ) {
+                this.dataProvider.retrieveTile("metar", new Point2d(x, y), this);
+            }
+        }
     }
 }

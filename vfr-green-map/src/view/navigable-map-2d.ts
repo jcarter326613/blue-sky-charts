@@ -175,12 +175,12 @@ export class NavigableMap2d {
             // Add the map to the list of map views and set the origin to be the center of the map
             // This will need to change in the future to not set the center like this
             this.mapViews.push(new SubMapPosition(subMapView, fileExtent2d));
-
-            // Create a data view for proof of concept
-            let dataView = new MapDataView(this.dataProvider);
-            dataView.initialize();
-            this.mapViews.push(new SubMapPosition(dataView, new Box2d(0, 0, PointWebMercator.MAX_X_MERCATOR, PointWebMercator.MAX_Y_MERCATOR)));
         }
+        
+        // Create a data view for proof of concept
+        let dataView = new MapDataView(this.dataProvider);
+        dataView.initialize();
+        this.mapViews.push(new SubMapPosition(dataView, new Box2d(0, 0, PointWebMercator.MAX_X_MERCATOR, PointWebMercator.MAX_Y_MERCATOR)));
     }
 
     private retrieveConfiguration(mapConfigurationFile: string): void {
