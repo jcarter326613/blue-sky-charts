@@ -9,12 +9,20 @@ export class PointWebMercator extends Point2d {
     }
 
     public getCellForZoom(zoomLevel: number): Point2d {
+
         let cellsAcross = 2 ** zoomLevel;
         let xPerCell = PointWebMercator.MAX_X_MERCATOR / cellsAcross;
         let cellX = Math.floor(this.x / xPerCell);
 
         let yPerCell = PointWebMercator.MAX_Y_MERCATOR / cellsAcross;
         let cellY = Math.floor(this.y / yPerCell);
+
+        if ( this.x == PointWebMercator.MAX_X_MERCATOR ) {
+            cellX--;
+        }
+        if ( this.y == PointWebMercator.MAX_Y_MERCATOR ) {
+            cellY--;
+        }
 
         let cellLocation = new Point2d(cellX, cellY);
         return cellLocation;
