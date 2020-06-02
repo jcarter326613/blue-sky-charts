@@ -28,7 +28,7 @@ export class ConditionCompiler {
             } else if ( b.ceiling === undefined ) {
                 return -1;
             }
-            return a.ceiling - b.ceiling;
+            return a.ceiling.valueOf() - b.ceiling.valueOf();
         })
     }
 
@@ -43,7 +43,7 @@ export class ConditionCompiler {
             for ( let j = cellsUpperLeft.y; j <= cellsLowerRight.y; j++ ) {
                 EasyAwait.instance.startThread();
                 this.cache.retrieveFile(`${i}_${j}.json`, (data: Array<AirportInformation>) => {
-                    this.receiveFile(data);
+                    this.receiveFile(data, region);
                     EasyAwait.instance.endThread();
                 });
             }
@@ -57,10 +57,20 @@ export class ConditionCompiler {
         return new Array<Condition>();
     }
 
-    private receiveFile(data: Array<AirportInformation>): void {
+    private receiveFile(data: Array<AirportInformation>, region: BoxGeo): void {
         this.remainingFiles--;
         for ( let info of data ) {
-            this.allConditions.add(info);
+            if ( info.longitude === undefined || info.latitude === undefined ) {
+                continue;
+            }
+            let tl = region.getTopLeft();
+            let br = region.getBottomRight();
+            if ( info.longitude.valueOf() >= tl.longitude.valueOf() && 
+                info.longitude.valueOf() <= br.longitude.valueOf() &&
+                info.latitude.valueOf() <= tl.latitude.valueOf() && 
+                info.latitude.valueOf() >= br.latitude.valueOf() ) {
+                this.allConditions.add(info);
+            }
         }
 
         if (this.remainingFiles == 0) {
@@ -75,13 +85,14 @@ export class ConditionCompiler {
         }
         while ( !this.allConditions.isEmpty ) {
             let info = this.allConditions.pop();
-            if ( info !== undefined && info.latitude !== undefined && info.longitude !== undefined && info.ceiling !== undefined ) {
+            if ( info !== undefined && info.latitude !== undefined && info.longitude !== undefined && 
+                info.ceiling !== undefined ) {
                 let conflictFound = false;
                 for ( let priorCondition of this.returnConditionList ) {
-                    if ( priorCondition.latitude > info.latitude - this.buffer.latitude && 
-                        priorCondition.latitude < info.latitude + this.buffer.latitude &&
-                        priorCondition.longitude > info.longitude - this.buffer.longitude &&
-                        priorCondition.longitude < info.longitude + this.buffer.longitude ) {
+                    if ( priorCondition.latitude - this.buffer.latitude < info.latitude && 
+                        parseFloat(priorCondition.latitude.toString()) + parseFloat(this.buffer.latitude.toString()) > info.latitude &&
+                        priorCondition.longitude - this.buffer.longitude < info.longitude &&
+                        parseFloat(priorCondition.longitude.toString()) + parseFloat(this.buffer.longitude.toString()) > info.longitude ) {
 
                         conflictFound = true;
                         break;
