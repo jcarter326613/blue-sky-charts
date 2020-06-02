@@ -3,7 +3,7 @@ import {AddsFileLoader} from './adds-file-loader';
 import {EasyAwait} from './easy-await'
 import {MetarFileLoader} from './metar-file-loader';
 
-let s3BucketName: string = "vfr-green-artifacts-245819277863";
+let s3BucketName: string = "blueskycharts.com";
 
 export const handler = async (event: any = {}): Promise<any> => {
     EasyAwait.instance.initialize();
