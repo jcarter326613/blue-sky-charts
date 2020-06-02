@@ -1,3 +1,4 @@
+import { Box2d } from './box-2d'
 import { BoxGeo } from './box-geo'
 import { BoxWebMercator } from './box-web-mercator'
 import { Point2d } from './point-2d'
@@ -80,10 +81,28 @@ export class CoordinateConversion {
         let newPoint = new PointWebMercator();
 
         let longitude = geoPoint.longitude * 2 * Math.PI / 360
-        let latitude = geoPoint.latitude * 2 * Math.PI / 360
-
         newPoint.x = (256 / (2 * Math.PI)) * (longitude + Math.PI)
-        newPoint.y = (256 / (2 * Math.PI)) * (Math.PI - Math.log(Math.tan((Math.PI / 4) + (latitude / 2))))
+
+        if ( geoPoint.latitude > 89 ) {
+            newPoint.y = 0;
+        } else if ( geoPoint.latitude < -89 ) {
+            newPoint.y = PointWebMercator.MAX_Y_MERCATOR;
+        } else {
+            let latitude = geoPoint.latitude * 2 * Math.PI / 360
+            newPoint.y = (256 / (2 * Math.PI)) * (Math.PI - Math.log(Math.tan((Math.PI / 4) + (latitude / 2))))
+        }
+
+        if ( newPoint.x < 0 ) {
+            newPoint.x = 0;
+        } else if ( newPoint.x > PointWebMercator.MAX_X_MERCATOR ) {
+            newPoint.x = PointWebMercator.MAX_X_MERCATOR;
+        }
+
+        if ( newPoint.y < 0 ) {
+            newPoint.y = 0;
+        } else if ( newPoint.y > PointWebMercator.MAX_Y_MERCATOR ) {
+            newPoint.y = PointWebMercator.MAX_Y_MERCATOR;
+        }
 
         return newPoint;
     }
@@ -108,6 +127,17 @@ export class CoordinateConversion {
         let boxGeo = new BoxGeo(CoordinateConversion.convertFromWebMercator(boxMercator.getTopLeft()),
             CoordinateConversion.convertFromWebMercator(boxMercator.getBottomRight()));
         return boxGeo;
+    }
+
+    /**
+     * Assumes the 2d box is actually web mercator coordinates
+     * @param boxMercator 
+     */
+    public static convertBox2dToBoxGeo(box2d: Box2d): BoxGeo {
+        let ul = box2d.getUpperLeft();
+        let lr = box2d.getLowerRight();
+        let boxMercator = new BoxWebMercator(ul.x, ul.y, lr.x, lr.y);
+        return this.convertBoxMercatorToBoxGeo(boxMercator);
     }
 
     public static convertBoxGeoToBoxMercator(boxGeo: BoxGeo): BoxWebMercator {

@@ -72,4 +72,9 @@ export class BoxGeo {
     public getBottomLeft(): PointGeo {
         return this.bottomLeft;
     }
+
+    public getDimensions(): PointGeo {
+        return new PointGeo(this.bottomRight.longitude - this.topLeft.longitude,
+            this.topLeft.latitude - this.bottomRight.latitude);
+    }
 }
