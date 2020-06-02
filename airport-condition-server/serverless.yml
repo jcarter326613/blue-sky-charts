@@ -9,7 +9,7 @@ provider:
       Action:
         - 's3:GetObject'
       Resource:
-        - 'arn:aws:s3:::vfr-green-artifacts-245819277863/*'
+        - 'arn:aws:s3:::blueskycharts.com/*'
 
 functions:
   getConditions:

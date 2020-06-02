@@ -5,7 +5,7 @@ import { join } from 'path'
 import { EasyAwait } from '../easy-await';
 
 export class S3Cache extends Cache {
-    private static readonly BUCKET_NAME = "vfr-green-artifacts-245819277863";
+    private static readonly BUCKET_NAME = "blueskycharts.com";
     private root: string;
     private s3: AWS.S3
 

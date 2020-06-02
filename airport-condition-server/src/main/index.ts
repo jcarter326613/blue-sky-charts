@@ -5,7 +5,7 @@ import { EasyAwait } from './easy-await'
 import { ConditionCompiler } from './condition-compiler';
 import { LocalCache } from './airport-cache/local-cache';
 
-let s3BucketName: string = "vfr-green-artifacts-245819277863";
+let s3BucketName: string = "blueskycharts.com";
 
 export const handler = async (event: any = {}): Promise<any> => {
     // Check CORS
