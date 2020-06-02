@@ -211,8 +211,6 @@ export class NavigableMap2d implements IMap {
             return;
 
         let viewport2d = this.calculateViewport();
-        let viewportMercatorWidth = viewport2d.getBottomRight().x - viewport2d.getTopLeft().x;
-        let viewportMercatorHeight = viewport2d.getBottomRight().y - viewport2d.getTopLeft().y;
 
         let context = this.context;
         context.save();
@@ -224,36 +222,14 @@ export class NavigableMap2d implements IMap {
             if ( context == null )
                 return;
             context.save();
-
-            // Calculate the viewport from the perspective of the un modified sub map
-            let mapPosition2d: BoxWebMercator = submap.getPosition();
-            let viewportOverlap2d = mapPosition2d.union(viewport2d);
-            if (viewportOverlap2d != null) {
-                let originalWidth = submap.getSubMapView().getOriginalWidth();
-                let originalHeight = submap.getSubMapView().getOriginalHeight();
-
-                let mapMercatorWidth = mapPosition2d.getBottomRight().x - mapPosition2d.getTopLeft().x;
-                let mapMercatorHeight = mapPosition2d.getBottomRight().y - mapPosition2d.getTopLeft().y;
-                let mapScale = (this.containerWidth * mapMercatorWidth) / (originalWidth * viewportMercatorWidth);
-
-                let mapShiftX = (mapPosition2d.getTopLeft().x - this.origin2d.x) * this.containerWidth / viewportMercatorWidth
-                let mapShiftY = (mapPosition2d.getTopLeft().y - this.origin2d.y) * this.containerHeight / viewportMercatorHeight
- 
-                context.translate(this.containerWidth / 2, this.containerHeight / 2);
-                context.translate(mapShiftX, mapShiftY);
-
-                // Figure out the part of the map we want to draw in 2d coordinates relative to the upper left corner
-                let subMapDrawSection = new Box2d(
-                    originalWidth * (viewportOverlap2d.getTopLeft().x - mapPosition2d.getTopLeft().x) / mapMercatorWidth,
-                    originalHeight * (viewportOverlap2d.getTopLeft().y - mapPosition2d.getTopLeft().y) / mapMercatorHeight,
-                    originalWidth * (viewportOverlap2d.getBottomRight().x - mapPosition2d.getTopLeft().x) / mapMercatorWidth,
-                    originalHeight * (viewportOverlap2d.getBottomRight().y - mapPosition2d.getTopLeft().y) / mapMercatorHeight);
-
-                // Draw the submap
-                submap.getSubMapView().render(context, subMapDrawSection, mapScale);
-            }
+            this.renderSubMap(submap, viewport2d);
             context.restore();
         })
+        if ( this.dataOverlayView !== undefined ) {
+            context.save();
+            this.renderSubMap(this.dataOverlayView, viewport2d);
+            context.restore();
+        }
 
         // Draw test X
         if (this.mark != undefined) {
@@ -261,8 +237,8 @@ export class NavigableMap2d implements IMap {
             testPoints.forEach((testXPositionMercator) => {
                 context.save();
                 
-                let drawX = (testXPositionMercator.x - this.origin2d.x) * this.containerWidth / viewportMercatorWidth;
-                let drawY = (testXPositionMercator.y - this.origin2d.y) * this.containerHeight / viewportMercatorHeight;
+                let drawX = (testXPositionMercator.x - this.origin2d.x) * this.containerWidth / viewport2d.getWidth();
+                let drawY = (testXPositionMercator.y - this.origin2d.y) * this.containerHeight / viewport2d.getHeight();
 
                 context.translate(this.containerWidth / 2, this.containerHeight / 2);
                 context.strokeStyle = "rgb(0,0,0)";
@@ -279,6 +255,39 @@ export class NavigableMap2d implements IMap {
         }
 
         context.restore();
+    }
+
+    private renderSubMap(submap: SubMapPosition, viewport2d: BoxWebMercator): void {
+        if ( this.context == null ) {
+            return;
+        }
+        // Calculate the viewport from the perspective of the un modified sub map
+        let mapPosition2d: BoxWebMercator = submap.getPosition();
+        let viewportOverlap2d = mapPosition2d.union(viewport2d);
+        if (viewportOverlap2d != null) {
+            let originalWidth = submap.getSubMapView().getOriginalWidth();
+            let originalHeight = submap.getSubMapView().getOriginalHeight();
+
+            let mapMercatorWidth = mapPosition2d.getBottomRight().x - mapPosition2d.getTopLeft().x;
+            let mapMercatorHeight = mapPosition2d.getBottomRight().y - mapPosition2d.getTopLeft().y;
+            let mapScale = (this.containerWidth * mapMercatorWidth) / (originalWidth * viewport2d.getWidth());
+
+            let mapShiftX = (mapPosition2d.getTopLeft().x - this.origin2d.x) * this.containerWidth / viewport2d.getWidth()
+            let mapShiftY = (mapPosition2d.getTopLeft().y - this.origin2d.y) * this.containerHeight / viewport2d.getHeight()
+
+            this.context.translate(this.containerWidth / 2, this.containerHeight / 2);
+            this.context.translate(mapShiftX, mapShiftY);
+
+            // Figure out the part of the map we want to draw in 2d coordinates relative to the upper left corner
+            let subMapDrawSection = new Box2d(
+                originalWidth * (viewportOverlap2d.getTopLeft().x - mapPosition2d.getTopLeft().x) / mapMercatorWidth,
+                originalHeight * (viewportOverlap2d.getTopLeft().y - mapPosition2d.getTopLeft().y) / mapMercatorHeight,
+                originalWidth * (viewportOverlap2d.getBottomRight().x - mapPosition2d.getTopLeft().x) / mapMercatorWidth,
+                originalHeight * (viewportOverlap2d.getBottomRight().y - mapPosition2d.getTopLeft().y) / mapMercatorHeight);
+
+            // Draw the submap
+            submap.getSubMapView().render(this.context, subMapDrawSection, mapScale);
+        }
     }
 
     /**
