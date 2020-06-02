@@ -25,6 +25,12 @@ export class MultiGrid {
      * @param priority 
      */
     public addObject( webMercatorLocation: PointWebMercator, data: any): void {
+        // Make sure the location is properly bounded
+        if ( webMercatorLocation.x < 0 || webMercatorLocation.x > PointWebMercator.MAX_X_MERCATOR ||
+            webMercatorLocation.y < 0 || webMercatorLocation.y > PointWebMercator.MAX_Y_MERCATOR ) {
+            return;
+        }
+
         // Get the proper cell for this zoom level
         let thisCellPoint = webMercatorLocation.getCellForZoom(this.baseZoom);
         let thisCellX = thisCellPoint.x;
