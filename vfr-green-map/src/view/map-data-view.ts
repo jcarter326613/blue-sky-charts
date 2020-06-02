@@ -6,7 +6,7 @@
  */
 
 import { BoxGeoModel } from "../models/box-geo-model"
-import { Box2d, BoxGeo, BoxWebMercator, Point2d, PointWebMercator, CoordinateConversion } from "coordinates"
+import { Box2d, BoxGeo, BoxWebMercator, Point2d, PointGeo, PointWebMercator, CoordinateConversion } from "coordinates"
 import { ISubMapView } from "./i-sub-map-view"
 import { IDataReceiver } from "../resources/i-data-receiver"
 import { SubMapModel } from "../models/sub-map-model"
@@ -16,7 +16,6 @@ export class MapDataView implements ISubMapView, IDataReceiver {
     // Metadata
     private tileWidth: number;
     private tileHeight: number;
-    private fixedZoomLevel: number;
 
     // Rendering
     private dataProvider: DataProvider;
@@ -29,7 +28,6 @@ export class MapDataView implements ISubMapView, IDataReceiver {
         this.dataProvider = dataProvider;
         this.tileWidth = 0;
         this.tileHeight = 0;
-        this.fixedZoomLevel = 2;
     }
 
     public initialize(): BoxGeo | undefined {
@@ -61,7 +59,7 @@ export class MapDataView implements ISubMapView, IDataReceiver {
             return;
         }
 
-        if ( data.ceiling === undefined ) {
+        if ( data.value === undefined ) {
             return;
         }
 
@@ -70,7 +68,7 @@ export class MapDataView implements ISubMapView, IDataReceiver {
 
         //Write out the ceiling
         let lineHeight = this.context.measureText('M').width * 1.2;
-        let textDimensions = this.context.measureText(data.ceiling);
+        let textDimensions = this.context.measureText(data.value);
         let textRect = new Box2d(location.x * this.contextScale - textDimensions.width / 2, location.y * this.contextScale - lineHeight / 2,
             location.x * this.contextScale + textDimensions.width / 2, location.y * this.contextScale + lineHeight / 2);
         this.context.strokeStyle = "rgb(0,0,0)";
@@ -80,7 +78,7 @@ export class MapDataView implements ISubMapView, IDataReceiver {
         this.context.strokeRect(textRect.getUpperLeft().x - 3, textRect.getUpperLeft().y - 3, 
             textRect.getDimensions().x + 6, textRect.getDimensions().y + 6);
 
-        this.context.strokeText(data.ceiling, textRect.getUpperLeft().x, textRect.getLowerRight().y);
+        this.context.strokeText(data.value, textRect.getUpperLeft().x, textRect.getLowerRight().y);
         
         this.context.setTransform(currentTransform);
     }
@@ -91,27 +89,12 @@ export class MapDataView implements ISubMapView, IDataReceiver {
         this.contextScale = scale;
         this.contextRegion = region;
 
-        // Figure out the size of what we are drawing
-        let zoomLevel = this.fixedZoomLevel;
-        let numTilesAcross = 2 ** zoomLevel;
-        let originalImageTileWidth = this.getOriginalWidth() / numTilesAcross
-        let originalImageTileHeight = this.getOriginalHeight() / numTilesAcross
-
-        // Ensure we aren't looping too much
-        let startX = Math.floor(region.getUpperLeft().x / originalImageTileWidth);
-        let endX = Math.ceil(region.getLowerRight().x / originalImageTileWidth);
-        let startY = Math.floor(region.getUpperLeft().y / originalImageTileHeight);
-        let endY = Math.ceil(region.getLowerRight().y / originalImageTileHeight)
-
-        if (endX - startX > 20 || endY - startY > 20)
-            return;
-
-        // Request the tiles
-        // Get all the images to draw
-        for (let x = startX; x < endX; x++ ) {
-            for (let y = startY; y < endY; y++ ) {
-                this.dataProvider.retrieveTile("metar", new Point2d(x, y), this);
-            }
-        }
+        let pixelsAcross = region.getDimensions().x * scale;
+        let longitudeAcross = 360 * region.getDimensions().x / this.getOriginalWidth();
+        let pixelsAcrossBuffer = this.context.measureText('0').width * 5
+        let longitudeBuffer = longitudeAcross * pixelsAcrossBuffer / pixelsAcross
+        let latitudeBuffer = longitudeBuffer * 0.6
+        
+        this.dataProvider.retrieveTile(CoordinateConversion.convertBox2dToBoxGeo(region), new PointGeo(longitudeBuffer, latitudeBuffer), this);
     }
 }
