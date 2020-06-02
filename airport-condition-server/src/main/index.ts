@@ -18,10 +18,10 @@ export const handler = async (event: any = {}): Promise<any> => {
     } else if (!(event["httpMethod"] == "GET" && "origin" in event["headers"] && (
         event["headers"]["origin"] == "http://localhost:3000" ||
         event["headers"]["origin"] == "http://localhost:3000/" ||
-        event["headers"]["origin"] == "http://www.blueskycharts.com" ||
-        event["headers"]["origin"] == "http://www.blueskycharts.com/" ||
-        event["headers"]["origin"] == "https://www.blueskycharts.com" ||
-        event["headers"]["origin"] == "https://www.blueskycharts.com/"))) {
+        event["headers"]["origin"] == "http://blueskycharts.com" ||
+        event["headers"]["origin"] == "http://blueskycharts.com/" ||
+        event["headers"]["origin"] == "https://blueskycharts.com" ||
+        event["headers"]["origin"] == "https://blueskycharts.com/"))) {
         console.warn(`Failed CORS. ${JSON.stringify(event)}`);
         return {
             "statusCode": 400,
@@ -84,6 +84,12 @@ export const handler = async (event: any = {}): Promise<any> => {
             "headers": headers,
             "body": JSON.stringify({"message": "Missing or invalid field bufferLatitude"})
         }
+    } else if (!("information" in queryStringParameters) || !isValidInformationRequestCategory(queryStringParameters["information"])) {
+        return {
+            "statusCode": 400,
+            "headers": headers,
+            "body": JSON.stringify({"message": "Missing or invalid field information"})
+        }
     }
 
     //Pull out the arguments
@@ -103,13 +109,15 @@ export const handler = async (event: any = {}): Promise<any> => {
         cache = Cache.overrideCache;
     } else {
         cache = new S3Cache("metar")
+        Cache.overrideCache = cache;
     }
-    let compiler = new ConditionCompiler(cache);
+    let compiler = new ConditionCompiler(cache, queryStringParameters["information"]);
     compiler.compileConditions(region, buffer);
     
     EasyAwait.instance.endThread();
     await EasyAwait.instance.join();
 
+    // Report the results
     if ( EasyAwait.instance.hasFatalError() ) {
         let message = EasyAwait.instance.getFatalMessage();
         if ( message === undefined ) {
@@ -130,4 +138,10 @@ export const handler = async (event: any = {}): Promise<any> => {
             "body": body
         };
     }
+}
+
+function isValidInformationRequestCategory(category: string): boolean {
+    return (category == "ceiling" || category == "visibility" || category == "cloudCover" || 
+        category == "wind" || category == "temperatureCelcius" || category == "dewpointCelcius" || 
+        category == "flightCategory");
 }

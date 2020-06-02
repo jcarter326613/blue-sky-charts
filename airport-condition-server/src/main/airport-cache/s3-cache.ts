@@ -39,6 +39,7 @@ export class S3Cache extends Cache {
             } else {
                 try {
                     let obj = JSON.parse(data.Body.toString());
+                    this.save(name, obj as Array<AirportInformation>);
                     callback(obj as Array<AirportInformation>);
                 } catch (e) {
                     EasyAwait.instance.reportFatalError(`Error parsing file ${fullPath}`);
