@@ -17,6 +17,14 @@ export class BoxWebMercator {
         return this.bottomRight;
     }
 
+    public getWidth(): number {
+        return this.bottomRight.x - this.topLeft.x
+    }
+
+    public getHeight(): number {
+        return this.bottomRight.y - this.topLeft.y
+    }
+
     /**
      * Returns the union of the two boxes.  An real number range is allowed.
      * @param o 
