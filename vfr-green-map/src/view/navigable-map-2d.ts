@@ -3,6 +3,7 @@ import * as $ from 'jquery'
 import { JQueryMousewheelEventObject } from '../types/jquery-mousewheel'
 import { Box2d, PointWebMercator, PointGeo } from 'coordinates'
 import { CoordinateConversion } from 'coordinates'
+import { IMap } from './i-map'
 import { ISubMapView } from './i-sub-map-view'
 import { Point2d } from 'coordinates'
 import { SubMapModel } from '../models/sub-map-model'
@@ -13,7 +14,7 @@ import { DataProvider } from '../resources/data-provider'
 
 declare function require(module: string): any;
 
-export class NavigableMap2d {
+export class NavigableMap2d implements IMap {
     private tileProvider: TileProvider;
     private dataProvider: DataProvider;
 
@@ -119,6 +120,10 @@ export class NavigableMap2d {
         this.retrieveConfiguration(`${mapRoot}/metadata.json`);
     }
 
+    public requestRedraw(): void {
+        this.render();
+    }
+
     private updateScale(): void {
         this.scale = 1 / (2 ** this.scaleDriver);
     }
@@ -163,7 +168,7 @@ export class NavigableMap2d {
             if (subMapModel.fileExtent == null || subMapModel.imageWidth == null || subMapModel.imageHeight == null)
                 continue;
 
-            let subMapView = new MapTileView(this.tileProvider);
+            let subMapView = new MapTileView(this.tileProvider, this);
             let fileExtent = subMapView.initialize(subMapModel, key);
             if (fileExtent === undefined)
                 continue;

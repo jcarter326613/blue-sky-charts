@@ -4,9 +4,11 @@ import { ISubMapView } from './i-sub-map-view'
 import { SubMapModel } from '../models/sub-map-model'
 import { TileProvider } from '../resources/tile-provider'
 import { ITileReceiver } from '../resources/i-tile-receiver';
+import { IMap } from './i-map'
 
 export class MapTileView implements ISubMapView, ITileReceiver {
     // Metadata
+    private map: IMap;
     private originalMapWidth: number;
     private originalMapHeight: number;
     private imageWidthScale: number;
@@ -25,7 +27,8 @@ export class MapTileView implements ISubMapView, ITileReceiver {
     private contextTransform: DOMMatrix | null;
     private scaledTileWidth: number;
     
-    constructor(tileProvider: TileProvider) {
+    constructor(tileProvider: TileProvider, map: IMap) {
+        this.map = map;
         this.originalMapWidth = 0;
         this.originalMapHeight = 0;
         this.imageWidthScale = 1;
@@ -80,9 +83,14 @@ export class MapTileView implements ISubMapView, ITileReceiver {
         return this.originalMapHeight;
     }
 
-    public receiveTile(location: Point2d, subsection: Box2d, tile: HTMLImageElement, data: any): void {
+    public receiveTile(location: Point2d, subsection: Box2d, tile: HTMLImageElement, data: any, immediate: boolean): void {
         if ( data as number != this.renderVersion )
             return;
+
+        if ( !immediate ) {
+            this.map.requestRedraw();
+            return;
+        }
 
         if ( this.contextTransform == null || this.context == null )
             return;

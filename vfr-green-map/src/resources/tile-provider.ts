@@ -27,7 +27,7 @@ export class TileProvider {
                 let image = tileRequest.getImage();
                 if ( image != null ) {
                     let region = new Box2d(0, 0, tileDimensions.x, tileDimensions.y);
-                    receiver.receiveTile(location, region, image, data);
+                    receiver.receiveTile(location, region, image, data, true);
                 }
             } else {
                 tileRequest.setReceiver(receiver, data);
@@ -84,7 +84,7 @@ export class TileProvider {
                 // Get the image and draw it
                 let image = this.tileCache[key].getImage();
                 if ( image != null ) {
-                    receiver.receiveTile(requestLocationO, subsection, image, request.getData());
+                    receiver.receiveTile(requestLocationO, subsection, image, request.getData(), true);
                     return;
                 }
             }
@@ -161,7 +161,7 @@ class TileRequest {
             this.loaded = true;
             if (this.receiver != null && this.location != null && this.tileImage != null && this.dimensions != null) {
                 let region = new Box2d(0, 0, this.dimensions.x, this.dimensions.y);
-                this.receiver.receiveTile(this.location, region, this.tileImage, this.data);
+                this.receiver.receiveTile(this.location, region, this.tileImage, this.data, false);
                 this.receiver = null;
                 this.location = null;
                 this.data = null;
