@@ -29,7 +29,7 @@ sudo apt-get install -y nodejs
 ## Deploying
 ```bash
 npm run generate
-aws s3 sync ./dist s3://vfr-green-artifacts-245819277863
+aws s3 sync ./dist s3://blueskycharts.com
 ```
 
 ## Troubleshooting deployment size

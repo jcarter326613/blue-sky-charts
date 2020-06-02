@@ -1,15 +1,24 @@
 <template>
   <div class="frame">
+    <div>
+      <input type="radio" id="overlayTypeNone" :value="$OverlayTypes.None" v-model="selectedOverlayType">
+      <label for="overlayTypeNone">None</label>
+      <input type="radio" id="overlayTypeCeiling" :value="$OverlayTypes.Ceiling" v-model="selectedOverlayType">
+      <label for="overlayTypeCeiling">Ceiling</label>
+    </div>
     <div class="expandingFrameElement" id="mapContainer"><interactivemap parentId="mapContainer" 
       :originLongitude="originLongitude" :originLatitude="originLatitude" :zoom="zoom"
-      :markLongitude="markLongitude" :markLatitude="markLatitude"/></div>
+      :markLongitude="markLongitude" :markLatitude="markLatitude" :overlayType="selectedOverlayType"/></div>
     <div class="staticFrameElement">test content {{ message }}</div>
   </div>
 </template>
 
-<script lang="ts">
+<script lang="javascript">
 import Vue from 'vue'
+import MyMap from 'vfr-green-map'
 import "~/components/InteractiveMap.vue"
+
+Vue.use(MyMap)
 
 export default Vue.extend({
   data: function() {
@@ -20,6 +29,7 @@ export default Vue.extend({
         "zoom": this.$route.query.zoom,
         "markLongitude": this.$route.query.markLongitude,
         "markLatitude": this.$route.query.markLatitude,
+        "selectedOverlayType": this.$OverlayTypes.None
       };
   }
 })

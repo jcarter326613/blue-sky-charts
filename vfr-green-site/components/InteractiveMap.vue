@@ -11,7 +11,7 @@ export default Vue.component("interactivemap", {
         return {};
     },
     mounted: function() {
-        this.$createMap(this.parentId, "/maps/world-vfr", this.originLongitude, this.originLatitude, this.zoom,
+        this.$interactiveMap = this.$createMap(this.parentId, "/maps/world-vfr", this.originLongitude, this.originLatitude, this.zoom,
             this.markLongitude, this.markLatitude);
     },
     props: [
@@ -20,8 +20,16 @@ export default Vue.component("interactivemap", {
         "originLongitude",
         "markLatitude",
         "markLongitude",
-        "zoom"
+        "zoom",
+        "overlayType"
     ],
+    watch: {
+        overlayType: function(newVal, oldVal) {
+            if (this.$interactiveMap !== undefined) {
+                this.$interactiveMap.setOverlayType(newVal);
+            }
+        }
+    },
     render: function() {
         return []
     }
