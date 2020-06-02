@@ -1,5 +1,5 @@
 import { BoxGeoModel } from '../models/box-geo-model'
-import { Box2d, BoxGeo, Point2d } from 'coordinates'
+import { Box2d, BoxWebMercator, CoordinateConversion, Point2d } from 'coordinates'
 import { ISubMapView } from './i-sub-map-view'
 import { SubMapModel } from '../models/sub-map-model'
 import { TileProvider } from '../resources/tile-provider'
@@ -46,7 +46,7 @@ export class MapTileView implements ISubMapView, ITileReceiver {
         this.scaledTileWidth = 0;
     }
 
-    public initialize(model: SubMapModel, name: string): BoxGeo | undefined {
+    public initialize(model: SubMapModel, name: string): BoxWebMercator | undefined {
         if (model.imageHeight == null || model.imageWidth == null || model.tileWidth == null || 
             model.version == null || model.fileExtent == null || model.maxZoom == null)
             return undefined;
@@ -72,7 +72,11 @@ export class MapTileView implements ISubMapView, ITileReceiver {
         else
             this.tileWidth = Math.round(this.tileHeight * this.originalMapWidth / this.originalMapHeight)
 
-        return BoxGeoModel.createBoxGeoFromModel(model.fileExtent);
+        let fileExtent = BoxGeoModel.createBoxGeoFromModel(model.fileExtent);
+        let fileExtent2dUpperLeft = CoordinateConversion.convertToWebMercator(fileExtent.getTopLeft());
+        let fileExtent2dLowerRight = CoordinateConversion.convertToWebMercator(fileExtent.getBottomRight());
+        let fileExtent2d = new BoxWebMercator(fileExtent2dUpperLeft.x, fileExtent2dUpperLeft.y, fileExtent2dLowerRight.x, fileExtent2dLowerRight.y);
+        return fileExtent2d
     }
 
     public getOriginalWidth(): number {

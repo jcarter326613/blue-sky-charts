@@ -1,4 +1,4 @@
-import { Box2d, BoxGeo } from 'coordinates'
+import { Box2d, BoxWebMercator } from 'coordinates'
 import { SubMapModel } from '../models/sub-map-model'
 
 export interface ISubMapView {
@@ -9,7 +9,7 @@ export interface ISubMapView {
      * @returns A BoxGeo representing the full extent of the map.  undefined if this map should be discarded from view because of a
      *  bad configuration.
      */
-    initialize(model: SubMapModel, name: string): BoxGeo | undefined;
+    initialize(model: SubMapModel, name: string): BoxWebMercator | undefined;
 
     /**
      * Some original width and height in any unit which is used determine the region parameter into the render function.

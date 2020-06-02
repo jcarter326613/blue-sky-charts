@@ -30,14 +30,12 @@ export class MapDataView implements ISubMapView, IDataReceiver {
         this.tileHeight = 0;
     }
 
-    public initialize(): BoxGeo | undefined {
+    public initialize(): BoxWebMercator | undefined {
         let tilesAcross = 2 ** 2;
         this.tileWidth = PointWebMercator.MAX_X_MERCATOR / tilesAcross;
         this.tileHeight = PointWebMercator.MAX_Y_MERCATOR / tilesAcross;
 
-        let boxMercator = new BoxWebMercator(0, 0, PointWebMercator.MAX_X_MERCATOR, PointWebMercator.MAX_Y_MERCATOR);
-
-        return CoordinateConversion.convertBoxMercatorToBoxGeo(boxMercator);
+        return new BoxWebMercator(0, 0, PointWebMercator.MAX_X_MERCATOR, PointWebMercator.MAX_Y_MERCATOR);
     }
 
     public getOriginalWidth(): number {
