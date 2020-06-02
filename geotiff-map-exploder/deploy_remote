@@ -8,4 +8,4 @@ fi
 mkdir ./maps/tiles
 
 python3 deploy_remote.py ./maps/tiles/metadata.json
-aws s3 sync ./maps/tiles s3://vfr-green-artifacts-245819277863/maps/world-vfr
+aws s3 sync ./maps/tiles s3://blueskycharts.com/maps/world-vfr
