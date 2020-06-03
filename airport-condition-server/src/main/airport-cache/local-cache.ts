@@ -16,8 +16,9 @@ export class LocalCache extends Cache {
 
     public retrieveFile(name: string, callback: (data: Array<AirportInformation>) => void): void {
         // If the file is in the cache, returns it
-        if ( this.hasKey(name) ) {
-            callback(this.retrieve(name));
+        let cachedValue = this.retrieve(name);
+        if ( cachedValue !== undefined ) {
+            callback(cachedValue);
             return;
         }
 
