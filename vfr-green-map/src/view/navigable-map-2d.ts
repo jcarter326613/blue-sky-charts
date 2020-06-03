@@ -51,14 +51,14 @@ export class NavigableMap2d implements IMap {
 
         // Set all parameterized defaults
         if ( zoom === undefined ) {
-            this.scaleDriver = 2;
+            this.scaleDriver = 4.25;
         } else {
             this.scaleDriver = zoom;
         }
         if ( originLongitude !== undefined && originLatitude !== undefined ) {
             this.origin2d = CoordinateConversion.convertToWebMercator(new PointGeo(originLongitude, originLatitude));
         } else {
-            this.origin2d = new PointWebMercator();
+            this.origin2d = CoordinateConversion.convertToWebMercator(new PointGeo(-98.5795, 39.8283));
         }
         if ( markLatitude !== undefined && markLongitude !== undefined ) {
             if ( zoom === undefined ) {
