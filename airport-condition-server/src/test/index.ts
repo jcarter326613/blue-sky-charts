@@ -6,13 +6,13 @@ Cache.overrideCache = new LocalCache("./data/test");
 
 let promise = handler({
     "queryStringParameters": {        
-        "startLongitude": -115.354736328125,
-        "endLongitude": -50.645263671875,
-        "startLatitude": 21.570073988213277,
-        "endLatitude": 44.37101850747771,
-        "bufferLongitude": 1,
-        "bufferLatitude": 1,
-        "information": "visibility"
+        "startLongitude": -180,
+        "endLongitude": 180,
+        "startLatitude": -90,
+        "endLatitude": 90,
+        "bufferLongitude": 16,
+        "bufferLatitude": 16,
+        "information": "ceiling"
     },
     "headers": {
         "origin": "http://localhost:3000/"
