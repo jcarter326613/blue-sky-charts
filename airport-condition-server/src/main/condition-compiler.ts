@@ -158,13 +158,13 @@ export class ConditionCompiler {
             case "wind": {
                 return this.getWindComparitor();
             }
-            case "tempC": {
+            case "temperatureCelcius": {
                 return this.getTemperatureCelciusComparitor();
             }
-            case "dewpointC": {
+            case "dewpointCelcius": {
                 return this.getDewpointCelciusComparitor();
             }
-            case "category": {
+            case "flightCategory": {
                 return this.getFlightCategoryComparitor();
             }
             default: {
@@ -304,13 +304,13 @@ export class ConditionCompiler {
             case "wind": {
                 return this.assignValueWind;
             }
-            case "tempC": {
+            case "temperatureCelcius": {
                 return this.assignValueTemperatureCelcius;
             }
-            case "dewpointC": {
+            case "dewpointCelcius": {
                 return this.assignValueDewpointCelcius;
             }
-            case "category": {
+            case "flightCategory": {
                 return this.assignValueFlightCategory;
             }
             default: {
@@ -358,7 +358,7 @@ export class ConditionCompiler {
         if ( info.temperatureCelcius === undefined ) {
             return false;
         }
-        condition.temperatureCelcius = info.temperatureCelcius
+        condition.temperatureCelcius = Math.min(info.temperatureCelcius);
         return true;
     }
 
@@ -366,7 +366,7 @@ export class ConditionCompiler {
         if ( info.dewpointCelcius === undefined ) {
             return false;
         }
-        condition.dewpointCelcius = info.dewpointCelcius
+        condition.dewpointCelcius = Math.min(info.dewpointCelcius);
         return true;
     }
 
@@ -408,7 +408,7 @@ export class ConditionCompiler {
             return 1
         } else if ( a == "IFR" ) {
             return 2
-        } else if ( a == "MIFR" ) {
+        } else if ( a == "LIFR" ) {
             return 3
         } else {
             EasyAwait.instance.reportFatalError(`Found unknown flight category: ${a}`);

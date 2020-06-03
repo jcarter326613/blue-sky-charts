@@ -12,7 +12,7 @@ let promise = handler({
         "endLatitude": 90,
         "bufferLongitude": 16,
         "bufferLatitude": 16,
-        "information": "ceiling"
+        "information": "dewpointCelcius"
     },
     "headers": {
         "origin": "http://localhost:3000/"

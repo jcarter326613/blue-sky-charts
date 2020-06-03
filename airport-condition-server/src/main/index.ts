@@ -8,6 +8,8 @@ import { LocalCache } from './airport-cache/local-cache';
 let s3BucketName: string = "blueskycharts.com";
 
 export const handler = async (event: any = {}): Promise<any> => {
+    console.log(`Received request: ${JSON.stringify(event)}`);
+
     // Check CORS
     if (!("httpMethod" in event && "headers" in event)) {
         console.warn("Failed CORS.  HttpMethod or Headers missing");
@@ -97,8 +99,6 @@ export const handler = async (event: any = {}): Promise<any> => {
     let bottomRight = new PointGeo(queryStringParameters["endLongitude"], queryStringParameters["startLatitude"]);
     let region = new BoxGeo(topLeft, bottomRight);
     let buffer = new PointGeo(queryStringParameters["bufferLongitude"], queryStringParameters["bufferLatitude"]);
-
-    console.log(`Received request: topLeft.long=${topLeft.longitude}, topLeft.lat=${topLeft.latitude}, bottomRight.long=${bottomRight.longitude}, bottomRight.lat=${bottomRight.latitude}, buffer.long=${buffer.longitude}, buffer.lat=${buffer.latitude}`);
 
     //Fulfill the request
     EasyAwait.instance.initialize();
