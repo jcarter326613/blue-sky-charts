@@ -1,0 +1,54 @@
+<html>
+    <head>
+        <title>Blue Sky Charts</title>
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <link rel="stylesheet" href="style/main.css">
+        <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+        <style>
+            .header {
+                background-color: rgb(100, 100, 255)
+            }
+            .header h1 {
+                font-size: 100px;
+                margin-top: .4em;
+                margin-bottom: .6em;
+                color: white;
+            }
+            .header .focusButton {
+                margin-bottom: 4em;
+            }
+            @media screen and (max-width: 768px) {
+                .header h1 {
+                    font-size: 12vw;
+                    text-align: center;
+                }
+            }
+            @media screen and (max-width: 425px) {
+                .header h1 {
+                    font-size: 25vw;
+                    text-align: left;
+                }
+            }
+        </style>
+        <script>
+            $(document).ready(() => {
+                $(".viewChartButton").click(() => {
+                    window.location.href = "/chart";
+                })
+            });
+        </script>
+    </head>
+    <body>
+        <div class="header">
+            <h1>Blue Sky Charts</h1>
+            <div class="focusButton"><div class="viewChartButton">View the charts</div></div>
+        </div>
+        <div>
+            <div>Review current weather conditions using graphically overlayed metar data.</div>
+            <div>
+                <img src="examples/ceiling_overlay.jpg" alt="Ceiling overlay on VFR map" width="200" height="100">
+                <img src="examples/wind_overlay.jpg" alt="Surface wind barbs on VFR map" width="200" height="100">
+            </div>
+        </div>
+    </body>
+</html>
