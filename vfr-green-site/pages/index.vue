@@ -5,6 +5,18 @@
       <label for="overlayTypeNone">None</label>
       <input type="radio" id="overlayTypeCeiling" :value="$OverlayTypes.Ceiling" v-model="selectedOverlayType">
       <label for="overlayTypeCeiling">Ceiling</label>
+      <input type="radio" id="overlayTypeVisibility" :value="$OverlayTypes.Visibility" v-model="selectedOverlayType">
+      <label for="overlayTypeVisibility">Visibility</label>
+      <input type="radio" id="overlayTypeCloudCover" :value="$OverlayTypes.CloudCover" v-model="selectedOverlayType">
+      <label for="overlayTypeCloudCover">Cloud Cover</label>
+      <input type="radio" id="overlayTypeWind" :value="$OverlayTypes.Wind" v-model="selectedOverlayType">
+      <label for="overlayTypeWind">Wind</label>
+      <input type="radio" id="overlayTypeTempC" :value="$OverlayTypes.TempC" v-model="selectedOverlayType">
+      <label for="overlayTypeTempC">Temperature Celsius</label>
+      <input type="radio" id="overlayTypeDewpointC" :value="$OverlayTypes.DewpointC" v-model="selectedOverlayType">
+      <label for="overlayTypeDewpointC">Dewpoint Celsius</label>
+      <input type="radio" id="overlayTypeCategory" :value="$OverlayTypes.Category" v-model="selectedOverlayType">
+      <label for="overlayTypeCategory">Category</label>
     </div>
     <div class="expandingFrameElement" id="mapContainer"><interactivemap parentId="mapContainer" 
       :originLongitude="originLongitude" :originLatitude="originLatitude" :zoom="zoom"
