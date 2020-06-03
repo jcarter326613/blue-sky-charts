@@ -26,6 +26,7 @@ export class MapTileView implements ISubMapView, ITileReceiver {
     private context: CanvasRenderingContext2D | null;
     private contextTransform: DOMMatrix | null;
     private scaledTileWidth: number;
+    private isDisposed: boolean;
     
     constructor(tileProvider: TileProvider, map: IMap) {
         this.map = map;
@@ -44,6 +45,7 @@ export class MapTileView implements ISubMapView, ITileReceiver {
         this.context = null;
         this.contextTransform = null;
         this.scaledTileWidth = 0;
+        this.isDisposed = false;
     }
 
     public initialize(model: SubMapModel, name: string): BoxWebMercator | undefined {
@@ -79,6 +81,10 @@ export class MapTileView implements ISubMapView, ITileReceiver {
         return fileExtent2d
     }
 
+    public dispose(): void {
+        this.isDisposed = true;
+    }
+
     public getOriginalWidth(): number {
         return this.originalMapWidth;
     }
@@ -88,7 +94,7 @@ export class MapTileView implements ISubMapView, ITileReceiver {
     }
 
     public receiveTile(location: Point2d, subsection: Box2d, tile: HTMLImageElement, data: any, immediate: boolean): void {
-        if ( data as number != this.renderVersion )
+        if ( this.isDisposed || data as number != this.renderVersion )
             return;
 
         if ( !immediate ) {
@@ -121,6 +127,10 @@ export class MapTileView implements ISubMapView, ITileReceiver {
      * @param scale The scale to draw the map at.  Point (0,0) is the center of the map.
      */
     public render(context: CanvasRenderingContext2D, region: Box2d, scale: number) {
+        if (this.isDisposed) {
+            return;
+        }
+
         // Validate the region
         region = region.clone();
         if ( region.getUpperLeft().x < 0 )
@@ -175,5 +185,9 @@ export class MapTileView implements ISubMapView, ITileReceiver {
                     this.tileDimensionPercentage, this, this.renderVersion);
             }
         }
+    }
+
+    public moveOffscreen(): void {
+        this.context = null;
     }
 }

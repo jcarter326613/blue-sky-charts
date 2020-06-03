@@ -24,4 +24,15 @@ export interface ISubMapView {
      * @param scale All aspects of the region are multiplied by this value
      */
     render(context: CanvasRenderingContext2D, region: Box2d, scale: number): void;
+
+    /**
+     * Prevents any further drawing from this view
+     */
+    dispose(): void;
+
+    /**
+     * Prevents drawing to the screen until a new render call is issued.  Used for preventing delay loaded assets from
+     * drawing with an old context transformation if the map has moved off screen and is not receiving updated render calls.
+     */
+    moveOffscreen(): void;
 }

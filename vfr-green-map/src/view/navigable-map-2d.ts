@@ -126,7 +126,7 @@ export class NavigableMap2d implements IMap {
         let success: boolean
         switch (type) {
             case OverlayTypes.Ceiling: {
-                let dataView = new MapDataView(this.dataProvider);
+                let dataView = new MapDataView(this.dataProvider, type);
                 let extent = dataView.initialize();
                 if ( extent !== undefined ) {
                     this.dataOverlayView = new SubMapPosition(dataView, extent);
@@ -137,7 +137,10 @@ export class NavigableMap2d implements IMap {
                 break;
             }
             default: {
-                this.dataOverlayView = undefined;
+                if ( this.dataOverlayView !== undefined ) {
+                    this.dataOverlayView.getSubMapView().dispose();
+                    this.dataOverlayView = undefined;
+                }
                 success = true;
             }
         }
@@ -287,6 +290,8 @@ export class NavigableMap2d implements IMap {
 
             // Draw the submap
             submap.getSubMapView().render(this.context, subMapDrawSection, mapScale);
+        } else {
+            submap.getSubMapView().moveOffscreen();
         }
     }
 

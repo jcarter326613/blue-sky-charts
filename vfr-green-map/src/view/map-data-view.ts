@@ -11,6 +11,7 @@ import { ISubMapView } from "./i-sub-map-view"
 import { IDataReceiver } from "../resources/i-data-receiver"
 import { SubMapModel } from "../models/sub-map-model"
 import { DataProvider } from "../resources/data-provider"
+import { OverlayTypes } from "./overlay-types"
 
 export class MapDataView implements ISubMapView, IDataReceiver {
     // Metadata
@@ -23,19 +24,31 @@ export class MapDataView implements ISubMapView, IDataReceiver {
     private contextTransform: DOMMatrix | undefined;
     private contextScale: number | undefined;
     private contextRegion: Box2d | undefined;
+    private isDisposed: boolean;
+    private overlayType: OverlayTypes;
 
-    constructor(dataProvider: DataProvider) {
+    constructor(dataProvider: DataProvider, type: OverlayTypes) {
         this.dataProvider = dataProvider;
         this.tileWidth = 0;
         this.tileHeight = 0;
+        this.isDisposed = false;
+        this.overlayType = type;
     }
 
     public initialize(): BoxWebMercator | undefined {
+        if ( this.overlayType == OverlayTypes.None ) {
+            return undefined;
+        }
+
         let tilesAcross = 2 ** 2;
         this.tileWidth = PointWebMercator.MAX_X_MERCATOR / tilesAcross;
         this.tileHeight = PointWebMercator.MAX_Y_MERCATOR / tilesAcross;
 
         return new BoxWebMercator(0, 0, PointWebMercator.MAX_X_MERCATOR, PointWebMercator.MAX_Y_MERCATOR);
+    }
+
+    public dispose(): void {
+        this.isDisposed = true;
     }
 
     public getOriginalWidth(): number {
@@ -47,8 +60,7 @@ export class MapDataView implements ISubMapView, IDataReceiver {
     }
 
     public receiveData(location: PointWebMercator, data: any): void {
-        if ( this.context === undefined || this.contextTransform === undefined || this.contextRegion === undefined ||
-            this.contextScale === undefined ) {
+        if ( this.isDisposed || this.context === undefined || this.contextTransform === undefined || this.contextRegion === undefined ) {
             return;
         }
 
@@ -57,16 +69,28 @@ export class MapDataView implements ISubMapView, IDataReceiver {
             return;
         }
 
-        if ( data.value === undefined ) {
+        let currentTransform = this.context.getTransform();
+        this.context.setTransform(this.contextTransform);
+        switch ( this.overlayType ) {
+            case OverlayTypes.Ceiling: {
+                this.renderCeiling(location, data);
+                break;
+            }
+            default: {
+                console.error("Request to render unknown type.");
+            }
+        }
+        this.context.setTransform(currentTransform);
+    }
+
+    private renderCeiling(location: PointWebMercator, data: any): void {
+        if ( this.context === undefined || this.contextScale === undefined || data.ceiling === undefined ) {
             return;
         }
 
-        let currentTransform = this.context.getTransform();
-        this.context.setTransform(this.contextTransform);
-
-        //Write out the ceiling
+        let visibleCeiling = (parseInt(data.ceiling) / 100).toString();
         let lineHeight = this.context.measureText('M').width * 1.2;
-        let textDimensions = this.context.measureText(data.value);
+        let textDimensions = this.context.measureText(visibleCeiling);
         let textRect = new Box2d(location.x * this.contextScale - textDimensions.width / 2, location.y * this.contextScale - lineHeight / 2,
             location.x * this.contextScale + textDimensions.width / 2, location.y * this.contextScale + lineHeight / 2);
         this.context.strokeStyle = "rgb(0,0,0)";
@@ -76,12 +100,13 @@ export class MapDataView implements ISubMapView, IDataReceiver {
         this.context.strokeRect(textRect.getUpperLeft().x - 3, textRect.getUpperLeft().y - 3, 
             textRect.getDimensions().x + 6, textRect.getDimensions().y + 6);
 
-        this.context.strokeText(data.value, textRect.getUpperLeft().x, textRect.getLowerRight().y);
-        
-        this.context.setTransform(currentTransform);
+        this.context.strokeText(visibleCeiling, textRect.getUpperLeft().x, textRect.getLowerRight().y);
     }
 
     public render(context: CanvasRenderingContext2D, region: Box2d, scale: number): void {       
+        if ( this.isDisposed ) {
+            return;
+        }
         this.context = context;
         this.contextTransform = context.getTransform();
         this.contextScale = scale;
@@ -93,6 +118,11 @@ export class MapDataView implements ISubMapView, IDataReceiver {
         let longitudeBuffer = longitudeAcross * pixelsAcrossBuffer / pixelsAcross
         let latitudeBuffer = longitudeBuffer * 0.6
         
-        this.dataProvider.retrieveTile(CoordinateConversion.convertBox2dToBoxGeo(region), new PointGeo(longitudeBuffer, latitudeBuffer), this);
+        this.dataProvider.retrieveTile(CoordinateConversion.convertBox2dToBoxGeo(region), new PointGeo(longitudeBuffer, latitudeBuffer), 
+            this.overlayType, this);
+    }
+
+    public moveOffscreen(): void {
+        this.context = undefined;
     }
 }

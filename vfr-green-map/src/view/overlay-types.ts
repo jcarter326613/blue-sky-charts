@@ -1,4 +1,10 @@
 export enum OverlayTypes {
     None,
-    Ceiling
+    Ceiling,
+    Visibility,
+    CloudCover,
+    Wind,
+    TempC,
+    DewpointC,
+    Category
 }

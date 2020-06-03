@@ -1,31 +1,44 @@
 import * as $ from 'jquery'
 import { Point2d, PointWebMercator, PointGeo, CoordinateConversion, BoxGeo } from "coordinates"
 import { IDataReceiver } from "./i-data-receiver";
+import { OverlayTypes } from '../view/overlay-types'
 
 export class DataProvider {
     private dataCache: Record<string, DataRequest>;
-    private usedBuckets: Record<string, Array<BoxGeo>>; //<resolution as string, box geos>
+    private usedBuckets: Record<OverlayTypes, Record<string, Array<BoxGeo>>>; //<overlay_type, <resolution as string, box geos>>
     private static readonly AREA_BUCKET_MULTIPLIER = 2;
 
     constructor() {
         this.dataCache = {};
-        this.usedBuckets = {};
+        this.usedBuckets = {
+            0: {},
+            1: {},
+            2: {}, 
+            3: {},
+            4: {},
+            5: {},
+            6: {},
+            7: {}
+        };
     }
 
-    public retrieveTile(area: BoxGeo, resolution: PointGeo, receiver: IDataReceiver): void {
+    public retrieveTile(area: BoxGeo, resolution: PointGeo, type: OverlayTypes, receiver: IDataReceiver): void {
         let resolutionBucket = this.createResolutionBucket(resolution);
-        let areaBucket = this.createAreaBucket(area, resolutionBucket);
-        let cachedData = this.getDataFromCache(areaBucket, resolutionBucket);
+        let areaBucket = this.createAreaBucket(area, resolutionBucket, type);
+        let cachedData = this.getDataFromCache(areaBucket, resolutionBucket, type);
         cachedData.setReceiver(receiver);
     }
 
-    private getDataFromCache( area: BoxGeo, resolution: PointGeo ): DataRequest {
-        let key = this.getCacheKey(area, resolution);
+    private getDataFromCache( area: BoxGeo, resolution: PointGeo, type: OverlayTypes ): DataRequest {
+        let key = this.getCacheKey(area, resolution, type);
         if ( key in this.dataCache ) {
-            return this.dataCache[key];
+            let cacheItem = this.dataCache[key];
+            if ( !cacheItem.isInError() ) {
+                return cacheItem;
+            }
         }
 
-        let dataRequest = new DataRequest(area, resolution);
+        let dataRequest = new DataRequest(area, resolution, type);
         this.dataCache[key] = dataRequest;
         return dataRequest;
     }
@@ -39,15 +52,15 @@ export class DataProvider {
         return new PointGeo(2 ** x, 2 ** y);
     }
 
-    private createAreaBucket(area: BoxGeo, resolution: PointGeo): BoxGeo {
+    private createAreaBucket(area: BoxGeo, resolution: PointGeo, type: OverlayTypes): BoxGeo {
         // Check if the area exists in a used bucket
         let resolutionKey = this.getResolutionKey(resolution);
-        if ( !(resolutionKey in this.usedBuckets) ) {
-            this.usedBuckets[resolutionKey] = new Array<BoxGeo>();
+        if ( !(resolutionKey in this.usedBuckets[type]) ) {
+            this.usedBuckets[type][resolutionKey] = new Array<BoxGeo>();
         }
         let areaTl = area.getTopLeft();
         let areaBr = area.getBottomRight();
-        for ( let obj of this.usedBuckets[resolutionKey] ) {
+        for ( let obj of this.usedBuckets[type][resolutionKey] ) {
             let tl = obj.getTopLeft();
             let br = obj.getBottomRight();
             if ( tl.longitude <= areaTl.longitude && tl.latitude >= areaTl.latitude &&
@@ -64,7 +77,7 @@ export class DataProvider {
         let brLatitude = areaBr.latitude - (areaDimensions.latitude * DataProvider.AREA_BUCKET_MULTIPLIER);
         let bucket = new BoxGeo(new PointGeo(this.forceValidLongitude(tlLongitude), this.forceValidLatitude(tlLatitude)),
             new PointGeo(this.forceValidLongitude(brLongitude), this.forceValidLatitude(brLatitude)));
-        this.usedBuckets[resolutionKey].push(bucket);
+        this.usedBuckets[type][resolutionKey].push(bucket);
         return bucket;
     }
 
@@ -92,24 +105,26 @@ export class DataProvider {
         return `${resolution.longitude}|${resolution.latitude}`;
     }
 
-    private getCacheKey(area: BoxGeo, resolution: PointGeo): string {
+    private getCacheKey(area: BoxGeo, resolution: PointGeo, type: OverlayTypes): string {
         let tl = area.getTopLeft();
         let br = area.getBottomRight();
-        return `${tl.longitude}|${tl.latitude}|${br.longitude}|${br.latitude}|${resolution.longitude}|${resolution.latitude}`
+        return `${type}|${tl.longitude}|${tl.latitude}|${br.longitude}|${br.latitude}|${resolution.longitude}|${resolution.latitude}`
     }
 }
 
 class DataRequest {
     private loaded: boolean;
+    private inError: boolean;
     private data: Array<any> | undefined;
     private receiver: IDataReceiver | undefined;
     private static readonly urlBase = "https://n3aigsadrc.execute-api.us-east-1.amazonaws.com/dev/getConditions";
 
-    constructor(area: BoxGeo, resolution: PointGeo) {
+    constructor(area: BoxGeo, resolution: PointGeo, type: OverlayTypes) {
         this.loaded = false;
         let tl = area.getTopLeft();
         let br = area.getBottomRight();
-        let url = `${DataRequest.urlBase}?startLongitude=${tl.longitude}&endLongitude=${br.longitude}&startLatitude=${br.latitude}&endLatitude=${tl.latitude}&bufferLongitude=${resolution.longitude}&bufferLatitude=${resolution.latitude}`;
+        let url = `${DataRequest.urlBase}?startLongitude=${tl.longitude}&endLongitude=${br.longitude}&startLatitude=${br.latitude}&endLatitude=${tl.latitude}&bufferLongitude=${resolution.longitude}&bufferLatitude=${resolution.latitude}&information=${this.getInformationForType(type)}`;
+        this.inError = false;
 
         $.ajax({
             url: url,
@@ -128,6 +143,7 @@ class DataRequest {
                 }
             },
             error: (response) => {
+                this.inError = true;
                 console.error(`Could not load data from ${url}`);
             }});
     }
@@ -138,6 +154,10 @@ class DataRequest {
         } else {
             this.receiver = receiver;
         }
+    }
+
+    public isInError(): boolean {
+        return this.inError;
     }
 
     private broadcastData(receiver: IDataReceiver) {
@@ -153,6 +173,36 @@ class DataRequest {
             let mercatorLocation = CoordinateConversion.convertToWebMercator(geoLocation);
 
             receiver.receiveData(mercatorLocation, data);
+        }
+    }
+    
+    private getInformationForType(type: OverlayTypes): string {
+        switch( type ) {
+            case OverlayTypes.Category: {
+                return "flightCategory"
+            }
+            case OverlayTypes.Ceiling: {
+                return "ceiling"
+            }
+            case OverlayTypes.CloudCover: {
+                return "cloudCover"
+            }
+            case OverlayTypes.DewpointC: {
+                return "dewpointCelcius"
+            }
+            case OverlayTypes.TempC: {
+                return "temperatureCelcius"
+            }
+            case OverlayTypes.Visibility: {
+                return "visibility"
+            }
+            case OverlayTypes.Wind: {
+                return "wind"
+            }
+            default: {
+                console.error("Invalid overlay type");
+                return "";
+            }
         }
     }
 }
