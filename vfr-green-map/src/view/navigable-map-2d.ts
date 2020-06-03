@@ -124,25 +124,21 @@ export class NavigableMap2d implements IMap {
 
     public setOverlayType(type: OverlayTypes): boolean {
         let success: boolean
-        switch (type) {
-            case OverlayTypes.Ceiling: {
-                let dataView = new MapDataView(this.dataProvider, type);
-                let extent = dataView.initialize();
-                if ( extent !== undefined ) {
-                    this.dataOverlayView = new SubMapPosition(dataView, extent);
-                    success = true;
-                } else {
-                    success = false;
-                }
-                break;
-            }
-            default: {
-                if ( this.dataOverlayView !== undefined ) {
-                    this.dataOverlayView.getSubMapView().dispose();
-                    this.dataOverlayView = undefined;
-                }
+        if (type != OverlayTypes.None) {
+            let dataView = new MapDataView(this.dataProvider, type);
+            let extent = dataView.initialize();
+            if ( extent !== undefined ) {
+                this.dataOverlayView = new SubMapPosition(dataView, extent);
                 success = true;
+            } else {
+                success = false;
             }
+        } else {
+            if ( this.dataOverlayView !== undefined ) {
+                this.dataOverlayView.getSubMapView().dispose();
+                this.dataOverlayView = undefined;
+            }
+            success = true;
         }
 
         this.render();

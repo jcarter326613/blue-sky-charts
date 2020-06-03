@@ -76,6 +76,22 @@ export class MapDataView implements ISubMapView, IDataReceiver {
                 this.renderCeiling(location, data);
                 break;
             }
+            case OverlayTypes.Category: {
+                this.renderCategory(location, data);
+                break;
+            }
+            case OverlayTypes.DewpointC: {
+                this.renderDewpoint(location, data);
+                break;
+            }
+            case OverlayTypes.TempC: {
+                this.renderTemperature(location, data);
+                break;
+            }
+            case OverlayTypes.Visibility: {
+                this.renderVisibility(location, data);
+                break;
+            }
             default: {
                 console.error("Request to render unknown type.");
             }
@@ -84,13 +100,51 @@ export class MapDataView implements ISubMapView, IDataReceiver {
     }
 
     private renderCeiling(location: PointWebMercator, data: any): void {
-        if ( this.context === undefined || this.contextScale === undefined || data.ceiling === undefined ) {
+        if ( data.ceiling === undefined ) {
             return;
         }
 
-        let visibleCeiling = (parseInt(data.ceiling) / 100).toString();
+        this.renderBoxText(location, (parseInt(data.ceiling) / 100).toString());
+    }
+
+    private renderCategory(location: PointWebMercator, data: any): void {
+        if ( data.flightCategory === undefined ) {
+            return;
+        }
+
+        this.renderBoxText(location, data.flightCategory);
+    }
+
+    private renderDewpoint(location: PointWebMercator, data: any): void {
+        if ( data.dewpointCelcius === undefined ) {
+            return;
+        }
+
+        this.renderBoxText(location, data.dewpointCelcius.toString());
+    }
+
+    private renderTemperature(location: PointWebMercator, data: any): void {
+        if ( data.temperatureCelcius === undefined ) {
+            return;
+        }
+
+        this.renderBoxText(location, data.temperatureCelcius.toString());
+    }
+
+    private renderVisibility(location: PointWebMercator, data: any): void {
+        if ( data.visibility === undefined ) {
+            return;
+        }
+
+        this.renderBoxText(location, data.visibility.toString());
+    }
+
+    private renderBoxText(location: PointWebMercator, text: string) {
+        if ( this.context === undefined || this.contextScale === undefined ) {
+            return;
+        }
         let lineHeight = this.context.measureText('M').width * 1.2;
-        let textDimensions = this.context.measureText(visibleCeiling);
+        let textDimensions = this.context.measureText(text);
         let textRect = new Box2d(location.x * this.contextScale - textDimensions.width / 2, location.y * this.contextScale - lineHeight / 2,
             location.x * this.contextScale + textDimensions.width / 2, location.y * this.contextScale + lineHeight / 2);
         this.context.strokeStyle = "rgb(0,0,0)";
@@ -100,7 +154,7 @@ export class MapDataView implements ISubMapView, IDataReceiver {
         this.context.strokeRect(textRect.getUpperLeft().x - 3, textRect.getUpperLeft().y - 3, 
             textRect.getDimensions().x + 6, textRect.getDimensions().y + 6);
 
-        this.context.strokeText(visibleCeiling, textRect.getUpperLeft().x, textRect.getLowerRight().y);
+        this.context.strokeText(text, textRect.getUpperLeft().x, textRect.getLowerRight().y);
     }
 
     public render(context: CanvasRenderingContext2D, region: Box2d, scale: number): void {       
