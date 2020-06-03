@@ -2,6 +2,7 @@ export class EasyAwait {
     public static instance: EasyAwait = new EasyAwait();
     private promise: Promise<void> | undefined;
     private threadCount: number;
+    private threadLocationCount: Record<string, number>;
     private started: boolean;
     private fatalErrorReported: boolean;
     private fatalErrorMessage: string | undefined;
@@ -9,6 +10,7 @@ export class EasyAwait {
     private constructor() {
         this.started = false;
         this.threadCount = 0;
+        this.threadLocationCount = {};
         this.promise = undefined;
         this.fatalErrorReported = false;
     }
@@ -21,21 +23,34 @@ export class EasyAwait {
         });
     }
 
-    public startThread(): void {
+    public startThread(location: string): void {
         if ( this.hasFatalError() ) {
             return;
         }
+        if ( !(location in this.threadLocationCount) ) {
+            this.threadLocationCount[location] = 0;
+        }
+        this.threadLocationCount[location]++;
         this.threadCount++;
         this.started = true;
     }
 
-    public endThread(): void {
+    public endThread(location: string): void {
         if ( this.hasFatalError() ) {
             return;
         }
+        if ( !(location in this.threadLocationCount) ) {
+            this.reportFatalError(`EasyAwait, location ${location} ended but never started`);
+            return;
+        }
+        if ( this.threadLocationCount[location] == 0 ) {
+            this.reportFatalError(`EasyAwait, location ${location} ended but is unbalanced`);
+            return;
+        }
+        this.threadLocationCount[location]--;
         this.threadCount--;
         if ( this.threadCount < 0 ) {
-            this.reportFatalError("EasyAwait thread count unbalanced.");
+            this.reportFatalError("EasyAwait thread count unbalanced in unknown location.");
         }
     }
 

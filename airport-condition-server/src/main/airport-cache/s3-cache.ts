@@ -21,6 +21,7 @@ export class S3Cache extends Cache {
         // If the file is in the cache, returns it
         if ( this.hasKey(name) ) {
             callback(this.retrieve(name));
+            return;
         }
 
         // Otherwise read the file in s3 and return it
@@ -30,7 +31,7 @@ export class S3Cache extends Cache {
             Key: fullPath,
         };
         
-        EasyAwait.instance.startThread();
+        EasyAwait.instance.startThread("S3Cache.retrieveFile");
         this.s3.getObject(params, (err, data) => {
             if (err) {
                 EasyAwait.instance.reportFatalError(`Error retrieving file ${fullPath} from S3.  Error: ${err}`);
@@ -45,7 +46,7 @@ export class S3Cache extends Cache {
                     EasyAwait.instance.reportFatalError(`Error parsing file ${fullPath}`);
                 }
             }
-            EasyAwait.instance.endThread();
+            EasyAwait.instance.endThread("S3Cache.retrieveFile");
         });
     }
 }

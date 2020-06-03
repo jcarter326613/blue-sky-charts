@@ -18,11 +18,12 @@ export class LocalCache extends Cache {
         // If the file is in the cache, returns it
         if ( this.hasKey(name) ) {
             callback(this.retrieve(name));
+            return;
         }
 
         // Otherwise read the file in from disk and return it
         let fullPath = join(this.root, name);
-        EasyAwait.instance.startThread();
+        EasyAwait.instance.startThread("LocalCache.retrieveFile");
         readFile(fullPath, null, (err: NodeJS.ErrnoException | null, data: Buffer) => {
             if ( err != null ) {
                 EasyAwait.instance.reportFatalError(`Could not load aiport information from file ${fullPath}.  Error: ${err.message}.`);
@@ -34,7 +35,7 @@ export class LocalCache extends Cache {
                     EasyAwait.instance.reportFatalError(`Error parsing file ${fullPath}`);
                 }
             }
-            EasyAwait.instance.endThread();
+            EasyAwait.instance.endThread("LocalCache.retrieveFile");
         });
     }
 }

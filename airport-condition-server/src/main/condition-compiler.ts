@@ -40,10 +40,10 @@ export class ConditionCompiler {
         this.buffer = buffer;
         for ( let i = cellsUpperLeft.x; i <= cellsLowerRight.x; i++ ) {
             for ( let j = cellsUpperLeft.y; j <= cellsLowerRight.y; j++ ) {
-                EasyAwait.instance.startThread();
+                EasyAwait.instance.startThread("ConditionCompiler.compileConditions");
                 this.cache.retrieveFile(`${i}_${j}.json`, (data: Array<AirportInformation>) => {
                     this.receiveFile(data, region);
-                    EasyAwait.instance.endThread();
+                    EasyAwait.instance.endThread("ConditionCompiler.compileConditions");
                 });
             }
         } 

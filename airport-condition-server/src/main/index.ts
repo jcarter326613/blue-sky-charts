@@ -102,7 +102,7 @@ export const handler = async (event: any = {}): Promise<any> => {
 
     //Fulfill the request
     EasyAwait.instance.initialize();
-    EasyAwait.instance.startThread();
+    EasyAwait.instance.startThread("Handler entrypoint");
 
     let cache: Cache;
     if ( Cache.overrideCache !== undefined ) {
@@ -114,7 +114,7 @@ export const handler = async (event: any = {}): Promise<any> => {
     let compiler = new ConditionCompiler(cache, queryStringParameters["information"]);
     compiler.compileConditions(region, buffer);
     
-    EasyAwait.instance.endThread();
+    EasyAwait.instance.endThread("Handler entrypoint");
     await EasyAwait.instance.join();
 
     // Report the results
