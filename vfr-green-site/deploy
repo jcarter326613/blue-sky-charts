@@ -1,5 +1,11 @@
 #!/bin/bash
 set -e
+read -p "Do you want to deploy? (y/n) " yn
+case $yn in
+	[Yy]* ) echo "Deploying...";;
+	[Nn]* ) exit;;
+	* ) exit;;
+esac
 
 npm run generate
 rm -rf dist/maps

@@ -6,7 +6,7 @@
         <div v-show="!showLayerControls" class="dropDownHeaderControl">+</div>
         <div v-show="showLayerControls" class="dropDownHeaderControl">-</div>
       </div>
-      <div v-show-slide="showLayerControls" class="dropDownContents">
+      <div v-show="showLayerControls" class="dropDownContents">
         <input type="radio" id="overlayTypeNone" :value="$OverlayTypes.None" v-model="selectedOverlayType">
         <label for="overlayTypeNone">None</label><br>
         <input type="radio" id="overlayTypeCeiling" :value="$OverlayTypes.Ceiling" v-model="selectedOverlayType">
@@ -34,14 +34,18 @@
 <script lang="javascript">
 import Vue from 'vue'
 import MyMap from 'vfr-green-map'
-import VShowSlide from 'v-show-slide'
 import "~/components/InteractiveMap.vue"
 
 Vue.use(MyMap)
-Vue.use(VShowSlide)
 
 export default Vue.extend({
   data: function() {
+      let showLayerControls;
+      try {
+        showLayerControls = screen.orientation.type.indexOf("landscape") >= 0
+      } catch (e) {
+        showLayerControls = true;
+      }
       return {
         "originLongitude": this.$route.query.longitude,
         "originLatitude": this.$route.query.latitude,
@@ -49,7 +53,7 @@ export default Vue.extend({
         "markLongitude": this.$route.query.markLongitude,
         "markLatitude": this.$route.query.markLatitude,
         "selectedOverlayType": this.$OverlayTypes.None,
-        "showLayerControls": false
+        "showLayerControls": showLayerControls
       };
   },
   methods: {
@@ -75,6 +79,7 @@ export default Vue.extend({
   flex-grow: 1;
   font-size: 0px;
   overflow: hidden;
+  z-index: 1;
 }
 .controls {
   flex-grow: 0;
@@ -82,6 +87,7 @@ export default Vue.extend({
   background-color: rgb(20,20,20);
   color: rgb(200,200,200);
   cursor: pointer;
+  z-index: 2;
 }
 .dropDownHeader {
   display: flex;
@@ -106,5 +112,13 @@ export default Vue.extend({
   user-select: none; /* Non-prefixed version, currently
                         supported by Chrome and Opera */
   -webkit-tap-highlight-color:  rgba(255, 255, 255, 0);
+}
+
+@media screen and (orientation: portrait) {
+  .controls {
+    float: left;
+    position: absolute;
+    width: 100%;
+  }
 }
 </style>
