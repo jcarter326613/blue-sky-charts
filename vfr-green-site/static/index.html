@@ -32,7 +32,9 @@
         </style>
         <script>
             $(document).ready(() => {
-                $(".viewChartButton").click(() => {
+                $(".viewChartButton").click((e) => {
+                    e.preventDefault();
+                    e.stopPropagation();
                     window.location.href = "/chart";
                 })
             });
