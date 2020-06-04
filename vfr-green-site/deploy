@@ -8,6 +8,7 @@ case $yn in
 esac
 
 npm run generate
-rm -rf dist/maps
+rm -rf dist/maps/world-vfr/metadata.json
+rm -rf dist/maps/world-vfr/sectional
 rm -rf dist/metar
 aws s3 sync ./dist s3://blueskycharts.com
