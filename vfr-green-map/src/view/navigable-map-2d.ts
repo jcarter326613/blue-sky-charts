@@ -109,10 +109,10 @@ export class NavigableMap2d implements IMap {
         // Create canvas object and place it in the div
         let canvasObj = document.createElement("canvas");
         this.canvasObjHtml = $(canvasObj);
+        this.setSize();
         this.containerDiv.append(this.canvasObjHtml);
         this.context = canvasObj.getContext("2d");
 
-        this.setSize();
         this.addEventListeners();
         this.render();
         this.retrieveConfiguration(`${mapRoot}/metadata.json`);
