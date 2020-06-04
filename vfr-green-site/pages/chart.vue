@@ -1,5 +1,5 @@
 <template>
-  <div class="frame">
+  <div class="frame noselect">
     <div class="controls">
       <div @click="toggleLayerControls" class="dropDownHeader">
         <div class="dropDownHeaderLabel">Layers</div>
@@ -96,5 +96,15 @@ export default Vue.extend({
 }
 .dropDownHeaderControl {
   flex-grow: 0;
+}
+.noselect {
+  -webkit-touch-callout: none; /* iOS Safari */
+  -webkit-user-select: none; /* Safari */
+  -khtml-user-select: none; /* Konqueror HTML */
+  -moz-user-select: none; /* Firefox */
+  -ms-user-select: none; /* Internet Explorer/Edge */
+  user-select: none; /* Non-prefixed version, currently
+                        supported by Chrome and Opera */
+  -webkit-tap-highlight-color:  rgba(255, 255, 255, 0);
 }
 </style>
