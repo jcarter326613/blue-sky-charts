@@ -1,7 +1,7 @@
 
 import * as $ from 'jquery'
 import { JQueryMousewheelEventObject } from '../types/jquery-mousewheel'
-import { Box2d, BoxWebMercator, PointGeo, PointWebMercator } from 'coordinates'
+import { Box2d, BoxWebMercator, PointGeo, PointWebMercator, BoxGeo } from 'coordinates'
 import { CoordinateConversion } from 'coordinates'
 import { IMap } from './i-map'
 import { OverlayTypes } from './overlay-types'
@@ -12,11 +12,13 @@ import { MapTileView } from './map-tile-view'
 import { TileProvider } from '../resources/tile-provider'
 import { MapDataView } from './map-data-view'
 import { DataProvider } from '../resources/data-provider'
+import { BoxGeoModel } from '../models/box-geo-model'
 
 declare function require(module: string): any;
 
 export class NavigableMap2d implements IMap {
     private tileProvider: TileProvider;
+    private shadowTileProvider: TileProvider;
     private dataProvider: DataProvider;
 
     // Map state variables
@@ -70,6 +72,7 @@ export class NavigableMap2d implements IMap {
 
         // Set all constant and derived defaults
         this.tileProvider = new TileProvider(`${mapRoot}/sectional`);
+        this.shadowTileProvider = new TileProvider(`${mapRoot}/world-shadow`);
         this.dataProvider = new DataProvider();
         this.maxScaleDriver = 12;
         if ( this.scaleDriver > this.maxScaleDriver ) {
@@ -187,6 +190,28 @@ export class NavigableMap2d implements IMap {
     }
 
     private initializeMapModel(data: Record<string, SubMapModel>): void {
+        // Add the background world map
+        let worldShadowView = new MapTileView(this.shadowTileProvider, this);
+        let worldShadowMercatorExtents = new BoxWebMercator(0, 0, PointWebMercator.MAX_X_MERCATOR, PointWebMercator.MAX_Y_MERCATOR);
+        let shadowBoxGeo = CoordinateConversion.convertBoxMercatorToBoxGeo(worldShadowMercatorExtents);
+        let shadowBoxGeoModel = new BoxGeoModel();
+        shadowBoxGeoModel.topLeft = shadowBoxGeo.getTopLeft();
+        shadowBoxGeoModel.topRight = shadowBoxGeo.getTopRight();
+        shadowBoxGeoModel.bottomLeft = shadowBoxGeo.getBottomLeft();
+        shadowBoxGeoModel.bottomRight = shadowBoxGeo.getBottomRight();
+        let shadowMapModel = new SubMapModel();
+        shadowMapModel.maxZoom = 0;
+        shadowMapModel.tileWidth = 256;
+        shadowMapModel.fileExtent = shadowBoxGeoModel;
+        shadowMapModel.imageHeight = 256;
+        shadowMapModel.imageWidth = 256;
+        shadowMapModel.imageHeightScale = 1;
+        shadowMapModel.imageWidthScale = 1;
+        shadowMapModel.version = "1";
+        worldShadowView.initialize(shadowMapModel, "world-shadow");
+        this.mapViews.push(new SubMapPosition(worldShadowView, worldShadowMercatorExtents));
+
+        // Add the world  VFR charts
         for (let key in data) {
             let subMapModel = data[key];
             if (subMapModel.fileExtent == null || subMapModel.imageWidth == null || subMapModel.imageHeight == null)
