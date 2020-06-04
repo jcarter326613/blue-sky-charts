@@ -181,6 +181,11 @@ export class NavigableMap2d implements IMap {
         }
     }
 
+    private getClientOffset(): Point2d {
+        let offset = this.canvasObjHtml.offset();
+        return new Point2d(offset?.left, offset?.top);
+    }
+
     private initializeMapModel(data: Record<string, SubMapModel>): void {
         for (let key in data) {
             let subMapModel = data[key];
@@ -408,7 +413,8 @@ export class NavigableMap2d implements IMap {
                 return;
             }
             this.touchMoveIdentifier = touch.identifier;
-            if ( this.mouseDownHelper(touch.clientX, touch.clientY) ) {
+            let clientRect = this.getClientOffset();
+            if ( this.mouseDownHelper(touch.clientX - clientRect.x, touch.clientY - clientRect.y) ) {
                 event.preventDefault();
                 event.stopPropagation();
             }
@@ -436,7 +442,8 @@ export class NavigableMap2d implements IMap {
             }
 
             if ( touch !== undefined ) {
-                this.mouseMoveHelper(touch.clientX, touch.clientY);
+                let clientRect = this.getClientOffset();
+                this.mouseMoveHelper(touch.clientX - clientRect.x, touch.clientY - clientRect.y);
             }
         } else if ( event.targetTouches.length == 2 ) {
             let touch1 = event.targetTouches[0]
