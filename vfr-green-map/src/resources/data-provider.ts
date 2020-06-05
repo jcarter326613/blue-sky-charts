@@ -1,14 +1,17 @@
 import * as $ from 'jquery'
+import { CachedProvider, CachedProviderRequest } from './cached-provider'
 import { Point2d, PointWebMercator, PointGeo, CoordinateConversion, BoxGeo } from "coordinates"
 import { IDataReceiver } from "./i-data-receiver";
 import { OverlayTypes } from '../view/overlay-types'
 
-export class DataProvider {
+export class DataProvider extends CachedProvider {
+    private static readonly AREA_BUCKET_MULTIPLIER = 2;
+    private static readonly REQUEST_DELAY_MILLISECONDS = 700;
     private dataCache: Record<string, DataRequest>;
     private usedBuckets: Record<OverlayTypes, Record<string, Array<BoxGeo>>>; //<overlay_type, <resolution as string, box geos>>
-    private static readonly AREA_BUCKET_MULTIPLIER = 2;
 
     constructor() {
+        super(DataProvider.REQUEST_DELAY_MILLISECONDS);
         this.dataCache = {};
         this.usedBuckets = {
             0: {},
@@ -38,7 +41,7 @@ export class DataProvider {
             }
         }
 
-        let dataRequest = new DataRequest(area, resolution, type);
+        let dataRequest = new DataRequest(this, area, resolution, type);
         this.dataCache[key] = dataRequest;
         return dataRequest;
     }
@@ -112,20 +115,25 @@ export class DataProvider {
     }
 }
 
-class DataRequest {
-    private loaded: boolean;
-    private inError: boolean;
+class DataRequest extends CachedProviderRequest {
     private data: Array<any> | undefined;
     private receiver: IDataReceiver | undefined;
+    private area: BoxGeo;
+    private resolution: PointGeo;
+    private type: OverlayTypes;
     private static readonly urlBase = "https://n3aigsadrc.execute-api.us-east-1.amazonaws.com/dev/getConditions";
 
-    constructor(area: BoxGeo, resolution: PointGeo, type: OverlayTypes) {
-        this.loaded = false;
-        let tl = area.getTopLeft();
-        let br = area.getBottomRight();
-        let url = `${DataRequest.urlBase}?startLongitude=${tl.longitude}&endLongitude=${br.longitude}&startLatitude=${br.latitude}&endLatitude=${tl.latitude}&bufferLongitude=${resolution.longitude}&bufferLatitude=${resolution.latitude}&information=${this.getInformationForType(type)}`;
-        this.inError = false;
-
+    constructor(provider: DataProvider, area: BoxGeo, resolution: PointGeo, type: OverlayTypes) {
+        super(provider);
+        this.area = area;
+        this.resolution = resolution;
+        this.type = type;
+    }
+    
+    public sendRequest(): void {
+        let tl = this.area.getTopLeft();
+        let br = this.area.getBottomRight();
+        let url = `${DataRequest.urlBase}?startLongitude=${tl.longitude}&endLongitude=${br.longitude}&startLatitude=${br.latitude}&endLatitude=${tl.latitude}&bufferLongitude=${this.resolution.longitude}&bufferLatitude=${this.resolution.latitude}&information=${this.getInformationForType(this.type)}`;
         $.ajax({
             url: url,
             type: "GET",
@@ -134,34 +142,24 @@ class DataRequest {
             success: (data) => {
                 try {
                     this.data = data;
-                    this.loaded = true;
-                    if (this.receiver != null) {
-                        this.broadcastData(this.receiver);
-                    }
+                    this.completeRequest(true);
                 } catch {
                     console.error(`Could not parse data from ${url}`);
+                    this.setError();
                 }
             },
             error: (response) => {
-                this.inError = true;
+                this.completeRequest(false);
                 console.error(`Could not load data from ${url}`);
             }});
     }
 
     public setReceiver(receiver: IDataReceiver) {
-        if ( this.loaded ) {
-            this.broadcastData(receiver);
-        } else {
-            this.receiver = receiver;
-        }
+        this.receiver = receiver;
     }
 
-    public isInError(): boolean {
-        return this.inError;
-    }
-
-    private broadcastData(receiver: IDataReceiver) {
-        if ( this.data === undefined ) {
+    public broadcastData() {
+        if ( this.data === undefined || this.receiver == undefined ) {
             return;
         }
 
@@ -172,7 +170,7 @@ class DataRequest {
             let geoLocation = new PointGeo(data.longitude, data.latitude);
             let mercatorLocation = CoordinateConversion.convertToWebMercator(geoLocation);
 
-            receiver.receiveData(mercatorLocation, data);
+            this.receiver.receiveData(mercatorLocation, data);
         }
     }
     
