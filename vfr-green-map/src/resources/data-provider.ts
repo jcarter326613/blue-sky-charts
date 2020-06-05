@@ -7,12 +7,10 @@ import { OverlayTypes } from '../view/overlay-types'
 export class DataProvider extends CachedProvider {
     private static readonly AREA_BUCKET_MULTIPLIER = 2;
     private static readonly REQUEST_DELAY_MILLISECONDS = 700;
-    private dataCache: Record<string, DataRequest>;
     private usedBuckets: Record<OverlayTypes, Record<string, Array<BoxGeo>>>; //<overlay_type, <resolution as string, box geos>>
 
     constructor() {
         super(DataProvider.REQUEST_DELAY_MILLISECONDS);
-        this.dataCache = {};
         this.usedBuckets = {
             0: {},
             1: {},
@@ -28,22 +26,23 @@ export class DataProvider extends CachedProvider {
     public retrieveTile(area: BoxGeo, resolution: PointGeo, type: OverlayTypes, receiver: IDataReceiver): void {
         let resolutionBucket = this.createResolutionBucket(resolution);
         let areaBucket = this.createAreaBucket(area, resolutionBucket, type);
-        let cachedData = this.getDataFromCache(areaBucket, resolutionBucket, type);
-        cachedData.setReceiver(receiver);
-    }
+        let key = this.getCacheKey(areaBucket, resolutionBucket, type);
+        let tileRequest = this.getExistingRequest(key);
 
-    private getDataFromCache( area: BoxGeo, resolution: PointGeo, type: OverlayTypes ): DataRequest {
-        let key = this.getCacheKey(area, resolution, type);
-        if ( key in this.dataCache ) {
-            let cacheItem = this.dataCache[key];
-            if ( !cacheItem.isInError() ) {
-                return cacheItem;
+        if ( tileRequest !== undefined && !tileRequest.isInError() ) {
+            let tileRequestScoped = tileRequest as DataRequest;
+            if (tileRequest.isLoaded()) {
+                tileRequestScoped.setReceiver(receiver);
+                tileRequestScoped.broadcastData(true);
+            } else {
+                tileRequestScoped.setReceiver(receiver);
+                //this.findTemporaryData(mapName, zoomLevel, location, receiver, data);
             }
+        } else {
+            let newRequest = new DataRequest(this, receiver, area, resolution, type);
+            this.addRequestToQueue(key, newRequest);
+            //this.findTemporaryData(mapName, zoomLevel, location, receiver, data);
         }
-
-        let dataRequest = new DataRequest(this, area, resolution, type);
-        this.dataCache[key] = dataRequest;
-        return dataRequest;
     }
 
     private createResolutionBucket(resolution: PointGeo): PointGeo {
@@ -123,8 +122,9 @@ class DataRequest extends CachedProviderRequest {
     private type: OverlayTypes;
     private static readonly urlBase = "https://n3aigsadrc.execute-api.us-east-1.amazonaws.com/dev/getConditions";
 
-    constructor(provider: DataProvider, area: BoxGeo, resolution: PointGeo, type: OverlayTypes) {
+    constructor(provider: DataProvider, receiver: IDataReceiver, area: BoxGeo, resolution: PointGeo, type: OverlayTypes) {
         super(provider);
+        this.receiver = receiver;
         this.area = area;
         this.resolution = resolution;
         this.type = type;
@@ -144,8 +144,8 @@ class DataRequest extends CachedProviderRequest {
                     this.data = data;
                     this.completeRequest(true);
                 } catch {
+                    this.completeRequest(false);
                     console.error(`Could not parse data from ${url}`);
-                    this.setError();
                 }
             },
             error: (response) => {
@@ -158,7 +158,7 @@ class DataRequest extends CachedProviderRequest {
         this.receiver = receiver;
     }
 
-    public broadcastData() {
+    public broadcastData(immediate: boolean) {
         if ( this.data === undefined || this.receiver == undefined ) {
             return;
         }

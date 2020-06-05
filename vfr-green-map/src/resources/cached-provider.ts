@@ -63,7 +63,7 @@ export abstract class CachedProviderRequest {
 
     abstract sendRequest(): void;
 
-    abstract broadcastData(): void;
+    abstract broadcastData(immediate: boolean): void;
 
     public isLoaded(): boolean {
         return this.loaded && !this.inError;
@@ -87,7 +87,7 @@ export abstract class CachedProviderRequest {
         this.provider.completeRequest();
         if ( isSuccess ) {
             this.setLoaded();
-            this.broadcastData();
+            this.broadcastData(false);
         } else {
             this.setError();
         }

@@ -18,11 +18,8 @@ export class TileProvider extends CachedProvider {
         if ( tileRequest !== undefined && !tileRequest.isInError() ) {
             let tileRequestScoped = tileRequest as TileRequest;
             if (tileRequest.isLoaded()) {
-                let image = tileRequestScoped.getImage();
-                if ( image != null ) {
-                    let region = new Box2d(0, 0, tileDimensions.x, tileDimensions.y);
-                    receiver.receiveTile(location, region, image, data, true);
-                }
+                tileRequestScoped.setReceiver(receiver, data);
+                tileRequestScoped.broadcastData(true);
             } else {
                 tileRequestScoped.setReceiver(receiver, data);
                 this.findTemporaryTile(mapName, zoomLevel, location, receiver, data);
@@ -98,14 +95,13 @@ class TileRequest extends CachedProviderRequest {
         this.tileImage.src = this.url;
     }
 
-    public broadcastData(): void {
+    public broadcastData(immediate: boolean): void {
         if (this.isLoaded() && !this.isInError() && 
             this.receiver != null && this.location != null && this.tileImage != null && this.dimensions != null) {
 
             let region = new Box2d(0, 0, this.dimensions.x, this.dimensions.y);
-            this.receiver.receiveTile(this.location, region, this.tileImage, this.data, false);
+            this.receiver.receiveTile(this.location, region, this.tileImage, this.data, immediate);
             this.receiver = null;
-            this.location = null;
             this.data = null;
         }
     }
