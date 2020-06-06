@@ -39,7 +39,7 @@ export class DataProvider extends CachedProvider {
                 //this.findTemporaryData(mapName, zoomLevel, location, receiver, data);
             }
         } else {
-            let newRequest = new DataRequest(this, receiver, area, resolution, type);
+            let newRequest = new DataRequest(this, receiver, areaBucket, resolutionBucket, type);
             this.addRequestToQueue(key, newRequest);
             //this.findTemporaryData(mapName, zoomLevel, location, receiver, data);
         }
