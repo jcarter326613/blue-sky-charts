@@ -33,9 +33,11 @@ export abstract class CachedProvider {
     }
 
     protected addRequestToQueue(key: string, request: CachedProviderRequest): void {
-        this.requestQueue[key] = request;
-        this.lastQueueAddition = new Date();
-        this.processQueue();
+        if (!(key in this.requestQueue) || this.requestQueue[key].isInError()) {
+            this.requestQueue[key] = request;
+            this.lastQueueAddition = new Date();
+            this.processQueue();
+        }
     }
 
     protected addRequestToCache(key: string, request: CachedProviderRequest): void {
