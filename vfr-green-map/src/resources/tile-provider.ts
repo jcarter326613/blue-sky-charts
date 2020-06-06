@@ -6,7 +6,7 @@ export class TileProvider extends CachedProvider {
     private mapRoot: string;
 
     constructor(mapRoot: string) {
-        super();
+        super(0);
         this.mapRoot = mapRoot;
     }
 

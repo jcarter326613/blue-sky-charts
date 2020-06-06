@@ -4,12 +4,16 @@ export abstract class CachedProvider {
     private numActiveRequests: number;
     private requestQueue: Record<string, CachedProviderRequest>;
     private requestDelayMilliseconds: number;
+    private lastQueueAddition: Date;
+    private processQueuePending: boolean;
 
     constructor(requestDelayMilliseconds: number = 0) {
         this.cache = {};
         this.numActiveRequests = 0;
         this.requestQueue = {};
         this.requestDelayMilliseconds = requestDelayMilliseconds;
+        this.lastQueueAddition = new Date();
+        this.processQueuePending = false;
     }
 
     public clearQueue(): void {
@@ -24,29 +28,44 @@ export abstract class CachedProvider {
      * Only to be called by CachedProviderRequest class to signify a downoad has completed.
      */
     public completeRequest(): void {
-        for ( let i in this.requestQueue ) {
-            let request = this.requestQueue[i];
-            this.addRequestToCache(i, request);
-            request.sendRequest();
-            delete this.requestQueue[i]
-            return;
-        }
-
         this.numActiveRequests--;
+        this.processQueue();
     }
 
     protected addRequestToQueue(key: string, request: CachedProviderRequest): void {
-        if ( this.numActiveRequests < CachedProvider.MAX_ACTIVE_REQUESTS ) {
-            this.addRequestToCache(key, request);
-            request.sendRequest();
-            this.numActiveRequests++;
-        } else {
-            this.requestQueue[key] = request;
-        }
+        this.requestQueue[key] = request;
+        this.lastQueueAddition = new Date();
+        this.processQueue();
     }
 
     protected addRequestToCache(key: string, request: CachedProviderRequest): void {
         this.cache[key] = request;
+    }
+
+    private processQueue(): void {
+        if ( this.processQueuePending ) {
+            return;
+        }
+        let now = new Date();
+        let timeToWait = this.requestDelayMilliseconds - (now.getTime() - this.lastQueueAddition.getTime())
+        if ( timeToWait <= 0 ) {
+            while ( this.numActiveRequests < CachedProvider.MAX_ACTIVE_REQUESTS && Object.keys(this.requestQueue).length > 0 ) {
+                for ( let i in this.requestQueue ) {
+                    let request = this.requestQueue[i];
+                    this.addRequestToCache(i, request);
+                    request.sendRequest();
+                    delete this.requestQueue[i]
+                    this.numActiveRequests++;
+                    break;
+                }
+            }
+        } else {
+            this.processQueuePending = true;
+            setTimeout(() => {
+                this.processQueuePending = false;
+                this.processQueue();
+            }, timeToWait);
+        }
     }
 };
 

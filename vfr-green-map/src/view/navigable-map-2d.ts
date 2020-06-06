@@ -144,8 +144,14 @@ export class NavigableMap2d implements IMap {
             success = true;
         }
 
+        this.dataProvider.clearQueue();
         this.render();
         return success;
+    }
+
+    private viewportChanged(): void {
+        this.tileProvider.clearQueue();
+        this.dataProvider.clearQueue();
     }
 
     private updateScale(): void {
@@ -163,11 +169,11 @@ export class NavigableMap2d implements IMap {
         this.containerDiv.on("touchcancel", (event: JQuery.Event) => this.touchEnd(event));
 
         // Setup the window resize listener
-        let thisObject = this;
-        $(window).resize(function() {
-            requestAnimationFrame(function(){
-                thisObject.setSize();
-                thisObject.render();
+        $(window).resize(() => {
+            requestAnimationFrame(() => {
+                this.setSize();
+                this.viewportChanged();
+                this.render();
             })
         });
     }
@@ -246,7 +252,6 @@ export class NavigableMap2d implements IMap {
         context.fillStyle = "rgb(50,50,50)";
         context.fillRect(0, 0, this.containerWidth, this.containerHeight);
 
-        this.tileProvider.clearQueue();
         this.mapViews.forEach((submap) => {
             if ( context == null )
                 return;
@@ -367,6 +372,7 @@ export class NavigableMap2d implements IMap {
             }
         }
         this.updateScale();
+        this.viewportChanged();
         this.render();
     }
 
@@ -414,6 +420,7 @@ export class NavigableMap2d implements IMap {
             this.origin2d = new PointWebMercator(this.mouseDownOrigin2d.x - viewportDimentions.x * percentageClientTraverseX,
                 this.mouseDownOrigin2d.y - viewportDimentions.y * percentageClientTraverseY);
 
+            this.viewportChanged();
             this.render();
         }
     }
@@ -489,6 +496,7 @@ export class NavigableMap2d implements IMap {
             }
 
             this.updateScale()
+            this.viewportChanged();
             this.render();
         }
     }
