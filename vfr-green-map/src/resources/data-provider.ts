@@ -185,8 +185,8 @@ class DataRequest extends CachedProviderRequest {
             case OverlayTypes.CloudCover: {
                 return "cloudCover"
             }
-            case OverlayTypes.DewpointC: {
-                return "dewpointCelcius"
+            case OverlayTypes.DewpointSpreadC: {
+                return "dewpointSpreadCelcius"
             }
             case OverlayTypes.TempC: {
                 return "temperatureCelcius"

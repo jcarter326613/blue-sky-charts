@@ -5,6 +5,6 @@ export enum OverlayTypes {
     CloudCover,
     Wind,
     TempC,
-    DewpointC,
+    DewpointSpreadC,
     Category
 }

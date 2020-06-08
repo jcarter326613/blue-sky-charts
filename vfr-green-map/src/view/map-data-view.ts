@@ -82,8 +82,8 @@ export class MapDataView implements ISubMapView, IDataReceiver {
                 this.renderCategory(location, data);
                 break;
             }
-            case OverlayTypes.DewpointC: {
-                this.renderDewpoint(location, data);
+            case OverlayTypes.DewpointSpreadC: {
+                this.renderDewpointSpread(location, data);
                 break;
             }
             case OverlayTypes.TempC: {
@@ -347,12 +347,12 @@ export class MapDataView implements ISubMapView, IDataReceiver {
         this.renderBoxText(location, data.flightCategory);
     }
 
-    private renderDewpoint(location: PointWebMercator, data: any): void {
-        if ( data.dewpointCelcius === undefined ) {
+    private renderDewpointSpread(location: PointWebMercator, data: any): void {
+        if ( data.dewpointSpreadCelcius === undefined ) {
             return;
         }
 
-        this.renderBoxText(location, data.dewpointCelcius.toString());
+        this.renderBoxText(location, data.dewpointSpreadCelcius.toString());
     }
 
     private renderTemperature(location: PointWebMercator, data: any): void {
@@ -375,18 +375,42 @@ export class MapDataView implements ISubMapView, IDataReceiver {
         if ( this.context === undefined || this.contextScale === undefined ) {
             return;
         }
+        let oldFont = this.context.font;
+        this.context.font = "20px Arial";
         let lineHeight = this.context.measureText('M').width * 1.2;
         let textDimensions = this.context.measureText(text);
+        let heightBuffer = 10;
+        let widthBuffer = 6;
+        let cornerRadius = 3;
         let textRect = new Box2d(-textDimensions.width / 2, -lineHeight / 2, textDimensions.width / 2, lineHeight / 2);
+        let boxRect = new Box2d(-textDimensions.width / 2 - widthBuffer / 2, -lineHeight / 2 - heightBuffer / 2, 
+            textDimensions.width / 2 + widthBuffer / 2, lineHeight / 2 + heightBuffer / 10)
         this.context.lineWidth = 1;
         this.context.strokeStyle = "rgb(0,0,0)";
         this.context.fillStyle = "rgb(255,255,255)";
-        this.context.fillRect(textRect.getUpperLeft().x - 3, textRect.getUpperLeft().y - 3, 
-            textRect.getDimensions().x + 6, textRect.getDimensions().y + 6);
-        this.context.strokeRect(textRect.getUpperLeft().x - 3, textRect.getUpperLeft().y - 3, 
-            textRect.getDimensions().x + 6, textRect.getDimensions().y + 6);
+        this.context.beginPath();
+        this.context.moveTo(boxRect.getUpperLeft().x + cornerRadius, boxRect.getUpperLeft().y);
+        this.context.lineTo(boxRect.getLowerRight().x - cornerRadius, boxRect.getUpperLeft().y);
+        this.context.arc(boxRect.getLowerRight().x - cornerRadius, boxRect.getUpperLeft().y + cornerRadius, cornerRadius,
+            -Math.PI / 2, 0);
+        this.context.lineTo(boxRect.getLowerRight().x, boxRect.getLowerRight().y - cornerRadius);
+        this.context.arc(boxRect.getLowerRight().x - cornerRadius, boxRect.getLowerRight().y - cornerRadius, cornerRadius,
+            0, Math.PI / 2);
+        this.context.lineTo(boxRect.getUpperLeft().x + cornerRadius, boxRect.getLowerRight().y);
+        this.context.arc(boxRect.getUpperLeft().x + cornerRadius, boxRect.getLowerRight().y - cornerRadius, cornerRadius,
+            Math.PI / 2, Math.PI);
+        this.context.lineTo(boxRect.getUpperLeft().x, boxRect.getUpperLeft().y + cornerRadius);
+        this.context.arc(boxRect.getUpperLeft().x + cornerRadius, boxRect.getUpperLeft().y + cornerRadius, cornerRadius,
+            Math.PI, 3 * Math.PI / 2);
+        this.context.fill();
+        this.context.stroke();
 
-        this.context.strokeText(text, textRect.getUpperLeft().x, textRect.getLowerRight().y);
+        this.context.fillStyle = "rgb(0,0,0)";
+        let oldAlign = this.context.textAlign;
+        this.context.textAlign = "center";
+        this.context.fillText(text, 0, textRect.getLowerRight().y - 5);
+        this.context.font = oldFont;
+        this.context.textAlign = oldAlign;
     }
 
     public render(context: CanvasRenderingContext2D, region: Box2d, scale: number): void {       
@@ -400,12 +424,15 @@ export class MapDataView implements ISubMapView, IDataReceiver {
 
         let pixelsAcross = region.getDimensions().x * scale;
         let longitudeAcross = 360 * region.getDimensions().x / this.getOriginalWidth();
+        let oldFont = this.context.font;
+        this.context.font = "20px Arial";
         let pixelsAcrossBuffer = this.context.measureText('0').width * 5
         let longitudeBuffer = longitudeAcross * pixelsAcrossBuffer / pixelsAcross
         let latitudeBuffer = longitudeBuffer * 0.6
         
         this.dataProvider.retrieveTile(CoordinateConversion.convertBox2dToBoxGeo(region), new PointGeo(longitudeBuffer, latitudeBuffer), 
             this.overlayType, this);
+        this.context.font = oldFont;
     }
 
     public moveOffscreen(): void {
