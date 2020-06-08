@@ -161,8 +161,8 @@ export class ConditionCompiler {
             case "temperatureCelcius": {
                 return this.getTemperatureCelciusComparitor();
             }
-            case "dewpointCelcius": {
-                return this.getDewpointCelciusComparitor();
+            case "dewpointSpreadCelcius": {
+                return this.getDewpointSpreadCelciusComparitor();
             }
             case "flightCategory": {
                 return this.getFlightCategoryComparitor();
@@ -257,18 +257,18 @@ export class ConditionCompiler {
         }
     }
 
-    private getDewpointCelciusComparitor(): ((a: AirportInformation, b: AirportInformation) => number) {
+    private getDewpointSpreadCelciusComparitor(): ((a: AirportInformation, b: AirportInformation) => number) {
         return (a: AirportInformation, b: AirportInformation) => {
-            if ( a.dewpointCelcius === undefined  ) {
-                if ( b.dewpointCelcius === undefined ) {
+            if ( a.dewpointSpreadCelcius === undefined  ) {
+                if ( b.dewpointSpreadCelcius === undefined ) {
                     return 0;
                 } else {
                     return 1;
                 }
-            } else if ( b.dewpointCelcius === undefined ) {
+            } else if ( b.dewpointSpreadCelcius === undefined ) {
                 return -1;
             }
-            return a.dewpointCelcius.valueOf() - b.dewpointCelcius.valueOf();
+            return a.dewpointSpreadCelcius.valueOf() - b.dewpointSpreadCelcius.valueOf();
         }
     }
 
@@ -307,8 +307,8 @@ export class ConditionCompiler {
             case "temperatureCelcius": {
                 return this.assignValueTemperatureCelcius;
             }
-            case "dewpointCelcius": {
-                return this.assignValueDewpointCelcius;
+            case "dewpointSpreadCelcius": {
+                return this.assignValueDewpointSpreadCelcius;
             }
             case "flightCategory": {
                 return this.assignValueFlightCategory;
@@ -358,15 +358,15 @@ export class ConditionCompiler {
         if ( info.temperatureCelcius === undefined ) {
             return false;
         }
-        condition.temperatureCelcius = Math.min(info.temperatureCelcius);
+        condition.temperatureCelcius = Math.floor(info.temperatureCelcius);
         return true;
     }
 
-    private assignValueDewpointCelcius(condition: Condition, info: AirportInformation): boolean {
-        if ( info.dewpointCelcius === undefined ) {
+    private assignValueDewpointSpreadCelcius(condition: Condition, info: AirportInformation): boolean {
+        if ( info.dewpointSpreadCelcius === undefined ) {
             return false;
         }
-        condition.dewpointCelcius = Math.min(info.dewpointCelcius);
+        condition.dewpointSpreadCelcius = Math.floor(info.dewpointSpreadCelcius);
         return true;
     }
 

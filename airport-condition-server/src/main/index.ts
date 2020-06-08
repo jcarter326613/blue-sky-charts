@@ -142,6 +142,6 @@ export const handler = async (event: any = {}): Promise<any> => {
 
 function isValidInformationRequestCategory(category: string): boolean {
     return (category == "ceiling" || category == "visibility" || category == "cloudCover" || 
-        category == "wind" || category == "temperatureCelcius" || category == "dewpointCelcius" || 
+        category == "wind" || category == "temperatureCelcius" || category == "dewpointSpreadCelcius" || 
         category == "flightCategory");
 }
