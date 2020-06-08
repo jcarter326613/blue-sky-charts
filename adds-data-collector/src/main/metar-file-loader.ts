@@ -40,7 +40,7 @@ export class MetarFileLoader extends AddsFileLoader {
                         "windDirection": <number|undefined>undefined,
                         "windGust": <number|undefined>undefined,
                         "temperatureCelcius": <number|undefined>undefined,
-                        "dewpointCelcius": <number|undefined>undefined,
+                        "dewpointSpreadCelcius": <number|undefined>undefined,
                         "flightCategory": <string|undefined>undefined
                     };
 
@@ -76,7 +76,9 @@ export class MetarFileLoader extends AddsFileLoader {
                     
                     // Extract temp and dewpoint
                     metarObj["temperatureCelcius"] = metar.temp_c;
-                    metarObj["dewpointCelcius"] = metar.dewpoint_c;
+                    if ( metar.temp_c !== undefined && metar.dewpoint_c !== undefined ) {
+                        metarObj["dewpointSpreadCelcius"] = metar.temp_c - metar.dewpoint_c;
+                    }
 
                     // Extract flight category
                     metarObj["flightCategory"] = metar.flight_category;
