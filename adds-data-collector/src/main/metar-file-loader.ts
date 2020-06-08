@@ -37,7 +37,7 @@ export class MetarFileLoader extends AddsFileLoader {
                         "visibility": <number|undefined>undefined,
                         "cloudCover": <string|undefined>undefined,
                         "windSpeed": <number|undefined>undefined,
-                        "windDirection": <number|undefined>undefined,
+                        "windDirection": <string|undefined>undefined,
                         "windGust": <number|undefined>undefined,
                         "temperatureCelcius": <number|undefined>undefined,
                         "dewpointSpreadCelcius": <number|undefined>undefined,
@@ -70,7 +70,11 @@ export class MetarFileLoader extends AddsFileLoader {
                     }
 
                     // Extract wind information
-                    metarObj["windDirection"] = metar.wind_dir_degrees;
+                    if ( metar.wind_dir_degrees == 0 && metar.raw_text.indexOf(" VRB") >= 0 ) {
+                        metarObj["windDirection"] = "VRB";
+                    } else {
+                        metarObj["windDirection"] = metar.wind_dir_degrees;
+                    }
                     metarObj["windSpeed"] = metar.wind_speed_kt;
                     metarObj["windGust"] = metar.wind_gust_kt;
                     
