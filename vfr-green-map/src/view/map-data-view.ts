@@ -157,10 +157,12 @@ export class MapDataView implements ISubMapView, IDataReceiver {
         }
 
         if ( drawIndicator ) {
-            this.context.strokeStyle = "rgb(0,0,0)";
             this.context.lineWidth = strokeLineWidth;
+            this.context.fillStyle = "rgb(255,255,255)";
+            this.context.strokeStyle = "rgb(0,0,0)";
             this.context.beginPath();
             this.context.arc(0, 0, circleRadius, 0, Math.PI * 2);
+            this.context.fill();
             this.context.stroke();
             
             if ( drawX ) {
