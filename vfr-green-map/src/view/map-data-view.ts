@@ -60,7 +60,8 @@ export class MapDataView implements ISubMapView, IDataReceiver {
     }
 
     public receiveData(location: PointWebMercator, data: any): void {
-        if ( this.isDisposed || this.context === undefined || this.contextTransform === undefined || this.contextRegion === undefined ) {
+        if ( this.isDisposed || this.context === undefined || this.contextTransform === undefined || this.contextRegion === undefined ||
+            this.contextScale === undefined ) {
             return;
         }
 
@@ -71,6 +72,7 @@ export class MapDataView implements ISubMapView, IDataReceiver {
 
         let currentTransform = this.context.getTransform();
         this.context.setTransform(this.contextTransform);
+        this.context.translate(location.x * this.contextScale, location.y * this.contextScale);
         switch ( this.overlayType ) {
             case OverlayTypes.Ceiling: {
                 this.renderCeiling(location, data);
@@ -96,11 +98,88 @@ export class MapDataView implements ISubMapView, IDataReceiver {
                 this.renderWind(location, data);
                 break;
             }
+            case OverlayTypes.CloudCover: {
+                this.renderCloudCover(location, data);
+                break;
+            }
             default: {
                 console.error("Request to render unknown type.");
             }
         }
         this.context.setTransform(currentTransform);
+    }
+
+    private renderCloudCover(location: PointWebMercator, data: any): void {
+        if ( data.cloudCover === undefined || this.context === undefined || this.contextScale === undefined ) {
+            return;
+        }
+
+        // Center the coordinates on the location the indicator should be
+        let circleRadius = 20
+        let strokeLineWidth = 4
+        let drawIndicator = false;
+        let drawX = false;
+        let angle = 0;
+
+        switch ( data.cloudCover ) {
+            case "CLR": {
+                drawIndicator = true;
+                break;
+            }
+            case "FEW": {
+                drawIndicator = true;
+                angle = Math.PI / 2;
+                break;
+            }
+            case "SCT": {
+                drawIndicator = true;
+                angle = Math.PI;
+                break;
+            }
+            case "BKN": {
+                drawIndicator = true;
+                angle = 3 * Math.PI / 2;
+                break;
+            }
+            case "OVC": {
+                drawIndicator = true;
+                angle = 2 * Math.PI;
+                break;
+            }
+            case "OVX": {
+                drawIndicator = true;
+                drawX = true;
+                break;
+            }
+            default: {
+                break;
+            }
+        }
+
+        if ( drawIndicator ) {
+            this.context.strokeStyle = "rgb(0,0,0)";
+            this.context.lineWidth = strokeLineWidth;
+            this.context.beginPath();
+            this.context.arc(0, 0, circleRadius, 0, Math.PI * 2);
+            this.context.stroke();
+            
+            if ( drawX ) {
+                let offset = Math.sin(Math.PI / 4) * circleRadius;
+                this.context.beginPath();
+                this.context.moveTo(-offset, -offset);
+                this.context.lineTo(offset, offset);
+                this.context.moveTo(offset, -offset);
+                this.context.lineTo(-offset, offset);
+                this.context.stroke();
+            } else {
+                this.context.rotate(-Math.PI / 2);
+                this.context.fillStyle = "rgb(0,0,0)";
+                this.context.beginPath();
+                this.context.arc(0, 0, circleRadius, 0, angle);
+                this.context.lineTo(0,0);
+                this.context.fill();
+            }
+        }
     }
 
     /**
@@ -112,29 +191,24 @@ export class MapDataView implements ISubMapView, IDataReceiver {
             return;
         }
 
-        // Center the coordinates on the location the wind barb should be
-        this.context.translate(location.x * this.contextScale, location.y * this.contextScale);
-
         // If the wind is variable, draw that.
+        this.context.lineWidth = 1;
         if ( data.windDirection == "VRB" ) {
-            let circleRadius = 50;
+            let circleRadius = 20;
             this.context.strokeStyle = "rgb(0,0,0)";
             this.context.fillStyle = "rgb(0,0,0)";
             this.context.beginPath();
             this.context.arc(0, 0, circleRadius, 0, 2 * Math.PI);
-            this.context.stroke();
             this.context.fill();
             this.context.strokeStyle = "rgb(255,255,255)";
             this.context.fillStyle = "rgb(255,255,255)";
             this.context.beginPath();
             this.context.arc(0, 0, circleRadius * 2 / 3, 0, 2 * Math.PI);
-            this.context.stroke();
             this.context.fill();
             this.context.strokeStyle = "rgb(0,0,0)";
             this.context.fillStyle = "rgb(0,0,0)";
             this.context.beginPath();
             this.context.arc(0, 0, circleRadius * 1 / 3, 0, 2 * Math.PI);
-            this.context.stroke();
             this.context.fill();
         } else {
             // Otherwise, get the angle and speed of the wind
@@ -301,8 +375,8 @@ export class MapDataView implements ISubMapView, IDataReceiver {
         }
         let lineHeight = this.context.measureText('M').width * 1.2;
         let textDimensions = this.context.measureText(text);
-        let textRect = new Box2d(location.x * this.contextScale - textDimensions.width / 2, location.y * this.contextScale - lineHeight / 2,
-            location.x * this.contextScale + textDimensions.width / 2, location.y * this.contextScale + lineHeight / 2);
+        let textRect = new Box2d(-textDimensions.width / 2, -lineHeight / 2, textDimensions.width / 2, lineHeight / 2);
+        this.context.lineWidth = 1;
         this.context.strokeStyle = "rgb(0,0,0)";
         this.context.fillStyle = "rgb(255,255,255)";
         this.context.fillRect(textRect.getUpperLeft().x - 3, textRect.getUpperLeft().y - 3, 
