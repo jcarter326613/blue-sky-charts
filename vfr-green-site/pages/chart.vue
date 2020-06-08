@@ -19,8 +19,8 @@
         <label for="overlayTypeWind">Wind</label><br>
         <input type="radio" id="overlayTypeTempC" :value="$OverlayTypes.TempC" v-model="selectedOverlayType">
         <label for="overlayTypeTempC">Temperature Celsius</label><br>
-        <input type="radio" id="overlayTypeDewpointC" :value="$OverlayTypes.DewpointC" v-model="selectedOverlayType">
-        <label for="overlayTypeDewpointC">Dewpoint Celsius</label><br>
+        <input type="radio" id="overlayTypeDewpointC" :value="$OverlayTypes.DewpointSpreadC" v-model="selectedOverlayType">
+        <label for="overlayTypeDewpointC">Dewpoint Spread Celsius</label><br>
         <input type="radio" id="overlayTypeCategory" :value="$OverlayTypes.Category" v-model="selectedOverlayType">
         <label for="overlayTypeCategory">Category</label>
       </div>
@@ -61,6 +61,17 @@ export default Vue.extend({
       e.preventDefault();
       e.stopPropagation();
       this.showLayerControls = !this.showLayerControls;
+    }
+  },
+  watch: {
+    selectedOverlayType: function( newValue, oldValue ) {
+      try {
+        let isLandscape = screen.orientation.type.indexOf("landscape") >= 0
+        if ( !isLandscape ) {
+          this.showLayerControls = false;
+        }
+      } catch (e) {
+      }
     }
   }
 })
