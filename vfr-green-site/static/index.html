@@ -17,16 +17,20 @@
             .header .focusButton {
                 margin-bottom: 4em;
             }
-            @media screen and (max-width: 768px) {
-                .header h1 {
-                    font-size: 12vw;
-                    text-align: center;
-                }
+            .featureHeader {
+                text-align: center;
+                font-size: 50px;
+                font-weight: bold;
             }
-            @media screen and (max-width: 425px) {
+            .featureExample {
+                text-align: center;
+            }
+            .featureExample img {
+                margin: 10px;
+            }
+            @media screen and (max-width: 400px) {
                 .header h1 {
                     font-size: 25vw;
-                    text-align: left;
                 }
             }
         </style>
@@ -46,10 +50,10 @@
             <div class="focusButton"><div class="viewChartButton">View the charts</div></div>
         </div>
         <div>
-            <div>Review current weather conditions using graphically overlayed metar data.</div>
-            <div>
-                <img src="examples/ceiling_overlay.jpg" alt="Ceiling overlay on VFR map" width="200" height="100">
-                <img src="examples/wind_overlay.jpg" alt="Surface wind barbs on VFR map" width="200" height="100">
+            <div class="featureHeader">Review graphical metar data</div>
+            <div class="featureExample">
+                <img src="examples/ceiling_example.jpg" alt="Ceiling overlay on VFR map" width="400" height="400">
+                <img src="examples/wind_example.jpg" alt="Surface wind barbs on VFR map" width="400" height="400">
             </div>
         </div>
     </body>
