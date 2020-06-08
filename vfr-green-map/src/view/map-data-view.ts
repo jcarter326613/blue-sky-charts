@@ -92,11 +92,167 @@ export class MapDataView implements ISubMapView, IDataReceiver {
                 this.renderVisibility(location, data);
                 break;
             }
+            case OverlayTypes.Wind: {
+                this.renderWind(location, data);
+                break;
+            }
             default: {
                 console.error("Request to render unknown type.");
             }
         }
         this.context.setTransform(currentTransform);
+    }
+
+    /**
+     * Graphic wind barb key: https://www.weather.gov/hfo/windbarbinfo.  We are not rounding to the nearest 5 here.  We are rounding up.
+     */
+    private renderWind(location: PointWebMercator, data: any): void {
+        if ( data.windSpeed === undefined || data.windDirection === undefined ||
+            this.context === undefined || this.contextScale === undefined ) {
+            return;
+        }
+
+        // Center the coordinates on the location the wind barb should be
+        this.context.translate(location.x * this.contextScale, location.y * this.contextScale);
+
+        // If the wind is variable, draw that.
+        if ( data.windDirection == "VRB" ) {
+            let circleRadius = 50;
+            this.context.strokeStyle = "rgb(0,0,0)";
+            this.context.fillStyle = "rgb(0,0,0)";
+            this.context.beginPath();
+            this.context.arc(0, 0, circleRadius, 0, 2 * Math.PI);
+            this.context.stroke();
+            this.context.fill();
+            this.context.strokeStyle = "rgb(255,255,255)";
+            this.context.fillStyle = "rgb(255,255,255)";
+            this.context.beginPath();
+            this.context.arc(0, 0, circleRadius * 2 / 3, 0, 2 * Math.PI);
+            this.context.stroke();
+            this.context.fill();
+            this.context.strokeStyle = "rgb(0,0,0)";
+            this.context.fillStyle = "rgb(0,0,0)";
+            this.context.beginPath();
+            this.context.arc(0, 0, circleRadius * 1 / 3, 0, 2 * Math.PI);
+            this.context.stroke();
+            this.context.fill();
+        } else {
+            // Otherwise, get the angle and speed of the wind
+            let windAngle = Math.round(parseFloat(data.windDirection));
+            let speedToDraw = Math.ceil(parseFloat(data.windSpeed));
+            if ( data.windGust !== undefined ) {
+                speedToDraw = Math.ceil(parseFloat(data.windGust));
+            }
+
+            if ( speedToDraw != 0 ) {
+                // Figure out the configuration of wind barbs
+                let numShort = 0;
+                let numLong = 0;
+                let numPenants = 0;
+                while ( speedToDraw > 45 ) {
+                    speedToDraw -= 50;
+                    numPenants++;
+                }
+                while ( speedToDraw > 5 ) {
+                    speedToDraw -= 10;
+                    numLong++;
+                }
+                if ( speedToDraw > 0 ) {
+                    numShort = 1;
+                }
+
+                // Figure out how tall the wind barb needs to be
+                let poleWidth = 4;
+                let poleBallRadius = poleWidth;
+                let barbWidth = poleWidth;
+                let maxBarbLength = 20;
+                let minBarbLength = maxBarbLength / 2;
+                let penantWidth = maxBarbLength * 2 / 3;
+                let barbAngleRadians = Math.acos((penantWidth / 2) / maxBarbLength)
+                let penantDepth = Math.sin(barbAngleRadians) * maxBarbLength;
+                let minPoleLength = 20;
+                let minPoleTail = 6;
+
+                let indicatorBlankSpaceHeight = barbWidth * (numShort + numLong + numPenants - 1)
+                let indicatorHeight = barbWidth * (numShort + numLong) + penantWidth * numPenants;
+                let poleLength = indicatorBlankSpaceHeight + indicatorHeight + minPoleTail
+                if ( poleLength < minPoleLength ) {
+                    poleLength = minPoleLength
+                }
+
+                // Draw the pole
+                this.context.rotate(-Math.PI / 2);
+                this.context.rotate(windAngle * 2 * Math.PI / 360);
+                this.context.translate(-poleLength / 2, 0);
+                this.context.fillRect(0, -poleWidth / 2, poleLength, poleWidth);
+                this.context.beginPath();
+                this.context.moveTo(0,0);
+                this.context.arc(0, 0, poleBallRadius, 0, Math.PI * 2);
+                this.context.fill();
+
+                // If there is only one short barb, draw that at center
+                if ( numPenants == 0 && numLong == 0 && numShort == 1 ) {
+                    this.context.translate(poleLength / 2, 0);
+                    this.context.save();
+                    this.context.rotate(barbAngleRadians);
+                    this.context.fillRect(0, -barbWidth / 2, minBarbLength, barbWidth);
+                    this.context.restore();
+                } else {
+                    this.context.translate(poleLength, 0);
+
+                    // Draw each penant
+                    let penantDrawn = false;
+                    while ( numPenants > 0 ) {
+                        this.context.beginPath()
+                        this.context.moveTo(0,0);
+                        this.context.lineTo(-penantWidth / 2, penantDepth);
+                        this.context.lineTo(-penantWidth, 0);
+                        this.context.fill();
+                        this.context.translate(-penantWidth, 0);
+
+                        numPenants--;
+                        penantDrawn = true;
+                    }
+                    if ( penantDrawn ) {
+                        this.context.translate(-barbWidth, 0);
+                    }
+
+                    // Draw each long barb
+                    while ( numLong > 0 ) {
+                        this.context.save();
+                        this.context.rotate(barbAngleRadians);
+                        this.context.fillRect(0, 0, maxBarbLength, barbWidth);
+                        this.context.restore();
+                        this.context.translate(-(barbWidth * 2), 0);
+                        
+                        numLong--;
+                    }
+
+                    // Draw the short barb
+                    if ( numShort > 0 ) {
+                        this.context.save();
+                        this.context.rotate(barbAngleRadians);
+                        this.context.fillRect(0, 0, minBarbLength, barbWidth);
+                        this.context.restore();
+                    }
+                }
+            } else {
+                // Draw no wind circle
+                let circleRadius = 50;
+                this.context.strokeStyle = "rgb(0,0,0)";
+                this.context.fillStyle = "rgb(0,0,0)";
+                this.context.beginPath();
+                this.context.arc(0, 0, circleRadius, 0, 2 * Math.PI);
+                this.context.stroke();
+                this.context.fill();
+                this.context.strokeStyle = "rgb(255,255,255)";
+                this.context.fillStyle = "rgb(255,255,255)";
+                this.context.beginPath();
+                this.context.arc(0, 0, circleRadius * 2 / 3, 0, 2 * Math.PI);
+                this.context.stroke();
+                this.context.fill();
+            }
+        }
     }
 
     private renderCeiling(location: PointWebMercator, data: any): void {
