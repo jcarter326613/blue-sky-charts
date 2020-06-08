@@ -7,7 +7,7 @@ export class Condition {
     public visibility: number | undefined;
     public cloudCover: string | undefined;
     public windSpeed: number | undefined;
-    public windDirection: number | undefined;
+    public windDirection: string | undefined;
     public windGust: number | undefined;
     public temperatureCelcius: number | undefined;
     public dewpointSpreadCelcius: number | undefined;
