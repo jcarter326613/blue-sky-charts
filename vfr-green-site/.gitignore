@@ -93,3 +93,4 @@ sw.*
 static/maps/world-vfr/metadata.json
 static/maps/world-vfr/sectional
 static/metar
+package-lock.json
