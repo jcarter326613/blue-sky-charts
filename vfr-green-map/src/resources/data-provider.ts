@@ -120,7 +120,7 @@ class DataRequest extends CachedProviderRequest {
     private area: BoxGeo;
     private resolution: PointGeo;
     private type: OverlayTypes;
-    private static readonly urlBase = "https://n3aigsadrc.execute-api.us-east-1.amazonaws.com/dev/getConditions";
+    private static readonly urlBase = "https://api.blueskycharts.com/condition/getConditions";
 
     constructor(provider: DataProvider, receiver: IDataReceiver, area: BoxGeo, resolution: PointGeo, type: OverlayTypes) {
         super(provider);
