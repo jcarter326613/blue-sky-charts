@@ -139,6 +139,7 @@ class DataRequest extends CachedProviderRequest {
             type: "GET",
             dataType: "json",
             crossDomain: true,
+            cache: false,
             success: (data) => {
                 try {
                     this.data = data;
