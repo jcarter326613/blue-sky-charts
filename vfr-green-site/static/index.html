@@ -35,6 +35,10 @@
                 margin: 20px 0px;
                 color: rgb(62,101,238);
             }
+            .featureExample .caption a {
+                text-decoration: none;
+                color: rgb(62,101,238);
+            }
             .featureExample .description {
                 max-width: 400px;
                 margin: auto;
@@ -67,16 +71,16 @@
             <div class="focusButton"><div class="viewChartButton">View the charts</div></div>
         </div>
         <div>
-            <div class="featureHeader">Review graphical metar data</div>
+            <div class="featureHeader">Review graphical METAR data</div>
             <div class="featureExample">
                 <div class="tile">
-                    <div><img src="examples/ceiling_example.jpg" alt="Ceiling overlay on VFR map" width="400" height="400"></div>
-                    <div class="caption">Ceiling Height</div>
+                    <div><a href="/chart?overlay=ceiling"><img src="examples/ceiling_example.jpg" alt="Ceiling overlay on VFR map" width="400" height="400"></a></div>
+                    <div class="caption"><a href="/chart?overlay=ceiling">Ceiling Height</a></div>
                     <div class="description">Review current cloud ceiling height above ground in hundreds of feet using easy to read large print at all zoom levels.</div>
                 </div>
                 <div class="tile">
-                    <img src="examples/wind_example.jpg" alt="Surface wind barbs on VFR map" width="400" height="400">
-                    <div class="caption">Surface Winds</div>
+                    <div><a href="/chart?overlay=wind"><img src="examples/wind_example.jpg" alt="Surface wind barbs on VFR map" width="400" height="400"></a></div>
+                    <div class="caption"><a href="/chart?overlay=wind">Surface Winds</a></div>
                     <div class="description">Too windy for takeoff or a nice calm day? Surface wind barbs tell you the direction and speed of wind at your favorite airports.</div>
                 </div>
             </div>

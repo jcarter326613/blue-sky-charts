@@ -46,13 +46,27 @@ export default Vue.extend({
       } catch (e) {
         showLayerControls = true;
       }
+      let overlayType = this.$OverlayTypes.None;
+      switch(this.$route.query.overlay) {
+        case "ceiling": {
+          overlayType = this.$OverlayTypes.Ceiling;
+          break;
+        }
+        case "wind": {
+          overlayType = this.$OverlayTypes.Wind;
+          break;
+        }
+        default: {
+          break;
+        }
+      }
       return {
         "originLongitude": this.$route.query.longitude,
         "originLatitude": this.$route.query.latitude,
         "zoom": this.$route.query.zoom,
         "markLongitude": this.$route.query.markLongitude,
         "markLatitude": this.$route.query.markLatitude,
-        "selectedOverlayType": this.$OverlayTypes.None,
+        "selectedOverlayType": overlayType,
         "showLayerControls": showLayerControls
       };
   },

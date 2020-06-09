@@ -13,6 +13,7 @@ export default Vue.component("interactivemap", {
     mounted: function() {
         this.$interactiveMap = this.$createMap("mapContainer", "/maps/world-vfr", this.originLongitude, this.originLatitude, this.zoom,
             this.markLongitude, this.markLatitude);
+        this.$interactiveMap.setOverlayType(this.overlayType);
     },
     props: [
         "originLatitude",
