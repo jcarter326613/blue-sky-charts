@@ -21,16 +21,33 @@
                 text-align: center;
                 font-size: 50px;
                 font-weight: bold;
+                margin: 20px 0px;
             }
             .featureExample {
                 text-align: center;
+                display: flex;
+                flex-direction: row;
+                justify-content: center;
             }
-            .featureExample img {
-                margin: 10px;
+            .featureExample .caption {
+                font-size: large;
+                font-weight: bold;
+                margin: 20px 0px;
+                color: rgb(62,101,238);
+            }
+            .featureExample .description {
+                max-width: 400px;
+                margin: auto;
+            }
+            .tile {
+                margin: 10px 10px;
             }
             @media screen and (max-width: 400px) {
                 .header h1 {
                     font-size: 25vw;
+                }
+                .featureExample {
+                    flex-direction: column;
                 }
             }
         </style>
@@ -52,8 +69,16 @@
         <div>
             <div class="featureHeader">Review graphical metar data</div>
             <div class="featureExample">
-                <img src="examples/ceiling_example.jpg" alt="Ceiling overlay on VFR map" width="400" height="400">
-                <img src="examples/wind_example.jpg" alt="Surface wind barbs on VFR map" width="400" height="400">
+                <div class="tile">
+                    <div><img src="examples/ceiling_example.jpg" alt="Ceiling overlay on VFR map" width="400" height="400"></div>
+                    <div class="caption">Ceiling Height</div>
+                    <div class="description">Review current cloud ceiling height above ground in hundreds of feet using easy to read large print at all zoom levels.</div>
+                </div>
+                <div class="tile">
+                    <img src="examples/wind_example.jpg" alt="Surface wind barbs on VFR map" width="400" height="400">
+                    <div class="caption">Surface Winds</div>
+                    <div class="description">Too windy for takeoff or a nice calm day? Surface wind barbs tell you the direction and speed of wind at your favorite airports.</div>
+                </div>
             </div>
         </div>
     </body>
