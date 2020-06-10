@@ -6,6 +6,7 @@ export class EasyAwait {
     private started: boolean;
     private fatalErrorReported: boolean;
     private fatalErrorMessage: string | undefined;
+    private fatalErrorIsUserError: boolean;
 
     private constructor() {
         this.started = false;
@@ -13,6 +14,7 @@ export class EasyAwait {
         this.threadLocationCount = {};
         this.promise = undefined;
         this.fatalErrorReported = false;
+        this.fatalErrorIsUserError = false;
     }
 
     public initialize(): void {
@@ -62,6 +64,10 @@ export class EasyAwait {
         return this.fatalErrorReported;
     }
 
+    public hasUserError(): boolean {
+        return this.fatalErrorReported && this.fatalErrorIsUserError;
+    }
+
     public getFatalMessage(): string | undefined {
         return this.fatalErrorMessage;
     }
@@ -72,6 +78,11 @@ export class EasyAwait {
         this.fatalErrorMessage = publicMessage;
         this.threadCount = 0;
         this.started = true;
+    }
+
+    public reportUserError(logMessage: string): void {
+        this.fatalErrorIsUserError = true;
+        this.reportFatalError(logMessage);
     }
 
     private wait(resolve: () => void): void {

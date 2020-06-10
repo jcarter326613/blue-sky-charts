@@ -1,5 +1,5 @@
 {
-  "name": "coordinates",
+  "name": "easy-await",
   "version": "1.0.0",
   "description": "This README would normally document whatever steps are necessary to get your application up and running.",
   "main": "src/main/index.js",
@@ -8,11 +8,11 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://jcarter123@bitbucket.org/jcarter123/coordinates.git"
+    "url": "git+https://jcarter123@bitbucket.org/jcarter123/easy-await.git"
   },
   "dependencies": {},
   "devDependencies": {},
   "author": "",
   "license": "ISC",
-  "homepage": "https://bitbucket.org/jcarter123/adds-data-collector#readme"
+  "homepage": "https://bitbucket.org/jcarter123/easy-await#readme"
 }
