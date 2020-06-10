@@ -455,6 +455,8 @@ export class NavigableMap2d implements IMap {
             this.pinchClientPoint1 = new Point2d(event.targetTouches[0].clientX, event.targetTouches[0].clientY)
             this.pinchClientPoint2 = new Point2d(event.targetTouches[1].clientX, event.targetTouches[1].clientY)
             this.pinchOriginalScale = this.scale
+            event.preventDefault();
+            event.stopPropagation();
         }
     }
 
@@ -477,6 +479,8 @@ export class NavigableMap2d implements IMap {
                 let clientRect = this.getClientOffset();
                 this.mouseMoveHelper(touch.clientX - clientRect.x, touch.clientY - clientRect.y);
             }
+            event.preventDefault();
+            event.stopPropagation();
         } else if ( event.targetTouches.length == 2 ) {
             let touch1 = event.targetTouches[0]
             let touch2 = event.targetTouches[1]
@@ -494,6 +498,9 @@ export class NavigableMap2d implements IMap {
             } else if ( this.scaleDriver < 0 ) {
                 this.scaleDriver = 0;
             }
+
+            event.preventDefault();
+            event.stopPropagation();
 
             this.updateScale()
             this.viewportChanged();
