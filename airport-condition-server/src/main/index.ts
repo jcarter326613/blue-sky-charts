@@ -1,9 +1,8 @@
 import { Cache } from './airport-cache/cache'
 import { S3Cache } from './airport-cache/s3-cache'
 import { BoxGeo, PointGeo, Point2d } from 'coordinates'
-import { EasyAwait } from './easy-await'
+import { EasyAwait } from 'easy-await'
 import { ConditionCompiler } from './condition-compiler';
-import { LocalCache } from './airport-cache/local-cache';
 
 let s3BucketName: string = "blueskycharts.com";
 

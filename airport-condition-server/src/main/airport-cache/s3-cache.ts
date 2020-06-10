@@ -2,7 +2,7 @@ import * as AWS from 'aws-sdk';
 import { AirportInformation } from './airport-information';
 import { Cache } from './cache'
 import { join } from 'path'
-import { EasyAwait } from '../easy-await';
+import { EasyAwait } from 'easy-await';
 
 export class S3Cache extends Cache {
     private static readonly BUCKET_NAME = "blueskycharts.com";

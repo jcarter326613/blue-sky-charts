@@ -4,7 +4,7 @@ import { Cache } from "./airport-cache/cache"
 import { Condition } from "./condition";
 import { BoxGeo, CoordinateConversion, PointGeo, PointWebMercator, Box2d } from "coordinates";
 import { Heap } from 'ts-heap'
-import { EasyAwait } from "./easy-await";
+import { EasyAwait } from "easy-await";
 
 export class ConditionCompiler {
     private static readonly airportInformationZoomLevel = 2;

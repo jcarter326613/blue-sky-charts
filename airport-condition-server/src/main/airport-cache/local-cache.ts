@@ -3,7 +3,7 @@ import { AirportInformation } from './airport-information';
 import { Cache } from './cache'
 import { readFile } from 'fs'
 import { join } from 'path'
-import { EasyAwait } from '../easy-await';
+import { EasyAwait } from 'easy-await';
 
 export class LocalCache extends Cache {
     private root: string;
