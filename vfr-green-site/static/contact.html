@@ -1,0 +1,111 @@
+<html>
+    <head>
+        <title>Contact Us</title>
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <link rel="stylesheet" href="style/main.css">
+        <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+        <style>
+            .header {
+                display: flex;
+            }
+            .header > div {
+                margin: auto;
+            }
+            .body {
+                display: flex;
+                flex-direction: column;
+            }
+            .body textarea {
+                width: 80%;
+                height: 40vh;
+            }
+            .body .entry {
+                padding: 10px 0px;
+                display: flex;
+                flex-direction: row;
+                justify-content: center;
+            }
+            .body .entry div {
+                flex-basis: 50%;
+                flex-grow: 1;
+            }
+            .body .entry div:first-child {
+                flex-basis: 20%;
+                flex-grow: 1;
+                text-align: right;
+                padding-right: 10px;
+            }
+            .body .buttons {
+                display: flex;
+                flex-direction: row;
+                justify-content: center;
+                margin: 10px 0px;
+            }
+            .body .buttons div {
+                margin: 0px 10px;
+            }
+            .body .buttons a {
+                margin: auto 20px;
+            }
+            @media screen and (max-width: 425px) {
+                .body input[type="text"] {
+                    width: 80%;
+                }
+            }
+        </style>
+        <script>
+            $(document).ready(() => {
+                $(".sendMessage").click((e) => {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    alert("Your message has been received.  Someone will respond as soon as possible.  Thank you or contacting us.")
+                    window.location.href = "/";
+                })
+            });
+        </script>
+    </head>
+    <body>
+        <div class="header">
+            <div>
+                <h2>Tell us what you would like to know</h2>
+                <ul>
+                    <li>Request for instructions</li>
+                    <li>Request for new features</li>
+                    <li>Technical problems</li>
+                    <li>Anything...</li>
+                </ul>
+            </div>
+        </div>
+        <div class="body">
+            <div class="entry">
+                <div>Your name</div>
+                <div><input type="text" id="name"/></div>
+            </div>
+            <div class="entry">
+                <div>Your email address</div>
+                <div><input type="text" id="email"/></div>
+            </div>
+            <div class="entry">
+                <div>Message</div>
+                <div><textarea id="message"></textarea></div>
+            </div>
+            <div class="buttons">
+                <div class="button sendMessage">Send Message</div>
+                <a href="/" onclick="javascript:return confirm('Are you sure you want to cancel?  Your message will be erased.');">Cancel</a>
+            </div>
+        </div>
+        <div class="footer">
+            <div>
+                <a href="/">Home</a><br />
+                <a href="/chart">View The Charts</a><br />
+                <!--<a href="">User Guide</a><br />-->
+                <a href="">Contact Us</a>
+            </div>
+            <div>
+                <div>Provided by</div>
+                <div>Muddy Paw Cloud Technology LLC</div>
+                <div>Chichester, New Hampshire</div>
+            </div>
+        </div>
+    </body>
+</html>
