@@ -1,23 +1,16 @@
-import { Cache } from '../main/airport-cache/cache'
-import { LocalCache } from '../main/airport-cache/local-cache'
-import { handler } from '../main/index'
 
-Cache.overrideCache = new LocalCache("./data/test");
+import { receiveWebsiteMessage } from '../main/index'
 
-let promise = handler({
+let promise = receiveWebsiteMessage({
     "queryStringParameters": {        
-        "startLongitude": -180,
-        "endLongitude": 180,
-        "startLatitude": -90,
-        "endLatitude": 90,
-        "bufferLongitude": 16,
-        "bufferLatitude": 16,
-        "information": "wind"
+        "name": "Jason Carter",
+        "email": "jcarter@naturalhues.com"
     },
     "headers": {
         "origin": "http://localhost:3000/"
     },
-    "httpMethod": "GET"
+    "httpMethod": "POST",
+    "body": "A really long message\nwith multiplelines"
 });
 promise.then((value: any) => {
     console.log(value);

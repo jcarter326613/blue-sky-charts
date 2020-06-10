@@ -1,4 +1,4 @@
-service: airport-condition-server
+service: support-server
 provider:
   name: aws
   runtime: nodejs12.x
@@ -14,9 +14,9 @@ provider:
 
 functions:
   submitSupportRequest:
-    handler: src/main/index.handler
+    handler: src/main/index.receiveWebsiteMessage
     events:
-      - http: GET submitSupportRequest
+      - http: POST submitSupportRequest
 
 package:
   exclude:

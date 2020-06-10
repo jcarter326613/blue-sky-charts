@@ -14,7 +14,8 @@
     "url": "git+https://jcarter123@bitbucket.org/jcarter123/airport-condition-server.git"
   },
   "dependencies": {
-    "aws-sdk": "^2.678.0"
+    "aws-sdk": "^2.678.0",
+    "easy-await": "file:../easy-await/easy-await-1.0.0.tgz"
   },
   "devDependencies": {
     "serverless": "^1.71.1"
