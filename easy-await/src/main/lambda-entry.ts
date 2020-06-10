@@ -59,7 +59,14 @@ export class LambdaEntry {
         }
         let body: string | undefined;
         if ( hasBody ) {
-            body = "test body";
+            if ( !("body" in event) || event["body"].length == 0 ) {
+                return {
+                    "statusCode": 400,
+                    "headers": headers,
+                    "body": JSON.stringify({"message": "Body missing"})
+                }
+            }
+            body = event["body"];
         }
         
         //Fulfill the request
