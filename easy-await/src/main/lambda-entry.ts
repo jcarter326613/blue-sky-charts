@@ -6,7 +6,19 @@ export class LambdaEntry {
     }
 
     public async handleGetRequest(event: any, hasParameters: boolean,
-        executionCallback: ((parameters: Record<string, any>) => void),
+        executionCallback: ((parameters: Record<string, any>, body: (string | undefined)) => void),
+        successResultsCallback: (() => string)): Promise<any> {
+        return this.handleRequest(event, "GET", hasParameters, false, executionCallback, successResultsCallback);
+    }
+
+    public async handlePostRequest(event: any, hasParameters: boolean,
+        executionCallback: ((parameters: Record<string, any>, body: (string | undefined)) => void),
+        successResultsCallback: (() => string)): Promise<any> {
+        return this.handleRequest(event, "POST", hasParameters, true, executionCallback, successResultsCallback);
+    }
+
+    private async handleRequest(event: any, httpMethod: string, hasParameters: boolean, hasBody: boolean,
+        executionCallback: ((parameters: Record<string, any>, body: (string | undefined)) => void),
         successResultsCallback: (() => string)): Promise<any> {
         console.log(`Received request: ${JSON.stringify(event)}`);
     
@@ -17,7 +29,7 @@ export class LambdaEntry {
                 "statusCode": 400,
                 "body": JSON.stringify({"message": "Invalid request"})
             }
-        } else if (!(event["httpMethod"] == "GET" && "origin" in event["headers"] && (
+        } else if (!(event["httpMethod"] == httpMethod && "origin" in event["headers"] && (
             event["headers"]["origin"] == "http://localhost:3000" ||
             event["headers"]["origin"] == "http://localhost:3000/" ||
             event["headers"]["origin"] == "http://blueskycharts.com" ||
@@ -34,7 +46,7 @@ export class LambdaEntry {
         let headers = {
             "Access-Control-Allow-Headers" : "application/json",
             "Access-Control-Allow-Origin": event["headers"]["origin"],
-            "Access-Control-Allow-Methods": "GET"
+            "Access-Control-Allow-Methods": httpMethod
         };
     
         //Validate request
@@ -45,15 +57,19 @@ export class LambdaEntry {
                 "body": JSON.stringify({"message": "Missing collection of query parameters"})
             }
         }
+        let body: string | undefined;
+        if ( hasBody ) {
+            body = "test body";
+        }
         
         //Fulfill the request
         EasyAwait.instance.initialize();
         EasyAwait.instance.startThread("Handler entrypoint");
     
         if ( hasParameters ) {
-            executionCallback(event["queryStringParameters"]);
+            executionCallback(event["queryStringParameters"], body);
         } else {
-            executionCallback({});
+            executionCallback({}, body);
         }
         
         EasyAwait.instance.endThread("Handler entrypoint");
