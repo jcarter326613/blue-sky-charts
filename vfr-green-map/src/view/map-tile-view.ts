@@ -93,6 +93,13 @@ export class MapTileView implements ISubMapView, ITileReceiver {
         return this.originalMapHeight;
     }
 
+    public resetRequestedInformationAgeRecord(): void {
+    }
+
+    public getRequestedInformationAgeSeconds(): number | undefined {
+        return undefined;
+    }
+
     public receiveTile(location: Point2d, subsection: Box2d, tile: HTMLImageElement, data: any, immediate: boolean): void {
         if ( this.isDisposed || data as number != this.renderVersion )
             return;

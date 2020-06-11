@@ -5,18 +5,18 @@
  * The parent map will tell us when a mouse is "down."
  */
 
-import { BoxGeoModel } from "../models/box-geo-model"
-import { Box2d, BoxGeo, BoxWebMercator, Point2d, PointGeo, PointWebMercator, CoordinateConversion } from "coordinates"
-import { ISubMapView } from "./i-sub-map-view"
-import { IDataReceiver } from "../resources/i-data-receiver"
-import { SubMapModel } from "../models/sub-map-model"
+import { Box2d, BoxWebMercator, PointGeo, PointWebMercator, CoordinateConversion } from "coordinates"
 import { DataProvider } from "../resources/data-provider"
 import { OverlayTypes } from "./overlay-types"
+import { IDataReceiver } from "../resources/i-data-receiver"
+import { IMap } from './i-map'
+import { ISubMapView } from "./i-sub-map-view"
 
 export class MapDataView implements ISubMapView, IDataReceiver {
+    private map: IMap;
+
     // Metadata
-    private tileWidth: number;
-    private tileHeight: number;
+    private dataAgeSeconds: number | undefined;
 
     // Rendering
     private dataProvider: DataProvider;
@@ -27,10 +27,9 @@ export class MapDataView implements ISubMapView, IDataReceiver {
     private isDisposed: boolean;
     private overlayType: OverlayTypes;
 
-    constructor(dataProvider: DataProvider, type: OverlayTypes) {
+    constructor(dataProvider: DataProvider, type: OverlayTypes, map: IMap) {
+        this.map = map;
         this.dataProvider = dataProvider;
-        this.tileWidth = 0;
-        this.tileHeight = 0;
         this.isDisposed = false;
         this.overlayType = type;
     }
@@ -39,10 +38,6 @@ export class MapDataView implements ISubMapView, IDataReceiver {
         if ( this.overlayType == OverlayTypes.None ) {
             return undefined;
         }
-
-        let tilesAcross = 2 ** 2;
-        this.tileWidth = PointWebMercator.MAX_X_MERCATOR / tilesAcross;
-        this.tileHeight = PointWebMercator.MAX_Y_MERCATOR / tilesAcross;
 
         return new BoxWebMercator(0, 0, PointWebMercator.MAX_X_MERCATOR, PointWebMercator.MAX_Y_MERCATOR);
     }
@@ -59,15 +54,32 @@ export class MapDataView implements ISubMapView, IDataReceiver {
         return PointWebMercator.MAX_Y_MERCATOR;
     }
 
-    public receiveData(location: PointWebMercator, data: any): void {
+    public resetRequestedInformationAgeRecord(): void {
+        this.dataAgeSeconds = undefined;
+    }
+
+    public getRequestedInformationAgeSeconds(): number | undefined {
+        return this.dataAgeSeconds;
+    }
+
+    public receiveData(location: PointWebMercator, data: any, dataAgeSeconds: number, immediate: boolean): void {
         if ( this.isDisposed || this.context === undefined || this.contextTransform === undefined || this.contextRegion === undefined ||
             this.contextScale === undefined ) {
+            return;
+        }
+
+        if ( !immediate ) {
+            this.map.requestRedraw();
             return;
         }
 
         if ( location.x < this.contextRegion.getUpperLeft().x || location.x > this.contextRegion.getLowerRight().x ||
             location.y < this.contextRegion.getUpperLeft().y || location.y > this.contextRegion.getLowerRight().y ) {
             return;
+        }
+
+        if ( this.dataAgeSeconds === undefined || this.dataAgeSeconds < dataAgeSeconds ) {
+            this.dataAgeSeconds = dataAgeSeconds;
         }
 
         let currentTransform = this.context.getTransform();

@@ -128,7 +128,7 @@ export class NavigableMap2d implements IMap {
     public setOverlayType(type: OverlayTypes): boolean {
         let success: boolean
         if (type != OverlayTypes.None) {
-            let dataView = new MapDataView(this.dataProvider, type);
+            let dataView = new MapDataView(this.dataProvider, type, this);
             let extent = dataView.initialize();
             if ( extent !== undefined ) {
                 this.dataOverlayView = new SubMapPosition(dataView, extent);
@@ -260,9 +260,18 @@ export class NavigableMap2d implements IMap {
             context.restore();
         })
         if ( this.dataOverlayView !== undefined ) {
+            this.dataOverlayView.getSubMapView().resetRequestedInformationAgeRecord();
             context.save();
             this.renderSubMap(this.dataOverlayView, viewport2d);
             context.restore();
+
+            // Draw the date indicating the oldest data displayed
+            let informationAge = this.dataOverlayView.getSubMapView().getRequestedInformationAgeSeconds();
+            if ( informationAge !== undefined ) {
+                context.save();
+                this.renderInformationAgeBox(informationAge);
+                context.restore();
+            }
         }
 
         // Draw test X
@@ -289,6 +298,52 @@ export class NavigableMap2d implements IMap {
         }
 
         context.restore();
+    }
+
+    private renderInformationAgeBox(informationAgeSeconds: number) {
+        if (this.context == null)
+            return;
+
+        // Figure out where we need to draw
+        let informationAgeLabel = this.getInformationAgeLabel(informationAgeSeconds);
+        let oldFont = this.context.font;
+        this.context.font = "20px Arial";
+        let lineHeight = this.context.measureText('M').width * 1.2;
+        let textDimensions = this.context.measureText(informationAgeLabel);
+        let heightBuffer = 10;
+        let widthBuffer = 6;
+        let textRect = new Box2d(-textDimensions.width / 2, -lineHeight / 2, textDimensions.width / 2, lineHeight / 2);
+        let boxRect = new Box2d(-textDimensions.width / 2 - widthBuffer / 2, -lineHeight / 2 - heightBuffer / 2, 
+            textDimensions.width / 2 + widthBuffer / 2, lineHeight / 2 + heightBuffer / 10)
+
+        // Reposition the axis
+        let offsetX = 5;
+        let offsetY = 5;
+        this.context.translate(-boxRect.getUpperLeft().x + offsetX, -boxRect.getUpperLeft().y + offsetY);
+
+        // Draw the box
+        this.context.lineWidth = 1;
+        this.context.strokeStyle = "rgb(0,0,0)";
+        this.context.fillStyle = "rgb(255,255,255)";
+        this.context.beginPath();
+        this.context.rect(boxRect.getUpperLeft().x, boxRect.getUpperLeft().y, boxRect.getDimensions().x, boxRect.getDimensions().y);
+        this.context.fill();
+        this.context.stroke();
+
+        // Draw the text
+        this.context.fillStyle = "rgb(0,0,0)";
+        let oldAlign = this.context.textAlign;
+        this.context.textAlign = "center";
+        this.context.fillText(informationAgeLabel, 0, textRect.getLowerRight().y - 5);
+        this.context.font = oldFont;
+        this.context.textAlign = oldAlign;
+    }
+
+    private getInformationAgeLabel(ageSeconds: number): string {
+        if ( ageSeconds < 60 ) {
+            return "Age 1 minute";
+        }
+        return `Age ${Math.ceil(ageSeconds / 60)} minutes`;
     }
 
     private renderSubMap(submap: SubMapPosition, viewport2d: BoxWebMercator): void {

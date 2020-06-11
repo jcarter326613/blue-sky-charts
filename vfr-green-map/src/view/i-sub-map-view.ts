@@ -18,6 +18,12 @@ export interface ISubMapView {
     getOriginalHeight(): number;
 
     /**
+     * Returns the age of any data beign displayed and resets the age counter prior to rendering
+     */
+    resetRequestedInformationAgeRecord(): void;
+    getRequestedInformationAgeSeconds(): number | undefined;
+
+    /**
      * Draws or queues the drawing of this sub map.  The number of pixels to be drawn are the region width * height * scale
      * @param context 
      * @param region The region in relation to the original width and height

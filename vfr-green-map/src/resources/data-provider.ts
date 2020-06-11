@@ -115,12 +115,12 @@ export class DataProvider extends CachedProvider {
 }
 
 class DataRequest extends CachedProviderRequest {
-    private data: Array<any> | undefined;
+    private data: any | undefined;
     private receiver: IDataReceiver | undefined;
     private area: BoxGeo;
     private resolution: PointGeo;
     private type: OverlayTypes;
-    private static readonly urlBase = "https://api.blueskycharts.com/condition/getConditions";
+    private static readonly urlBase = "https://api.blueskycharts.com/condition-v2/getConditions";
 
     constructor(provider: DataProvider, receiver: IDataReceiver, area: BoxGeo, resolution: PointGeo, type: OverlayTypes) {
         super(provider);
@@ -160,18 +160,20 @@ class DataRequest extends CachedProviderRequest {
     }
 
     public broadcastData(immediate: boolean) {
-        if ( this.data === undefined || this.receiver == undefined ) {
+        if ( this.data === undefined || this.data.oldestDataAgeSeconds === undefined || this.data.conditions === undefined || 
+            this.receiver == undefined ) {
             return;
         }
 
-        for ( let data of this.data ) {
+        let dataAgeSeconds = this.data.oldestDataAgeSeconds as number;
+        for ( let data of this.data.conditions ) {
             if (data.longitude === undefined || data.latitude === undefined) {
                 continue;
             }
             let geoLocation = new PointGeo(data.longitude, data.latitude);
             let mercatorLocation = CoordinateConversion.convertToWebMercator(geoLocation);
 
-            this.receiver.receiveData(mercatorLocation, data);
+            this.receiver.receiveData(mercatorLocation, data, dataAgeSeconds, immediate);
         }
     }
     
