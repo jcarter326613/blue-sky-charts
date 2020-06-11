@@ -16,7 +16,10 @@ functions:
   collect:
     handler: src/main/index.handler
     events:
-      - http: GET handler
+    - schedule:
+        name: fire-adds-data-collection
+        description: 'Performs periodic retrieval of METAR data'
+        rate: rate(5 minutes)
 
 package:
   exclude:

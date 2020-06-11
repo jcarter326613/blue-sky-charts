@@ -29,10 +29,12 @@ export class MetarFileLoader extends AddsFileLoader {
             // Go through each metar and place it in its correct zoom cells
             jsonObject.METAR.forEach((metar: any) => {
                 let geoLocation = this.getGeoLocation(metar);
-                if ( geoLocation !== undefined ) {
+                let issueTime = this.getIssueTime(metar);
+                if ( geoLocation !== undefined && issueTime !== undefined ) {
                     let metarObj = {
                         "latitude": geoLocation.latitude,
                         "longitude": geoLocation.longitude,
+                        "issueTime": issueTime,
                         "ceiling": <number|undefined>undefined,
                         "visibility": <number|undefined>undefined,
                         "cloudCover": <string|undefined>undefined,
@@ -147,6 +149,21 @@ export class MetarFileLoader extends AddsFileLoader {
         }
 
         return new PointGeo(longitude, latitude);
+    }
+
+    private getIssueTime(metar: any): number | undefined {
+        if (metar.observation_time === undefined) {
+            console.error(`Observation time information missing for metar station ${metar.station_id}`);
+            return undefined;
+        }
+
+        let observationTime = Date.parse(metar.observation_time);
+        if ( Number.isNaN(observationTime) ) {
+            console.error(`Observation time not in correct format for metar station ${metar.station_id}: ${metar.observation_time}`);
+            return undefined;
+        }
+
+        return observationTime;
     }
 
     private extractSkyCondition(skyCondition: any): Array<SkyCondition> {
