@@ -122,7 +122,9 @@ export class NavigableMap2d implements IMap {
     }
 
     public requestRedraw(): void {
-        this.render();
+        requestAnimationFrame(() => {
+            this.render();
+        });
     }
 
     public setOverlayType(type: OverlayTypes): boolean {
@@ -271,6 +273,18 @@ export class NavigableMap2d implements IMap {
                 context.save();
                 this.renderInformationAgeBox(informationAge);
                 context.restore();
+
+                let secondsToSleep: number;
+                if ( informationAge == 60 ) {
+                    secondsToSleep = 1;
+                } else if ( informationAge == 0 ) {
+                    secondsToSleep = 61;
+                } else {
+                    secondsToSleep = (60 - (informationAge % 60)) + 1;
+                }
+                setTimeout(() => {
+                    this.requestRedraw();
+                }, secondsToSleep * 1000);
             }
         }
 

@@ -94,8 +94,8 @@ export abstract class CachedProviderRequest {
         return this.inError;
     }
 
-    protected setLoaded(): void {
-        this.loaded = true;
+    protected setLoaded(loaded: boolean = true): void {
+        this.loaded = loaded
         this.inError = false;
     }
 

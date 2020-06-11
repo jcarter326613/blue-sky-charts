@@ -27,9 +27,9 @@ export class DataProvider extends CachedProvider {
         let resolutionBucket = this.createResolutionBucket(resolution);
         let areaBucket = this.createAreaBucket(area, resolutionBucket, type);
         let key = this.getCacheKey(areaBucket, resolutionBucket, type);
-        let tileRequest = this.getExistingRequest(key);
+        let tileRequest = this.getExistingRequest(key) as DataRequest;
 
-        if ( tileRequest !== undefined && !tileRequest.isInError() ) {
+        if ( tileRequest !== undefined && !tileRequest.isInError() && !tileRequest.isExpired() ) {
             let tileRequestScoped = tileRequest as DataRequest;
             if (tileRequest.isLoaded()) {
                 tileRequestScoped.setReceiver(receiver);
@@ -116,11 +116,14 @@ export class DataProvider extends CachedProvider {
 
 class DataRequest extends CachedProviderRequest {
     private data: any | undefined;
+    private timeReceived: number;
+    private oldestDataAgeAtRetrievalSeconds: number | undefined;
     private receiver: IDataReceiver | undefined;
     private area: BoxGeo;
     private resolution: PointGeo;
     private type: OverlayTypes;
-    private static readonly urlBase = "https://api.blueskycharts.com/condition-v2/getConditions";
+    private static readonly URL_BASE = "https://api.blueskycharts.com/condition-v2/getConditions";
+    private static readonly MAX_AGE_MILLISECONDS = 5 * 60 * 1000;
 
     constructor(provider: DataProvider, receiver: IDataReceiver, area: BoxGeo, resolution: PointGeo, type: OverlayTypes) {
         super(provider);
@@ -128,12 +131,22 @@ class DataRequest extends CachedProviderRequest {
         this.area = area;
         this.resolution = resolution;
         this.type = type;
+        this.timeReceived = 0;
+    }
+
+    public isExpired(): boolean {
+        if ( this.isLoaded() ) {
+            let now = (new Date()).getTime();
+            return now - this.timeReceived > DataRequest.MAX_AGE_MILLISECONDS;
+        } else {
+            return false;
+        }
     }
     
     public sendRequest(): void {
         let tl = this.area.getTopLeft();
         let br = this.area.getBottomRight();
-        let url = `${DataRequest.urlBase}?startLongitude=${tl.longitude}&endLongitude=${br.longitude}&startLatitude=${br.latitude}&endLatitude=${tl.latitude}&bufferLongitude=${this.resolution.longitude}&bufferLatitude=${this.resolution.latitude}&information=${this.getInformationForType(this.type)}`;
+        let url = `${DataRequest.URL_BASE}?startLongitude=${tl.longitude}&endLongitude=${br.longitude}&startLatitude=${br.latitude}&endLatitude=${tl.latitude}&bufferLongitude=${this.resolution.longitude}&bufferLatitude=${this.resolution.latitude}&information=${this.getInformationForType(this.type)}`;
         $.ajax({
             url: url,
             type: "GET",
@@ -143,6 +156,10 @@ class DataRequest extends CachedProviderRequest {
             success: (data) => {
                 try {
                     this.data = data;
+                    this.timeReceived = (new Date()).getTime();
+                    if ( this.data !== undefined && this.data.oldestDataAgeSeconds !== undefined ) {
+                        this.oldestDataAgeAtRetrievalSeconds = this.data.oldestDataAgeSeconds
+                    }
                     this.completeRequest(true);
                 } catch {
                     this.completeRequest(false);
@@ -160,12 +177,13 @@ class DataRequest extends CachedProviderRequest {
     }
 
     public broadcastData(immediate: boolean) {
-        if ( this.data === undefined || this.data.oldestDataAgeSeconds === undefined || this.data.conditions === undefined || 
+        if ( this.data === undefined || this.oldestDataAgeAtRetrievalSeconds === undefined || this.data.conditions === undefined || 
             this.receiver == undefined ) {
             return;
         }
 
-        let dataAgeSeconds = this.data.oldestDataAgeSeconds as number;
+        let secondsSinceRequest = Math.ceil(((new Date()).getTime() - this.timeReceived) / 1000);
+        let dataAgeSeconds = this.oldestDataAgeAtRetrievalSeconds + secondsSinceRequest;
         for ( let data of this.data.conditions ) {
             if (data.longitude === undefined || data.latitude === undefined) {
                 continue;
