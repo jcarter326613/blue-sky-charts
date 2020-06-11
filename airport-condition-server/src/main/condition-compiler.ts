@@ -48,14 +48,16 @@ export class ConditionCompiler {
                     EasyAwait.instance.endThread("ConditionCompiler.compileConditions");
                 });
             }
-        } 
+        }
     }
 
     public getConditions(): ConditionResponse {
         let retVal = new ConditionResponse();
-        if ( this.returnConditionList !== undefined ) {
+        if ( this.returnConditionList !== undefined && this.returnOldestIssueDate !== undefined ) {
             retVal.conditions = this.returnConditionList;
-            retVal.oldestIssueDate = this.returnOldestIssueDate;
+
+            let now = new Date();
+            retVal.oldestDataAgeSeconds = Math.ceil((now.getTime() - this.returnOldestIssueDate) / 1000);
         }
         return retVal;
     }
