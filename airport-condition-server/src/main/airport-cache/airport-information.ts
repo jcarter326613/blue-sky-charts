@@ -2,6 +2,7 @@
 export class AirportInformation {
     public latitude: number | undefined;
     public longitude: number | undefined;
+    public issueTime: number | undefined;
     public ceiling: number | undefined;
     public visibility: number | undefined;
     public cloudCover: string | undefined;

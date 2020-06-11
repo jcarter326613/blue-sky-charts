@@ -2,6 +2,7 @@
 import { AirportInformation } from "./airport-cache/airport-information";
 import { Cache } from "./airport-cache/cache"
 import { Condition } from "./condition";
+import { ConditionResponse } from './condition-response'
 import { BoxGeo, CoordinateConversion, PointGeo, PointWebMercator, Box2d } from "coordinates";
 import { Heap } from 'ts-heap'
 import { EasyAwait } from "easy-await";
@@ -12,6 +13,7 @@ export class ConditionCompiler {
     private remainingFiles: number;
     private allConditions: Heap<AirportInformation> | undefined;
     private returnConditionList: Array<Condition> | undefined;
+    private returnOldestIssueDate: number | undefined;
     private buffer: PointGeo | undefined;
     private assigner: ((condition: Condition, info: AirportInformation) => boolean) | undefined;
     
@@ -49,11 +51,13 @@ export class ConditionCompiler {
         } 
     }
 
-    public getConditions(): Array<Condition> {
+    public getConditions(): ConditionResponse {
+        let retVal = new ConditionResponse();
         if ( this.returnConditionList !== undefined ) {
-            return this.returnConditionList;
+            retVal.conditions = this.returnConditionList;
+            retVal.oldestIssueDate = this.returnOldestIssueDate;
         }
-        return new Array<Condition>();
+        return retVal;
     }
 
     private receiveFile(data: Array<AirportInformation>, region: BoxGeo): void {
@@ -88,7 +92,7 @@ export class ConditionCompiler {
         }
         while ( !this.allConditions.isEmpty ) {
             let info = this.allConditions.pop();
-            if ( info !== undefined && info.latitude !== undefined && info.longitude !== undefined ) {
+            if ( info !== undefined && info.latitude !== undefined && info.longitude !== undefined && info.issueTime !== undefined ) {
                 let conflictFound = false;
                 for ( let priorCondition of this.returnConditionList ) {
                     if ( priorCondition.latitude - this.buffer.latitude < info.latitude && 
@@ -107,6 +111,9 @@ export class ConditionCompiler {
                     condition.longitude = info.longitude;
                     if ( this.assigner(condition, info) ) {
                         this.returnConditionList.push(condition);
+                        if ( this.returnOldestIssueDate === undefined || this.returnOldestIssueDate > info.issueTime ) {
+                            this.returnOldestIssueDate = info.issueTime;
+                        }
                     }
                 }
             }
