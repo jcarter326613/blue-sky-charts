@@ -21,6 +21,10 @@ export abstract class CachedProvider {
         this.processQueuePending = false;
     }
 
+    public isLoading(): boolean {
+        return this.numActiveRequests > 0 || this.requestQueue.size() > 0;
+    }
+
     public clearQueue(): void {
         this.requestQueue.clear();
         this.requestQueueKeys = {};

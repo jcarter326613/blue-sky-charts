@@ -262,29 +262,40 @@ export class NavigableMap2d implements IMap {
             context.restore();
         })
         if ( this.dataOverlayView !== undefined ) {
-            this.dataOverlayView.getSubMapView().resetRequestedInformationAgeRecord();
+            let dataOverlay = this.dataOverlayView.getSubMapView();
+
+            dataOverlay.resetRequestedInformationAgeRecord();
             context.save();
             this.renderSubMap(this.dataOverlayView, viewport2d);
             context.restore();
 
             // Draw the date indicating the oldest data displayed
-            let informationAge = this.dataOverlayView.getSubMapView().getRequestedInformationAgeSeconds();
-            if ( informationAge !== undefined ) {
+            if ( this.dataProvider.isLoading() ) {
                 context.save();
-                this.renderInformationAgeBox(informationAge);
+                this.renderInformationAgeBox("Loading weather data...");
                 context.restore();
+            } else {
+                let informationAge = dataOverlay.getRequestedInformationAgeSeconds();
+                if ( informationAge !== undefined ) {
+                    // Draw the information age
+                    context.save();
+                    let informationAgeLabel = this.getInformationAgeLabel(informationAge);
+                    this.renderInformationAgeBox(informationAgeLabel);
+                    context.restore();
 
-                let secondsToSleep: number;
-                if ( informationAge == 60 ) {
-                    secondsToSleep = 1;
-                } else if ( informationAge == 0 ) {
-                    secondsToSleep = 61;
-                } else {
-                    secondsToSleep = (60 - (informationAge % 60)) + 1;
+                    // Trigger a refresh for when the information age needs to be updated
+                    let secondsToSleep: number;
+                    if ( informationAge == 60 ) {
+                        secondsToSleep = 1;
+                    } else if ( informationAge == 0 ) {
+                        secondsToSleep = 61;
+                    } else {
+                        secondsToSleep = (60 - (informationAge % 60)) + 1;
+                    }
+                    setTimeout(() => {
+                        this.requestRedraw();
+                    }, secondsToSleep * 1000);
                 }
-                setTimeout(() => {
-                    this.requestRedraw();
-                }, secondsToSleep * 1000);
             }
         }
 
@@ -314,12 +325,11 @@ export class NavigableMap2d implements IMap {
         context.restore();
     }
 
-    private renderInformationAgeBox(informationAgeSeconds: number) {
+    private renderInformationAgeBox(informationAgeLabel: string) {
         if (this.context == null)
             return;
 
         // Figure out where we need to draw
-        let informationAgeLabel = this.getInformationAgeLabel(informationAgeSeconds);
         let oldFont = this.context.font;
         this.context.font = "20px Arial";
         let lineHeight = this.context.measureText('M').width * 1.2;
