@@ -1,8 +1,12 @@
+
+import { PriorityArray } from '../utility/priority-array'
+
 export abstract class CachedProvider {
     private static readonly MAX_ACTIVE_REQUESTS = 2;
     private cache: Record<string, CachedProviderRequest>; //Need to add ageoff, causing memory leak
     private numActiveRequests: number;
-    private requestQueue: Record<string, CachedProviderRequest>;
+    private requestQueue: PriorityArray<[string, CachedProviderRequest]>;
+    private requestQueueKeys: Record<string,number>;    //key, priority
     private requestDelayMilliseconds: number;
     private lastQueueAddition: Date;
     private processQueuePending: boolean;
@@ -10,18 +14,31 @@ export abstract class CachedProvider {
     constructor(requestDelayMilliseconds: number = 0) {
         this.cache = {};
         this.numActiveRequests = 0;
-        this.requestQueue = {};
+        this.requestQueue = new PriorityArray<[string, CachedProviderRequest]>();
+        this.requestQueueKeys = {};
         this.requestDelayMilliseconds = requestDelayMilliseconds;
         this.lastQueueAddition = new Date();
         this.processQueuePending = false;
     }
 
     public clearQueue(): void {
-        this.requestQueue = {}
+        this.requestQueue.clear();
+        this.requestQueueKeys = {};
     }
 
     public getExistingRequest(key: string): CachedProviderRequest | undefined {
-        return this.cache[key];
+        if ( key in this.cache ) {
+            return this.cache[key];
+        }
+        if ( key in this.requestQueueKeys ) {
+            let priority = this.requestQueueKeys[key];
+            let priorityList = this.requestQueue.getPriorityList(priority);
+            for ( let e of priorityList ) {
+                if ( e[0] == key ) {
+                    return e[1];
+                }
+            }
+        }
     }
 
     /**
@@ -33,8 +50,9 @@ export abstract class CachedProvider {
     }
 
     protected addRequestToQueue(key: string, request: CachedProviderRequest): void {
-        if (!(key in this.requestQueue) || this.requestQueue[key].isInError()) {
-            this.requestQueue[key] = request;
+        if (!(key in this.requestQueueKeys)) {
+            this.requestQueueKeys[key] = request.getPriority();
+            this.requestQueue.add([key, request], request.getPriority());
             this.lastQueueAddition = new Date();
             this.processQueue();
         }
@@ -51,15 +69,15 @@ export abstract class CachedProvider {
         let now = new Date();
         let timeToWait = this.requestDelayMilliseconds - (now.getTime() - this.lastQueueAddition.getTime())
         if ( timeToWait <= 0 ) {
-            while ( this.numActiveRequests < CachedProvider.MAX_ACTIVE_REQUESTS && Object.keys(this.requestQueue).length > 0 ) {
-                for ( let i in this.requestQueue ) {
-                    let request = this.requestQueue[i];
-                    this.addRequestToCache(i, request);
-                    request.sendRequest();
-                    delete this.requestQueue[i]
-                    this.numActiveRequests++;
+            while ( this.numActiveRequests < CachedProvider.MAX_ACTIVE_REQUESTS && this.requestQueue.size() > 0 ) {
+                let request = this.requestQueue.pop();
+                if ( request === undefined ) {
                     break;
                 }
+                delete this.requestQueueKeys[request[0]];
+                this.addRequestToCache(request[0], request[1]);
+                request[1].sendRequest();
+                this.numActiveRequests++;
             }
         } else {
             this.processQueuePending = true;
@@ -74,17 +92,23 @@ export abstract class CachedProvider {
 export abstract class CachedProviderRequest {
     private loaded: boolean;
     private inError: boolean;
-    private provider: CachedProvider
+    private provider: CachedProvider;
+    private priority: number;
 
-    constructor(provider: CachedProvider) {
+    constructor(provider: CachedProvider, priority: number) {
         this.loaded = false;
         this.inError = false;
         this.provider = provider;
+        this.priority = priority;
     }
 
     abstract sendRequest(): void;
 
     abstract broadcastData(immediate: boolean): void;
+
+    public getPriority(): number {
+        return this.priority;
+    }
 
     public isLoaded(): boolean {
         return this.loaded && !this.inError;

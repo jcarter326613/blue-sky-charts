@@ -126,7 +126,7 @@ class DataRequest extends CachedProviderRequest {
     private static readonly MAX_AGE_MILLISECONDS = 5 * 60 * 1000;
 
     constructor(provider: DataProvider, receiver: IDataReceiver, area: BoxGeo, resolution: PointGeo, type: OverlayTypes) {
-        super(provider);
+        super(provider, 1);
         this.receiver = receiver;
         this.area = area;
         this.resolution = resolution;

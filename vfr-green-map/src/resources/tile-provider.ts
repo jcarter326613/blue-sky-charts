@@ -10,7 +10,7 @@ export class TileProvider extends CachedProvider {
         this.mapRoot = mapRoot;
     }
 
-    public retrieveTile(mapName: string, mapVersion: string, zoomLevel: number, location: Point2d, tileDimensions: Point2d ,
+    public retrieveTile(mapName: string, mapVersion: string, zoomLevel: number, location: Point2d, tileDimensions: Point2d,
             receiver: ITileReceiver, data: any): void {
         let key = this.createKey(mapName, zoomLevel, location);
         let tileRequest = this.getExistingRequest(key);
@@ -22,13 +22,13 @@ export class TileProvider extends CachedProvider {
                 tileRequestScoped.broadcastData(true);
             } else {
                 tileRequestScoped.setReceiver(receiver, data);
-                this.findTemporaryTile(mapName, zoomLevel, location, receiver, data);
+                this.findTemporaryTile(mapName, zoomLevel, location, receiver, data, mapVersion, tileDimensions);
             }
         } else {
             let url = `${this.mapRoot}/${mapName}_SEC_${mapVersion}/${zoomLevel}/${location.x}_${location.y}.png`;
-            let newRequest = new TileRequest(this, receiver, location, tileDimensions, data, url);
+            let newRequest = new TileRequest(this, receiver, location, tileDimensions, data, url, zoomLevel);
             this.addRequestToQueue(key, newRequest);
-            this.findTemporaryTile(mapName, zoomLevel, location, receiver, data);
+            this.findTemporaryTile(mapName, zoomLevel, location, receiver, data, mapVersion, tileDimensions);
         }
     }
 
@@ -36,7 +36,8 @@ export class TileProvider extends CachedProvider {
         return `${mapName}|${zoomLevel}|${location.x}_${location.y}`;
     }
 
-    private findTemporaryTile(mapName: string, zoomLevel: number, requestLocation: Point2d, receiver: ITileReceiver, data: any): void {
+    private findTemporaryTile(mapName: string, zoomLevel: number, requestLocation: Point2d, receiver: ITileReceiver, data: any, 
+        mapVersion: string, tileDimensions: Point2d): void {
         let divisor = 1;
         for ( let i = zoomLevel - 1; i >= 0; i-- ) {
             // Get the new cell that we want in the new zoom level
@@ -46,7 +47,7 @@ export class TileProvider extends CachedProvider {
             // See if that cell is available and draw it if it is
             let key = this.createKey(mapName, i, zoomLocation);
             let cachedRequest = this.getExistingRequest(key);
-            if ( cachedRequest != undefined && cachedRequest.isLoaded() ) {
+            if ( cachedRequest !== undefined && cachedRequest.isLoaded() ) {
                 // Get the bounds of that cell in the original zoom cells
                 let originalZoomZoomLocation = new Point2d(zoomLocation.x * divisor, zoomLocation.y * divisor);
                 let subsectionX = (requestLocation.x - originalZoomZoomLocation.x) / divisor;
@@ -59,8 +60,11 @@ export class TileProvider extends CachedProvider {
                     receiver.receiveTile(requestLocation, subsection, image, data, true);
                     return;
                 }
+            } else if ( cachedRequest === undefined ) {
+                let url = `${this.mapRoot}/${mapName}_SEC_${mapVersion}/${i}/${zoomLocation.x}_${zoomLocation.y}.png`;
+                let newRequest = new TileRequest(this, receiver, zoomLocation, tileDimensions, data, url, i);
+                this.addRequestToQueue(key, newRequest);
             }
-            //requestLocation = zoomLocation;
         }
 
         return;
@@ -76,8 +80,8 @@ class TileRequest extends CachedProviderRequest {
     private url: string;
 
     constructor(provider: TileProvider, receiver: ITileReceiver, location: Point2d, dimensions: Point2d, 
-        data: any, url: string) {
-        super(provider);
+        data: any, url: string, zoomLevel: number) {
+        super(provider, zoomLevel);
         this.tileImage = null;
         this.receiver = receiver;
         this.location = location;
