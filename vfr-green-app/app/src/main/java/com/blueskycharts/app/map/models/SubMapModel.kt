@@ -1,5 +1,6 @@
 package com.blueskycharts.app.map.models
 
+import android.util.JsonReader
 import com.blueskycharts.app.coordinates.Point2d
 
 data class SubMapModel ( val mapBounds: Array<Point2d>?,
@@ -45,5 +46,26 @@ data class SubMapModel ( val mapBounds: Array<Point2d>?,
         result = 31 * result + (fileExtent?.hashCode() ?: 0)
         result = 31 * result + (maxZoom ?: 0)
         return result
+    }
+
+    companion object {
+        fun readFromJsonReader(reader: JsonReader): Collection<SubMapModel> {
+            reader.beginObject()
+            while (reader.hasNext()) {
+                val mapName = reader.nextName();
+                reader.beginObject()
+                while ( reader.hasNext() ) {
+                    val attribute = reader.nextName()
+                    when ( attribute ) {
+                        "fileExtent" -> {
+                            reader.beginObject()
+                            reader.endObject()
+                        }
+                    }
+                }
+                reader.endObject();
+            }
+            reader.endObject()
+        }
     }
 }

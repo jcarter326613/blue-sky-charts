@@ -1,107 +1,149 @@
 package com.blueskycharts.app.map.view
 
+import android.content.Context
+import android.graphics.Canvas
+import android.graphics.Color
+import android.graphics.Paint
+import android.graphics.Rect
+import android.net.Uri
+import android.util.AttributeSet
+import android.util.JsonReader
+import android.util.JsonToken
+import android.view.View
+import androidx.annotation.RestrictTo
+import androidx.core.content.res.getStringOrThrow
+import com.blueskycharts.app.R
+import com.blueskycharts.app.coordinates.CoordinateConversion
+import com.blueskycharts.app.coordinates.Point2d
+import com.blueskycharts.app.coordinates.PointGeo
+import com.blueskycharts.app.coordinates.PointWebMercator
+import com.blueskycharts.app.map.models.SubMapModel
 import com.blueskycharts.app.map.resources.TileProvider
+import java.net.URL
+import java.util.*
+import kotlin.concurrent.thread
+import kotlin.math.pow
+import kotlinx.coroutines.*
+import java.io.InputStreamReader
 
-class NavigableMap2d : Map {
+class NavigableMap2d(context: Context, attributes: AttributeSet) : View(context, attributes), Map {
     private val tileProvider: TileProvider;
     private val shadowTileProvider: TileProvider;
-    //private dataProvider: DataProvider;
+    //private val dataProvider: DataProvider;
 
     // Map state variables
     //private context: CanvasRenderingContext2D | null;
-    private mapViews: Collection<SubMapPosition>;
-    private dataOverlayView: SubMapPosition | undefined;
-    private origin2d: PointWebMercator;
-    private mark: PointWebMercator | undefined;
-    private scale: number;
-    private scaleDriver: number;
-    private readonly maxScaleDriver: number;
+    private var mapViews: Collection<SubMapPosition>;
+    private val dataOverlayView: SubMapPosition? = null;
+    private var origin2d: PointWebMercator;
+    private var scale: Double;
+    private var scaleDriver: Float;
+    private val maxScaleDriver: Float = 12F;
 
     // Mouse event variables
-    private isDragging: boolean;
-    private mouseDownClient: Point2d;
-    private mouseDownOrigin2d: Point2d;
-    private touchMoveIdentifier: number;
-    private pinchClientPoint1: Point2d;
-    private pinchClientPoint2: Point2d;
-    private pinchOriginalScale: number;
+    private val isDragging: Boolean;
+    private val mouseDownClient: Point2d;
+    private val mouseDownOrigin2d: Point2d;
+    private val touchMoveIdentifier: Int;
+    private val pinchClientPoint1: Point2d;
+    private val pinchClientPoint2: Point2d;
+    private val pinchOriginalScale: Double;
 
     // html element variables
-    private containerWidth: number;
-    private containerHeight: number;
-    private canvasObjHtml: JQuery<HTMLElement>;
-    private containerDiv: JQuery<HTMLElement>;
+    private var containerWidth: Int;
+    private var containerHeight: Int;
 
-    constructor(elementId: string, mapRoot: string, originLongitude: number | undefined, originLatitude: number | undefined,
-    zoom: number | undefined, markLongitude: number | undefined, markLatitude: number | undefined) {
-
-        // Set all parameterized defaults
-        if ( zoom === undefined ) {
-            this.scaleDriver = 4.25;
-        } else {
-            this.scaleDriver = zoom;
-        }
-        if ( originLongitude !== undefined && originLatitude !== undefined ) {
-            this.origin2d = CoordinateConversion.convertToWebMercator(new PointGeo(originLongitude, originLatitude));
-        } else {
-            this.origin2d = CoordinateConversion.convertToWebMercator(new PointGeo(-98.5795, 39.8283));
-        }
-        if ( markLatitude !== undefined && markLongitude !== undefined ) {
-            if ( zoom === undefined ) {
-                this.scaleDriver = 8;
+    init {
+        val mapRoot: String;
+        context.theme.obtainStyledAttributes(attributes, R.styleable.NavigableMap2d, 0, 0).apply {
+            try {
+                mapRoot = getStringOrThrow(R.styleable.NavigableMap2d_mapRoot)
+                scaleDriver = getFloat(R.styleable.NavigableMap2d_zoom, 4.25F);
+                val originLongitude = getFloat(R.styleable.NavigableMap2d_originLongitude, -98.5795F)
+                val originLatitude = getFloat(R.styleable.NavigableMap2d_originLongitude, 39.8283F)
+                origin2d = CoordinateConversion.convertToWebMercator(PointGeo(originLongitude.toDouble(), originLatitude.toDouble()));
+            } finally {
+                recycle()
             }
-            this.origin2d = CoordinateConversion.convertToWebMercator(new PointGeo(markLongitude, markLatitude));
-            this.mark = this.origin2d;
         }
 
         // Set all constant and derived defaults
-        this.tileProvider = new TileProvider(`${mapRoot}/sectional`);
-        this.shadowTileProvider = new TileProvider(`${mapRoot}/world-shadow`);
-        this.dataProvider = new DataProvider();
-        this.maxScaleDriver = 12;
+        this.tileProvider = TileProvider("${mapRoot}/sectional");
+        this.shadowTileProvider = TileProvider("${mapRoot}/world-shadow");
+        /*
+        this.dataProvider = DataProvider();
+         */
         if ( this.scaleDriver > this.maxScaleDriver ) {
             this.scaleDriver = this.maxScaleDriver;
         } else if (this.scaleDriver < 0) {
-            this.scaleDriver = 0;
+            this.scaleDriver = 0.0F;
         }
-        this.scale = 0;
+        this.scale = 0.0;
         this.updateScale();
         this.containerWidth = 0;
         this.containerHeight = 0;
 
-        this.mouseDownClient = new Point2d();
-        this.mouseDownOrigin2d = new Point2d();
+        this.mouseDownClient = Point2d();
+        this.mouseDownOrigin2d = Point2d();
         this.touchMoveIdentifier = 0;
 
-        this.mapViews = new Array<SubMapPosition>();
+        this.mapViews = LinkedList<SubMapPosition>();
         this.isDragging = false;
-        this.pinchClientPoint1 = new Point2d();
-        this.pinchClientPoint2 = new Point2d();
-        this.pinchOriginalScale = 0;
+        this.pinchClientPoint1 = Point2d();
+        this.pinchClientPoint2 = Point2d();
+        this.pinchOriginalScale = 0.0;
 
-        // Identify and store the html comtainer for this control
-        let jQueryElement = $("#" + elementId);
-        if (jQueryElement.length != 1) {
-            throw new Error("Must specify a unique html element id to place the map in.");
-        }
-        this.containerDiv = jQueryElement;
-
-        // Create a debug text div
-        /*
-        this.debugDiv = $(document.createElement("div"));
-        this.debugDiv.attr("style", "font-size: 14px;")
-        this.containerDiv.append(this.debugDiv);
-        */
-
-        // Create canvas object and place it in the div
-        let canvasObj = document.createElement("canvas");
-        this.canvasObjHtml = $(canvasObj);
+        // Startup the map
         this.setSize();
-        this.containerDiv.append(this.canvasObjHtml);
-        this.context = canvasObj.getContext("2d");
 
+        /*
         this.addEventListeners();
-        this.render();
-        this.retrieveConfiguration(`${mapRoot}/metadata.json`);
+         */
+        this.retrieveConfiguration(URL("${mapRoot}/metadata.json"));
+    }
+
+    private fun updateScale() {
+        this.scale = 1 / (2.0.pow(this.scaleDriver.toDouble()));
+    }
+
+    private fun setSize() {
+        this.containerWidth = width;
+        this.containerHeight = height;
+    }
+
+    private fun retrieveConfiguration(mapConfigurationFile: URL) {
+        GlobalScope.launch {
+            try {
+                //val configText = mapConfigurationFile.readText();
+                val reader = JsonReader(InputStreamReader(mapConfigurationFile.openStream()));
+                val mapPositions = SubMapModel.readFromJsonReader(reader);
+            } catch (e: Throwable) {
+                print(e.message);
+            }
+        }
+        /*
+        $.getJSON(mapConfigurationFile,
+        function(data: Record<string, SubMapModel>) {
+            thisObj.initializeMapModel(data);
+            thisObj.render();
+        });
+
+         */
+    }
+
+    override fun requestRedraw() {
+        /*
+        requestAnimationFrame(() => {
+            this.render();
+        });
+         */
+    }
+
+    override fun onDraw(canvas: Canvas?) {
+        super.onDraw(canvas)
+        val paint = Paint()
+        val color = Color.BLUE
+        paint.color = color
+        canvas?.drawRect(Rect(0, 0, 300, 100), paint)
     }
 }

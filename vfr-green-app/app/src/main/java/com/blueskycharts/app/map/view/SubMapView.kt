@@ -32,7 +32,7 @@ interface SubMapView {
      * @param region The region in relation to the original width and height
      * @param scale All aspects of the region are multiplied by this value
      */
-    fun render(context: CanvasRenderingContext2D, region: Box2d, scale: Float);
+    fun render(context: Any, region: Box2d, scale: Float);
 
     /**
      * Prevents any further drawing from this view
