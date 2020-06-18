@@ -6,17 +6,18 @@ import android.graphics.Color
 import android.graphics.Paint
 import android.graphics.Rect
 import android.net.Uri
+import android.os.Build
 import android.util.AttributeSet
 import android.util.JsonReader
 import android.util.JsonToken
 import android.view.View
+import androidx.annotation.RequiresApi
 import androidx.annotation.RestrictTo
 import androidx.core.content.res.getStringOrThrow
+import androidx.core.graphics.drawable.toBitmap
 import com.blueskycharts.app.R
-import com.blueskycharts.app.coordinates.CoordinateConversion
-import com.blueskycharts.app.coordinates.Point2d
-import com.blueskycharts.app.coordinates.PointGeo
-import com.blueskycharts.app.coordinates.PointWebMercator
+import com.blueskycharts.app.coordinates.*
+import com.blueskycharts.app.map.models.BoxGeoModel
 import com.blueskycharts.app.map.models.SubMapModel
 import com.blueskycharts.app.map.resources.TileProvider
 import java.net.URL
@@ -33,7 +34,7 @@ class NavigableMap2d(context: Context, attributes: AttributeSet) : View(context,
 
     // Map state variables
     //private context: CanvasRenderingContext2D | null;
-    private var mapViews: Collection<SubMapPosition>;
+    private var mapViews: LinkedList<SubMapPosition>;
     private val dataOverlayView: SubMapPosition? = null;
     private var origin2d: PointWebMercator;
     private var scale: Double;
@@ -48,10 +49,6 @@ class NavigableMap2d(context: Context, attributes: AttributeSet) : View(context,
     private val pinchClientPoint1: Point2d;
     private val pinchClientPoint2: Point2d;
     private val pinchOriginalScale: Double;
-
-    // html element variables
-    private var containerWidth: Int;
-    private var containerHeight: Int;
 
     init {
         val mapRoot: String;
@@ -80,8 +77,6 @@ class NavigableMap2d(context: Context, attributes: AttributeSet) : View(context,
         }
         this.scale = 0.0;
         this.updateScale();
-        this.containerWidth = 0;
-        this.containerHeight = 0;
 
         this.mouseDownClient = Point2d();
         this.mouseDownOrigin2d = Point2d();
@@ -94,56 +89,247 @@ class NavigableMap2d(context: Context, attributes: AttributeSet) : View(context,
         this.pinchOriginalScale = 0.0;
 
         // Startup the map
-        this.setSize();
-
+        this.setupBackgroundShadow();
         /*
         this.addEventListeners();
          */
         this.retrieveConfiguration(URL("${mapRoot}/metadata.json"));
     }
 
+    override fun requestRedraw() {
+        this.postInvalidate()
+    }
+
+    fun setOverlayType(type: OverlayTypes): Boolean {
+        /*
+        let success: boolean
+                if (type != OverlayTypes.None) {
+                    let dataView = new MapDataView(this.dataProvider, type, this);
+                    let extent = dataView.initialize();
+                    if ( extent !== undefined ) {
+                        this.dataOverlayView = new SubMapPosition(dataView, extent);
+                        success = true;
+                    } else {
+                        success = false;
+                    }
+                } else {
+                    if ( this.dataOverlayView !== undefined ) {
+                        this.dataOverlayView.getSubMapView().dispose();
+                        this.dataOverlayView = undefined;
+                    }
+                    success = true;
+                }
+
+        this.dataProvider.clearQueue();
+        this.render();
+        return success;
+         */
+        return true;
+    }
+
+    private fun viewportChanged() {
+        this.tileProvider.clearQueue();
+        /*
+        this.dataProvider.clearQueue();
+         */
+    }
+
     private fun updateScale() {
         this.scale = 1 / (2.0.pow(this.scaleDriver.toDouble()));
     }
 
-    private fun setSize() {
-        this.containerWidth = width;
-        this.containerHeight = height;
+    private fun addEventListeners() {
+        /*
+        this.containerDiv.mousedown((event: JQuery.Event) => this.mouseDown(event));
+        this.containerDiv.mousemove((event: JQuery.Event) => this.mouseMove(event));
+        this.containerDiv.mouseup((event: JQuery.Event) => this.mouseUp(event));
+        this.containerDiv.mousewheel((event: JQueryMousewheelEventObject) => this.mouseScroll(event))
+        this.containerDiv.on("touchstart", (event: JQuery.Event) => this.touchStart(event));
+        this.containerDiv.on("touchmove", (event: JQuery.Event) => this.touchMove(event));
+        this.containerDiv.on("touchend", (event: JQuery.Event) => this.touchEnd(event));
+        this.containerDiv.on("touchcancel", (event: JQuery.Event) => this.touchEnd(event));
+
+        // Setup the window resize listener
+        $(window).resize(() => {
+            requestAnimationFrame(() => {
+                this.setSize();
+                this.viewportChanged();
+                this.render();
+            })
+        });
+         */
+    }
+
+    private fun getClientOffset(): Point2d {
+        /*
+        let offset = this.canvasObjHtml.offset();
+        return new Point2d(offset?.left, offset?.top);
+         */
+        return Point2d(0.0, 0.0)
+    }
+
+    private fun setupBackgroundShadow() {
+        val worldShadowView = MapTileView(this.shadowTileProvider, this);
+        val worldShadowMercatorExtents = BoxWebMercator(0.0, 0.0, PointWebMercator.MAX_X_MERCATOR.toDouble(), PointWebMercator.MAX_Y_MERCATOR.toDouble());
+        val shadowBoxGeo = CoordinateConversion.convertBoxMercatorToBoxGeo(worldShadowMercatorExtents);
+        val shadowBoxGeoModel = BoxGeoModel(
+            topLeft = shadowBoxGeo.topLeft,
+            topRight = shadowBoxGeo.topRight,
+            bottomLeft = shadowBoxGeo.bottomLeft,
+            bottomRight = shadowBoxGeo.bottomRight
+        )
+        val shadowMapModel = SubMapModel(
+            mapBounds = null,
+            tileWidth = 256,
+            maxZoom = 0,
+            fileExtent = shadowBoxGeoModel,
+            imageHeight = 256,
+            imageWidth = 256,
+            imageHeightScale = 1.0,
+            imageWidthScale = 1.0,
+            version = "1",
+            name = "world-shadow"
+        )
+        worldShadowView.initialize(shadowMapModel)
+        this.mapViews.add(SubMapPosition(worldShadowView, worldShadowMercatorExtents));
+    }
+
+    private fun initializeMapModel(data: Collection<SubMapModel>) {
+        // Add the world  VFR charts
+        return;
+        for (subMapModel in data) {
+            val subMapView = MapTileView(this.tileProvider, this);
+            val fileExtent = subMapView.initialize(subMapModel) ?: continue;
+            this.mapViews.push(SubMapPosition(subMapView, fileExtent));
+        }
     }
 
     private fun retrieveConfiguration(mapConfigurationFile: URL) {
         GlobalScope.launch {
             try {
-                //val configText = mapConfigurationFile.readText();
                 val reader = JsonReader(InputStreamReader(mapConfigurationFile.openStream()));
                 val mapPositions = SubMapModel.readFromJsonReader(reader);
+                this@NavigableMap2d.initializeMapModel(mapPositions)
+                this@NavigableMap2d.postInvalidate()
             } catch (e: Throwable) {
                 print(e.message);
             }
         }
-        /*
-        $.getJSON(mapConfigurationFile,
-        function(data: Record<string, SubMapModel>) {
-            thisObj.initializeMapModel(data);
-            thisObj.render();
-        });
-
-         */
     }
 
-    override fun requestRedraw() {
-        /*
-        requestAnimationFrame(() => {
-            this.render();
-        });
-         */
-    }
-
+    @RequiresApi(Build.VERSION_CODES.LOLLIPOP)
     override fun onDraw(canvas: Canvas?) {
         super.onDraw(canvas)
+        if (canvas == null)
+            return;
+
+        val viewport2d = this.calculateViewport();
+
+        // Draw the solid background color
         val paint = Paint()
-        val color = Color.BLUE
-        paint.color = color
-        canvas?.drawRect(Rect(0, 0, 300, 100), paint)
+        paint.color = Color.parseColor("#323232")
+        canvas.drawRect(Rect(0, 0, this.width, this.height), paint)
+
+        // Draw each sub map
+        for(submap in this.mapViews) {
+            val restoreCount = canvas.save()
+            this.drawSubMap(submap, viewport2d, canvas)
+            canvas.restoreToCount(restoreCount)
+        }
+
+        //val drawable = context.resources.getDrawable( R.drawable.ic_launcher_foreground, null)
+        //var bitmap = drawable.toBitmap(93, 93, null)
+        //canvas.drawBitmap(bitmap, 0F, 0F, null)
+
+        /*
+        if ( this.dataOverlayView !== undefined ) {
+            let dataOverlay = this.dataOverlayView.getSubMapView();
+
+            dataOverlay.resetRequestedInformationAgeRecord();
+            canvas.save();
+            this.renderSubMap(this.dataOverlayView, viewport2d);
+            canvas.restore();
+
+            // Draw the date indicating the oldest data displayed
+            if ( this.dataProvider.isLoading() ) {
+                canvas.save();
+                this.renderInformationAgeBox("Loading weather data...");
+                canvas.restore();
+            } else {
+                let informationAge = dataOverlay.getRequestedInformationAgeSeconds();
+                if ( informationAge !== undefined ) {
+                    // Draw the information age
+                    canvas.save();
+                    let informationAgeLabel = this.getInformationAgeLabel(informationAge);
+                    this.renderInformationAgeBox(informationAgeLabel);
+                    canvas.restore();
+
+                    // Trigger a refresh for when the information age needs to be updated
+                    let secondsToSleep: number;
+                    if ( informationAge == 60 ) {
+                        secondsToSleep = 1;
+                    } else if ( informationAge == 0 ) {
+                        secondsToSleep = 61;
+                    } else {
+                        secondsToSleep = (60 - (informationAge % 60)) + 1;
+                    }
+                    setTimeout(() => {
+                        this.requestRedraw();
+                    }, secondsToSleep * 1000);
+                }
+            }
+        }
+
+         */
+    }
+
+    private fun drawSubMap(submap: SubMapPosition, viewport2d: BoxWebMercator, canvas: Canvas) {
+        // Calculate the viewport from the perspective of the un modified sub map
+        val mapPosition2d: BoxWebMercator = submap.location;
+        val viewportOverlap2d = mapPosition2d.union(viewport2d);
+        if (viewportOverlap2d != null) {
+            val originalWidth = submap.subMapView.originalWidth;
+            val originalHeight = submap.subMapView.originalHeight;
+
+            val mapMercatorWidth = mapPosition2d.bottomRight.x - mapPosition2d.topLeft.x;
+            val mapMercatorHeight = mapPosition2d.bottomRight.y - mapPosition2d.topLeft.y;
+            val mapScale = (this.width * mapMercatorWidth) / (originalWidth * viewport2d.getWidth());
+
+            val mapShiftX = (mapPosition2d.topLeft.x - this.origin2d.x) * this.width / viewport2d.getWidth()
+            val mapShiftY = (mapPosition2d.topLeft.y - this.origin2d.y) * this.height / viewport2d.getHeight()
+
+            //canvas.translate(this.width / 2.0F, this.height / 2.0F);
+            //canvas.translate(mapShiftX.toFloat(), mapShiftY.toFloat());
+
+            // Figure out the part of the map we want to draw in 2d coordinates relative to the upper left corner
+            val subMapDrawSection = Box2d(
+                originalWidth * (viewportOverlap2d.topLeft.x - mapPosition2d.topLeft.x) / mapMercatorWidth,
+                originalHeight * (viewportOverlap2d.topLeft.y - mapPosition2d.topLeft.y) / mapMercatorHeight,
+                originalWidth * (viewportOverlap2d.bottomRight.x - mapPosition2d.topLeft.x) / mapMercatorWidth,
+                originalHeight * (viewportOverlap2d.bottomRight.y - mapPosition2d.topLeft.y) / mapMercatorHeight);
+
+            // Draw the submap
+            submap.subMapView.render(canvas, subMapDrawSection, mapScale);
+        } else {
+            submap.subMapView.moveOffscreen();
+        }
+    }
+
+    /**
+     * Returns the viewport in unscaled coordinates.
+     */
+    private fun calculateViewport(): BoxWebMercator {
+        val viewportDimensions2d = this.getViewportDimensions2d();
+        val widthBy2 = viewportDimensions2d.x / 2;
+        val heightBy2 = viewportDimensions2d.y / 2;
+        val viewport = BoxWebMercator(this.origin2d.x - widthBy2, this.origin2d.y - heightBy2,
+            this.origin2d.x + widthBy2, this.origin2d.y + heightBy2);
+        return viewport;
+    }
+
+    private fun getViewportDimensions2d(): PointWebMercator {
+        val viewportWidth = this.width * this.scale;
+        val viewportHeight = this.height * this.scale;
+        return PointWebMercator(viewportWidth, viewportHeight);
     }
 }

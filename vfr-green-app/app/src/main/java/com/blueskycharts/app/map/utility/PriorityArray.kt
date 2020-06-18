@@ -34,7 +34,7 @@ class PriorityArray<T> {
         val retVal = this.content[this.lowestPriority].removeFirst() ?: return null;
 
         // Adjust the lowest priority if we've used this one up
-        while ( this.content[this.lowestPriority].size == 0 ) {
+        while ( this.content.size > this.lowestPriority && this.content[this.lowestPriority].size == 0 ) {
             this.lowestPriority++;
         }
 

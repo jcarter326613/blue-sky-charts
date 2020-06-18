@@ -25,10 +25,10 @@ abstract class CachedProvider( private val requestDelayMilliseconds: Int = 0 ) {
     }
 
     fun getExistingRequest(key: String): CachedProviderRequest? {
-        if ( key in this.cache ) {
+        if ( key in this.cache.keys ) {
             return this.cache[key];
         }
-        if ( key in this.requestQueueKeys ) {
+        if ( key in this.requestQueueKeys.keys ) {
             val priority = this.requestQueueKeys[key] ?: return null;
             val priorityList = this.requestQueue.getPriorityList(priority);
             for ( e in priorityList ) {

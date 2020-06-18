@@ -1,12 +1,14 @@
 package com.blueskycharts.app.map.resources
 
+import android.graphics.Canvas
 import com.blueskycharts.app.coordinates.Box2d
 import com.blueskycharts.app.coordinates.Point2d
 import kotlin.math.floor
 
 class TileProvider(private val mapRoot: String ) : CachedProvider(0) {
     fun retrieveTile(mapName: String, mapVersion: String, zoomLevel: Int, location: Point2d, tileDimensions: Point2d,
-                     receiver: TileReceiver, data: Any) {
+                     receiver: TileReceiver, data: Any?, canvas: Canvas
+    ) {
         val key = this.createKey(mapName, zoomLevel, location);
         val tileRequest = this.getExistingRequest(key);
 
@@ -14,30 +16,30 @@ class TileProvider(private val mapRoot: String ) : CachedProvider(0) {
             val tileRequestScoped = tileRequest as TileRequest;
             if (tileRequest.loaded) {
                 tileRequestScoped.setReceiver(receiver, data);
-                tileRequestScoped.broadcastData(true);
+                tileRequestScoped.broadcastData(true, canvas);
             } else {
                 tileRequestScoped.setReceiver(receiver, data);
-                this.findTemporaryTile(mapName, zoomLevel, location, receiver, data, mapVersion, tileDimensions);
+                this.findTemporaryTile(mapName, zoomLevel, location, receiver, data, mapVersion, tileDimensions, canvas);
             }
         } else {
-            val url = "${mapRoot}/${mapName}_SEC_$mapVersion/$zoomLevel/${location.x}_${location.y}.png";
+            val url = "${mapRoot}/${mapName}_SEC_$mapVersion/$zoomLevel/${location.x.toInt()}_${location.y.toInt()}.png";
             val newRequest = TileRequest(this, receiver, location, tileDimensions, data, url, zoomLevel);
             this.addRequestToQueue(key, newRequest);
-            this.findTemporaryTile(mapName, zoomLevel, location, receiver, data, mapVersion, tileDimensions);
+            this.findTemporaryTile(mapName, zoomLevel, location, receiver, data, mapVersion, tileDimensions, canvas);
         }
     }
 
     private fun createKey(mapName: String, zoomLevel: Int, location: Point2d): String {
-        return "${mapName}|${zoomLevel}|${location.x}_${location.y}";
+        return "${mapName}|${zoomLevel}|${location.x.toInt()}_${location.y.toInt()}";
     }
 
-    private fun findTemporaryTile(mapName: String, zoomLevel: Int, requestLocation: Point2d, receiver: TileReceiver, data: Any,
-        mapVersion: String, tileDimensions: Point2d) {
+    private fun findTemporaryTile(mapName: String, zoomLevel: Int, requestLocation: Point2d, receiver: TileReceiver, data: Any?,
+        mapVersion: String, tileDimensions: Point2d, canvas: Canvas) {
         var divisor = 1;
         for ( i in zoomLevel - 1 downTo 0 ) {
             // Get the new cell that we want in the new zoom level
             divisor *= 2;
-            val zoomLocation: Point2d = Point2d(floor(requestLocation.x / divisor), Math.floor(requestLocation.y / divisor));
+            val zoomLocation: Point2d = Point2d(floor(requestLocation.x / divisor), floor(requestLocation.y / divisor));
 
             // See if that cell is available and draw it if it is
             val key = this.createKey(mapName, i, zoomLocation);
@@ -50,9 +52,9 @@ class TileProvider(private val mapRoot: String ) : CachedProvider(0) {
                 val subsection = Box2d(subsectionX, subsectionY, subsectionX + 1 / divisor, subsectionY + 1 / divisor);
 
                 // Get the image and draw it
-                val image = (cachedRequest as TileRequest).getImage();
+                val image = (cachedRequest as TileRequest).image;
                 if ( image != null ) {
-                    receiver.receiveTile(requestLocation, subsection, image, data, true);
+                    receiver.receiveTile(requestLocation, subsection, image, data, true, canvas);
                     return;
                 }
             } else if ( cachedRequest == null ) {

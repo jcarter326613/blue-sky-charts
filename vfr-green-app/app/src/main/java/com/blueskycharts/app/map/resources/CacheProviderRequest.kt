@@ -1,5 +1,7 @@
 package com.blueskycharts.app.map.resources
 
+import android.graphics.Canvas
+
 abstract class CachedProviderRequest( private val provider: CachedProvider, val priority: Int ) {
     var loaded: Boolean = false
         set(value) {
@@ -26,13 +28,13 @@ abstract class CachedProviderRequest( private val provider: CachedProvider, val 
 
     abstract fun sendRequest();
 
-    abstract fun broadcastData(immediate: Boolean);
+    abstract fun broadcastData(immediate: Boolean, canvas: Canvas?);
 
     protected fun completeRequest(isSuccess: Boolean) {
         this.provider.completeRequest();
         if ( isSuccess ) {
             this.loaded = true
-            this.broadcastData(false);
+            this.broadcastData(false, null);
         } else {
             this.inError = true
         }

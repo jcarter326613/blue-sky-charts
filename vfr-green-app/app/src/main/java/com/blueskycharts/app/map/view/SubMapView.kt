@@ -1,10 +1,17 @@
 package com.blueskycharts.app.map.view
 
+import android.graphics.Canvas
 import com.blueskycharts.app.coordinates.Box2d
 import com.blueskycharts.app.coordinates.BoxWebMercator
 import com.blueskycharts.app.map.models.SubMapModel
 
 interface SubMapView {
+    /**
+     * Some original width and height in any unit which is used determine the region parameter into the render function.
+     */
+    val originalWidth: Int
+    val originalHeight: Int
+
     /**
      * Initializes the view
      * @param model
@@ -12,13 +19,7 @@ interface SubMapView {
      * @returns A BoxGeo representing the full extent of the map.  undefined if this map should be discarded from view because of a
      *  bad configuration.
      */
-    fun initialize(model: SubMapModel, name: String): BoxWebMercator?;
-
-    /**
-     * Some original width and height in any unit which is used determine the region parameter into the render function.
-     */
-    fun getOriginalWidth(): Int;
-    fun getOriginalHeight(): Int;
+    fun initialize(model: SubMapModel): BoxWebMercator?;
 
     /**
      * Returns the age of any data beign displayed and resets the age counter prior to rendering
@@ -32,7 +33,7 @@ interface SubMapView {
      * @param region The region in relation to the original width and height
      * @param scale All aspects of the region are multiplied by this value
      */
-    fun render(context: Any, region: Box2d, scale: Float);
+    fun render(context: Canvas, region: Box2d, scale: Double);
 
     /**
      * Prevents any further drawing from this view
