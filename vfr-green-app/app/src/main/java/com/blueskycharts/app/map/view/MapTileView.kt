@@ -92,18 +92,21 @@ class MapTileView(private val tileProvider: TileProvider, private val map: Map) 
         val restoreTo = canvas.save();
         val upperLeft = subsection.upperLeft;
         val dimensions = subsection.getDimensions();
-        //canvas.translate(100F,100F)
-        //tile.draw(canvas);
 
-        val paint = Paint()
-        paint.color = Color.parseColor("#FF0000")
-        canvas.drawRect(Rect(0, 0, tile.width, tile.height), paint)
+        val sourceRect = Rect(
+            (upperLeft.x * tile.width).toInt(),
+            (upperLeft.y * tile.height).toInt(),
+            ((upperLeft.x + dimensions.x) * tile.width).toInt(),
+            ((upperLeft.y + dimensions.y) * tile.height).toInt()
+        )
+        val destinationRect = RectF(
+            tileX.toFloat(),
+            tileY.toFloat(),
+            (tileX + tileWidth).toFloat(),
+            (tileY + tileHeight).toFloat()
+        )
+        canvas.drawBitmap(tile, sourceRect, destinationRect, null)
 
-        canvas.drawBitmap(tile, 0F, 0F, null)
-        /*
-        canvas.drawBitmap().drawImage(tile, upperLeft.x * tile.intrinsicWidth, upperLeft.y * tile.intrinsicHeight, dimensions.x * tile.intrinsicWidth, dimensions.y * tile.intrinsicHeight,
-            tileX, tileY, tileWidth, tileHeight);
-         */
         canvas.restoreToCount(restoreTo);
     }
 

@@ -191,16 +191,15 @@ class NavigableMap2d(context: Context, attributes: AttributeSet) : View(context,
             name = "world-shadow"
         )
         worldShadowView.initialize(shadowMapModel)
-        this.mapViews.add(SubMapPosition(worldShadowView, worldShadowMercatorExtents));
+        this.mapViews.addLast(SubMapPosition(worldShadowView, worldShadowMercatorExtents));
     }
 
     private fun initializeMapModel(data: Collection<SubMapModel>) {
         // Add the world  VFR charts
-        return;
         for (subMapModel in data) {
             val subMapView = MapTileView(this.tileProvider, this);
             val fileExtent = subMapView.initialize(subMapModel) ?: continue;
-            this.mapViews.push(SubMapPosition(subMapView, fileExtent));
+            this.mapViews.addLast(SubMapPosition(subMapView, fileExtent));
         }
     }
 
@@ -298,8 +297,8 @@ class NavigableMap2d(context: Context, attributes: AttributeSet) : View(context,
             val mapShiftX = (mapPosition2d.topLeft.x - this.origin2d.x) * this.width / viewport2d.getWidth()
             val mapShiftY = (mapPosition2d.topLeft.y - this.origin2d.y) * this.height / viewport2d.getHeight()
 
-            //canvas.translate(this.width / 2.0F, this.height / 2.0F);
-            //canvas.translate(mapShiftX.toFloat(), mapShiftY.toFloat());
+            canvas.translate(this.width / 2.0F, this.height / 2.0F);
+            canvas.translate(mapShiftX.toFloat(), mapShiftY.toFloat());
 
             // Figure out the part of the map we want to draw in 2d coordinates relative to the upper left corner
             val subMapDrawSection = Box2d(
