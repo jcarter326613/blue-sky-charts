@@ -49,7 +49,7 @@ class TileProvider(private val mapRoot: String ) : CachedProvider(0) {
                 val originalZoomZoomLocation = Point2d(zoomLocation.x * divisor, zoomLocation.y * divisor);
                 val subsectionX = (requestLocation.x - originalZoomZoomLocation.x) / divisor;
                 val subsectionY = (requestLocation.y - originalZoomZoomLocation.y) / divisor;
-                val subsection = Box2d(subsectionX, subsectionY, subsectionX + 1 / divisor, subsectionY + 1 / divisor);
+                val subsection = Box2d(subsectionX, subsectionY, subsectionX + 1 / divisor.toDouble(), subsectionY + 1 / divisor.toDouble());
 
                 // Get the image and draw it
                 val image = (cachedRequest as TileRequest).image;
@@ -58,7 +58,7 @@ class TileProvider(private val mapRoot: String ) : CachedProvider(0) {
                     return;
                 }
             } else if ( cachedRequest == null ) {
-                val url = "${mapRoot}/${mapName}_SEC_${mapVersion}/${i}/${zoomLocation.x}_${zoomLocation.y}.png";
+                val url = "${mapRoot}/${mapName}_SEC_${mapVersion}/${i}/${zoomLocation.x.toInt()}_${zoomLocation.y.toInt()}.png";
                 val newRequest = TileRequest(this, receiver, zoomLocation, tileDimensions, data, url, i);
                 this.addRequestToQueue(key, newRequest);
             }

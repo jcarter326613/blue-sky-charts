@@ -34,7 +34,8 @@ class NavigableMap2d(context: Context, attributes: AttributeSet) : View(context,
 
     // Map state variables
     //private context: CanvasRenderingContext2D | null;
-    private var mapViews: LinkedList<SubMapPosition>;
+    private var mapBackground: SubMapPosition? = null;
+    private var mapViews: LinkedList<SubMapPosition>? = null
     private val dataOverlayView: SubMapPosition? = null;
     private var origin2d: PointWebMercator;
     private var scale: Double;
@@ -82,7 +83,6 @@ class NavigableMap2d(context: Context, attributes: AttributeSet) : View(context,
         this.mouseDownOrigin2d = Point2d();
         this.touchMoveIdentifier = 0;
 
-        this.mapViews = LinkedList<SubMapPosition>();
         this.isDragging = false;
         this.pinchClientPoint1 = Point2d();
         this.pinchClientPoint2 = Point2d();
@@ -191,16 +191,18 @@ class NavigableMap2d(context: Context, attributes: AttributeSet) : View(context,
             name = "world-shadow"
         )
         worldShadowView.initialize(shadowMapModel)
-        this.mapViews.addLast(SubMapPosition(worldShadowView, worldShadowMercatorExtents));
+        this.mapBackground = SubMapPosition(worldShadowView, worldShadowMercatorExtents)
     }
 
     private fun initializeMapModel(data: Collection<SubMapModel>) {
         // Add the world  VFR charts
+        val mapViewList = LinkedList<SubMapPosition>()
         for (subMapModel in data) {
             val subMapView = MapTileView(this.tileProvider, this);
             val fileExtent = subMapView.initialize(subMapModel) ?: continue;
-            this.mapViews.addLast(SubMapPosition(subMapView, fileExtent));
+            mapViewList.add(SubMapPosition(subMapView, fileExtent));
         }
+        this.mapViews = mapViewList
     }
 
     private fun retrieveConfiguration(mapConfigurationFile: URL) {
@@ -229,11 +231,21 @@ class NavigableMap2d(context: Context, attributes: AttributeSet) : View(context,
         paint.color = Color.parseColor("#323232")
         canvas.drawRect(Rect(0, 0, this.width, this.height), paint)
 
-        // Draw each sub map
-        for(submap in this.mapViews) {
+        // Draw the shadow
+        if ( this.mapBackground != null ) {
             val restoreCount = canvas.save()
-            this.drawSubMap(submap, viewport2d, canvas)
+            this.drawSubMap(this.mapBackground!!, viewport2d, canvas)
             canvas.restoreToCount(restoreCount)
+        }
+
+        // Draw each sub map
+        if ( this.mapViews != null ) {
+            val mapViews = this.mapViews!!
+            for (submap in mapViews) {
+                val restoreCount = canvas.save()
+                this.drawSubMap(submap, viewport2d, canvas)
+                canvas.restoreToCount(restoreCount)
+            }
         }
 
         //val drawable = context.resources.getDrawable( R.drawable.ic_launcher_foreground, null)
