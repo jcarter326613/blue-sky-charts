@@ -5,6 +5,7 @@ import android.graphics.BitmapFactory
 import android.graphics.Canvas
 import android.graphics.drawable.BitmapDrawable
 import android.graphics.drawable.Drawable
+import android.util.Log
 import androidx.core.graphics.drawable.toDrawable
 import com.blueskycharts.app.coordinates.Box2d
 import com.blueskycharts.app.coordinates.Point2d
@@ -33,9 +34,7 @@ class TileRequest(private val provider: TileProvider, private var receiver: Tile
     }
 
     override fun broadcastData(immediate: Boolean, canvas: Canvas?) {
-        if (this.loaded && !this.inError &&
-            this.receiver != null && this.location != null && this.image != null && this.dimensions != null) {
-
+        if (this.loaded && this.receiver != null && this.location != null && this.image != null && this.dimensions != null) {
             val region = Box2d(0.0, 0.0, this.dimensions.x, this.dimensions.y);
             this.receiver?.receiveTile(this.location, region, this.image, this.data, immediate, canvas);
             this.receiver = null;

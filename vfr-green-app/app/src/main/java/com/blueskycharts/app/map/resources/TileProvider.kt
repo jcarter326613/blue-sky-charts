@@ -3,29 +3,39 @@ package com.blueskycharts.app.map.resources
 import android.graphics.Canvas
 import com.blueskycharts.app.coordinates.Box2d
 import com.blueskycharts.app.coordinates.Point2d
+import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.launch
 import kotlin.math.floor
 
 class TileProvider(private val mapRoot: String ) : CachedProvider(0) {
     fun retrieveTile(mapName: String, mapVersion: String, zoomLevel: Int, location: Point2d, tileDimensions: Point2d,
-                     receiver: TileReceiver, data: Any?, canvas: Canvas
-    ) {
+                     receiver: TileReceiver, data: Any?, canvas: Canvas ) {
         val key = this.createKey(mapName, zoomLevel, location);
-        val tileRequest = this.getExistingRequest(key);
-
-        if ( tileRequest != null && !tileRequest.inError ) {
+        val tileRequest = this.getCachedItem(key);
+        if ( tileRequest != null && tileRequest.loaded ) {
             val tileRequestScoped = tileRequest as TileRequest;
             if (tileRequest.loaded) {
                 tileRequestScoped.setReceiver(receiver, data);
                 tileRequestScoped.broadcastData(true, canvas);
             } else {
-                tileRequestScoped.setReceiver(receiver, data);
-                this.findTemporaryTile(mapName, zoomLevel, location, receiver, data, mapVersion, tileDimensions, canvas);
+                this.findTemporaryTile(mapName, zoomLevel, location, receiver, data, mapVersion, tileDimensions, canvas)
             }
         } else {
-            val url = "${mapRoot}/${mapName}_SEC_$mapVersion/$zoomLevel/${location.x.toInt()}_${location.y.toInt()}.png";
-            val newRequest = TileRequest(this, receiver, location, tileDimensions, data, url, zoomLevel);
-            this.addRequestToQueue(key, newRequest);
-            this.findTemporaryTile(mapName, zoomLevel, location, receiver, data, mapVersion, tileDimensions, canvas);
+            this.findTemporaryTile(mapName, zoomLevel, location, receiver, data, mapVersion, tileDimensions, canvas)
+            GlobalScope.launch {
+                val tileRequest = this@TileProvider.getExistingRequest(key);
+                if (tileRequest != null && !tileRequest.inError) {
+                    val tileRequestScoped = tileRequest as TileRequest;
+                    tileRequestScoped.setReceiver(receiver, data);
+                    if ( tileRequestScoped.loaded ) {
+                        tileRequestScoped.broadcastData(false, canvas);
+                    }
+                } else {
+                    val url = "${mapRoot}/${mapName}_SEC_$mapVersion/$zoomLevel/${location.x.toInt()}_${location.y.toInt()}.png";
+                    val newRequest = TileRequest(this@TileProvider, receiver, location, tileDimensions, data, url, zoomLevel);
+                    this@TileProvider.addRequestToQueue(key, newRequest);
+                }
+            }
         }
     }
 
@@ -43,7 +53,7 @@ class TileProvider(private val mapRoot: String ) : CachedProvider(0) {
 
             // See if that cell is available and draw it if it is
             val key = this.createKey(mapName, i, zoomLocation);
-            val cachedRequest = this.getExistingRequest(key);
+            val cachedRequest = this.getCachedItem(key);
             if ( cachedRequest != null && cachedRequest.loaded ) {
                 // Get the bounds of that cell in the original zoom cells
                 val originalZoomZoomLocation = Point2d(zoomLocation.x * divisor, zoomLocation.y * divisor);
@@ -58,9 +68,11 @@ class TileProvider(private val mapRoot: String ) : CachedProvider(0) {
                     return;
                 }
             } else if ( cachedRequest == null ) {
-                val url = "${mapRoot}/${mapName}_SEC_${mapVersion}/${i}/${zoomLocation.x.toInt()}_${zoomLocation.y.toInt()}.png";
-                val newRequest = TileRequest(this, receiver, zoomLocation, tileDimensions, data, url, i);
-                this.addRequestToQueue(key, newRequest);
+                GlobalScope.launch {
+                    val url = "${mapRoot}/${mapName}_SEC_${mapVersion}/${i}/${zoomLocation.x.toInt()}_${zoomLocation.y.toInt()}.png";
+                    val newRequest = TileRequest(this@TileProvider, receiver, zoomLocation, tileDimensions, data, url, i);
+                    this@TileProvider.addRequestToQueue(key, newRequest);
+                }
             }
         }
     }
