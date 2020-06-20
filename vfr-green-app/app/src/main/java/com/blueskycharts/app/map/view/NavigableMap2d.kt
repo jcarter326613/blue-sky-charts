@@ -5,27 +5,23 @@ import android.graphics.Canvas
 import android.graphics.Color
 import android.graphics.Paint
 import android.graphics.Rect
-import android.net.Uri
-import android.os.Build
 import android.util.AttributeSet
 import android.util.JsonReader
-import android.util.JsonToken
+import android.view.MotionEvent
 import android.view.View
-import androidx.annotation.RequiresApi
-import androidx.annotation.RestrictTo
 import androidx.core.content.res.getStringOrThrow
-import androidx.core.graphics.drawable.toBitmap
 import com.blueskycharts.app.R
 import com.blueskycharts.app.coordinates.*
 import com.blueskycharts.app.map.models.BoxGeoModel
 import com.blueskycharts.app.map.models.SubMapModel
 import com.blueskycharts.app.map.resources.TileProvider
+import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.launch
+import java.io.InputStreamReader
 import java.net.URL
 import java.util.*
-import kotlin.concurrent.thread
+import kotlin.math.log2
 import kotlin.math.pow
-import kotlinx.coroutines.*
-import java.io.InputStreamReader
 
 class NavigableMap2d(context: Context, attributes: AttributeSet) : View(context, attributes), Map {
     private val tileProvider: TileProvider;
@@ -43,13 +39,12 @@ class NavigableMap2d(context: Context, attributes: AttributeSet) : View(context,
     private val maxScaleDriver: Float = 12F;
 
     // Mouse event variables
-    private val isDragging: Boolean;
-    private val mouseDownClient: Point2d;
-    private val mouseDownOrigin2d: Point2d;
-    private val touchMoveIdentifier: Int;
-    private val pinchClientPoint1: Point2d;
-    private val pinchClientPoint2: Point2d;
-    private val pinchOriginalScale: Double;
+    private var isDragging: Boolean;
+    private var mouseDownClient: Point2d;
+    private var mouseDownOrigin2d: Point2d;
+    private var pinchClientPoint1: Point2d;
+    private var pinchClientPoint2: Point2d;
+    private var pinchOriginalScale: Double;
 
     init {
         val mapRoot: String;
@@ -81,7 +76,6 @@ class NavigableMap2d(context: Context, attributes: AttributeSet) : View(context,
 
         this.mouseDownClient = Point2d();
         this.mouseDownOrigin2d = Point2d();
-        this.touchMoveIdentifier = 0;
 
         this.isDragging = false;
         this.pinchClientPoint1 = Point2d();
@@ -218,7 +212,6 @@ class NavigableMap2d(context: Context, attributes: AttributeSet) : View(context,
         }
     }
 
-    @RequiresApi(Build.VERSION_CODES.LOLLIPOP)
     override fun onDraw(canvas: Canvas?) {
         super.onDraw(canvas)
         if (canvas == null)
@@ -247,10 +240,6 @@ class NavigableMap2d(context: Context, attributes: AttributeSet) : View(context,
                 canvas.restoreToCount(restoreCount)
             }
         }
-
-        //val drawable = context.resources.getDrawable( R.drawable.ic_launcher_foreground, null)
-        //var bitmap = drawable.toBitmap(93, 93, null)
-        //canvas.drawBitmap(bitmap, 0F, 0F, null)
 
         /*
         if ( this.dataOverlayView !== undefined ) {
@@ -342,5 +331,109 @@ class NavigableMap2d(context: Context, attributes: AttributeSet) : View(context,
         val viewportWidth = this.width * this.scale;
         val viewportHeight = this.height * this.scale;
         return PointWebMercator(viewportWidth, viewportHeight);
+    }
+
+    override fun onTouchEvent(event: MotionEvent?): Boolean {
+        if ( event == null ) {
+            return false;
+        }
+        when(event.actionMasked) {
+            MotionEvent.ACTION_DOWN,
+            MotionEvent.ACTION_POINTER_DOWN -> {
+                return touchStart(event)
+            }
+            MotionEvent.ACTION_MOVE -> {
+                touchMove(event)
+                return true;
+            }
+            MotionEvent.ACTION_UP,
+            MotionEvent.ACTION_POINTER_UP -> {
+                touchEnd(event)
+                return true;
+            }
+        }
+        return false;
+    }
+
+    private fun touchStart(event: MotionEvent): Boolean {
+        if ( event.actionMasked == MotionEvent.ACTION_DOWN ) {
+            return this.mouseDownHelper(event.x, event.y)
+        } else if ( event.pointerCount == 2 ) {
+            this.isDragging = false;
+            this.pinchClientPoint1 = Point2d(event.getX(0).toDouble(), event.getY(0).toDouble())
+            this.pinchClientPoint2 = Point2d(event.getX(1).toDouble(), event.getY(1).toDouble())
+            this.pinchOriginalScale = this.scale
+            return true
+        }
+        return false
+    }
+
+    private fun touchMove(event: MotionEvent) {
+        if ( event.pointerCount == 1 ) {
+            this.mouseMoveHelper(event.x, event.y);
+        } else if ( event.pointerCount == 2 ) {
+            val newPoint1 = Point2d(event.getX(0).toDouble(), event.getY(0).toDouble());
+            val newPoint2 = Point2d(event.getX(1).toDouble(), event.getY(1).toDouble());
+
+            val originalDistance: Double = this.pinchClientPoint1.calculateDistance(this.pinchClientPoint2);
+            val thisDistance = newPoint1.calculateDistance(newPoint2);
+
+            val targetScale = this.pinchOriginalScale / (thisDistance / originalDistance)
+            this.scaleDriver = log2(1 / targetScale).toFloat()
+
+            if ( this.scaleDriver > this.maxScaleDriver ) {
+                this.scaleDriver = this.maxScaleDriver
+            } else if ( this.scaleDriver < 0 ) {
+                this.scaleDriver = 0F;
+            }
+
+            this.updateScale()
+            this.viewportChanged()
+            this.requestRedraw()
+        }
+    }
+
+    private fun touchEnd(event: MotionEvent) {
+        if ( event.actionMasked == MotionEvent.ACTION_UP ) {
+            this.mouseUpHelper()
+        } else {
+            this.touchStart(event)
+        }
+    }
+
+    private fun mouseDownHelper(offsetX: Float, offsetY: Float): Boolean {
+        // Detect if the mouse event is outside the canvas
+        if (offsetX < 0 || this.width < offsetX ||
+            offsetY < 0 || this.height < offsetY) {
+            return false
+        }
+
+        // Continue with starting the drag state
+        this.mouseDownClient = Point2d(offsetX.toDouble(), offsetY.toDouble())
+        this.mouseDownOrigin2d = this.origin2d.clone()
+        this.isDragging = true
+
+        return true
+    }
+
+    private fun mouseMoveHelper(offsetX: Float, offsetY: Float) {
+        if (this.isDragging) {
+            val xDifference = offsetX - this.mouseDownClient.x
+            val yDifference = offsetY - this.mouseDownClient.y
+            val viewportDimensions = this.getViewportDimensions2d()
+
+            val percentageClientTraverseX = xDifference / this.width
+            val percentageClientTraverseY = yDifference / this.height
+
+            this.origin2d = PointWebMercator(this.mouseDownOrigin2d.x - viewportDimensions.x * percentageClientTraverseX,
+                this.mouseDownOrigin2d.y - viewportDimensions.y * percentageClientTraverseY)
+
+            this.viewportChanged()
+            this.requestRedraw()
+        }
+    }
+
+    private fun mouseUpHelper() {
+        isDragging = false
     }
 }

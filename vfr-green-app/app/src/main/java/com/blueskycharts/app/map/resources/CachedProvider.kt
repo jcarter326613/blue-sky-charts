@@ -31,7 +31,7 @@ abstract class CachedProvider( private val requestDelayMilliseconds: Int = 0 ) {
         if ( key in this.requestQueueKeys.keys ) {
             val priority = this.requestQueueKeys[key] ?: return null;
             val priorityList = this.requestQueue.getPriorityList(priority);
-            for ( e in priorityList ) {
+            for ( e in priorityList ) {     //TODO: Concurrent Modification Exception here
                 if ( e.first == key ) {
                     return e.second;
                 }
