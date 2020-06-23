@@ -1,0 +1,98 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:id="@+id/main_menu_layout"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent">
+
+    <ImageButton
+        android:id="@+id/open_menu_button"
+        android:layout_width="100dp"
+        android:layout_height="100dp"
+        android:contentDescription="@string/main_menu_caption"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        app:srcCompat="@android:drawable/ic_menu_preferences" />
+
+    <com.google.android.flexbox.FlexboxLayout xmlns:android="http://schemas.android.com/apk/res/android"
+        xmlns:app="http://schemas.android.com/apk/res-auto"
+        android:id="@+id/main_menu_grid_layout"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/open_menu_button"
+        app:alignContent="space_around"
+        app:alignItems="flex_start"
+        app:flexWrap="wrap"
+        android:visibility="invisible">
+
+        <Button
+            android:id="@+id/weather_button"
+            android:layout_width="100dp"
+            android:layout_height="100dp"
+            android:text="Weather" />
+
+        <Button
+            android:layout_width="100dp"
+            android:layout_height="100dp"
+            android:text="System" />
+    </com.google.android.flexbox.FlexboxLayout>
+
+    <com.google.android.flexbox.FlexboxLayout xmlns:android="http://schemas.android.com/apk/res/android"
+        xmlns:app="http://schemas.android.com/apk/res-auto"
+        android:id="@+id/weather_grid_layout"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/open_menu_button"
+        app:alignContent="space_around"
+        app:alignItems="flex_start"
+        app:flexWrap="wrap"
+        android:visibility="invisible">
+
+        <Button
+            android:id="@+id/ceiling"
+            android:layout_width="100dp"
+            android:layout_height="100dp"
+            android:text="Ceiling" />
+
+        <Button
+            android:id="@+id/visibility"
+            android:layout_width="100dp"
+            android:layout_height="100dp"
+            android:text="Visibility" />
+
+        <Button
+            android:id="@+id/cloud_cover"
+            android:layout_width="100dp"
+            android:layout_height="100dp"
+            android:text="Cloud Cover" />
+
+        <Button
+            android:id="@+id/wind"
+            android:layout_width="100dp"
+            android:layout_height="100dp"
+            android:text="Surface Wind" />
+
+        <Button
+            android:id="@+id/temperature"
+            android:layout_width="100dp"
+            android:layout_height="100dp"
+            android:text="Temperature Celsius" />
+
+        <Button
+            android:id="@+id/dewpoint"
+            android:layout_width="100dp"
+            android:layout_height="100dp"
+            android:text="Dew Point Spread Celsius" />
+
+        <Button
+            android:id="@+id/category"
+            android:layout_width="100dp"
+            android:layout_height="100dp"
+            android:text="Flight Category" />
+
+    </com.google.android.flexbox.FlexboxLayout>
+
+</androidx.constraintlayout.widget.ConstraintLayout>

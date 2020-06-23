@@ -6,20 +6,19 @@ import android.graphics.Color
 import android.graphics.Paint
 import android.graphics.Rect
 import android.util.AttributeSet
-import android.util.JsonReader
 import android.view.MotionEvent
 import android.view.View
 import androidx.core.content.res.getStringOrThrow
+import androidx.lifecycle.ViewModelProvider
+import androidx.lifecycle.ViewModelProvider.NewInstanceFactory
 import com.blueskycharts.app.R
 import com.blueskycharts.app.coordinates.*
 import com.blueskycharts.app.map.models.BoxGeoModel
+import com.blueskycharts.app.map.models.OverlayViewModel
 import com.blueskycharts.app.map.models.SubMapModel
 import com.blueskycharts.app.map.resources.TileProvider
 import com.blueskycharts.app.remoteassests.AssetProvider
 import com.blueskycharts.app.remoteassests.Volatility
-import kotlinx.coroutines.GlobalScope
-import kotlinx.coroutines.launch
-import java.io.InputStreamReader
 import java.net.URL
 import java.util.*
 import kotlin.math.log2
@@ -93,7 +92,7 @@ class NavigableMap2d(context: Context, attributes: AttributeSet) : View(context,
         this.postInvalidate()
     }
 
-    fun setOverlayType(/*type: OverlayTypes*/): Boolean {
+    fun setOverlayType(type: OverlayTypes): Boolean {
         /*
         let success: boolean
                 if (type != OverlayTypes.None) {

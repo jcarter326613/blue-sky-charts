@@ -39,6 +39,8 @@ class AssetProvider(private val context: Context) {
                     Volatility.ScheduledLifetime -> {
                         diskCache.writeAsset(asset)
                     }
+                    else -> {
+                    }
                 }
 
                 // Call the callback

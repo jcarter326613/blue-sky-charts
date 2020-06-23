@@ -1,35 +1,19 @@
 <?xml version="1.0" encoding="utf-8"?>
 <androidx.constraintlayout.widget.ConstraintLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:app="http://schemas.android.com/apk/res-auto"
-    xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent">
 
-    <com.blueskycharts.app.map.view.NavigableMap2d
-        android:id="@+id/navigableMap2d"
+    <fragment
+        android:id="@+id/navigableMap"
+        android:name="com.blueskycharts.app.map.NavigableMapFragment"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:background="#B32424"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent"
-        app:mapRoot="https://blueskycharts.com/maps/world-vfr"
-        app:zoom="8" />
-
-    <ImageButton
-        android:id="@+id/openMainMenuButton"
-        android:layout_width="150dp"
-        android:layout_height="150dp"
-        android:contentDescription="@string/main_menu_caption"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent"
-        app:srcCompat="@android:drawable/ic_menu_preferences" />
+        />
 
     <fragment
         android:id="@+id/mainMenu"
-        android:name="com.blueskycharts.app.menu.MainMenu"
+        android:name="com.blueskycharts.app.menu.MainMenuFragment"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         />
