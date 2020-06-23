@@ -1,5 +1,6 @@
 package com.blueskycharts.app.map.resources
 
+import android.content.Context
 import android.graphics.Canvas
 import com.blueskycharts.app.coordinates.Box2d
 import com.blueskycharts.app.coordinates.Point2d
@@ -7,7 +8,7 @@ import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
 import kotlin.math.floor
 
-class TileProvider(private val mapRoot: String ) : CachedProvider(0) {
+class TileProvider(private val mapRoot: String, val context: Context) : CachedProvider(0) {
     fun retrieveTile(mapName: String, mapVersion: String, zoomLevel: Int, location: Point2d, tileDimensions: Point2d,
                      receiver: TileReceiver, data: Any?, canvas: Canvas ) {
         val key = this.createKey(mapName, zoomLevel, location);
@@ -23,9 +24,9 @@ class TileProvider(private val mapRoot: String ) : CachedProvider(0) {
         } else {
             this.findTemporaryTile(mapName, zoomLevel, location, receiver, data, mapVersion, tileDimensions, canvas)
             GlobalScope.launch {
-                val tileRequest = this@TileProvider.getExistingRequest(key);
-                if (tileRequest != null && !tileRequest.inError) {
-                    val tileRequestScoped = tileRequest as TileRequest;
+                val newTileRequest = this@TileProvider.getExistingRequest(key);
+                if (newTileRequest != null && !newTileRequest.inError) {
+                    val tileRequestScoped = newTileRequest as TileRequest;
                     tileRequestScoped.setReceiver(receiver, data);
                     if ( tileRequestScoped.loaded ) {
                         tileRequestScoped.broadcastData(false, canvas);

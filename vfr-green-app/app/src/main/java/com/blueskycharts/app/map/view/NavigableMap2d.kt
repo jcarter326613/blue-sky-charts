@@ -15,6 +15,8 @@ import com.blueskycharts.app.coordinates.*
 import com.blueskycharts.app.map.models.BoxGeoModel
 import com.blueskycharts.app.map.models.SubMapModel
 import com.blueskycharts.app.map.resources.TileProvider
+import com.blueskycharts.app.remoteassests.AssetProvider
+import com.blueskycharts.app.remoteassests.Volatility
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
 import java.io.InputStreamReader
@@ -61,8 +63,8 @@ class NavigableMap2d(context: Context, attributes: AttributeSet) : View(context,
         }
 
         // Set all constant and derived defaults
-        this.tileProvider = TileProvider("${mapRoot}/sectional");
-        this.shadowTileProvider = TileProvider("${mapRoot}/world-shadow");
+        this.tileProvider = TileProvider("${mapRoot}/sectional", context);
+        this.shadowTileProvider = TileProvider("${mapRoot}/world-shadow", context);
         /*
         this.dataProvider = DataProvider();
          */
@@ -83,18 +85,15 @@ class NavigableMap2d(context: Context, attributes: AttributeSet) : View(context,
         this.pinchOriginalScale = 0.0;
 
         // Startup the map
-        this.setupBackgroundShadow();
-        /*
-        this.addEventListeners();
-         */
-        this.retrieveConfiguration(URL("${mapRoot}/metadata.json"));
+        this.setupBackgroundShadow()
+        this.retrieveConfiguration(URL("${mapRoot}/metadata.json"))
     }
 
     override fun requestRedraw() {
         this.postInvalidate()
     }
 
-    fun setOverlayType(type: OverlayTypes): Boolean {
+    fun setOverlayType(/*type: OverlayTypes*/): Boolean {
         /*
         let success: boolean
                 if (type != OverlayTypes.None) {
@@ -130,36 +129,6 @@ class NavigableMap2d(context: Context, attributes: AttributeSet) : View(context,
 
     private fun updateScale() {
         this.scale = 1 / (2.0.pow(this.scaleDriver.toDouble()));
-    }
-
-    private fun addEventListeners() {
-        /*
-        this.containerDiv.mousedown((event: JQuery.Event) => this.mouseDown(event));
-        this.containerDiv.mousemove((event: JQuery.Event) => this.mouseMove(event));
-        this.containerDiv.mouseup((event: JQuery.Event) => this.mouseUp(event));
-        this.containerDiv.mousewheel((event: JQueryMousewheelEventObject) => this.mouseScroll(event))
-        this.containerDiv.on("touchstart", (event: JQuery.Event) => this.touchStart(event));
-        this.containerDiv.on("touchmove", (event: JQuery.Event) => this.touchMove(event));
-        this.containerDiv.on("touchend", (event: JQuery.Event) => this.touchEnd(event));
-        this.containerDiv.on("touchcancel", (event: JQuery.Event) => this.touchEnd(event));
-
-        // Setup the window resize listener
-        $(window).resize(() => {
-            requestAnimationFrame(() => {
-                this.setSize();
-                this.viewportChanged();
-                this.render();
-            })
-        });
-         */
-    }
-
-    private fun getClientOffset(): Point2d {
-        /*
-        let offset = this.canvasObjHtml.offset();
-        return new Point2d(offset?.left, offset?.top);
-         */
-        return Point2d(0.0, 0.0)
     }
 
     private fun setupBackgroundShadow() {
@@ -200,14 +169,13 @@ class NavigableMap2d(context: Context, attributes: AttributeSet) : View(context,
     }
 
     private fun retrieveConfiguration(mapConfigurationFile: URL) {
-        GlobalScope.launch {
-            try {
-                val reader = JsonReader(InputStreamReader(mapConfigurationFile.openStream()));
+        val assetProvider = AssetProvider(context)
+        assetProvider.retrieveAsset(mapConfigurationFile, Volatility.DayCache) {
+            val reader = it.asJsonReader()
+            if ( reader != null ) {
                 val mapPositions = SubMapModel.readFromJsonReader(reader);
                 this@NavigableMap2d.initializeMapModel(mapPositions)
                 this@NavigableMap2d.postInvalidate()
-            } catch (e: Throwable) {
-                print(e.message);
             }
         }
     }

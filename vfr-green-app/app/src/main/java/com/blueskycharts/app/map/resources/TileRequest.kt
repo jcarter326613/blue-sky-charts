@@ -9,6 +9,8 @@ import android.util.Log
 import androidx.core.graphics.drawable.toDrawable
 import com.blueskycharts.app.coordinates.Box2d
 import com.blueskycharts.app.coordinates.Point2d
+import com.blueskycharts.app.remoteassests.AssetProvider
+import com.blueskycharts.app.remoteassests.Volatility
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
 import java.io.InputStream
@@ -20,13 +22,17 @@ class TileRequest(private val provider: TileProvider, private var receiver: Tile
         private set
 
     override fun sendRequest() {
-        GlobalScope.launch {
+        val provider = AssetProvider(provider.context)
+        provider.retrieveAsset(URL(url), Volatility.Indefinite) {
             try {
-                val url = URL(url);
-                val bitmap = BitmapFactory.decodeStream(url.openStream())
-                this@TileRequest.image = bitmap
-                val success = bitmap.width > 1;
-                this@TileRequest.completeRequest(success);
+                val bitmap = it.asBitmap()
+                if ( bitmap != null ) {
+                    this@TileRequest.image = bitmap
+                    val success = bitmap.width > 1;
+                    this@TileRequest.completeRequest(success);
+                } else {
+                    this@TileRequest.completeRequest(false);
+                }
             } catch (e: Throwable) {
                 this@TileRequest.completeRequest(false);
             }

@@ -116,30 +116,30 @@ class MapTileView(private val tileProvider: TileProvider, private val map: Map) 
      * @param region The region of the map to draw relative to the original size of the map image
      * @param scale The scale to draw the map at.  Point (0,0) is the center of the map.
      */
-    override fun render(canvas: Canvas, regionIn: Box2d, scale: Double) {
+    override fun render(canvas: Canvas, region: Box2d, scale: Double) {
         if (this.isDisposed) {
             return;
         }
 
         // Validate the region
-        val region = regionIn.clone();
-        if ( region.upperLeft.x < 0 )
-            region.upperLeft.x = 0.0;
-        else if ( region.upperLeft.x >= this.originalWidth )
-            region.upperLeft.x = this.originalWidth.toDouble();
-        if ( region.upperLeft.y < 0 )
-            region.upperLeft.y = 0.0;
-        else if ( region.upperLeft.y >= this.originalHeight )
-            region.upperLeft.y = this.originalHeight.toDouble();
+        val reg = region.clone();
+        if ( reg.upperLeft.x < 0 )
+            reg.upperLeft.x = 0.0;
+        else if ( reg.upperLeft.x >= this.originalWidth )
+            reg.upperLeft.x = this.originalWidth.toDouble();
+        if ( reg.upperLeft.y < 0 )
+            reg.upperLeft.y = 0.0;
+        else if ( reg.upperLeft.y >= this.originalHeight )
+            reg.upperLeft.y = this.originalHeight.toDouble();
 
-        if ( region.lowerRight.x < 0 )
-            region.lowerRight.x = 0.0;
-        else if ( region.lowerRight.x >= this.originalWidth )
-            region.lowerRight.x = this.originalWidth.toDouble();
-        if ( region.lowerRight.y < 0 )
-            region.lowerRight.y = 0.0;
-        else if ( region.lowerRight.y >= this.originalHeight )
-            region.lowerRight.y = this.originalHeight.toDouble();
+        if ( reg.lowerRight.x < 0 )
+            reg.lowerRight.x = 0.0;
+        else if ( reg.lowerRight.x >= this.originalWidth )
+            reg.lowerRight.x = this.originalWidth.toDouble();
+        if ( reg.lowerRight.y < 0 )
+            reg.lowerRight.y = 0.0;
+        else if ( reg.lowerRight.y >= this.originalHeight )
+            reg.lowerRight.y = this.originalHeight.toDouble();
 
         // Figure out the size of what we are drawing
         val m = this.originalWidth * scale
@@ -154,10 +154,10 @@ class MapTileView(private val tileProvider: TileProvider, private val map: Map) 
         val originalImageTileHeight = this.originalHeight / numTilesAcross
 
         // Ensure we aren't looping too much
-        val startX = floor(region.upperLeft.x / originalImageTileWidth).toInt()
-        val endX = ceil(region.lowerRight.x / originalImageTileWidth).toInt()
-        val startY = floor(region.upperLeft.y / originalImageTileHeight).toInt()
-        val endY = ceil(region.lowerRight.y / originalImageTileHeight).toInt()
+        val startX = floor(reg.upperLeft.x / originalImageTileWidth).toInt()
+        val endX = ceil(reg.lowerRight.x / originalImageTileWidth).toInt()
+        val startY = floor(reg.upperLeft.y / originalImageTileHeight).toInt()
+        val endY = ceil(reg.lowerRight.y / originalImageTileHeight).toInt()
 
         if (endX - startX > 40 || endY - startY > 40) {
             return;

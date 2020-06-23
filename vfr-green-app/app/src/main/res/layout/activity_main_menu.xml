@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="utf-8"?>
+<com.google.android.flexbox.FlexboxLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:id="@+id/main_menu_grid_layout"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    app:alignContent="space_around"
+    app:alignItems="flex_start"
+    app:flexWrap="wrap">
+
+    <Button
+        android:layout_width="100dp"
+        android:layout_height="100dp"
+        android:text="test1" />
+
+    <Button
+        android:layout_width="100dp"
+        android:layout_height="100dp"
+        android:text="test2" />
+
+    <Button
+        android:layout_width="100dp"
+        android:layout_height="100dp"
+        android:text="test3" />
+
+</com.google.android.flexbox.FlexboxLayout>
