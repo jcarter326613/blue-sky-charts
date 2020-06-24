@@ -1,17 +1,17 @@
 package com.blueskycharts.app.map.view
 
+import android.content.Context
 import android.graphics.*
 import android.util.Log
 import com.blueskycharts.app.coordinates.*
 import com.blueskycharts.app.map.models.SubMapModel
 import com.blueskycharts.app.map.models.WeatherCondition
-import com.blueskycharts.app.map.models.WeatherConditionResponse
 import com.blueskycharts.app.map.resources.DataProvider
 import com.blueskycharts.app.map.resources.DataReceiver
 import kotlin.math.PI
 import kotlin.math.sin
 
-class MapDataView(private val dataProvider: DataProvider, private val overlayType: OverlayTypes, private val map: Map) : SubMapView, DataReceiver {
+class MapDataView(private val dataProvider: DataProvider, private val overlayType: OverlayTypes, private val map: Map, private val context: Context) : SubMapView, DataReceiver {
     // Metadata
     private var dataAgeSeconds: Int? = null
     override val originalWidth: Int = PointWebMercator.MAX_X_MERCATOR
@@ -79,29 +79,29 @@ class MapDataView(private val dataProvider: DataProvider, private val overlayTyp
         }
 
         // Center the coordinates on the location the indicator should be
-        val circleRadius = 100       //TODO convert this to something that's dependent on pixel density
+        val circleRadius = 20f * context.resources.displayMetrics.density + 0.5f
         val strokeLineWidth = 4
         var drawIndicator = false
         var drawX = false
-        var angle = 0.0
+        var angle = 0f
 
         when ( data.cloudCover ) {
             "CLR" -> drawIndicator = true
             "FEW" -> {
                 drawIndicator = true
-                angle = PI / 2.0
+                angle = 90f
             }
             "SCT" -> {
                 drawIndicator = true
-                angle = PI
+                angle = 180f
             }
             "BKN" -> {
                 drawIndicator = true
-                angle = 3 * PI / 2.0
+                angle = 270f
             }
             "OVC" -> {
                 drawIndicator = true
-                angle = 2 * Math.PI
+                angle = 360f
             }
             "OVX" -> {
                 drawIndicator = true
@@ -124,24 +124,17 @@ class MapDataView(private val dataProvider: DataProvider, private val overlayTyp
                 RectF(-circleRadius.toFloat(), -circleRadius.toFloat(), circleRadius.toFloat(), circleRadius.toFloat()),
                 0F, 360F, true, paint)
 
-            /*
             if ( drawX ) {
-                val offset = sin(PI / 4.0) * circleRadius
-                canvas.beginPath()
-                canvas.moveTo(-offset, -offset)
-                canvas.lineTo(offset, offset)
-                canvas.moveTo(offset, -offset)
-                canvas.lineTo(-offset, offset)
-                canvas.stroke()
+                val offset = (sin(PI / 4.0) * circleRadius).toFloat()
+                canvas.drawLine(-offset, -offset, offset, offset, paint)
+                canvas.drawLine(offset, -offset, -offset, offset, paint)
             } else {
                 canvas.rotate(-180 / 2F)
-                canvas.fillStyle = "rgb(0,0,0)"
-                canvas.beginPath()
-                canvas.arc(0, 0, circleRadius, 0, angle)
-                canvas.lineTo(0,0)
-                canvas.fill()
+                paint.style = Paint.Style.FILL
+                canvas.drawArc(
+                    RectF(-circleRadius.toFloat(), -circleRadius.toFloat(), circleRadius.toFloat(), circleRadius.toFloat()),
+                    0F, angle, true, paint)
             }
-             */
         }
     }
 
@@ -404,7 +397,7 @@ class MapDataView(private val dataProvider: DataProvider, private val overlayTyp
 
         val paint = Paint()
         val bounds = Rect()
-        paint.textSize = 20F
+        paint.textSize = 20f * context.resources.displayMetrics.density + 0.5f
         paint.getTextBounds("00000", 0, 5, bounds)
         val longitudeBuffer = longitudeAcross * bounds.width() / pixelsAcross
         val latitudeBuffer = longitudeBuffer * 0.6

@@ -10,7 +10,7 @@ import java.net.URL
 
 class Asset( val url: URL, val volatility: Volatility ) {
     val localPath: String
-        get() = "${url.host}/${url.path}"
+        get() = "${url.host}/${url.path}/${url.query}"
     var bytes: ByteArray? = null
     var errorLoading: Boolean = false
     var requiresCors: Boolean = false

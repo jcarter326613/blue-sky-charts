@@ -94,7 +94,7 @@ class NavigableMap2d(context: Context, attributes: AttributeSet) : View(context,
     fun setOverlayType(type: OverlayTypes): Boolean {
         var success: Boolean
         if (type != OverlayTypes.None) {
-            val dataView = MapDataView(this.dataProvider, type, this)
+            val dataView = MapDataView(this.dataProvider, type, this, context)
             val extent = dataView.initialize(null)
             if ( extent != null ) {
                 this.dataOverlayView = SubMapPosition(dataView, extent)
@@ -244,17 +244,6 @@ class NavigableMap2d(context: Context, attributes: AttributeSet) : View(context,
 
              */
         }
-
-        paint.color = Color.WHITE
-        paint.style = Paint.Style.FILL
-        paint.strokeWidth = 2F
-        canvas.drawArc(RectF(200F, 200F, 260F, 260F),
-            0F, 360F, false, paint)
-
-        paint.color = Color.BLACK
-        paint.style = Paint.Style.STROKE
-        canvas.drawArc(RectF(200F, 200F, 260F, 260F),
-            0F, 360F, false, paint)
     }
 
     private fun drawSubMap(submap: SubMapPosition, viewport2d: BoxWebMercator, canvas: Canvas) {
