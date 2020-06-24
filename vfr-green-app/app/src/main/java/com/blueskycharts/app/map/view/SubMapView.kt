@@ -19,7 +19,7 @@ interface SubMapView {
      * @returns A BoxGeo representing the full extent of the map.  undefined if this map should be discarded from view because of a
      *  bad configuration.
      */
-    fun initialize(model: SubMapModel): BoxWebMercator?;
+    fun initialize(model: SubMapModel?): BoxWebMercator?;
 
     /**
      * Returns the age of any data beign displayed and resets the age counter prior to rendering

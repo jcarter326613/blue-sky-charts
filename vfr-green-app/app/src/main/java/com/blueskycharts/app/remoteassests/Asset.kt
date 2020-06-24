@@ -3,16 +3,17 @@ package com.blueskycharts.app.remoteassests
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory
 import android.util.JsonReader
-import com.beust.klaxon.Klaxon
+import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
+import com.fasterxml.jackson.module.kotlin.readValue
 import java.io.InputStreamReader
 import java.net.URL
-import kotlin.reflect.KClass
 
 class Asset( val url: URL, val volatility: Volatility ) {
     val localPath: String
         get() = "${url.host}/${url.path}"
     var bytes: ByteArray? = null
     var errorLoading: Boolean = false
+    var requiresCors: Boolean = false
 
     fun asJsonReader(): JsonReader? {
         val bytes = this.bytes
@@ -27,6 +28,11 @@ class Asset( val url: URL, val volatility: Volatility ) {
     }
 
     inline fun <reified T: Any> asJsonObject(): T? {
-        return Klaxon().parse<T>(bytes.toString())
+        val toParse = bytes?.toString(kotlin.text.charset("UTF_8"))
+        if ( toParse != null ) {
+            val mapper = jacksonObjectMapper()
+            return mapper.readValue<T>(toParse)
+        }
+        return null
     }
 }

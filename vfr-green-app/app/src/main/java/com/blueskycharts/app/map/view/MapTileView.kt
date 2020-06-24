@@ -32,11 +32,12 @@ class MapTileView(private val tileProvider: TileProvider, private val map: Map) 
     private var scaledTileWidth: Double = 0.0;
     private var isDisposed: Boolean = false;
 
-    override fun initialize(model: SubMapModel): BoxWebMercator? {
-        if (model.imageHeight == null || model.imageWidth == null || model.tileWidth == null ||
+    override fun initialize(model: SubMapModel?): BoxWebMercator? {
+        if (model == null ||
+            model.imageHeight == null || model.imageWidth == null || model.tileWidth == null ||
             model.version == null || model.fileExtent == null || model.maxZoom == null ||
             model.name == null)
-            return null;
+            return null
 
         if ( model.imageWidthScale != null ) {
             this.imageWidthScale = model.imageWidthScale;

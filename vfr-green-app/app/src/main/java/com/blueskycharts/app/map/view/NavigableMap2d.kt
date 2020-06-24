@@ -1,10 +1,7 @@
 package com.blueskycharts.app.map.view
 
 import android.content.Context
-import android.graphics.Canvas
-import android.graphics.Color
-import android.graphics.Paint
-import android.graphics.Rect
+import android.graphics.*
 import android.util.AttributeSet
 import android.view.MotionEvent
 import android.view.View
@@ -16,36 +13,39 @@ import com.blueskycharts.app.coordinates.*
 import com.blueskycharts.app.map.models.BoxGeoModel
 import com.blueskycharts.app.map.models.OverlayViewModel
 import com.blueskycharts.app.map.models.SubMapModel
+import com.blueskycharts.app.map.resources.DataProvider
 import com.blueskycharts.app.map.resources.TileProvider
 import com.blueskycharts.app.remoteassests.AssetProvider
 import com.blueskycharts.app.remoteassests.Volatility
 import java.net.URL
 import java.util.*
+import kotlin.concurrent.timerTask
+import kotlin.math.ceil
 import kotlin.math.log2
 import kotlin.math.pow
 
 class NavigableMap2d(context: Context, attributes: AttributeSet) : View(context, attributes), Map {
-    private val tileProvider: TileProvider;
-    private val shadowTileProvider: TileProvider;
-    //private val dataProvider: DataProvider;
+    private val tileProvider: TileProvider
+    private val shadowTileProvider: TileProvider
+    private val dataProvider: DataProvider
+    private val redrawTimer = Timer(false)
 
     // Map state variables
-    //private context: CanvasRenderingContext2D | null;
-    private var mapBackground: SubMapPosition? = null;
+    private var mapBackground: SubMapPosition? = null
     private var mapViews: LinkedList<SubMapPosition>? = null
-    private val dataOverlayView: SubMapPosition? = null;
-    private var origin2d: PointWebMercator;
-    private var scale: Double;
-    private var scaleDriver: Float;
-    private val maxScaleDriver: Float = 12F;
+    private var dataOverlayView: SubMapPosition? = null
+    private var origin2d: PointWebMercator
+    private var scale: Double
+    private var scaleDriver: Float
+    private val maxScaleDriver: Float = 12F
 
     // Mouse event variables
-    private var isDragging: Boolean;
-    private var mouseDownClient: Point2d;
-    private var mouseDownOrigin2d: Point2d;
-    private var pinchClientPoint1: Point2d;
-    private var pinchClientPoint2: Point2d;
-    private var pinchOriginalScale: Double;
+    private var isDragging: Boolean
+    private var mouseDownClient: Point2d
+    private var mouseDownOrigin2d: Point2d
+    private var pinchClientPoint1: Point2d
+    private var pinchClientPoint2: Point2d
+    private var pinchOriginalScale: Double
 
     init {
         val mapRoot: String;
@@ -64,9 +64,8 @@ class NavigableMap2d(context: Context, attributes: AttributeSet) : View(context,
         // Set all constant and derived defaults
         this.tileProvider = TileProvider("${mapRoot}/sectional", context);
         this.shadowTileProvider = TileProvider("${mapRoot}/world-shadow", context);
-        /*
-        this.dataProvider = DataProvider();
-         */
+        this.dataProvider = DataProvider(context)
+
         if ( this.scaleDriver > this.maxScaleDriver ) {
             this.scaleDriver = this.maxScaleDriver;
         } else if (this.scaleDriver < 0) {
@@ -93,37 +92,33 @@ class NavigableMap2d(context: Context, attributes: AttributeSet) : View(context,
     }
 
     fun setOverlayType(type: OverlayTypes): Boolean {
-        /*
-        let success: boolean
-                if (type != OverlayTypes.None) {
-                    let dataView = new MapDataView(this.dataProvider, type, this);
-                    let extent = dataView.initialize();
-                    if ( extent !== undefined ) {
-                        this.dataOverlayView = new SubMapPosition(dataView, extent);
-                        success = true;
-                    } else {
-                        success = false;
-                    }
-                } else {
-                    if ( this.dataOverlayView !== undefined ) {
-                        this.dataOverlayView.getSubMapView().dispose();
-                        this.dataOverlayView = undefined;
-                    }
-                    success = true;
-                }
+        var success: Boolean
+        if (type != OverlayTypes.None) {
+            val dataView = MapDataView(this.dataProvider, type, this)
+            val extent = dataView.initialize(null)
+            if ( extent != null ) {
+                this.dataOverlayView = SubMapPosition(dataView, extent)
+                success = true;
+            } else {
+                success = false;
+            }
+        } else {
+            val dataOverlayView = this.dataOverlayView
+            if ( dataOverlayView != null ) {
+                dataOverlayView.subMapView.dispose()
+                this.dataOverlayView = null;
+            }
+            success = true
+        }
 
-        this.dataProvider.clearQueue();
-        this.render();
-        return success;
-         */
-        return true;
+        this.dataProvider.clearQueue()
+        this.requestRedraw()
+        return success
     }
 
     private fun viewportChanged() {
-        this.tileProvider.clearQueue();
-        /*
-        this.dataProvider.clearQueue();
-         */
+        this.tileProvider.clearQueue()
+        this.dataProvider.clearQueue()
     }
 
     private fun updateScale() {
@@ -208,46 +203,58 @@ class NavigableMap2d(context: Context, attributes: AttributeSet) : View(context,
             }
         }
 
-        /*
-        if ( this.dataOverlayView !== undefined ) {
-            let dataOverlay = this.dataOverlayView.getSubMapView();
+        val dataOverlayView = this.dataOverlayView
+        if ( dataOverlayView != null ) {
+            val dataOverlay = dataOverlayView.subMapView
 
-            dataOverlay.resetRequestedInformationAgeRecord();
-            canvas.save();
-            this.renderSubMap(this.dataOverlayView, viewport2d);
-            canvas.restore();
+            dataOverlay.resetRequestedInformationAgeRecord()
+            canvas.save()
+            this.drawSubMap(dataOverlayView, viewport2d, canvas)
+            canvas.restore()
 
+            /*
             // Draw the date indicating the oldest data displayed
             if ( this.dataProvider.isLoading() ) {
                 canvas.save();
-                this.renderInformationAgeBox("Loading weather data...");
+                this.renderInformationAgeBox("Loading weather data...")
                 canvas.restore();
             } else {
-                let informationAge = dataOverlay.getRequestedInformationAgeSeconds();
-                if ( informationAge !== undefined ) {
+                val informationAge = dataOverlay.getRequestedInformationAgeSeconds()
+                if ( informationAge != null ) {
                     // Draw the information age
-                    canvas.save();
-                    let informationAgeLabel = this.getInformationAgeLabel(informationAge);
-                    this.renderInformationAgeBox(informationAgeLabel);
-                    canvas.restore();
+                    canvas.save()
+                    val informationAgeLabel = this.getInformationAgeLabel(informationAge)
+                    this.renderInformationAgeBox(informationAgeLabel)
+                    canvas.restore()
 
                     // Trigger a refresh for when the information age needs to be updated
-                    let secondsToSleep: number;
-                    if ( informationAge == 60 ) {
-                        secondsToSleep = 1;
-                    } else if ( informationAge == 0 ) {
-                        secondsToSleep = 61;
-                    } else {
-                        secondsToSleep = (60 - (informationAge % 60)) + 1;
+                    val secondsToSleep =
+                        when (informationAge) {
+                            60 -> 1
+                            0 -> 61
+                            else -> (60 - (informationAge % 60)) + 1
+                        }
+
+                    val task: TimerTask = timerTask {
+                        this@NavigableMap2d.requestRedraw()
                     }
-                    setTimeout(() => {
-                        this.requestRedraw();
-                    }, secondsToSleep * 1000);
+                    redrawTimer.schedule(task, secondsToSleep * 1000L)
                 }
             }
+
+             */
         }
 
-         */
+        paint.color = Color.WHITE
+        paint.style = Paint.Style.FILL
+        paint.strokeWidth = 2F
+        canvas.drawArc(RectF(200F, 200F, 260F, 260F),
+            0F, 360F, false, paint)
+
+        paint.color = Color.BLACK
+        paint.style = Paint.Style.STROKE
+        canvas.drawArc(RectF(200F, 200F, 260F, 260F),
+            0F, 360F, false, paint)
     }
 
     private fun drawSubMap(submap: SubMapPosition, viewport2d: BoxWebMercator, canvas: Canvas) {
@@ -280,6 +287,55 @@ class NavigableMap2d(context: Context, attributes: AttributeSet) : View(context,
         } else {
             submap.subMapView.moveOffscreen();
         }
+    }
+
+    private fun renderInformationAgeBox(informationAgeLabel: String) {
+        /*
+        if (this.context == null)
+            return;
+
+        // Figure out where we need to draw
+        let oldFont = this.context.font;
+        this.context.font = "20px Arial";
+        let lineHeight = this.context.measureText('M').width * 1.2;
+        let textDimensions = this.context.measureText(informationAgeLabel);
+        let heightBuffer = 10;
+        let widthBuffer = 6;
+        let textRect = new Box2d(-textDimensions.width / 2, -lineHeight / 2, textDimensions.width / 2, lineHeight / 2);
+        let boxRect = new Box2d(-textDimensions.width / 2 - widthBuffer / 2, -lineHeight / 2 - heightBuffer / 2,
+            textDimensions.width / 2 + widthBuffer / 2, lineHeight / 2 + heightBuffer / 10)
+
+        // Reposition the axis
+        let offsetX = 5;
+        let offsetY = 5;
+        this.context.translate(-boxRect.getUpperLeft().x + offsetX, -boxRect.getUpperLeft().y + offsetY);
+
+        // Draw the box
+        this.context.lineWidth = 1;
+        this.context.strokeStyle = "rgb(0,0,0)";
+        this.context.fillStyle = "rgb(255,255,255)";
+        this.context.beginPath();
+        this.context.rect(boxRect.getUpperLeft().x, boxRect.getUpperLeft().y, boxRect.getDimensions().x, boxRect.getDimensions().y);
+        this.context.fill();
+        this.context.stroke();
+
+        // Draw the text
+        this.context.fillStyle = "rgb(0,0,0)";
+        let oldAlign = this.context.textAlign;
+        this.context.textAlign = "center";
+        this.context.fillText(informationAgeLabel, 0, textRect.getLowerRight().y - 5);
+        this.context.font = oldFont;
+        this.context.textAlign = oldAlign;
+
+         */
+    }
+
+    private fun getInformationAgeLabel(ageSeconds: Int): String {
+        if ( ageSeconds < 60 ) {
+            return "Age 1 minute";
+        }
+        val displaySeconds = ceil(ageSeconds / 60.0).toInt()
+        return "Age $displaySeconds minutes"
     }
 
     /**

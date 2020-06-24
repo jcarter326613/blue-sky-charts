@@ -37,7 +37,7 @@ class DataProvider(val context: Context) : CachedProvider(700) {
             GlobalScope.launch {
                 val newTileRequest = this@DataProvider.getExistingRequest(key)
                 if (newTileRequest != null && !newTileRequest.inError) {
-                    val tileRequestScoped = tileRequest as DataRequest
+                    val tileRequestScoped = newTileRequest as DataRequest
                     tileRequestScoped.receiver = receiver
                     if ( tileRequestScoped.loaded ) {
                         tileRequestScoped.broadcastData(false, canvas)

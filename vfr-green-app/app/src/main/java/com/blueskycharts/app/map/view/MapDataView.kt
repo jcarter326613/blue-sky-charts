@@ -1,11 +1,8 @@
 package com.blueskycharts.app.map.view
 
-import android.graphics.Canvas
+import android.graphics.*
 import android.util.Log
-import com.blueskycharts.app.coordinates.Box2d
-import com.blueskycharts.app.coordinates.BoxWebMercator
-import com.blueskycharts.app.coordinates.CoordinateConversion
-import com.blueskycharts.app.coordinates.PointWebMercator
+import com.blueskycharts.app.coordinates.*
 import com.blueskycharts.app.map.models.SubMapModel
 import com.blueskycharts.app.map.models.WeatherCondition
 import com.blueskycharts.app.map.models.WeatherConditionResponse
@@ -24,7 +21,7 @@ class MapDataView(private val dataProvider: DataProvider, private val overlayTyp
     private var contextScale: Double? = null
     private var isDisposed: Boolean = false
 
-    override fun initialize(model: SubMapModel): BoxWebMercator? {
+    override fun initialize(model: SubMapModel?): BoxWebMercator? {
         if ( this.overlayType == OverlayTypes.None ) {
             return null;
         }
@@ -44,7 +41,7 @@ class MapDataView(private val dataProvider: DataProvider, private val overlayTyp
         return this.dataAgeSeconds;
     }
 
-    override fun receiveData(location: PointWebMercator, data: WeatherConditionResponse, dataAgeSeconds: Int, immediate: Boolean, canvas: Canvas?) {
+    override fun receiveData(location: PointWebMercator, data: WeatherCondition, dataAgeSeconds: Int, immediate: Boolean, canvas: Canvas?) {
         val contextScale = this.contextScale
         if ( this.isDisposed || contextScale == null ) {
             return;
@@ -62,14 +59,15 @@ class MapDataView(private val dataProvider: DataProvider, private val overlayTyp
 
         val restoreTo = canvas.save();
         canvas.translate((location.x * contextScale).toFloat(), (location.y * contextScale).toFloat())
+        Log.d("circleTest", "receiveData translate(${(location.x * contextScale).toFloat()}, ${(location.y * contextScale).toFloat()})")
         when ( this.overlayType ) {
-            OverlayTypes.Ceiling -> data.conditions?.forEach { this.renderCeiling(location, it, canvas) }
-            OverlayTypes.Category -> data.conditions?.forEach { this.renderCategory(location, it, canvas) }
-            OverlayTypes.DewPointSpread -> data.conditions?.forEach { this.renderDewpointSpread(location, it, canvas) }
-            OverlayTypes.Temperature -> data.conditions?.forEach { this.renderTemperature(location, it, canvas) }
-            OverlayTypes.Visibility -> data.conditions?.forEach { this.renderVisibility(location, it, canvas) }
-            OverlayTypes.SurfaceWind -> data.conditions?.forEach { this.renderWind(location, it, canvas) }
-            OverlayTypes.CloudCover -> data.conditions?.forEach { this.renderCloudCover(location, it, canvas) }
+            OverlayTypes.Ceiling -> this.renderCeiling(location, data, canvas)
+            OverlayTypes.Category -> this.renderCategory(location, data, canvas)
+            OverlayTypes.DewPointSpread -> this.renderDewpointSpread(location, data, canvas)
+            OverlayTypes.Temperature -> this.renderTemperature(location, data, canvas)
+            OverlayTypes.Visibility -> this.renderVisibility(location, data, canvas)
+            OverlayTypes.SurfaceWind -> this.renderWind(location, data, canvas)
+            OverlayTypes.CloudCover -> this.renderCloudCover(location, data, canvas)
             else -> Log.e(null, "Request to render unknown type.")
         }
         canvas.restoreToCount(restoreTo);
@@ -81,7 +79,7 @@ class MapDataView(private val dataProvider: DataProvider, private val overlayTyp
         }
 
         // Center the coordinates on the location the indicator should be
-        val circleRadius = 20
+        val circleRadius = 100       //TODO convert this to something that's dependent on pixel density
         val strokeLineWidth = 4
         var drawIndicator = false
         var drawX = false
@@ -112,14 +110,21 @@ class MapDataView(private val dataProvider: DataProvider, private val overlayTyp
         }
 
         if ( drawIndicator ) {
-            canvas.lineWidth = strokeLineWidth
-            canvas.fillStyle = "rgb(255,255,255)"
-            canvas.strokeStyle = "rgb(0,0,0)"
-            canvas.beginPath()
-            canvas.arc(0, 0, circleRadius, 0, PI * 2)
-            canvas.fill()
-            canvas.stroke()
+            val paint = Paint()
+            paint.color = Color.WHITE
+            paint.style = Paint.Style.FILL
+            paint.strokeWidth = strokeLineWidth.toFloat()
+            canvas.drawArc(
+                RectF(-circleRadius.toFloat(), -circleRadius.toFloat(), circleRadius.toFloat(), circleRadius.toFloat()),
+                0F, 360F, true, paint)
 
+            paint.color = Color.BLACK
+            paint.style = Paint.Style.STROKE
+            canvas.drawArc(
+                RectF(-circleRadius.toFloat(), -circleRadius.toFloat(), circleRadius.toFloat(), circleRadius.toFloat()),
+                0F, 360F, true, paint)
+
+            /*
             if ( drawX ) {
                 val offset = sin(PI / 4.0) * circleRadius
                 canvas.beginPath()
@@ -136,6 +141,7 @@ class MapDataView(private val dataProvider: DataProvider, private val overlayTyp
                 canvas.lineTo(0,0)
                 canvas.fill()
             }
+             */
         }
     }
 
@@ -143,6 +149,7 @@ class MapDataView(private val dataProvider: DataProvider, private val overlayTyp
      * Graphic wind barb key: https://www.weather.gov/hfo/windbarbinfo.  We are not rounding to the nearest 5 here.  We are rounding up.
      */
     private fun renderWind(location: PointWebMercator, data: WeatherCondition, canvas: Canvas) {
+        /*
         if ( data.windSpeed === undefined || data.windDirection === undefined ||
             this.context === undefined || this.contextScale === undefined ) {
             return;
@@ -284,49 +291,65 @@ class MapDataView(private val dataProvider: DataProvider, private val overlayTyp
                 this.context.fill();
             }
         }
+         */
     }
 
     private fun renderCeiling(location: PointWebMercator, data: WeatherCondition, canvas: Canvas) {
+        /*
         if ( data.ceiling === undefined ) {
             return;
         }
 
         this.renderBoxText(location, (parseInt(data.ceiling) / 100).toString());
+         */
     }
 
     private fun renderCategory(location: PointWebMercator, data: WeatherCondition, canvas: Canvas) {
+        /*
         if ( data.flightCategory === undefined ) {
             return;
         }
 
         this.renderBoxText(location, data.flightCategory);
+
+         */
     }
 
     private fun renderDewpointSpread(location: PointWebMercator, data: WeatherCondition, canvas: Canvas) {
+        /*
         if ( data.dewpointSpreadCelcius === undefined ) {
             return;
         }
 
         this.renderBoxText(location, data.dewpointSpreadCelcius.toString());
+
+         */
     }
 
     private fun renderTemperature(location: PointWebMercator, data: WeatherCondition, canvas: Canvas) {
+        /*
         if ( data.temperatureCelcius === undefined ) {
             return;
         }
 
         this.renderBoxText(location, data.temperatureCelcius.toString());
+
+         */
     }
 
     private fun renderVisibility(location: PointWebMercator, data: WeatherCondition, canvas: Canvas) {
+        /*
         if ( data.visibility === undefined ) {
             return;
         }
 
         this.renderBoxText(location, data.visibility.toString());
+
+         */
     }
 
     private fun renderBoxText(location: PointWebMercator, text: String) {
+        /*
         if ( this.context === undefined || this.contextScale === undefined ) {
             return;
         }
@@ -366,6 +389,8 @@ class MapDataView(private val dataProvider: DataProvider, private val overlayTyp
         this.context.fillText(text, 0, textRect.getLowerRight().y - 5);
         this.context.font = oldFont;
         this.context.textAlign = oldAlign;
+
+         */
     }
 
     override fun render(canvas: Canvas, region: Box2d, scale: Double) {
@@ -374,20 +399,20 @@ class MapDataView(private val dataProvider: DataProvider, private val overlayTyp
         }
         this.contextScale = scale;
 
-        let pixelsAcross = region.getDimensions().x * scale;
-        let longitudeAcross = 360 * region.getDimensions().x / this.getOriginalWidth();
-        let oldFont = this.context.font;
-        this.context.font = "20px Arial";
-        let pixelsAcrossBuffer = this.context.measureText('0').width * 5
-        let longitudeBuffer = longitudeAcross * pixelsAcrossBuffer / pixelsAcross
-                let latitudeBuffer = longitudeBuffer * 0.6
+        val pixelsAcross = region.getDimensions().x * scale;
+        val longitudeAcross = 360 * region.getDimensions().x / this.originalWidth;
+
+        val paint = Paint()
+        val bounds = Rect()
+        paint.textSize = 20F
+        paint.getTextBounds("00000", 0, 5, bounds)
+        val longitudeBuffer = longitudeAcross * bounds.width() / pixelsAcross
+        val latitudeBuffer = longitudeBuffer * 0.6
 
         this.dataProvider.retrieveTile(CoordinateConversion.convertBox2dToBoxGeo(region), PointGeo(longitudeBuffer, latitudeBuffer),
-        this.overlayType, this);
-        this.context.font = oldFont;
+            this.overlayType, this, canvas)
     }
 
-    fun moveOffscreen() {
-        this.context = undefined;
+    override fun moveOffscreen() {
     }
 }

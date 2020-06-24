@@ -17,7 +17,7 @@ class DataRequest(private val provider: DataProvider, var receiver: DataReceiver
     CachedProviderRequest(provider, 1) {
 
     private var data: WeatherConditionResponse? = null
-    private var timeReceived: Int = 0
+    private var timeReceived: Long = 0
     private var oldestDataAgeAtRetrievalSeconds: Int? = null
     private val urlBase = "https://api.blueskycharts.com/condition-v2/getConditions"
     private val maxAgeMilliseconds = 5 * 60 * 1000
@@ -38,13 +38,19 @@ class DataRequest(private val provider: DataProvider, var receiver: DataReceiver
         val url = "$urlBase?startLongitude=${tl.longitude}&endLongitude=${br.longitude}&startLatitude=${br.latitude}&endLatitude=${tl.latitude}&bufferLongitude=${this.resolution.longitude}&bufferLatitude=${this.resolution.latitude}&information=${this.getInformationForType(this.type)}"
 
         val provider = AssetProvider(provider.context)
-        provider.retrieveAsset(URL(url), Volatility.ScheduledLifetime) {
+        provider.retrieveAsset(URL(url), Volatility.ScheduledLifetime, true) {
             try {
-                val conditionResponse = it.asJsonObject<WeatherConditionResponse>()
-                if ( conditionResponse != null ) {
+                if ( !it.errorLoading ) {
+                    val conditionResponse = it.asJsonObject<WeatherConditionResponse>()
                     this@DataRequest.data = conditionResponse
-                    val success = conditionResponse.oldestDataAgeSeconds != null
-                    this@DataRequest.completeRequest(success);
+                    this@DataRequest.timeReceived = System.currentTimeMillis()
+                    if (conditionResponse != null) {
+                        this@DataRequest.oldestDataAgeAtRetrievalSeconds = conditionResponse.oldestDataAgeSeconds
+                        val success = conditionResponse.oldestDataAgeSeconds != null
+                        this@DataRequest.completeRequest(success);
+                    } else {
+                        this@DataRequest.completeRequest(false);
+                    }
                 } else {
                     this@DataRequest.completeRequest(false);
                 }
@@ -71,7 +77,7 @@ class DataRequest(private val provider: DataProvider, var receiver: DataReceiver
             val geoLocation = PointGeo(longitude.toDouble(), latitude.toDouble())
             val mercatorLocation = CoordinateConversion.convertToWebMercator(geoLocation)
 
-            receiver.receiveData(mercatorLocation, data, dataAgeSeconds, immediate)
+            receiver.receiveData(mercatorLocation, condition, dataAgeSeconds, immediate, canvas)
         }
     }
 

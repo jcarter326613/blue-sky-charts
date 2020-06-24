@@ -14,8 +14,9 @@ import java.net.URL
 class AssetProvider(private val context: Context) {
     private val diskCache = DiskCache(context)
 
-    fun retrieveAsset(url: URL, volatility: Volatility, callback: ((asset: Asset) -> Unit)) {
+    fun retrieveAsset(url: URL, volatility: Volatility, requiresCors: Boolean = false, callback: ((asset: Asset) -> Unit)) {
         var asset = Asset(url, volatility)
+        asset.requiresCors = requiresCors
         if ( diskCache.retrieveAssetBytes(asset) ) {
             callback(asset)
             return
@@ -27,7 +28,9 @@ class AssetProvider(private val context: Context) {
         GlobalScope.launch {
             try {
                 // Download the file to memory
-                val iStream: InputStream = asset.url.openStream()
+                val connection = asset.url.openConnection()
+                if ( asset.requiresCors ) connection.setRequestProperty("origin", "https://blueskycharts.com/")
+                val iStream: InputStream = connection.getInputStream()
                 val fileContent = iStream.readBytes()
                 iStream.close()
                 asset.bytes = fileContent
