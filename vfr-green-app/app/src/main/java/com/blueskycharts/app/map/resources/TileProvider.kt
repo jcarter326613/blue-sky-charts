@@ -15,7 +15,7 @@ class TileProvider(private val mapRoot: String, val context: Context) : CachedPr
         val tileRequest = this.getCachedItem(key);
         if ( tileRequest != null && tileRequest.loaded ) {
             val tileRequestScoped = tileRequest as TileRequest;
-            if (tileRequest.loaded) {
+            if (tileRequestScoped.loaded) {
                 tileRequestScoped.setReceiver(receiver, data);
                 tileRequestScoped.broadcastData(true, canvas);
             } else {

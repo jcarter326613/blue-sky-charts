@@ -26,9 +26,9 @@ abstract class CachedProviderRequest( private val provider: CachedProvider, val 
             }
         }
 
-    abstract fun sendRequest();
+    abstract fun sendRequest()
 
-    abstract fun broadcastData(immediate: Boolean, canvas: Canvas?);
+    abstract fun broadcastData(immediate: Boolean, canvas: Canvas?)
 
     protected fun completeRequest(isSuccess: Boolean) {
         this.provider.completeRequest();
