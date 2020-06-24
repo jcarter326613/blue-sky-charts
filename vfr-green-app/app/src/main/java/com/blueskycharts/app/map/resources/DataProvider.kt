@@ -34,17 +34,28 @@ class DataProvider(val context: Context) : CachedProvider(700) {
             tileRequestScoped.receiver = receiver
             tileRequestScoped.broadcastData(true, canvas)
         } else {
+            incrementAwaitingQueueAddition()
             GlobalScope.launch {
-                val newTileRequest = this@DataProvider.getExistingRequest(key)
-                if (newTileRequest != null && !newTileRequest.inError) {
-                    val tileRequestScoped = newTileRequest as DataRequest
-                    tileRequestScoped.receiver = receiver
-                    if ( tileRequestScoped.loaded ) {
-                        tileRequestScoped.broadcastData(false, canvas)
+                try {
+                    val newTileRequest = this@DataProvider.getExistingRequest(key)
+                    if (newTileRequest != null && !newTileRequest.inError) {
+                        val tileRequestScoped = newTileRequest as DataRequest
+                        tileRequestScoped.receiver = receiver
+                        if (tileRequestScoped.loaded) {
+                            tileRequestScoped.broadcastData(false, canvas)
+                        }
+                    } else {
+                        val newRequest = DataRequest(
+                            this@DataProvider,
+                            receiver,
+                            areaBucket,
+                            resolutionBucket,
+                            type
+                        )
+                        this@DataProvider.addRequestToQueue(key, newRequest);
                     }
-                } else {
-                    val newRequest = DataRequest(this@DataProvider, receiver, areaBucket, resolutionBucket, type)
-                    this@DataProvider.addRequestToQueue(key, newRequest);
+                } finally {
+                    decrementAwaitingQueueAddition()
                 }
             }
         }

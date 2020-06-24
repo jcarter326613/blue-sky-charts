@@ -23,18 +23,32 @@ class TileProvider(private val mapRoot: String, val context: Context) : CachedPr
             }
         } else {
             this.findTemporaryTile(mapName, zoomLevel, location, receiver, data, mapVersion, tileDimensions, canvas)
+            incrementAwaitingQueueAddition()
             GlobalScope.launch {
-                val newTileRequest = this@TileProvider.getExistingRequest(key);
-                if (newTileRequest != null && !newTileRequest.inError) {
-                    val tileRequestScoped = newTileRequest as TileRequest;
-                    tileRequestScoped.setReceiver(receiver, data);
-                    if ( tileRequestScoped.loaded ) {
-                        tileRequestScoped.broadcastData(false, canvas);
+                try {
+                    val newTileRequest = this@TileProvider.getExistingRequest(key);
+                    if (newTileRequest != null && !newTileRequest.inError) {
+                        val tileRequestScoped = newTileRequest as TileRequest;
+                        tileRequestScoped.setReceiver(receiver, data);
+                        if (tileRequestScoped.loaded) {
+                            tileRequestScoped.broadcastData(false, canvas);
+                        }
+                    } else {
+                        val url =
+                            "${mapRoot}/${mapName}_SEC_$mapVersion/$zoomLevel/${location.x.toInt()}_${location.y.toInt()}.png";
+                        val newRequest = TileRequest(
+                            this@TileProvider,
+                            receiver,
+                            location,
+                            tileDimensions,
+                            data,
+                            url,
+                            zoomLevel
+                        );
+                        this@TileProvider.addRequestToQueue(key, newRequest);
                     }
-                } else {
-                    val url = "${mapRoot}/${mapName}_SEC_$mapVersion/$zoomLevel/${location.x.toInt()}_${location.y.toInt()}.png";
-                    val newRequest = TileRequest(this@TileProvider, receiver, location, tileDimensions, data, url, zoomLevel);
-                    this@TileProvider.addRequestToQueue(key, newRequest);
+                } finally {
+                    decrementAwaitingQueueAddition()
                 }
             }
         }

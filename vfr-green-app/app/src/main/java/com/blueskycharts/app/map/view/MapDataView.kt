@@ -13,7 +13,7 @@ import kotlin.math.acos
 import kotlin.math.ceil
 import kotlin.math.sin
 
-class MapDataView(private val dataProvider: DataProvider, private val overlayType: OverlayTypes, private val map: Map, context: Context) : SubMapView(context), DataReceiver {
+class MapDataView(private val dataProvider: DataProvider, private val overlayType: OverlayTypes, private val map: Map) : SubMapView, DataReceiver {
     // Metadata
     private var dataAgeSeconds: Int? = null
     override val originalWidth: Int = PointWebMercator.MAX_X_MERCATOR
@@ -38,12 +38,12 @@ class MapDataView(private val dataProvider: DataProvider, private val overlayTyp
 
         itemStrokePaint.color = Color.BLACK
         itemStrokePaint.style = Paint.Style.STROKE
-        itemStrokePaint.strokeWidth = convertDipToPixels(4f)
+        itemStrokePaint.strokeWidth = map.convertDipToPixels(4f)
 
         itemTextPaint.color = Color.BLACK
         itemTextPaint.style = Paint.Style.FILL_AND_STROKE
-        itemTextPaint.strokeWidth = convertDipToPixels(1f)
-        itemTextPaint.textSize = convertDipToPixels(20f)
+        itemTextPaint.strokeWidth = map.convertDipToPixels(1f)
+        itemTextPaint.textSize = map.convertDipToPixels(20f)
         itemTextPaint.textAlign = Paint.Align.CENTER
         itemTextPaint.getTextBounds("00000", 0, 5, this.expectedBuffer)
 
@@ -108,7 +108,7 @@ class MapDataView(private val dataProvider: DataProvider, private val overlayTyp
         }
 
         // Center the coordinates on the location the indicator should be
-        val circleRadius = convertDipToPixels(20f)
+        val circleRadius = map.convertDipToPixels(20f)
         var drawIndicator = false
         var drawX = false
         var angle = 0f
@@ -172,7 +172,7 @@ class MapDataView(private val dataProvider: DataProvider, private val overlayTyp
 
         // If the wind is variable, draw that.
         if ( data.windDirection == "VRB" ) {
-            var circleRadius = convertDipToPixels(20f)
+            var circleRadius = map.convertDipToPixels(20f)
             canvas.drawArc(RectF(-circleRadius, -circleRadius, circleRadius, circleRadius), 0f, 360f, true, this.itemDarkBackgroundPaint)
             circleRadius *= 2 / 3f
             canvas.drawArc(RectF(-circleRadius, -circleRadius, circleRadius, circleRadius), 0f, 360f, true, this.itemLightBackgroundPaint)
@@ -205,16 +205,16 @@ class MapDataView(private val dataProvider: DataProvider, private val overlayTyp
                 }
 
                 // Figure out how tall the wind barb needs to be
-                val poleWidth = convertDipToPixels(4f)
+                val poleWidth = map.convertDipToPixels(4f)
                 val poleBallRadius = poleWidth
                 val barbWidth = poleWidth
-                val maxBarbLength = convertDipToPixels(20f)
+                val maxBarbLength = map.convertDipToPixels(20f)
                 val minBarbLength = maxBarbLength / 2.0
                 val penantWidth = maxBarbLength * 2 / 3.0
                 val barbAngleRadians = acos((penantWidth / 2.0) / maxBarbLength)
                 val penantDepth = sin(barbAngleRadians) * maxBarbLength;
-                val minPoleLength = convertDipToPixels(20f)
-                val minPoleTail = convertDipToPixels(6f)
+                val minPoleLength = map.convertDipToPixels(20f)
+                val minPoleTail = map.convertDipToPixels(6f)
 
                 val indicatorBlankSpaceHeight = barbWidth * (numShort + numLong + numPenants - 1)
                 val indicatorHeight = barbWidth * (numShort + numLong) + penantWidth * numPenants
@@ -278,7 +278,7 @@ class MapDataView(private val dataProvider: DataProvider, private val overlayTyp
                 }
             } else {
                 // Draw no wind circle
-                var circleRadius = this.convertDipToPixels(50f)
+                var circleRadius = map.convertDipToPixels(50f)
                 canvas.drawArc(RectF(-circleRadius, -circleRadius, circleRadius, circleRadius), 0f, 360f, true, this.itemDarkBackgroundPaint)
                 circleRadius *= 2 / 3f
                 canvas.drawArc(RectF(-circleRadius, -circleRadius, circleRadius, circleRadius), 0f, 360f, true, this.itemDarkBackgroundPaint)
@@ -314,9 +314,9 @@ class MapDataView(private val dataProvider: DataProvider, private val overlayTyp
     private fun renderBoxText(text: String, canvas: Canvas) {
         val lineHeight = this.expectedBuffer.height()
         val textDimensions = this.itemTextPaint.measureText(text)
-        val heightBuffer = this.convertDipToPixels(14f)
-        val widthBuffer = this.convertDipToPixels(10f)
-        val cornerRadius = this.convertDipToPixels(6f)
+        val heightBuffer = map.convertDipToPixels(14f)
+        val widthBuffer = map.convertDipToPixels(10f)
+        val cornerRadius = map.convertDipToPixels(6f)
         //val textRect = Box2d(-textDimensions / 2.0, -lineHeight / 2.0, textDimensions / 2.0, lineHeight / 2.0)
         val boxRect = Box2d(-(textDimensions + widthBuffer) / 2.0, -(lineHeight + heightBuffer) / 2.0,
             (textDimensions + widthBuffer) / 2.0, (lineHeight + heightBuffer) / 2.0)

@@ -24,11 +24,15 @@ import kotlin.math.ceil
 import kotlin.math.log2
 import kotlin.math.pow
 
-class NavigableMap2d(context: Context, attributes: AttributeSet) : View(context, attributes), Map {
+class NavigableMap2d(context: Context, attributes: AttributeSet) : Map(context, attributes) {
     private val tileProvider: TileProvider
     private val shadowTileProvider: TileProvider
     private val dataProvider: DataProvider
     private val redrawTimer = Timer(false)
+    private val itemTextPaint = Paint()
+    private val textHeight: Float
+    private val textBackgroundPaint = Paint()
+    private val textStrokePaint = Paint()
 
     // Map state variables
     private var mapBackground: SubMapPosition? = null
@@ -61,6 +65,23 @@ class NavigableMap2d(context: Context, attributes: AttributeSet) : View(context,
             }
         }
 
+        //Setup the paint objects
+        itemTextPaint.color = Color.BLACK
+        itemTextPaint.style = Paint.Style.FILL_AND_STROKE
+        itemTextPaint.strokeWidth = convertDipToPixels(1f)
+        itemTextPaint.textSize = convertDipToPixels(20f)
+        itemTextPaint.textAlign = Paint.Align.CENTER
+        val buffer = Rect()
+        itemTextPaint.getTextBounds("00000", 0, 5, buffer)
+        textHeight = buffer.height().toFloat()
+
+        textBackgroundPaint.color = Color.WHITE
+        textBackgroundPaint.style = Paint.Style.FILL
+
+        textStrokePaint.color = Color.BLACK
+        textStrokePaint.style = Paint.Style.STROKE
+        textStrokePaint.strokeWidth = convertDipToPixels(1f)
+
         // Set all constant and derived defaults
         this.tileProvider = TileProvider("${mapRoot}/sectional", context);
         this.shadowTileProvider = TileProvider("${mapRoot}/world-shadow", context);
@@ -87,14 +108,10 @@ class NavigableMap2d(context: Context, attributes: AttributeSet) : View(context,
         this.retrieveConfiguration(URL("${mapRoot}/metadata.json"))
     }
 
-    override fun requestRedraw() {
-        this.postInvalidate()
-    }
-
     fun setOverlayType(type: OverlayTypes): Boolean {
         var success: Boolean
         if (type != OverlayTypes.None) {
-            val dataView = MapDataView(this.dataProvider, type, this, context)
+            val dataView = MapDataView(this.dataProvider, type, this)
             val extent = dataView.initialize(null)
             if ( extent != null ) {
                 this.dataOverlayView = SubMapPosition(dataView, extent)
@@ -126,7 +143,7 @@ class NavigableMap2d(context: Context, attributes: AttributeSet) : View(context,
     }
 
     private fun setupBackgroundShadow() {
-        val worldShadowView = MapTileView(this.shadowTileProvider, this, context);
+        val worldShadowView = MapTileView(this.shadowTileProvider, this);
         val worldShadowMercatorExtents = BoxWebMercator(0.0, 0.0, PointWebMercator.MAX_X_MERCATOR.toDouble(), PointWebMercator.MAX_Y_MERCATOR.toDouble());
         val shadowBoxGeo = CoordinateConversion.convertBoxMercatorToBoxGeo(worldShadowMercatorExtents);
         val shadowBoxGeoModel = BoxGeoModel(
@@ -155,8 +172,8 @@ class NavigableMap2d(context: Context, attributes: AttributeSet) : View(context,
         // Add the world  VFR charts
         val mapViewList = LinkedList<SubMapPosition>()
         for (subMapModel in data) {
-            val subMapView = MapTileView(this.tileProvider, this, context);
-            val fileExtent = subMapView.initialize(subMapModel) ?: continue;
+            val subMapView = MapTileView(this.tileProvider, this)
+            val fileExtent = subMapView.initialize(subMapModel) ?: continue
             mapViewList.add(SubMapPosition(subMapView, fileExtent));
         }
         this.mapViews = mapViewList
@@ -212,19 +229,18 @@ class NavigableMap2d(context: Context, attributes: AttributeSet) : View(context,
             this.drawSubMap(dataOverlayView, viewport2d, canvas)
             canvas.restore()
 
-            /*
             // Draw the date indicating the oldest data displayed
             if ( this.dataProvider.isLoading() ) {
-                canvas.save();
-                this.renderInformationAgeBox("Loading weather data...")
-                canvas.restore();
+                canvas.save()
+                this.renderInformationAgeBox("Loading weather data...", canvas)
+                canvas.restore()
             } else {
                 val informationAge = dataOverlay.getRequestedInformationAgeSeconds()
                 if ( informationAge != null ) {
                     // Draw the information age
                     canvas.save()
                     val informationAgeLabel = this.getInformationAgeLabel(informationAge)
-                    this.renderInformationAgeBox(informationAgeLabel)
+                    this.renderInformationAgeBox(informationAgeLabel, canvas)
                     canvas.restore()
 
                     // Trigger a refresh for when the information age needs to be updated
@@ -241,8 +257,6 @@ class NavigableMap2d(context: Context, attributes: AttributeSet) : View(context,
                     redrawTimer.schedule(task, secondsToSleep * 1000L)
                 }
             }
-
-             */
         }
     }
 
@@ -278,45 +292,22 @@ class NavigableMap2d(context: Context, attributes: AttributeSet) : View(context,
         }
     }
 
-    private fun renderInformationAgeBox(informationAgeLabel: String) {
-        /*
-        if (this.context == null)
-            return;
+    private fun renderInformationAgeBox(informationAgeLabel: String, canvas: Canvas) {
+        val lineHeight = this.textHeight
+        val textDimensions = this.itemTextPaint.measureText(informationAgeLabel)
+        val heightBuffer = this.convertDipToPixels(14f)
+        val widthBuffer = this.convertDipToPixels(10f)
+        val margin = this.convertDipToPixels(5f)
 
-        // Figure out where we need to draw
-        let oldFont = this.context.font;
-        this.context.font = "20px Arial";
-        let lineHeight = this.context.measureText('M').width * 1.2;
-        let textDimensions = this.context.measureText(informationAgeLabel);
-        let heightBuffer = 10;
-        let widthBuffer = 6;
-        let textRect = new Box2d(-textDimensions.width / 2, -lineHeight / 2, textDimensions.width / 2, lineHeight / 2);
-        let boxRect = new Box2d(-textDimensions.width / 2 - widthBuffer / 2, -lineHeight / 2 - heightBuffer / 2,
-            textDimensions.width / 2 + widthBuffer / 2, lineHeight / 2 + heightBuffer / 10)
+        val boxRect = Box2d(-(textDimensions + widthBuffer) / 2.0, -(lineHeight + heightBuffer) / 2.0,
+            (textDimensions + widthBuffer) / 2.0, (lineHeight + heightBuffer) / 2.0)
 
-        // Reposition the axis
-        let offsetX = 5;
-        let offsetY = 5;
-        this.context.translate(-boxRect.getUpperLeft().x + offsetX, -boxRect.getUpperLeft().y + offsetY);
-
-        // Draw the box
-        this.context.lineWidth = 1;
-        this.context.strokeStyle = "rgb(0,0,0)";
-        this.context.fillStyle = "rgb(255,255,255)";
-        this.context.beginPath();
-        this.context.rect(boxRect.getUpperLeft().x, boxRect.getUpperLeft().y, boxRect.getDimensions().x, boxRect.getDimensions().y);
-        this.context.fill();
-        this.context.stroke();
-
-        // Draw the text
-        this.context.fillStyle = "rgb(0,0,0)";
-        let oldAlign = this.context.textAlign;
-        this.context.textAlign = "center";
-        this.context.fillText(informationAgeLabel, 0, textRect.getLowerRight().y - 5);
-        this.context.font = oldFont;
-        this.context.textAlign = oldAlign;
-
-         */
+        canvas.save()
+        canvas.translate(-boxRect.upperLeft.x.toFloat() + margin, -boxRect.upperLeft.y.toFloat() + margin)
+        canvas.drawRect(boxRect.upperLeft.x.toFloat(), boxRect.upperLeft.y.toFloat(), boxRect.lowerRight.x.toFloat(), boxRect.lowerRight.y.toFloat(), this.textBackgroundPaint)
+        canvas.drawRect(boxRect.upperLeft.x.toFloat(), boxRect.upperLeft.y.toFloat(), boxRect.lowerRight.x.toFloat(), boxRect.lowerRight.y.toFloat(), this.textStrokePaint)
+        canvas.drawText(informationAgeLabel, 0f, lineHeight / 2f, this.itemTextPaint)
+        canvas.restore()
     }
 
     private fun getInformationAgeLabel(ageSeconds: Int): String {

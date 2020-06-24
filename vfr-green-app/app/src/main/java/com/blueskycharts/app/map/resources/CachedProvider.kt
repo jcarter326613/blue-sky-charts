@@ -14,7 +14,8 @@ import kotlin.concurrent.timerTask
 abstract class CachedProvider( private val requestDelayMilliseconds: Int = 0 ) {
     private val maxActiveRequests = 2
     private val cache = Hashtable<String, CachedProviderRequest>(); //Need to add ageoff, causing memory leak
-    private var numActiveRequests: AtomicInteger = AtomicInteger(0);
+    private var numActiveRequests = AtomicInteger(0)
+    private var numAwaitingQueueAddition = AtomicInteger(0)
     private val requestQueue: PriorityArray<Pair<String, CachedProviderRequest>> = PriorityArray();
     private var requestQueueKeys = Hashtable<String, Int>();    //key, priority
     private var lastQueueAddition = Date();
@@ -23,7 +24,7 @@ abstract class CachedProvider( private val requestDelayMilliseconds: Int = 0 ) {
     private val queueMutex: Mutex = Mutex()
 
     fun isLoading(): Boolean {
-        return this.numActiveRequests.get() > 0 || this.requestQueue.size() > 0;
+        return this.numActiveRequests.get() > 0 || this.requestQueue.size() > 0 || numAwaitingQueueAddition.get() > 0
     }
 
     fun clearQueue() {
@@ -69,27 +70,40 @@ abstract class CachedProvider( private val requestDelayMilliseconds: Int = 0 ) {
         this.processQueue();
     }
 
+    protected fun incrementAwaitingQueueAddition() {
+        numAwaitingQueueAddition.getAndIncrement()
+    }
+
+    protected fun decrementAwaitingQueueAddition() {
+        numAwaitingQueueAddition.getAndDecrement()
+    }
+
     protected fun addRequestToQueue(key: String, request: CachedProviderRequest) {
         if (key in this.requestQueueKeys) {
             return
         }
+        incrementAwaitingQueueAddition()
         GlobalScope.launch {
             queueMutex.withLock {
-                if (key in this@CachedProvider.requestQueueKeys.keys ) {
-                    return@launch
-                }
                 try {
-                    if ( this@CachedProvider.cache.containsKey(key) ) {
-                        val cacheItem: CachedProviderRequest? = this@CachedProvider.cache[key]
-                        if (cacheItem != null && !cacheItem.inError) {
-                            return@launch
-                        }
+                    if (key in this@CachedProvider.requestQueueKeys.keys) {
+                        return@launch
                     }
-                } catch ( e: Throwable ) {
-                }
+                    try {
+                        if (this@CachedProvider.cache.containsKey(key)) {
+                            val cacheItem: CachedProviderRequest? = this@CachedProvider.cache[key]
+                            if (cacheItem != null && !cacheItem.inError) {
+                                return@launch
+                            }
+                        }
+                    } catch (e: Throwable) {
+                    }
 
-                this@CachedProvider.requestQueueKeys[key] = request.priority;
-                this@CachedProvider.requestQueue.add(Pair(key, request), request.priority);
+                    this@CachedProvider.requestQueueKeys[key] = request.priority
+                    this@CachedProvider.requestQueue.add(Pair(key, request), request.priority)
+                } finally {
+                    decrementAwaitingQueueAddition()
+                }
             }
             this@CachedProvider.lastQueueAddition = Date();
             this@CachedProvider.processQueue();
