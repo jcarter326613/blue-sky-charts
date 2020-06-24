@@ -1,5 +1,6 @@
 package com.blueskycharts.app.map.view
 
+import android.content.Context
 import android.graphics.*
 import android.graphics.drawable.Drawable
 import com.blueskycharts.app.R
@@ -13,7 +14,7 @@ import com.blueskycharts.app.map.resources.TileReceiver
 import kotlin.math.*
 import androidx.core.graphics.drawable.toDrawable as toDrawable1
 
-class MapTileView(private val tileProvider: TileProvider, private val map: Map) : SubMapView, TileReceiver {
+class MapTileView(private val tileProvider: TileProvider, private val map: Map, context: Context) : SubMapView(context), TileReceiver {
     // Metadata
     override var originalWidth: Int = 0
         private set

@@ -126,7 +126,7 @@ class NavigableMap2d(context: Context, attributes: AttributeSet) : View(context,
     }
 
     private fun setupBackgroundShadow() {
-        val worldShadowView = MapTileView(this.shadowTileProvider, this);
+        val worldShadowView = MapTileView(this.shadowTileProvider, this, context);
         val worldShadowMercatorExtents = BoxWebMercator(0.0, 0.0, PointWebMercator.MAX_X_MERCATOR.toDouble(), PointWebMercator.MAX_Y_MERCATOR.toDouble());
         val shadowBoxGeo = CoordinateConversion.convertBoxMercatorToBoxGeo(worldShadowMercatorExtents);
         val shadowBoxGeoModel = BoxGeoModel(
@@ -155,7 +155,7 @@ class NavigableMap2d(context: Context, attributes: AttributeSet) : View(context,
         // Add the world  VFR charts
         val mapViewList = LinkedList<SubMapPosition>()
         for (subMapModel in data) {
-            val subMapView = MapTileView(this.tileProvider, this);
+            val subMapView = MapTileView(this.tileProvider, this, context);
             val fileExtent = subMapView.initialize(subMapModel) ?: continue;
             mapViewList.add(SubMapPosition(subMapView, fileExtent));
         }

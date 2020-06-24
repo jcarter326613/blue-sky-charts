@@ -9,9 +9,11 @@ import com.blueskycharts.app.map.models.WeatherCondition
 import com.blueskycharts.app.map.resources.DataProvider
 import com.blueskycharts.app.map.resources.DataReceiver
 import kotlin.math.PI
+import kotlin.math.acos
+import kotlin.math.ceil
 import kotlin.math.sin
 
-class MapDataView(private val dataProvider: DataProvider, private val overlayType: OverlayTypes, private val map: Map, private val context: Context) : SubMapView, DataReceiver {
+class MapDataView(private val dataProvider: DataProvider, private val overlayType: OverlayTypes, private val map: Map, context: Context) : SubMapView(context), DataReceiver {
     // Metadata
     private var dataAgeSeconds: Int? = null
     override val originalWidth: Int = PointWebMercator.MAX_X_MERCATOR
@@ -20,6 +22,34 @@ class MapDataView(private val dataProvider: DataProvider, private val overlayTyp
     // Rendering
     private var contextScale: Double? = null
     private var isDisposed: Boolean = false
+    private val itemLightBackgroundPaint = Paint()
+    private val itemDarkBackgroundPaint = Paint()
+    private val itemStrokePaint = Paint()
+    private val itemTextPaint = Paint()
+    private val itemFillPaint = Paint()
+    private val expectedBuffer = Rect()
+
+    init {
+        itemLightBackgroundPaint.color = Color.WHITE
+        itemLightBackgroundPaint.style = Paint.Style.FILL
+
+        itemDarkBackgroundPaint.color = Color.BLACK
+        itemDarkBackgroundPaint.style = Paint.Style.FILL
+
+        itemStrokePaint.color = Color.BLACK
+        itemStrokePaint.style = Paint.Style.STROKE
+        itemStrokePaint.strokeWidth = convertDipToPixels(4f)
+
+        itemTextPaint.color = Color.BLACK
+        itemTextPaint.style = Paint.Style.FILL_AND_STROKE
+        itemTextPaint.strokeWidth = convertDipToPixels(1f)
+        itemTextPaint.textSize = convertDipToPixels(20f)
+        itemTextPaint.textAlign = Paint.Align.CENTER
+        itemTextPaint.getTextBounds("00000", 0, 5, this.expectedBuffer)
+
+        itemFillPaint.color = Color.BLACK
+        itemFillPaint.style = Paint.Style.FILL
+    }
 
     override fun initialize(model: SubMapModel?): BoxWebMercator? {
         if ( this.overlayType == OverlayTypes.None ) {
@@ -59,28 +89,26 @@ class MapDataView(private val dataProvider: DataProvider, private val overlayTyp
 
         val restoreTo = canvas.save();
         canvas.translate((location.x * contextScale).toFloat(), (location.y * contextScale).toFloat())
-        Log.d("circleTest", "receiveData translate(${(location.x * contextScale).toFloat()}, ${(location.y * contextScale).toFloat()})")
         when ( this.overlayType ) {
-            OverlayTypes.Ceiling -> this.renderCeiling(location, data, canvas)
-            OverlayTypes.Category -> this.renderCategory(location, data, canvas)
-            OverlayTypes.DewPointSpread -> this.renderDewpointSpread(location, data, canvas)
-            OverlayTypes.Temperature -> this.renderTemperature(location, data, canvas)
-            OverlayTypes.Visibility -> this.renderVisibility(location, data, canvas)
-            OverlayTypes.SurfaceWind -> this.renderWind(location, data, canvas)
-            OverlayTypes.CloudCover -> this.renderCloudCover(location, data, canvas)
+            OverlayTypes.Ceiling -> this.renderCeiling(data, canvas)
+            OverlayTypes.Category -> this.renderCategory(data, canvas)
+            OverlayTypes.DewPointSpread -> this.renderDewpointSpread(data, canvas)
+            OverlayTypes.Temperature -> this.renderTemperature(data, canvas)
+            OverlayTypes.Visibility -> this.renderVisibility(data, canvas)
+            OverlayTypes.SurfaceWind -> this.renderWind(data, canvas)
+            OverlayTypes.CloudCover -> this.renderCloudCover(data, canvas)
             else -> Log.e(null, "Request to render unknown type.")
         }
         canvas.restoreToCount(restoreTo);
     }
 
-    private fun renderCloudCover(location: PointWebMercator, data: WeatherCondition, canvas: Canvas) {
-        if ( data.cloudCover == null || this.contextScale == null ) {
+    private fun renderCloudCover(data: WeatherCondition, canvas: Canvas) {
+        if ( data.cloudCover == null ) {
             return;
         }
 
         // Center the coordinates on the location the indicator should be
-        val circleRadius = 20f * context.resources.displayMetrics.density + 0.5f
-        val strokeLineWidth = 4
+        val circleRadius = convertDipToPixels(20f)
         var drawIndicator = false
         var drawX = false
         var angle = 0f
@@ -110,30 +138,23 @@ class MapDataView(private val dataProvider: DataProvider, private val overlayTyp
         }
 
         if ( drawIndicator ) {
-            val paint = Paint()
-            paint.color = Color.WHITE
-            paint.style = Paint.Style.FILL
-            paint.strokeWidth = strokeLineWidth.toFloat()
             canvas.drawArc(
                 RectF(-circleRadius.toFloat(), -circleRadius.toFloat(), circleRadius.toFloat(), circleRadius.toFloat()),
-                0F, 360F, true, paint)
+                0F, 360F, true, this.itemLightBackgroundPaint)
 
-            paint.color = Color.BLACK
-            paint.style = Paint.Style.STROKE
             canvas.drawArc(
                 RectF(-circleRadius.toFloat(), -circleRadius.toFloat(), circleRadius.toFloat(), circleRadius.toFloat()),
-                0F, 360F, true, paint)
+                0F, 360F, true, this.itemStrokePaint)
 
             if ( drawX ) {
                 val offset = (sin(PI / 4.0) * circleRadius).toFloat()
-                canvas.drawLine(-offset, -offset, offset, offset, paint)
-                canvas.drawLine(offset, -offset, -offset, offset, paint)
+                canvas.drawLine(-offset, -offset, offset, offset, this.itemStrokePaint)
+                canvas.drawLine(offset, -offset, -offset, offset, this.itemStrokePaint)
             } else {
                 canvas.rotate(-180 / 2F)
-                paint.style = Paint.Style.FILL
                 canvas.drawArc(
                     RectF(-circleRadius.toFloat(), -circleRadius.toFloat(), circleRadius.toFloat(), circleRadius.toFloat()),
-                    0F, angle, true, paint)
+                    0F, angle, true, this.itemFillPaint)
             }
         }
     }
@@ -141,249 +162,182 @@ class MapDataView(private val dataProvider: DataProvider, private val overlayTyp
     /**
      * Graphic wind barb key: https://www.weather.gov/hfo/windbarbinfo.  We are not rounding to the nearest 5 here.  We are rounding up.
      */
-    private fun renderWind(location: PointWebMercator, data: WeatherCondition, canvas: Canvas) {
-        /*
-        if ( data.windSpeed === undefined || data.windDirection === undefined ||
-            this.context === undefined || this.contextScale === undefined ) {
+    private fun renderWind(data: WeatherCondition, canvas: Canvas) {
+        val windSpeed = data.windSpeed
+        val windDirection = data.windDirection
+
+        if ( windSpeed == null || windDirection == null ) {
             return;
         }
 
         // If the wind is variable, draw that.
-        this.context.lineWidth = 1;
         if ( data.windDirection == "VRB" ) {
-            let circleRadius = 20;
-            this.context.strokeStyle = "rgb(0,0,0)";
-            this.context.fillStyle = "rgb(0,0,0)";
-            this.context.beginPath();
-            this.context.arc(0, 0, circleRadius, 0, 2 * Math.PI);
-            this.context.fill();
-            this.context.strokeStyle = "rgb(255,255,255)";
-            this.context.fillStyle = "rgb(255,255,255)";
-            this.context.beginPath();
-            this.context.arc(0, 0, circleRadius * 2 / 3, 0, 2 * Math.PI);
-            this.context.fill();
-            this.context.strokeStyle = "rgb(0,0,0)";
-            this.context.fillStyle = "rgb(0,0,0)";
-            this.context.beginPath();
-            this.context.arc(0, 0, circleRadius * 1 / 3, 0, 2 * Math.PI);
-            this.context.fill();
+            var circleRadius = convertDipToPixels(20f)
+            canvas.drawArc(RectF(-circleRadius, -circleRadius, circleRadius, circleRadius), 0f, 360f, true, this.itemDarkBackgroundPaint)
+            circleRadius *= 2 / 3f
+            canvas.drawArc(RectF(-circleRadius, -circleRadius, circleRadius, circleRadius), 0f, 360f, true, this.itemLightBackgroundPaint)
+            circleRadius *= 1 / 2f
+            canvas.drawArc(RectF(-circleRadius, -circleRadius, circleRadius, circleRadius), 0f, 360f, true, this.itemDarkBackgroundPaint)
         } else {
             // Otherwise, get the angle and speed of the wind
-            let windAngle = Math.round(parseFloat(data.windDirection));
-            let speedToDraw = Math.ceil(parseFloat(data.windSpeed));
-            if ( data.windGust !== undefined ) {
-                speedToDraw = Math.ceil(parseFloat(data.windGust));
+            val windAngle = windDirection.toFloat()
+            var speedToDraw = ceil(windSpeed.toFloat())
+            val windGust = data.windGust
+            if ( windGust != null ) {
+                speedToDraw = ceil(windGust.toFloat())
             }
 
-            if ( speedToDraw != 0 ) {
+            if ( speedToDraw > 0 ) {
                 // Figure out the configuration of wind barbs
-                let numShort = 0;
-                let numLong = 0;
-                let numPenants = 0;
+                var numShort = 0
+                var numLong = 0
+                var numPenants = 0
                 while ( speedToDraw > 45 ) {
                     speedToDraw -= 50;
-                    numPenants++;
+                    numPenants++
                 }
                 while ( speedToDraw > 5 ) {
                     speedToDraw -= 10;
-                    numLong++;
+                    numLong++
                 }
                 if ( speedToDraw > 0 ) {
-                    numShort = 1;
+                    numShort = 1
                 }
 
                 // Figure out how tall the wind barb needs to be
-                let poleWidth = 4;
-                let poleBallRadius = poleWidth;
-                let barbWidth = poleWidth;
-                let maxBarbLength = 20;
-                let minBarbLength = maxBarbLength / 2;
-                let penantWidth = maxBarbLength * 2 / 3;
-                let barbAngleRadians = Math.acos((penantWidth / 2) / maxBarbLength)
-                let penantDepth = Math.sin(barbAngleRadians) * maxBarbLength;
-                let minPoleLength = 20;
-                let minPoleTail = 6;
+                val poleWidth = convertDipToPixels(4f)
+                val poleBallRadius = poleWidth
+                val barbWidth = poleWidth
+                val maxBarbLength = convertDipToPixels(20f)
+                val minBarbLength = maxBarbLength / 2.0
+                val penantWidth = maxBarbLength * 2 / 3.0
+                val barbAngleRadians = acos((penantWidth / 2.0) / maxBarbLength)
+                val penantDepth = sin(barbAngleRadians) * maxBarbLength;
+                val minPoleLength = convertDipToPixels(20f)
+                val minPoleTail = convertDipToPixels(6f)
 
-                let indicatorBlankSpaceHeight = barbWidth * (numShort + numLong + numPenants - 1)
-                let indicatorHeight = barbWidth * (numShort + numLong) + penantWidth * numPenants;
-                let poleLength = indicatorBlankSpaceHeight + indicatorHeight + minPoleTail
+                val indicatorBlankSpaceHeight = barbWidth * (numShort + numLong + numPenants - 1)
+                val indicatorHeight = barbWidth * (numShort + numLong) + penantWidth * numPenants
+                var poleLength = indicatorBlankSpaceHeight + indicatorHeight + minPoleTail
                 if ( poleLength < minPoleLength ) {
-                    poleLength = minPoleLength
+                    poleLength = minPoleLength.toDouble()
                 }
 
                 // Draw the pole
-                this.context.rotate(-Math.PI / 2);
-                this.context.rotate(windAngle * 2 * Math.PI / 360);
-                this.context.translate(-poleLength / 2, 0);
-                this.context.fillRect(0, -poleWidth / 2, poleLength, poleWidth);
-                this.context.beginPath();
-                this.context.moveTo(0,0);
-                this.context.arc(0, 0, poleBallRadius, 0, Math.PI * 2);
-                this.context.fill();
+                canvas.rotate(-90f)
+                canvas.rotate(windAngle)
+                canvas.translate((-poleLength / 2.0).toFloat(), 0f)
+                canvas.drawRect(0f, -poleWidth / 2, poleLength.toFloat(), poleWidth, this.itemDarkBackgroundPaint)
+                canvas.drawArc(RectF(-poleBallRadius, -poleBallRadius, poleBallRadius, poleBallRadius), 0f, 360f, true, this.itemDarkBackgroundPaint)
 
                 // If there is only one short barb, draw that at center
                 if ( numPenants == 0 && numLong == 0 && numShort == 1 ) {
-                    this.context.translate(poleLength / 2, 0);
-                    this.context.save();
-                    this.context.rotate(barbAngleRadians);
-                    this.context.fillRect(0, -barbWidth / 2, minBarbLength, barbWidth);
-                    this.context.restore();
+                    canvas.translate((poleLength / 2).toFloat(), 0f)
+                    canvas.save()
+                    canvas.rotate((barbAngleRadians * 360 / (2.0 * PI)).toFloat())
+                    canvas.drawRect(0f, -barbWidth / 2f, minBarbLength.toFloat(), barbWidth, this.itemDarkBackgroundPaint)
+                    canvas.restore()
                 } else {
-                    this.context.translate(poleLength, 0);
+                    canvas.translate(poleLength.toFloat(), 0f)
 
                     // Draw each penant
-                    let penantDrawn = false;
+                    var penantDrawn = false
                     while ( numPenants > 0 ) {
-                        this.context.beginPath()
-                        this.context.moveTo(0,0);
-                        this.context.lineTo(-penantWidth / 2, penantDepth);
-                        this.context.lineTo(-penantWidth, 0);
-                        this.context.fill();
-                        this.context.translate(-penantWidth, 0);
+                        val path = Path()
+                        path.moveTo(0f,0f)
+                        path.lineTo((-penantWidth / 2.0).toFloat(), penantDepth.toFloat())
+                        path.lineTo(-penantWidth.toFloat(), 0f)
+                        canvas.drawPath(path, this.itemDarkBackgroundPaint)
+                        canvas.translate(-penantWidth.toFloat(), 0f)
 
-                        numPenants--;
+                        numPenants--
                         penantDrawn = true;
                     }
                     if ( penantDrawn ) {
-                        this.context.translate(-barbWidth, 0);
+                        canvas.translate(-barbWidth, 0f)
                     }
 
                     // Draw each long barb
                     while ( numLong > 0 ) {
-                        this.context.save();
-                        this.context.rotate(barbAngleRadians);
-                        this.context.fillRect(0, 0, maxBarbLength, barbWidth);
-                        this.context.restore();
-                        this.context.translate(-(barbWidth * 2), 0);
+                        canvas.save()
+                        canvas.rotate((barbAngleRadians * 360 / (2.0 * PI)).toFloat())
+                        canvas.drawRect(RectF(0f, 0f, maxBarbLength.toFloat(), barbWidth), this.itemDarkBackgroundPaint)
+                        canvas.restore()
+                        canvas.translate(-(barbWidth * 2), 0f)
 
-                        numLong--;
+                        numLong--
                     }
 
                     // Draw the short barb
                     if ( numShort > 0 ) {
-                        this.context.save();
-                        this.context.rotate(barbAngleRadians);
-                        this.context.fillRect(0, 0, minBarbLength, barbWidth);
-                        this.context.restore();
+                        canvas.save()
+                        canvas.rotate((barbAngleRadians * 360 / (2.0 * PI)).toFloat())
+                        canvas.drawRect(RectF(0f, 0f, minBarbLength.toFloat(), barbWidth), this.itemDarkBackgroundPaint)
+                        canvas.restore()
                     }
                 }
             } else {
                 // Draw no wind circle
-                let circleRadius = 50;
-                this.context.strokeStyle = "rgb(0,0,0)";
-                this.context.fillStyle = "rgb(0,0,0)";
-                this.context.beginPath();
-                this.context.arc(0, 0, circleRadius, 0, 2 * Math.PI);
-                this.context.stroke();
-                this.context.fill();
-                this.context.strokeStyle = "rgb(255,255,255)";
-                this.context.fillStyle = "rgb(255,255,255)";
-                this.context.beginPath();
-                this.context.arc(0, 0, circleRadius * 2 / 3, 0, 2 * Math.PI);
-                this.context.stroke();
-                this.context.fill();
+                var circleRadius = this.convertDipToPixels(50f)
+                canvas.drawArc(RectF(-circleRadius, -circleRadius, circleRadius, circleRadius), 0f, 360f, true, this.itemDarkBackgroundPaint)
+                circleRadius *= 2 / 3f
+                canvas.drawArc(RectF(-circleRadius, -circleRadius, circleRadius, circleRadius), 0f, 360f, true, this.itemDarkBackgroundPaint)
             }
         }
-         */
     }
 
-    private fun renderCeiling(location: PointWebMercator, data: WeatherCondition, canvas: Canvas) {
-        /*
-        if ( data.ceiling === undefined ) {
-            return;
-        }
-
-        this.renderBoxText(location, (parseInt(data.ceiling) / 100).toString());
-         */
+    private fun renderCeiling(data: WeatherCondition, canvas: Canvas) {
+        val ceiling = data.ceiling ?: return
+        this.renderBoxText((ceiling / 100).toString(), canvas)
     }
 
-    private fun renderCategory(location: PointWebMercator, data: WeatherCondition, canvas: Canvas) {
-        /*
-        if ( data.flightCategory === undefined ) {
-            return;
-        }
-
-        this.renderBoxText(location, data.flightCategory);
-
-         */
+    private fun renderCategory(data: WeatherCondition, canvas: Canvas) {
+        val category = data.flightCategory ?: return
+        this.renderBoxText(category, canvas)
     }
 
-    private fun renderDewpointSpread(location: PointWebMercator, data: WeatherCondition, canvas: Canvas) {
-        /*
-        if ( data.dewpointSpreadCelcius === undefined ) {
-            return;
-        }
-
-        this.renderBoxText(location, data.dewpointSpreadCelcius.toString());
-
-         */
+    private fun renderDewpointSpread(data: WeatherCondition, canvas: Canvas) {
+        val spread = data.dewpointSpreadCelcius ?: return
+        this.renderBoxText(spread.toString(), canvas)
     }
 
-    private fun renderTemperature(location: PointWebMercator, data: WeatherCondition, canvas: Canvas) {
-        /*
-        if ( data.temperatureCelcius === undefined ) {
-            return;
-        }
-
-        this.renderBoxText(location, data.temperatureCelcius.toString());
-
-         */
+    private fun renderTemperature(data: WeatherCondition, canvas: Canvas) {
+        val temp = data.temperatureCelcius ?: return
+        this.renderBoxText(temp.toString(), canvas)
     }
 
-    private fun renderVisibility(location: PointWebMercator, data: WeatherCondition, canvas: Canvas) {
-        /*
-        if ( data.visibility === undefined ) {
-            return;
-        }
-
-        this.renderBoxText(location, data.visibility.toString());
-
-         */
+    private fun renderVisibility(data: WeatherCondition, canvas: Canvas) {
+        val visibility = data.visibility ?: return
+        this.renderBoxText(visibility.toString(), canvas)
     }
 
-    private fun renderBoxText(location: PointWebMercator, text: String) {
-        /*
-        if ( this.context === undefined || this.contextScale === undefined ) {
-            return;
-        }
-        let oldFont = this.context.font;
-        this.context.font = "20px Arial";
-        let lineHeight = this.context.measureText('M').width * 1.2;
-        let textDimensions = this.context.measureText(text);
-        let heightBuffer = 10;
-        let widthBuffer = 6;
-        let cornerRadius = 3;
-        let textRect = new Box2d(-textDimensions.width / 2, -lineHeight / 2, textDimensions.width / 2, lineHeight / 2);
-        let boxRect = new Box2d(-textDimensions.width / 2 - widthBuffer / 2, -lineHeight / 2 - heightBuffer / 2,
-            textDimensions.width / 2 + widthBuffer / 2, lineHeight / 2 + heightBuffer / 10)
-        this.context.lineWidth = 1;
-        this.context.strokeStyle = "rgb(0,0,0)";
-        this.context.fillStyle = "rgb(255,255,255)";
-        this.context.beginPath();
-        this.context.moveTo(boxRect.getUpperLeft().x + cornerRadius, boxRect.getUpperLeft().y);
-        this.context.lineTo(boxRect.getLowerRight().x - cornerRadius, boxRect.getUpperLeft().y);
-        this.context.arc(boxRect.getLowerRight().x - cornerRadius, boxRect.getUpperLeft().y + cornerRadius, cornerRadius,
-            -Math.PI / 2, 0);
-        this.context.lineTo(boxRect.getLowerRight().x, boxRect.getLowerRight().y - cornerRadius);
-        this.context.arc(boxRect.getLowerRight().x - cornerRadius, boxRect.getLowerRight().y - cornerRadius, cornerRadius,
-            0, Math.PI / 2);
-        this.context.lineTo(boxRect.getUpperLeft().x + cornerRadius, boxRect.getLowerRight().y);
-        this.context.arc(boxRect.getUpperLeft().x + cornerRadius, boxRect.getLowerRight().y - cornerRadius, cornerRadius,
-            Math.PI / 2, Math.PI);
-        this.context.lineTo(boxRect.getUpperLeft().x, boxRect.getUpperLeft().y + cornerRadius);
-        this.context.arc(boxRect.getUpperLeft().x + cornerRadius, boxRect.getUpperLeft().y + cornerRadius, cornerRadius,
-            Math.PI, 3 * Math.PI / 2);
-        this.context.fill();
-        this.context.stroke();
+    private fun renderBoxText(text: String, canvas: Canvas) {
+        val lineHeight = this.expectedBuffer.height()
+        val textDimensions = this.itemTextPaint.measureText(text)
+        val heightBuffer = this.convertDipToPixels(14f)
+        val widthBuffer = this.convertDipToPixels(10f)
+        val cornerRadius = this.convertDipToPixels(6f)
+        //val textRect = Box2d(-textDimensions / 2.0, -lineHeight / 2.0, textDimensions / 2.0, lineHeight / 2.0)
+        val boxRect = Box2d(-(textDimensions + widthBuffer) / 2.0, -(lineHeight + heightBuffer) / 2.0,
+            (textDimensions + widthBuffer) / 2.0, (lineHeight + heightBuffer) / 2.0)
+        val path = Path()
+        path.moveTo((boxRect.upperLeft.x + cornerRadius).toFloat(), boxRect.upperLeft.y.toFloat())
+        path.lineTo((boxRect.lowerRight.x - cornerRadius).toFloat(), boxRect.upperLeft.y.toFloat())
+        path.arcTo(RectF((boxRect.lowerRight.x - 2 * cornerRadius).toFloat(), boxRect.upperLeft.y.toFloat(), boxRect.lowerRight.x.toFloat(), (boxRect.upperLeft.y + 2 * cornerRadius).toFloat()),
+            270f, 90f)
+        path.lineTo(boxRect.lowerRight.x.toFloat(), (boxRect.lowerRight.y - cornerRadius).toFloat())
+        path.arcTo(RectF((boxRect.lowerRight.x - 2 * cornerRadius).toFloat(), (boxRect.lowerRight.y - 2 * cornerRadius).toFloat(), boxRect.lowerRight.x.toFloat(), boxRect.lowerRight.y.toFloat()),
+            0f, 90f)
+        path.lineTo((boxRect.upperLeft.x + cornerRadius).toFloat(), boxRect.lowerRight.y.toFloat())
+        path.arcTo(RectF(boxRect.upperLeft.x.toFloat(), (boxRect.lowerRight.y - 2 * cornerRadius).toFloat(), (boxRect.upperLeft.x + 2 * cornerRadius).toFloat(), boxRect.lowerRight.y.toFloat()),
+            90f, 90f)
+        path.lineTo(boxRect.upperLeft.x.toFloat(), (boxRect.upperLeft.y + cornerRadius).toFloat())
+        path.arcTo(RectF(boxRect.upperLeft.x.toFloat(), boxRect.upperLeft.y.toFloat(), (boxRect.upperLeft.x + 2 * cornerRadius).toFloat(), (boxRect.upperLeft.y + 2 * cornerRadius).toFloat()),
+            180f, 90f)
+        canvas.drawPath(path, this.itemLightBackgroundPaint)
+        canvas.drawPath(path, this.itemStrokePaint)
 
-        this.context.fillStyle = "rgb(0,0,0)";
-        let oldAlign = this.context.textAlign;
-        this.context.textAlign = "center";
-        this.context.fillText(text, 0, textRect.getLowerRight().y - 5);
-        this.context.font = oldFont;
-        this.context.textAlign = oldAlign;
-
-         */
+        canvas.drawText(text, 0f, lineHeight / 2f, this.itemTextPaint)
     }
 
     override fun render(canvas: Canvas, region: Box2d, scale: Double) {
@@ -394,12 +348,7 @@ class MapDataView(private val dataProvider: DataProvider, private val overlayTyp
 
         val pixelsAcross = region.getDimensions().x * scale;
         val longitudeAcross = 360 * region.getDimensions().x / this.originalWidth;
-
-        val paint = Paint()
-        val bounds = Rect()
-        paint.textSize = 20f * context.resources.displayMetrics.density + 0.5f
-        paint.getTextBounds("00000", 0, 5, bounds)
-        val longitudeBuffer = longitudeAcross * bounds.width() / pixelsAcross
+        val longitudeBuffer = longitudeAcross * this.expectedBuffer.width() / pixelsAcross
         val latitudeBuffer = longitudeBuffer * 0.6
 
         this.dataProvider.retrieveTile(CoordinateConversion.convertBox2dToBoxGeo(region), PointGeo(longitudeBuffer, latitudeBuffer),
