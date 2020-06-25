@@ -1,0 +1,25 @@
+{
+  "name": "geotiff-mosaic",
+  "version": "1.0.0",
+  "description": "This README would normally document whatever steps are necessary to get your application up and running.",
+  "main": "src/index.js",
+  "exports": {
+    "./": "./src/"
+  },
+  "scripts": {
+    "test": "echo \"test command here\""
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://jcarter123@bitbucket.org/jcarter123/geotiff-mosaic.git"
+  },
+  "dependencies": {
+    "coordinates": "file:../coordinates/coordinates-1.0.0.tgz",
+    "easy-await": "file:../easy-await/easy-await-1.0.0.tgz"
+  },
+  "devDependencies": {
+  },
+  "author": "",
+  "license": "ISC",
+  "homepage": "https://bitbucket.org/jcarter123/geotiff-mosaic#readme"
+}
