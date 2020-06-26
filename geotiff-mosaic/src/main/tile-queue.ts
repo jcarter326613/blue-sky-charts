@@ -2,22 +2,21 @@
 import { BoxGeo, CoordinateConversion, PointGeo, Point2d, BoxWebMercator } from 'coordinates'
 import { FileExtent } from './models/file-extent'
 import { exit } from 'process'
+import { Heap } from 'ts-heap'
 import { SectionMetadata } from './models/section-metadata'
+import { TileDescription } from './tile-description'
+import { SubMapDescription } from './sub-map-description'
+import { TileCache } from './tile-cache'
 
 export class TileQueue {
-    public constructor (maps: Array<string>, metadata: Record<string, SectionMetadata>) {
+    private queue: Array<Heap<TileDescription>>
+
+    public constructor (maps: Array<string>, metadata: Record<string, SectionMetadata>, tileCache: TileCache) {
+        this.queue = []
+
         // Load all the configs for each map and determine the mosaic rectangular extents
         let extents = this.getExtents(maps, metadata)
         let extentsMercator = CoordinateConversion.convertBoxGeoToBoxMercator(extents)
-        /*
-        let extentWidthByHeight = extentsMercator.getWidth() / extentsMercator.getHeight()
-        let tilePixelSize = new Point2d(this.TILE_DIMENSIONS_PIXELS, this.TILE_DIMENSIONS_PIXELS)
-        if ( extentWidthByHeight > 1 ) {
-            tilePixelSize.y = tilePixelSize.x / extentWidthByHeight
-        } else {
-            tilePixelSize.x = tilePixelSize.y * extentWidthByHeight
-        }
-        */
 
         // Get the max zoom we need to be able to go to to show a full resolution tile of all maps
         let maxZoom = this.getMaxZoom()
@@ -26,6 +25,17 @@ export class TileQueue {
         let currentZoom = 0
         while ( currentZoom <= maxZoom ) {
             let tilesAcross = 2 ** currentZoom
+
+            this.queue[currentZoom] =
+                new Heap<TileDescription>((a: TileDescription, b: TileDescription) => {
+                    let aMaps = a.getDependencyList()
+                    let bMaps = b.getDependencyList()
+
+                    let aKey = aMaps.join("|")
+                    let bKey = bMaps.join("|")
+
+                    return aKey.localeCompare(bKey)
+                })
             
             // For each tile
             for ( let x = 0; x < tilesAcross; x++ ) {
@@ -38,10 +48,10 @@ export class TileQueue {
                         extentsMercator.getTopLeft().y + (y+1) * (extentsMercator.getHeight() / tilesAcross))
 
                     // Get the sections that overlap that extent
-                    let overlaps: Record<string, BoxWebMercator> = {}
+                    let overlaps: Array<SubMapDescription> = []
                     for ( let sectionName in metadata ) {
                         let section = metadata[sectionName]
-                        if ( section.fileExtent === undefined ) {
+                        if ( section.fileExtent === undefined || section.maxZoom === undefined || section.tileWidth === undefined ) {
                             continue
                         }
                         let sectionExtentGeo = this.convertFileExtentToBoxGeo(section.fileExtent)
@@ -52,11 +62,15 @@ export class TileQueue {
                         let sectionExtentMercator = CoordinateConversion.convertBoxGeoToBoxMercator(sectionExtentGeo)
                         let sectionOverlapMercator = sectionExtentMercator.union(tileExtent)
                         if ( sectionOverlapMercator != null && sectionOverlapMercator.getWidth() > 0 && sectionOverlapMercator.getHeight() > 0 ) {
-                            overlaps[sectionName] = sectionOverlapMercator
+                            let subMapDescription = new SubMapDescription(sectionName, sectionExtentMercator, section.maxZoom, section.tileWidth)
+                            overlaps.push(subMapDescription)
                         }
                     }
 
                     // Record the tile needs
+                    let newTileDescription = new TileDescription(tileExtent, tileCache)
+                    newTileDescription.setSubTileOverlaps(overlaps)
+                    this.queue[currentZoom].add(newTileDescription)
                 }
             }
 
@@ -66,6 +80,14 @@ export class TileQueue {
 
     public getMaxZoom(): number {
         return 1
+    }
+
+    public hasNext(zoom: number): Boolean {
+        return !this.queue[zoom].isEmpty
+    }
+
+    public pop(zoom: number): TileDescription | undefined {
+        return this.queue[zoom].pop()
     }
 
     private getExtents(subMaps: string[], subSectionMetadata: Record<string, SectionMetadata>): BoxGeo {
