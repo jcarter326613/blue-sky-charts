@@ -1,7 +1,8 @@
+'use strict';
 
-import { BoxGeo, PointGeo, Point2d } from 'coordinates'
-import { EasyAwait } from 'easy-await'
+import { Generator } from './generator'
 
-export const handler = () => {
-    
+export const handler = async () => {
+    let generator = new Generator()
+    generator.generateMosaics()
 }
