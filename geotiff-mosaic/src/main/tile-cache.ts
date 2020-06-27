@@ -5,7 +5,11 @@ import { exit } from 'process';
 export class TileCache {
     private generatedFiles: Record<string, Record<number, string>> = {}     //mapname, zoom, root directory
 
-    public getPathForTile(subMapDescription: SubMapDescription, targetZoom: number, x: number, y: number) {
+    constructor() {
+        exec(`cp ../geotiff-map-exploder/maps/metadata.json ./maps`)
+    }
+
+    public getPathForTile(subMapDescription: SubMapDescription, targetZoom: number, x: number, y: number): string {
         // Return the path if it's been generated
         if ( this.generatedFiles[subMapDescription.name] !== undefined && 
             this.generatedFiles[subMapDescription.name][targetZoom] !== undefined ) {
@@ -29,6 +33,8 @@ export class TileCache {
             }
         })
         console.log(`Explosion complete`)
+
+        return "./blah"
     }
 
     public dispose(): void {

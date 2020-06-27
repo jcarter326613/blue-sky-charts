@@ -1,6 +1,7 @@
 import { BoxWebMercator, PointWebMercator } from "coordinates";
 import { SubMapDescription } from './sub-map-description'
 import { TileCache } from "./tile-cache";
+import { exit } from "process";
 
 export class TileDescription {
     private TILE_DIMENSIONS_PIXELS = 1024
@@ -121,7 +122,8 @@ export class TileDescription {
             let imageExtentList: BoxWebMercator[] = []
             for ( let x = startX; x <= endX; x++ ) {
                 for ( let y = startY; y <= endY; y++ ) {
-                    imagePathList.push(this.tileCache.getPathForTile(subMapDescription, targetZoom, x, y))
+                    let path = this.tileCache.getPathForTile(subMapDescription, targetZoom, x, y)
+                    imagePathList.push(path)
                     imageExtentList.push(new BoxWebMercator(
                         subMapDescription.extent.getTopLeft().x + extentPerZoom.x * x, 
                         subMapDescription.extent.getTopLeft().y + extentPerZoom.y * y,
