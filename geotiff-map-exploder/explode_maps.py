@@ -15,28 +15,29 @@ from rasterio.enums import ColorInterp
 from rasterio.enums import Resampling
 from tqdm import tqdm
 
-def _explode_map_helper(image_cache_folder, zoom_level, original_image, original_image_dimensions, this_xy, tile_width, max_zoom):
+def _explode_map_helper(image_cache_folder, zoom_level, original_image, original_image_dimensions, this_xy, tile_width, max_zoom, zoom_restriction):
     # Check if we've zoomed far enough
     if zoom_level > max_zoom:
         return
 
-    # Make sure the zoom directory exists
-    zoom_directory = "/".join([image_cache_folder, str(zoom_level)])
-    if not path.exists(zoom_directory):
-        mkdir(zoom_directory)
+    if zoom_restriction is None or zoom_restriction == zoom_level:
+        # Make sure the zoom directory exists
+        zoom_directory = "/".join([image_cache_folder, str(zoom_level)])
+        if not path.exists(zoom_directory):
+            mkdir(zoom_directory)
 
-    # Get the crop are for this x, y, and zoom level
-    block_size = (original_image_dimensions[0] / (2 ** zoom_level), \
-        (original_image_dimensions[1] / (2 ** zoom_level)))
-    crop_dimensions = (this_xy[0] * block_size[0], this_xy[1] * block_size[1], \
-        (this_xy[0] + 1) * block_size[0], (this_xy[1] + 1) * block_size[1])
-    crop_dimensions = (math.floor(crop_dimensions[0]), math.floor(crop_dimensions[1]), \
-        math.floor(crop_dimensions[2]), math.floor(crop_dimensions[3]))
-    cropped_image = original_image.crop(crop_dimensions)
+        # Get the crop area for this x, y, and zoom level
+        block_size = (original_image_dimensions[0] / (2 ** zoom_level), \
+            (original_image_dimensions[1] / (2 ** zoom_level)))
+        crop_dimensions = (this_xy[0] * block_size[0], this_xy[1] * block_size[1], \
+            (this_xy[0] + 1) * block_size[0], (this_xy[1] + 1) * block_size[1])
+        crop_dimensions = (math.floor(crop_dimensions[0]), math.floor(crop_dimensions[1]), \
+            math.floor(crop_dimensions[2]), math.floor(crop_dimensions[3]))
+        cropped_image = original_image.crop(crop_dimensions)
 
-    # Resize the image and write it out
-    cropped_image.thumbnail((tile_width, tile_width), Image.ANTIALIAS)
-    cropped_image.save(zoom_directory + "/{}_{}.png".format(this_xy[0], this_xy[1]), "PNG")
+        # Resize the image and write it out
+        cropped_image.thumbnail((tile_width, tile_width), Image.ANTIALIAS)
+        cropped_image.save(zoom_directory + "/{}_{}.png".format(this_xy[0], this_xy[1]), "PNG")
 
     # Split the image into 4 equal parts and recurse
     next_coordinate = (this_xy[0] * 2, this_xy[1] * 2)
@@ -50,18 +51,18 @@ def _explode_map_helper(image_cache_folder, zoom_level, original_image, original
     _explode_map_helper(image_cache_folder, zoom_level + 1, original_image, original_image_dimensions, \
         (next_coordinate[0] + 1, next_coordinate[1] + 1), tile_width, max_zoom)
 
-def explode_map(name, definition, image_cache_folder, image_location, tile_width, max_zoom):
+def explode_map(name, definition, image_cache_folder, image_location, tile_width, max_zoom, zoom_restriction):
     print("Exploding map " + name)
 
     # Load the original image
     Image.MAX_IMAGE_PIXELS = 300000000
     image = Image.open(image_location)
 
-    print("Expected max zoom level: ciel({}), actual max zoom: {}".format(math.log2(image.width / tile_width), max_zoom))
+    print("Expected max zoom level: ciel({}), actual max zoom: {}, zoom restriction {}".format(math.log2(image.width / tile_width), max_zoom, zoom_restriction))
 
     _explode_map_helper(image_cache_folder, 0, image, (image.width, image.height), (0, 0), tile_width, max_zoom)
 
-def explode_maps(map_name, location_name):
+def explode_maps(map_name, location_name, zoom_restriction):
     if location_name not in ["local", "remote"]:
         print("bad location")
         exit()
@@ -81,7 +82,7 @@ def explode_maps(map_name, location_name):
         os.system("rm -rf maps/tiles")
     os.makedirs(image_cache_folder)
     png_image_path = gdal_util.convert_tiff_to_png(image_path)
-    explode_map(map_name, map_definition, image_cache_folder, png_image_path, tile_width, max_zoom)
+    explode_map(map_name, map_definition, image_cache_folder, png_image_path, tile_width, max_zoom, zoom_restriction)
     if location_name == "local":
         if not os.path.exists("../vfr-green-site/static/maps/world-vfr/sectional"):
             os.makedirs("../vfr-green-site/static/maps/world-vfr/sectional")
@@ -90,8 +91,11 @@ def explode_maps(map_name, location_name):
         os.system("aws s3 sync ./maps/tiles s3://blueskycharts.com/maps/world-vfr/sectional")
     #os.system("rm -f {}*".format(png_image_path))
 
-if len(sys.argv) != 3:
-    print("Usage python3 explode_maps.py <mapname> <local|remote>")
+if len(sys.argv) not in [3,4]:
+    print("Usage python3 explode_maps.py <mapname> <local|remote> (<zoom_restriction>)")
     exit()
     
-explode_maps(sys.argv[1], sys.argv[2])
+zoom_restriction = None
+if len(sys.argv) == 4:
+    zoom_restriction = int(sys.argv[3])
+explode_maps(sys.argv[1], sys.argv[2], zoom_restriction)

@@ -19,6 +19,12 @@ from pyproj import Proj, transform
 
 TILE_WIDTH = 256
 
+use_defaults = False
+default_map = ""
+if len(sys.argv) == 3 and sys.argv[1] == "-use-defaults":
+    use_defaults = True
+    default_map = sys.argv[2]
+    
 def getExtent(projectionType, src, geom):
     geom_lat_long = rasterio.warp.transform_geom(
         src.crs, projectionType, geom, precision=6)
@@ -72,7 +78,11 @@ def getExtent(projectionType, src, geom):
 
 # Get the name and url of the map to process
 print("What map would you like to process?")
-map_name = sys.stdin.readline().strip()
+if use_defaults:
+    map_name = default_map
+    print(map_name)
+else:
+    map_name = sys.stdin.readline().strip()
 
 map_inventory = mi.read_inventory_metadata()
 version = None
@@ -83,9 +93,16 @@ if map_name in map_inventory:
 else:
     map_inventory[map_name] = {}
 
-version_question = "What version?"
-if version != None:
-    version_question += " ({})".format(version)
+if use_defaults:
+    if version <= 0:
+        print("error, no defautl version")
+        exit(1)
+    print("version {}".format(version))
+    version_requested = "{}".format(version)
+else:
+    version_question = "What version?"
+    if version != None:
+        version_question += " ({})".format(version)
 
 print(version_question)
 version_requested = sys.stdin.readline().strip()
@@ -118,34 +135,37 @@ with zipfile.ZipFile(zip_file) as z:
 web_tiff_path = gdal_util.convert_tiff_to_web_mercator(tif_file)
 
 # Define the crop area
-existing_bounds = None
-if "mapBounds" in map_inventory[map_name]:
-    with rasterio.open(web_tiff_path) as src:
-        existing_bounds = map_inventory[map_name]["mapBounds"]
-        for i in range(len(existing_bounds)):
-            bound = existing_bounds[i]
-            outProj = Proj(src.crs.to_proj4())
-            inProj = Proj('epsg:4326')
-            meterX, meterY = transform(inProj, outProj, bound[1], bound[0])
-            y, x = src.index(meterX, meterY)
-            existing_bounds[i] = (x, y)
-
-map_bounds = define_crops(web_tiff_path, existing_bounds)
-if map_bounds != None and len(map_bounds) > 2:
-    with rasterio.open(web_tiff_path) as src:
-        for i in range(len(map_bounds)):
-            bound = map_bounds[i]
-            meterX, meterY = src.xy(row=bound[1], col=bound[0])
-            inProj = Proj(src.crs.to_proj4())
-            outProj = Proj('epsg:4326')
-            map_bounds[i] = transform(inProj,outProj, meterX, meterY)
-            map_bounds[i] = [map_bounds[i][1], map_bounds[i][0]]
-    map_bounds.append(map_bounds[0])
-    map_inventory[map_name]["mapBounds"] = map_bounds
-    mi.write_inventory_metadata(map_inventory)
+if default_map:
+    map_bounds = map_inventory[map_name]["mapBounds"]
 else:
-    print("No bounds given.")
-    exit()
+    existing_bounds = None
+    if "mapBounds" in map_inventory[map_name]:
+        with rasterio.open(web_tiff_path) as src:
+            existing_bounds = map_inventory[map_name]["mapBounds"]
+            for i in range(len(existing_bounds)):
+                bound = existing_bounds[i]
+                outProj = Proj(src.crs.to_proj4())
+                inProj = Proj('epsg:4326')
+                meterX, meterY = transform(inProj, outProj, bound[1], bound[0])
+                y, x = src.index(meterX, meterY)
+                existing_bounds[i] = (x, y)
+
+    map_bounds = define_crops(web_tiff_path, existing_bounds)
+    if map_bounds != None and len(map_bounds) > 2:
+        with rasterio.open(web_tiff_path) as src:
+            for i in range(len(map_bounds)):
+                bound = map_bounds[i]
+                meterX, meterY = src.xy(row=bound[1], col=bound[0])
+                inProj = Proj(src.crs.to_proj4())
+                outProj = Proj('epsg:4326')
+                map_bounds[i] = transform(inProj,outProj, meterX, meterY)
+                map_bounds[i] = [map_bounds[i][1], map_bounds[i][0]]
+        map_bounds.append(map_bounds[0])
+        map_inventory[map_name]["mapBounds"] = map_bounds
+        mi.write_inventory_metadata(map_inventory)
+    else:
+        print("No bounds given.")
+        exit()
 
 # Create the cropped image
 geojsonGeometryObject = {}
@@ -155,7 +175,7 @@ geojsonGeometryObject["coordinates"] = [map_bounds]
 geojsonFeatureObject = {}
 geojsonFeatureObject["type"] = "Feature"
 geojsonFeatureObject["geometry"] = geojsonGeometryObject
-
+ 
 geojsonObj = {}
 geojsonObj["type"] = "FeatureCollection"
 geojsonObj["features"] = [geojsonFeatureObject]
