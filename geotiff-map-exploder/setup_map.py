@@ -104,8 +104,8 @@ else:
     if version != None:
         version_question += " ({})".format(version)
 
-print(version_question)
-version_requested = sys.stdin.readline().strip()
+    print(version_question)
+    version_requested = sys.stdin.readline().strip()
 
 if version_requested == None or len(version_requested) == 0:
     if version == None:
