@@ -17,7 +17,7 @@ from tqdm import tqdm
 
 def _explode_map_helper(image_cache_folder, zoom_level, original_image, original_image_dimensions, this_xy, tile_width, max_zoom, zoom_restriction):
     # Check if we've zoomed far enough
-    if zoom_level > max_zoom:
+    if zoom_level > max_zoom or zoom_level > zoom_restriction:
         return
 
     if zoom_restriction is None or zoom_restriction == zoom_level:
@@ -43,13 +43,13 @@ def _explode_map_helper(image_cache_folder, zoom_level, original_image, original
     next_coordinate = (this_xy[0] * 2, this_xy[1] * 2)
 
     _explode_map_helper(image_cache_folder, zoom_level + 1, original_image, original_image_dimensions, \
-        next_coordinate, tile_width, max_zoom)
+        next_coordinate, tile_width, max_zoom, zoom_restriction)
     _explode_map_helper(image_cache_folder, zoom_level + 1, original_image, original_image_dimensions, \
-        (next_coordinate[0] + 1, next_coordinate[1]), tile_width, max_zoom)
+        (next_coordinate[0] + 1, next_coordinate[1]), tile_width, max_zoom, zoom_restriction)
     _explode_map_helper(image_cache_folder, zoom_level + 1, original_image, original_image_dimensions, \
-        (next_coordinate[0], next_coordinate[1] + 1), tile_width, max_zoom)
+        (next_coordinate[0], next_coordinate[1] + 1), tile_width, max_zoom, zoom_restriction)
     _explode_map_helper(image_cache_folder, zoom_level + 1, original_image, original_image_dimensions, \
-        (next_coordinate[0] + 1, next_coordinate[1] + 1), tile_width, max_zoom)
+        (next_coordinate[0] + 1, next_coordinate[1] + 1), tile_width, max_zoom, zoom_restriction)
 
 def explode_map(name, definition, image_cache_folder, image_location, tile_width, max_zoom, zoom_restriction):
     print("Exploding map " + name)
@@ -60,10 +60,10 @@ def explode_map(name, definition, image_cache_folder, image_location, tile_width
 
     print("Expected max zoom level: ciel({}), actual max zoom: {}, zoom restriction {}".format(math.log2(image.width / tile_width), max_zoom, zoom_restriction))
 
-    _explode_map_helper(image_cache_folder, 0, image, (image.width, image.height), (0, 0), tile_width, max_zoom)
+    _explode_map_helper(image_cache_folder, 0, image, (image.width, image.height), (0, 0), tile_width, max_zoom, zoom_restriction)
 
 def explode_maps(map_name, location_name, zoom_restriction):
-    if location_name not in ["local", "remote"]:
+    if location_name not in ["local", "remote", "relative"]:
         print("bad location")
         exit()
 
