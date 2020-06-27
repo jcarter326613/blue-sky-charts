@@ -1,12 +1,14 @@
-import { exec } from 'child_process'
+import { exec, execSync } from 'child_process'
 import { SubMapDescription } from "./sub-map-description";
 import { exit } from 'process';
+import { existsSync } from 'fs';
 
 export class TileCache {
     private generatedFiles: Record<string, Record<number, string>> = {}     //mapname, zoom, root directory
 
     constructor() {
-        exec(`cp ../geotiff-map-exploder/maps/metadata.json ./maps`)
+        execSync(`cp ../geotiff-map-exploder/maps/metadata.json ./maps`)
+        execSync(`mkdir ./maps/cache`)
     }
 
     public getPathForTile(subMapDescription: SubMapDescription, targetZoom: number, x: number, y: number): string {
@@ -18,23 +20,26 @@ export class TileCache {
         }
 
         // Otherwise generate the file
-        console.log(`Setting up map ${subMapDescription.name}`)
-        exec(`python3 ../geotiff-map-exploder/setup_map.py -use-defaults ${subMapDescription.name}`, (error, stdout, stderr) => {
-            if ( error ) {
-                console.error(error)
-                exit(1)
-            }
-        })
+        let pngFilePath = `./maps/${subMapDescription.name}_SEC_${subMapDescription.version}_WEB_CROPPED_RGB.png`
+        if ( !existsSync(pngFilePath) ) {
+            console.log(`Setting up map ${subMapDescription.name}`)
+            execSync(`python3 ../geotiff-map-exploder/setup_map.py -use-defaults ${subMapDescription.name}`)
+        }
         console.log(`Exploding map ${subMapDescription.name}`)
-        exec(`python3 ../geotiff-map-exploder/setup_map.py -use-defaults ${subMapDescription.name}`, (error, stdout, stderr) => {
-            if ( error ) {
-                console.error(error)
-                exit(1)
-            }
-        })
-        console.log(`Explosion complete`)
+        execSync(`python3 ../geotiff-map-exploder/explode_maps.py ${subMapDescription.name} relative ${targetZoom}`)
+        console.log(`Explosion complete. Cleaning up.`)
+        execSync(`mv ./maps/tiles/* ./maps/cache`)
+        execSync(`rm -rf ./maps/tiles`)
+        execSync(`rm -f ./maps/*.png.*`)
+        execSync(`rm -f ./maps/*.tif`)
 
-        return "./blah"
+        let rootDir = `./maps/cache/${subMapDescription.name}_SEC_${subMapDescription.version}/${targetZoom}`
+        if ( this.generatedFiles[subMapDescription.name] === undefined ) {
+            this.generatedFiles[subMapDescription.name] = {}
+        }
+        this.generatedFiles[subMapDescription.name][targetZoom] = rootDir
+
+        return `${rootDir}/${x}_${y}.png`
     }
 
     public dispose(): void {

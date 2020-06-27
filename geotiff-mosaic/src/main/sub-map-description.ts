@@ -5,12 +5,14 @@ export class SubMapDescription {
     public extent: BoxWebMercator
     public maxZoom: number
     public tileWidth: number
+    public version: string
 
-    constructor(name: string, extent: BoxWebMercator, maxZoom: number, tileWidth: number) {
+    constructor(name: string, extent: BoxWebMercator, maxZoom: number, tileWidth: number, version: string) {
         this.name = name
         this.extent = extent
         this.maxZoom = maxZoom
         this.tileWidth = tileWidth
+        this.version = version
     }
 
     public getZoomForResolution(pixelsPerMercator: number): number {

@@ -51,7 +51,8 @@ export class TileQueue {
                     let overlaps: Array<SubMapDescription> = []
                     for ( let sectionName in metadata ) {
                         let section = metadata[sectionName]
-                        if ( section.fileExtent === undefined || section.maxZoom === undefined || section.tileWidth === undefined ) {
+                        if ( section.fileExtent === undefined || section.maxZoom === undefined || section.tileWidth === undefined ||
+                            section.version === undefined ) {
                             continue
                         }
                         let sectionExtentGeo = this.convertFileExtentToBoxGeo(section.fileExtent)
@@ -62,7 +63,8 @@ export class TileQueue {
                         let sectionExtentMercator = CoordinateConversion.convertBoxGeoToBoxMercator(sectionExtentGeo)
                         let sectionOverlapMercator = sectionExtentMercator.union(tileExtent)
                         if ( sectionOverlapMercator != null && sectionOverlapMercator.getWidth() > 0 && sectionOverlapMercator.getHeight() > 0 ) {
-                            let subMapDescription = new SubMapDescription(sectionName, sectionExtentMercator, section.maxZoom, section.tileWidth)
+                            let subMapDescription = new SubMapDescription(sectionName, sectionExtentMercator, section.maxZoom, 
+                                section.tileWidth, section.version)
                             overlaps.push(subMapDescription)
                         }
                     }
