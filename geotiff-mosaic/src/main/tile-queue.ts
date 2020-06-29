@@ -9,87 +9,73 @@ import { SubMapDescription } from './sub-map-description'
 import { TileCache } from './tile-cache'
 
 export class TileQueue {
-    private queue: Array<Heap<TileDescription>>
+    private queue: Heap<TileDescription>
 
-    public constructor (maps: Array<string>, metadata: Record<string, SectionMetadata>, tileCache: TileCache) {
-        this.queue = []
-
+    public constructor (maps: Array<string>, metadata: Record<string, SectionMetadata>, tileCache: TileCache, zoom: number) {
         // Load all the configs for each map and determine the mosaic rectangular extents
         let extents = this.getExtents(maps, metadata)
         let extentsMercator = CoordinateConversion.convertBoxGeoToBoxMercator(extents)
 
-        // Get the max zoom we need to be able to go to to show a full resolution tile of all maps
-        let maxZoom = this.getMaxZoom()
-    
         // Create the list of tiles needed to cover that extent
-        let currentZoom = 0
-        while ( currentZoom <= maxZoom ) {
-            let tilesAcross = 2 ** currentZoom
+        let tilesAcross = 2 ** zoom
 
-            this.queue[currentZoom] =
-                new Heap<TileDescription>((a: TileDescription, b: TileDescription) => {
-                    let aMaps = a.getDependencyList()
-                    let bMaps = b.getDependencyList()
+        this.queue =
+            new Heap<TileDescription>((a: TileDescription, b: TileDescription) => {
+                let aMaps = a.getDependencyList()
+                let bMaps = b.getDependencyList()
 
-                    let aKey = aMaps.join("|")
-                    let bKey = bMaps.join("|")
+                let aKey = aMaps.join("|")
+                let bKey = bMaps.join("|")
 
-                    return aKey.localeCompare(bKey)
-                })
-            
-            // For each tile
-            for ( let x = 0; x < tilesAcross; x++ ) {
-                for ( let y = 0; y < tilesAcross; y++ ) {
-                    // Get the mercator extents for this zoom level
-                    let tileExtent = new BoxWebMercator(
-                        extentsMercator.getTopLeft().x + x * (extentsMercator.getWidth() / tilesAcross), 
-                        extentsMercator.getTopLeft().y + y * (extentsMercator.getHeight() / tilesAcross),
-                        extentsMercator.getTopLeft().x + (x+1) * (extentsMercator.getWidth() / tilesAcross),
-                        extentsMercator.getTopLeft().y + (y+1) * (extentsMercator.getHeight() / tilesAcross))
+                return aKey.localeCompare(bKey)
+            })
+        
+        // For each tile
+        for ( let x = 0; x < tilesAcross; x++ ) {
+            for ( let y = 0; y < tilesAcross; y++ ) {
+                // Get the mercator extents for this zoom level
+                let tileExtent = new BoxWebMercator(
+                    extentsMercator.getTopLeft().x + x * (extentsMercator.getWidth() / tilesAcross), 
+                    extentsMercator.getTopLeft().y + y * (extentsMercator.getHeight() / tilesAcross),
+                    extentsMercator.getTopLeft().x + (x+1) * (extentsMercator.getWidth() / tilesAcross),
+                    extentsMercator.getTopLeft().y + (y+1) * (extentsMercator.getHeight() / tilesAcross))
 
-                    // Get the sections that overlap that extent
-                    let overlaps: Array<SubMapDescription> = []
-                    for ( let sectionName in metadata ) {
-                        let section = metadata[sectionName]
-                        if ( section.fileExtent === undefined || section.maxZoom === undefined || section.tileWidth === undefined ||
-                            section.version === undefined ) {
-                            continue
-                        }
-                        let sectionExtentGeo = this.convertFileExtentToBoxGeo(section.fileExtent)
-                        if ( sectionExtentGeo === undefined ) {
-                            continue
-                        }
-
-                        let sectionExtentMercator = CoordinateConversion.convertBoxGeoToBoxMercator(sectionExtentGeo)
-                        let sectionOverlapMercator = sectionExtentMercator.union(tileExtent)
-                        if ( sectionOverlapMercator != null && sectionOverlapMercator.getWidth() > 0 && sectionOverlapMercator.getHeight() > 0 ) {
-                            let subMapDescription = new SubMapDescription(sectionName, sectionExtentMercator, section.maxZoom, 
-                                section.tileWidth, section.version)
-                            overlaps.push(subMapDescription)
-                        }
+                // Get the sections that overlap that extent
+                let overlaps: Array<SubMapDescription> = []
+                for ( let sectionName in metadata ) {
+                    let section = metadata[sectionName]
+                    if ( section.fileExtent === undefined || section.maxZoom === undefined || section.tileWidth === undefined ||
+                        section.version === undefined ) {
+                        continue
+                    }
+                    let sectionExtentGeo = this.convertFileExtentToBoxGeo(section.fileExtent)
+                    if ( sectionExtentGeo === undefined ) {
+                        continue
                     }
 
-                    // Record the tile needs
-                    let newTileDescription = new TileDescription(tileExtent, tileCache, currentZoom, x, y)
-                    newTileDescription.setSubTileOverlaps(overlaps)
-                    this.queue[currentZoom].add(newTileDescription)
+                    let sectionExtentMercator = CoordinateConversion.convertBoxGeoToBoxMercator(sectionExtentGeo)
+                    let sectionOverlapMercator = sectionExtentMercator.union(tileExtent)
+                    if ( sectionOverlapMercator != null && sectionOverlapMercator.getWidth() > 0 && sectionOverlapMercator.getHeight() > 0 ) {
+                        let subMapDescription = new SubMapDescription(sectionName, sectionExtentMercator, section.maxZoom, 
+                            section.tileWidth, section.version)
+                        overlaps.push(subMapDescription)
+                    }
                 }
-            }
 
-            currentZoom++
+                // Record the tile needs
+                let newTileDescription = new TileDescription(tileExtent, tileCache, zoom, x, y)
+                newTileDescription.setSubTileOverlaps(overlaps)
+                this.queue.add(newTileDescription)
+            }
         }
     }
 
-    public getMaxZoom(): number {
-        return 1
+    public hasNext(): Boolean {
+        return !this.queue.isEmpty
     }
 
-    public hasNext(zoom: number): Boolean {
-        return !this.queue[zoom].isEmpty
-    }
-
-    public pop(zoom: number): TileDescription | undefined {
-        return this.queue[zoom].pop()
+    public pop(): TileDescription | undefined {
+        return this.queue.pop()
     }
 
     private getExtents(subMaps: string[], subSectionMetadata: Record<string, SectionMetadata>): BoxGeo {
@@ -127,10 +113,10 @@ export class TileQueue {
             if ( maxLongitude === undefined || maxLongitude < metadata.fileExtent.bottomRight.longitude ) {
                 maxLongitude = metadata.fileExtent.bottomRight.longitude
             }
-            if ( minLatitude === undefined || maxLatitude < metadata.fileExtent.bottomRight.latitude ) {
+            if ( minLatitude === undefined || minLatitude > metadata.fileExtent.bottomRight.latitude ) {
                 minLatitude = metadata.fileExtent.bottomRight.latitude
             }
-            if ( minLongitude === undefined || maxLatitude < metadata.fileExtent.topLeft.longitude ) {
+            if ( minLongitude === undefined || minLongitude > metadata.fileExtent.topLeft.longitude ) {
                 minLongitude = metadata.fileExtent.topLeft.longitude
             }
         }

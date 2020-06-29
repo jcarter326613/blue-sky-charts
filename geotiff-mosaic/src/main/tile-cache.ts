@@ -8,6 +8,9 @@ export class TileCache {
 
     constructor() {
         execSync(`cp ../geotiff-map-exploder/maps/metadata.json ./maps`)
+        if ( existsSync("./maps/cache") ) {
+            execSync(`rm -rf ./maps/cache`)
+        }
         execSync(`mkdir ./maps/cache`)
     }
 
@@ -43,6 +46,7 @@ export class TileCache {
     }
 
     public dispose(): void {
-
+        execSync(`rm -rf ./maps/cache`)
+        execSync(`rm -f ./maps/*.zip`)
     }
 }

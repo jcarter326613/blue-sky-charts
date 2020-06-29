@@ -35,15 +35,15 @@ export class Generator {
                 continue
             }
     
-            // Create a lookup of all the tiles to generate and which sections are needed to create them
-            let tileCache = new TileCache()
-            let tileQueue = new TileQueue(imageConfiguration.subMaps, subSectionMetadata, tileCache)
-    
             // For each zoom level
-            for ( let zoom = 0; zoom < tileQueue.getMaxZoom(); zoom++ ) {
+            for ( let zoom = 0; zoom <= 1; zoom++ ) {
+                // Create a lookup of all the tiles to generate and which sections are needed to create them
+                let tileCache = new TileCache()
+                let tileQueue = new TileQueue(imageConfiguration.subMaps, subSectionMetadata, tileCache, zoom)
+    
                 // For each tile to generate, sorted in order of the alphabetical order of dependents
-                while ( tileQueue.hasNext(zoom) ) {
-                    let tile = tileQueue.pop(zoom);
+                while ( tileQueue.hasNext() ) {
+                    let tile = tileQueue.pop();
                     if ( tile === undefined ) {
                         continue
                     }
@@ -51,8 +51,9 @@ export class Generator {
                     // Compose the tile with world map drawn first, then each section in alphabetical order
                     await this.createTile(tile, tileCache, zoom)
                 } 
+
+                tileCache.dispose()
             }
-            tileCache.dispose()
         }
     }
 
@@ -77,17 +78,16 @@ export class Generator {
                     image, 
                     sourceExtent2d.getUpperLeft().x, 
                     sourceExtent2d.getUpperLeft().y, 
-                    sourceExtent2d.getLowerRight().x, 
-                    sourceExtent2d.getLowerRight().y, 
+                    sourceExtent2d.getLowerRight().x - sourceExtent2d.getUpperLeft().x, 
+                    sourceExtent2d.getLowerRight().y - sourceExtent2d.getUpperLeft().y, 
                     destinationExtent.getUpperLeft().x, 
                     destinationExtent.getUpperLeft().y, 
-                    destinationExtent.getLowerRight().x, 
-                    destinationExtent.getLowerRight().y)
+                    destinationExtent.getLowerRight().x - destinationExtent.getUpperLeft().x, 
+                    destinationExtent.getLowerRight().y - destinationExtent.getUpperLeft().y)
             }
         }
 
         // Write the tile out to disk
-        let jpegStream = canvas.createJPEGStream()
         if (!existsSync(this.OUTPUT_DIRECTORY)){
             mkdirSync(this.OUTPUT_DIRECTORY);
         }
@@ -95,7 +95,9 @@ export class Generator {
         if (!existsSync(zoomDirectory)){
             mkdirSync(zoomDirectory);
         }
-        let filePath = `${zoomDirectory}/${tile.x}_${tile.y}.jpg`
-        writeFileSync(filePath, jpegStream.read())
+        let filePath = `${zoomDirectory}/${tile.x}_${tile.y}.png`
+        //let stream = canvas.createJPEGStream()
+        let stream = canvas.toBuffer()
+        writeFileSync(filePath, stream)
     }
 }

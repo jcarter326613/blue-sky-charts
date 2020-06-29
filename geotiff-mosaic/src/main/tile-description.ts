@@ -1,4 +1,4 @@
-import { Box2d, BoxWebMercator, PointWebMercator } from "coordinates";
+import { Box2d, BoxWebMercator, PointWebMercator, Point2d } from "coordinates";
 import { SubMapDescription } from './sub-map-description'
 import { TileCache } from "./tile-cache";
 import { exit } from "process";
@@ -17,6 +17,7 @@ export class TileDescription {
 
     private overlaps: Array<SubMapDescription> | undefined
     private subMapNames: string[] | undefined
+    private subMapTileDimensions: Array<Point2d> | undefined
     private subMapExtents: BoxWebMercator[] | undefined
     private subMapImagePaths: Array<string[]> | undefined
     private subMapImageExtents: Array<Array<BoxWebMercator>> | undefined
@@ -27,15 +28,33 @@ export class TileDescription {
         this.zoom = zoom
         this.x = x
         this.y = y
+
+        this.widthPixels = this.TILE_DIMENSIONS_PIXELS
+        this.heightPixels = this.TILE_DIMENSIONS_PIXELS
+        if ( tileExtent.getHeight() > tileExtent.getWidth() ) {
+            this.widthPixels = this.widthPixels * tileExtent.getWidth() / tileExtent.getHeight()
+        } else {
+            this.heightPixels = this.heightPixels * tileExtent.getHeight() / tileExtent.getWidth()
+        }
     }
 
     public setSubTileOverlaps(overlaps: Array<SubMapDescription>): void {
         this.overlaps = overlaps
         this.subMapNames = []
         this.subMapExtents = []
+        this.subMapTileDimensions = []
         for ( let map of overlaps ) {
             this.subMapNames.push(map.name)
             this.subMapExtents.push(map.extent)
+
+            let width = map.tileWidth
+            let height = map.tileWidth
+            if ( map.extent.getHeight() > map.extent.getWidth() ) {
+                width = width * map.extent.getWidth() / map.extent.getHeight()
+            } else {
+                height = height * map.extent.getHeight() / map.extent.getWidth()
+            }
+            this.subMapTileDimensions.push(new Point2d(width, height))
         }
 
         this.prepareSubMapData()
@@ -56,29 +75,29 @@ export class TileDescription {
         let thisSubMapList = this.subMapImageExtents[subMapNumber]
         let retList: Array<Box2d> = []
         for ( let subMap of thisSubMapList ) {
-            retList.push(this.convertMercatorToRelative2d(subMap, this.tileExtent))
+            retList.push(this.convertMercatorToRelative2d(subMap, this.tileExtent, new Point2d(this.widthPixels, this.heightPixels)))
         }
         return retList
     }
 
     public getSubTileSources2d(subMapNumber: number): Array<Box2d> {
-        if ( this.subMapImageExtents === undefined || this.subMapExtents === undefined ) {
+        if ( this.subMapImageExtents === undefined || this.subMapExtents === undefined || this.subMapTileDimensions === undefined ) {
             throw new Error("this.subMapImageExtents or subMapExtents undefined")
         }
         
         let thisSubMapList = this.subMapImageExtents[subMapNumber]
         let retList: Array<Box2d> = []
         for ( let subMap of thisSubMapList ) {
-            retList.push(this.convertMercatorToRelative2d(subMap, this.subMapExtents[subMapNumber]))
+            retList.push(this.convertMercatorToRelative2d(subMap, subMap, this.subMapTileDimensions[subMapNumber]))
         }
         return retList
     }
 
-    private convertMercatorToRelative2d(mercator: BoxWebMercator, relativeTo: BoxWebMercator): Box2d {
-        let startX = this.widthPixels * ((relativeTo.getTopLeft().x - this.tileExtent.getTopLeft().x) / this.tileExtent.getWidth())
-        let endX = this.widthPixels * ((relativeTo.getBottomRight().x - this.tileExtent.getTopLeft().x) / this.tileExtent.getWidth())
-        let startY = this.heightPixels * ((relativeTo.getTopLeft().x - this.tileExtent.getTopLeft().x) / this.tileExtent.getWidth())
-        let endY = this.heightPixels * ((relativeTo.getBottomRight().x - this.tileExtent.getTopLeft().x) / this.tileExtent.getWidth())
+    private convertMercatorToRelative2d(mercator: BoxWebMercator, relativeTo: BoxWebMercator, relativeToPixels: Point2d): Box2d {
+        let startX = relativeToPixels.x * ((mercator.getTopLeft().x - relativeTo.getTopLeft().x) / relativeTo.getWidth())
+        let endX = relativeToPixels.x * ((mercator.getBottomRight().x - relativeTo.getTopLeft().x) / relativeTo.getWidth())
+        let startY = relativeToPixels.y * ((mercator.getTopLeft().y - relativeTo.getTopLeft().y) / relativeTo.getHeight())
+        let endY = relativeToPixels.y * ((mercator.getBottomRight().y - relativeTo.getTopLeft().y) / relativeTo.getHeight())
 
         return new Box2d(startX, startY, endX, endY)
     }
