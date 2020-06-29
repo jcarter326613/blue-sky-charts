@@ -1,5 +1,6 @@
 
 import { readFileSync, writeFileSync, existsSync, mkdirSync } from 'fs'
+import { execSync } from 'child_process'
 import { createCanvas, loadImage } from 'canvas'
 import { Config } from './models/config'
 import { SectionMetadata } from './models/section-metadata'
@@ -13,6 +14,8 @@ export class Generator {
     private OUTPUT_DIRECTORY = "./output"
 
     public async generateMosaics(): Promise<void> {
+        let mosaicVersion = (new Date()).toISOString().replace(/\..+/, "").replace(":", "-").replace(":", "-")
+
         // Load the configuration
         let mapConfigurationFile = this.MAP_CONFIGURATION_FILE
         let rawdata = readFileSync(mapConfigurationFile)
@@ -49,7 +52,7 @@ export class Generator {
                     }
 
                     // Compose the tile with world map drawn first, then each section in alphabetical order
-                    await this.createTile(tile, tileCache, zoom)
+                    await this.createTile(tile, imageConfigurationName, mosaicVersion)
                 } 
 
                 tileCache.dispose()
@@ -57,7 +60,7 @@ export class Generator {
         }
     }
 
-    private async createTile(tile: TileDescription, tileCache: TileCache, zoom: number): Promise<void> {
+    private async createTile(tile: TileDescription, mapName: string, mapVersion: string): Promise<void> {
         // Create a bitmap to draw on
         let canvas = createCanvas(tile.widthPixels, tile.heightPixels)
 
@@ -91,13 +94,21 @@ export class Generator {
         if (!existsSync(this.OUTPUT_DIRECTORY)){
             mkdirSync(this.OUTPUT_DIRECTORY);
         }
-        let zoomDirectory = `${this.OUTPUT_DIRECTORY}/${tile.zoom}`
+        let areaDirectory = `${this.OUTPUT_DIRECTORY}/${mapName}_MOSAIC_${mapVersion}`
+        if (!existsSync(areaDirectory)){
+            mkdirSync(areaDirectory);
+        }
+        let zoomDirectory = `${areaDirectory}/${tile.zoom}`
         if (!existsSync(zoomDirectory)){
             mkdirSync(zoomDirectory);
         }
-        let filePath = `${zoomDirectory}/${tile.x}_${tile.y}.png`
-        //let stream = canvas.createJPEGStream()
+        let pngPath = `${zoomDirectory}/${tile.x}_${tile.y}.png`
         let stream = canvas.toBuffer()
-        writeFileSync(filePath, stream)
+        writeFileSync(pngPath, stream)
+
+        // Convert the png to a jpeg and clean up the png
+        let jpegPath = `${zoomDirectory}/${tile.x}_${tile.y}.jpg`
+        execSync(`convert ${pngPath} -quality 90 ${jpegPath}`)
+        execSync(`rm ${pngPath}`)
     }
 }

@@ -1,6 +1,5 @@
-import { exec, execSync } from 'child_process'
+import { execSync } from 'child_process'
 import { SubMapDescription } from "./sub-map-description";
-import { exit } from 'process';
 import { existsSync } from 'fs';
 
 export class TileCache {
