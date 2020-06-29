@@ -4,7 +4,7 @@ import { TileCache } from "./tile-cache";
 import { exit } from "process";
 
 export class TileDescription {
-    private TILE_DIMENSIONS_PIXELS = 1024
+    public static readonly TILE_DIMENSIONS_PIXELS = 1024
 
     public tileCache: TileCache
     public tileExtent: BoxWebMercator
@@ -29,8 +29,8 @@ export class TileDescription {
         this.x = x
         this.y = y
 
-        this.widthPixels = this.TILE_DIMENSIONS_PIXELS
-        this.heightPixels = this.TILE_DIMENSIONS_PIXELS
+        this.widthPixels = TileDescription.TILE_DIMENSIONS_PIXELS
+        this.heightPixels = TileDescription.TILE_DIMENSIONS_PIXELS
         if ( tileExtent.getHeight() > tileExtent.getWidth() ) {
             this.widthPixels = this.widthPixels * tileExtent.getWidth() / tileExtent.getHeight()
         } else {
@@ -130,10 +130,10 @@ export class TileDescription {
             let targetDimensionExtent: number
             if ( this.tileExtent.getHeight() > this.tileExtent.getWidth() ) {
                 targetDimensionExtent = this.tileExtent.getHeight()
-                pixelsPerMercator = this.TILE_DIMENSIONS_PIXELS / targetDimensionExtent
+                pixelsPerMercator = TileDescription.TILE_DIMENSIONS_PIXELS / targetDimensionExtent
             } else {
                 targetDimensionExtent = this.tileExtent.getWidth()
-                pixelsPerMercator = this.TILE_DIMENSIONS_PIXELS / targetDimensionExtent
+                pixelsPerMercator = TileDescription.TILE_DIMENSIONS_PIXELS / targetDimensionExtent
             }
 
             // Get the zoom for the submap

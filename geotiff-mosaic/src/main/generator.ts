@@ -7,7 +7,9 @@ import { SectionMetadata } from './models/section-metadata'
 import { TileQueue } from './tile-queue'
 import { TileCache } from './tile-cache'
 import { TileDescription } from './tile-description'
-import { Box2d, PointWebMercator } from 'coordinates'
+import { BoxGeo, CoordinateConversion, PointWebMercator } from 'coordinates'
+import { FileExtent } from './models/file-extent'
+import { PointGeoModel } from './models/point-geo-model'
 
 export class Generator {
     private MAP_CONFIGURATION_FILE = "./data/config.json"
@@ -31,16 +33,29 @@ export class Generator {
         let subsectionMetaFile = this.SUBSECTION_META_FILE
         rawdata = readFileSync(subsectionMetaFile)
         let subSectionMetadata: Record<string, SectionMetadata> = JSON.parse(rawdata.toString())
+
+        // Delete the output directory
+        if (existsSync("./output")) {
+            execSync("rm -rf ./output")
+        }
         
         // For each mosaic image to make
+        let newSubSectionMetadata: Record<string, SectionMetadata> = {}
         for ( let imageConfigurationName in configuration.sections ) {
             let imageConfiguration = configuration.sections[imageConfigurationName]
             if ( imageConfiguration.subMaps === undefined ) {
                 continue
             }
-    
+
+            // Figure out the max zoom
+            let maxZoom = 1
+            let newSectionData = new SectionMetadata()
+            newSectionData.maxZoom = maxZoom
+            newSectionData.tileWidth = TileDescription.TILE_DIMENSIONS_PIXELS
+            newSectionData.version = mosaicVersion
+
             // For each zoom level
-            for ( let zoom = 0; zoom <= 1; zoom++ ) {
+            for ( let zoom = 0; zoom <= maxZoom; zoom++ ) {
                 // Create a lookup of all the tiles to generate and which sections are needed to create them
                 let tileCache = new TileCache()
                 let tileQueue = new TileQueue(imageConfiguration.subMaps, subSectionMetadata, tileCache, zoom)
@@ -51,6 +66,13 @@ export class Generator {
                     if ( tile === undefined ) {
                         continue
                     }
+                    if ( zoom == 0 ) {
+                        newSectionData.fileExtent = 
+                            this.convertBoxGeoToFileExtent(CoordinateConversion.convertBoxMercatorToBoxGeo(tile.tileExtent))
+
+                        newSectionData.imageWidth = tile.tileExtent.getWidth() * maxZoom
+                        newSectionData.imageHeight = tile.tileExtent.getHeight() * maxZoom
+                    }
 
                     // Compose the tile with world map drawn first, then each section in alphabetical order
                     await this.createTile(tile, imageConfigurationName, mosaicVersion)
@@ -58,7 +80,27 @@ export class Generator {
 
                 tileCache.dispose()
             }
+
+            // Save the metadata for this new tile
+            newSubSectionMetadata[imageConfigurationName] = newSectionData
         }
+
+        // Write out the new metadata
+        let newMetadataString = JSON.stringify(newSubSectionMetadata)
+        writeFileSync("./output/metadata.json", newMetadataString)
+    }
+
+    private convertBoxGeoToFileExtent(box: BoxGeo): FileExtent {
+        let extent = new FileExtent()
+        extent.topLeft = new PointGeoModel()
+        extent.topLeft.latitude = box.getTopLeft().latitude
+        extent.topLeft.longitude = box.getTopLeft().longitude
+
+        extent.bottomRight = new PointGeoModel()
+        extent.bottomRight.latitude = box.getBottomRight().latitude
+        extent.bottomRight.longitude = box.getBottomRight().longitude
+
+        return extent
     }
 
     private async createTile(tile: TileDescription, mapName: string, mapVersion: string): Promise<void> {

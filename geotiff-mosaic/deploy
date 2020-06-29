@@ -1,0 +1,5 @@
+#!/bin/bash
+set -e
+
+npm run generate
+aws s3 sync ./output s3://blueskycharts.com/maps/world-vfr-mosaic

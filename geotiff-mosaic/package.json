@@ -7,7 +7,7 @@
     "./": "./src/"
   },
   "scripts": {
-    "test": "echo \"test command here\""
+    "generate": "node src/test/index.js"
   },
   "repository": {
     "type": "git",

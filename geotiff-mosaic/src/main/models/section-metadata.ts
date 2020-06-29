@@ -5,4 +5,6 @@ export class SectionMetadata {
     public maxZoom: number | undefined
     public tileWidth: number | undefined
     public version: string | undefined
+    public imageWidth: number | undefined
+    public imageHeight: number | undefined
 }
