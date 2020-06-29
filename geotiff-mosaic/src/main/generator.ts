@@ -7,6 +7,7 @@ import { SectionMetadata } from './models/section-metadata'
 import { TileQueue } from './tile-queue'
 import { TileCache } from './tile-cache'
 import { TileDescription } from './tile-description'
+import { Box2d, PointWebMercator } from 'coordinates'
 
 export class Generator {
     private MAP_CONFIGURATION_FILE = "./data/config.json"
@@ -63,9 +64,20 @@ export class Generator {
     private async createTile(tile: TileDescription, mapName: string, mapVersion: string): Promise<void> {
         // Create a bitmap to draw on
         let canvas = createCanvas(tile.widthPixels, tile.heightPixels)
+        let context = canvas.getContext("2d")
+
+        // Draw the background onto it
+        let shadowImage = await loadImage("./data/world-shadow.png") // TODO: replace the world shadow with another image, preferably higher resolution
+        let percentageMultiplier = shadowImage.width / PointWebMercator.MAX_X_MERCATOR
+
+        context.drawImage(shadowImage, 
+            tile.tileExtent.getTopLeft().x * percentageMultiplier,
+            tile.tileExtent.getTopLeft().y * percentageMultiplier,
+            (tile.tileExtent.getBottomRight().x - tile.tileExtent.getTopLeft().x) * percentageMultiplier,
+            (tile.tileExtent.getBottomRight().y - tile.tileExtent.getTopLeft().y) * percentageMultiplier,
+            0, 0, tile.widthPixels, tile.heightPixels)
 
         // Draw each image onto the bitmap in the correct position
-        let context = canvas.getContext("2d")
         for ( let i = 0; i < tile.getNumSubMaps(); i++ ) {
             let subTileExtents = tile.getSubTileDestinations2d(i)
             let subTileImagePaths = tile.getImagePaths(i)
