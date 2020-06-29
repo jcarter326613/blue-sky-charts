@@ -1,4 +1,6 @@
 *.json
 *.zip
 *.png*
+*.tif
+*.geojson
 ./tiles

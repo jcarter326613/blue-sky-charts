@@ -1,4 +1,4 @@
-import { BoxWebMercator, PointWebMercator } from "coordinates";
+import { Box2d, BoxWebMercator, PointWebMercator } from "coordinates";
 import { SubMapDescription } from './sub-map-description'
 import { TileCache } from "./tile-cache";
 import { exit } from "process";
@@ -11,6 +11,9 @@ export class TileDescription {
     public pieces: Array<[string, BoxWebMercator, BoxWebMercator]> = []  // [map name, map extents, desired portion]
     public widthPixels: number = 0
     public heightPixels: number = 0
+    public zoom: number
+    public x: number
+    public y: number
 
     private overlaps: Array<SubMapDescription> | undefined
     private subMapNames: string[] | undefined
@@ -18,9 +21,12 @@ export class TileDescription {
     private subMapImagePaths: Array<string[]> | undefined
     private subMapImageExtents: Array<Array<BoxWebMercator>> | undefined
 
-    constructor(tileExtent: BoxWebMercator, tileCache: TileCache) {
+    constructor(tileExtent: BoxWebMercator, tileCache: TileCache, zoom: number, x: number, y: number) {
         this.tileCache = tileCache
         this.tileExtent = tileExtent
+        this.zoom = zoom
+        this.x = x
+        this.y = y
     }
 
     public setSubTileOverlaps(overlaps: Array<SubMapDescription>): void {
@@ -42,15 +48,39 @@ export class TileDescription {
         return this.subMapNames
     }
 
-    public getMercatorExtents(subMapNumber: number | undefined = undefined): BoxWebMercator {
-        if ( subMapNumber === undefined ) {
-            return this.tileExtent
+    public getSubTileDestinations2d(subMapNumber: number): Array<Box2d> {
+        if ( this.subMapImageExtents === undefined ) {
+            throw new Error("this.subMapImageExtents undefined")
+        }
+
+        let thisSubMapList = this.subMapImageExtents[subMapNumber]
+        let retList: Array<Box2d> = []
+        for ( let subMap of thisSubMapList ) {
+            retList.push(this.convertMercatorToRelative2d(subMap, this.tileExtent))
+        }
+        return retList
+    }
+
+    public getSubTileSources2d(subMapNumber: number): Array<Box2d> {
+        if ( this.subMapImageExtents === undefined || this.subMapExtents === undefined ) {
+            throw new Error("this.subMapImageExtents or subMapExtents undefined")
         }
         
-        if ( this.subMapExtents === undefined ) {
-            throw new Error("this.subMapExtents undefined")
+        let thisSubMapList = this.subMapImageExtents[subMapNumber]
+        let retList: Array<Box2d> = []
+        for ( let subMap of thisSubMapList ) {
+            retList.push(this.convertMercatorToRelative2d(subMap, this.subMapExtents[subMapNumber]))
         }
-        return this.subMapExtents[subMapNumber]
+        return retList
+    }
+
+    private convertMercatorToRelative2d(mercator: BoxWebMercator, relativeTo: BoxWebMercator): Box2d {
+        let startX = this.widthPixels * ((relativeTo.getTopLeft().x - this.tileExtent.getTopLeft().x) / this.tileExtent.getWidth())
+        let endX = this.widthPixels * ((relativeTo.getBottomRight().x - this.tileExtent.getTopLeft().x) / this.tileExtent.getWidth())
+        let startY = this.heightPixels * ((relativeTo.getTopLeft().x - this.tileExtent.getTopLeft().x) / this.tileExtent.getWidth())
+        let endY = this.heightPixels * ((relativeTo.getBottomRight().x - this.tileExtent.getTopLeft().x) / this.tileExtent.getWidth())
+
+        return new Box2d(startX, startY, endX, endY)
     }
 
     public getNumSubMaps(): number {
@@ -65,13 +95,6 @@ export class TileDescription {
             return []
         }
         return this.subMapImagePaths[subMapNumber]
-    }
-
-    public getExtentSections(subMapNumber: number): Array<BoxWebMercator> {
-        if ( this.subMapImageExtents === undefined ) {
-            return []
-        }
-        return this.subMapImageExtents[subMapNumber]
     }
 
     private prepareSubMapData(): void {

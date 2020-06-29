@@ -70,7 +70,7 @@ export class TileQueue {
                     }
 
                     // Record the tile needs
-                    let newTileDescription = new TileDescription(tileExtent, tileCache)
+                    let newTileDescription = new TileDescription(tileExtent, tileCache, currentZoom, x, y)
                     newTileDescription.setSubTileOverlaps(overlaps)
                     this.queue[currentZoom].add(newTileDescription)
                 }
