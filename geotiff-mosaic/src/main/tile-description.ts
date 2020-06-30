@@ -80,19 +80,6 @@ export class TileDescription {
         return retList
     }
 
-    public getSubTileSources2d(subMapNumber: number): Array<Box2d> {
-        if ( this.subMapImageExtents === undefined || this.subMapExtents === undefined || this.subMapTileDimensions === undefined ) {
-            throw new Error("this.subMapImageExtents or subMapExtents undefined")
-        }
-        
-        let thisSubMapList = this.subMapImageExtents[subMapNumber]
-        let retList: Array<Box2d> = []
-        for ( let subMap of thisSubMapList ) {
-            retList.push(this.convertMercatorToRelative2d(subMap, subMap, this.subMapTileDimensions[subMapNumber]))
-        }
-        return retList
-    }
-
     private convertMercatorToRelative2d(mercator: BoxWebMercator, relativeTo: BoxWebMercator, relativeToPixels: Point2d): Box2d {
         let startX = relativeToPixels.x * ((mercator.getTopLeft().x - relativeTo.getTopLeft().x) / relativeTo.getWidth())
         let endX = relativeToPixels.x * ((mercator.getBottomRight().x - relativeTo.getTopLeft().x) / relativeTo.getWidth())

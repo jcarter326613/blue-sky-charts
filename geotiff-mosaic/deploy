@@ -1,5 +1,8 @@
 #!/bin/bash
 set -e
 
+tsc --build --clean
+tsc --build
 npm run generate
 aws s3 sync ./output s3://blueskycharts.com/maps/world-vfr-mosaic
+tsc --build --clean

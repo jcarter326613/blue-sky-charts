@@ -1,6 +1,6 @@
 
 import { BoxGeo, CoordinateConversion, PointGeo, Point2d, BoxWebMercator } from 'coordinates'
-import { FileExtent } from './models/file-extent'
+import { Conversion } from './models/conversion'
 import { exit } from 'process'
 import { Heap } from 'ts-heap'
 import { SectionMetadata } from './models/section-metadata'
@@ -48,7 +48,7 @@ export class TileQueue {
                         section.version === undefined ) {
                         continue
                     }
-                    let sectionExtentGeo = this.convertFileExtentToBoxGeo(section.fileExtent)
+                    let sectionExtentGeo = Conversion.convertFileExtentToBoxGeo(section.fileExtent)
                     if ( sectionExtentGeo === undefined ) {
                         continue
                     }
@@ -122,14 +122,5 @@ export class TileQueue {
         }
     
         return new BoxGeo(new PointGeo(minLongitude, maxLatitude), new PointGeo(maxLongitude, minLatitude))
-    }
-
-    private convertFileExtentToBoxGeo(fileExtent: FileExtent): BoxGeo | undefined {
-        if ( fileExtent.topLeft === undefined || fileExtent.topLeft.latitude === undefined || fileExtent.topLeft.longitude === undefined ||
-            fileExtent.bottomRight === undefined || fileExtent.bottomRight.latitude === undefined || fileExtent.bottomRight.longitude === undefined ) {
-            return undefined
-        }
-        return new BoxGeo(new PointGeo(fileExtent.topLeft.longitude, fileExtent.topLeft.latitude), 
-            new PointGeo(fileExtent.bottomRight.longitude, fileExtent.bottomRight.latitude))
     }
 }
