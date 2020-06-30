@@ -88,7 +88,7 @@ export class Generator {
             newSectionData.version = mosaicVersion
 
             // For each zoom level
-            for ( let zoom = 4; zoom <= maxZoom; zoom++ ) {
+            for ( let zoom = 0; zoom <= maxZoom; zoom++ ) {
                 console.log(`Starting zoom level ${zoom}`)
 
                 // Create a lookup of all the tiles to generate and which sections are needed to create them
