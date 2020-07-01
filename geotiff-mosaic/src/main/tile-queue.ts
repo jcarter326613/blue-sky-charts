@@ -76,7 +76,7 @@ export class TileQueue {
                 }
 
                 // Record the tile needs
-                let newTileDescription = new TileDescription(tileExtent, tileCache, zoom, x, y)
+                let newTileDescription = new TileDescription(tileExtent, tileCache, zoom, x, tilesAcross - y - 1)
                 newTileDescription.setSubTileOverlaps(overlaps)
                 this.queue.add(newTileDescription)
             }

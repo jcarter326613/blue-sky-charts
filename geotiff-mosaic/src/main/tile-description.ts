@@ -134,7 +134,7 @@ export class TileDescription {
             }
 
             // For the given zoom, get the needed tiles
-            let extentPerZoom = new PointWebMercator( 
+            let extentPerTile = new PointWebMercator( 
                 subMapDescription.extent.getWidth() / (2 ** targetZoom),
                 subMapDescription.extent.getHeight() / (2 ** targetZoom))
             let extentOverlap = subMapDescription.extent.intersection(this.tileExtent)
@@ -143,23 +143,23 @@ export class TileDescription {
                 this.subMapImageExtents.push([])
                 continue
             }
-            let startX = Math.floor((extentOverlap.getTopLeft().x - subMapDescription.extent.getTopLeft().x) / extentPerZoom.x)
-            let endX = Math.ceil((extentOverlap.getBottomRight().x - subMapDescription.extent.getTopLeft().x) / extentPerZoom.x) - 1
-            let startY = Math.floor((extentOverlap.getBottomRight().y - subMapDescription.extent.getBottomRight().y) / extentPerZoom.y)
-            let endY = Math.ceil((extentOverlap.getTopLeft().y - subMapDescription.extent.getBottomRight().y) / extentPerZoom.y) - 1
+            let startX = Math.floor((extentOverlap.getTopLeft().x - subMapDescription.extent.getTopLeft().x) / extentPerTile.x)
+            let endX = Math.ceil((extentOverlap.getBottomRight().x - subMapDescription.extent.getTopLeft().x) / extentPerTile.x) - 1
+            let startY = Math.floor((subMapDescription.extent.getTopLeft().y - extentOverlap.getTopLeft().y) / extentPerTile.y)
+            let endY = Math.ceil((subMapDescription.extent.getTopLeft().y - extentOverlap.getBottomRight().y) / extentPerTile.y) - 1
 
             // Generate the actual paths and extents
             let imagePathList: string[] = []
             let imageExtentList: BoxWebMercator[] = []
             for ( let x = startX; x <= endX; x++ ) {
                 for ( let y = startY; y <= endY; y++ ) {
-                    let path = this.tileCache.getPathForTile(subMapDescription, targetZoom, x, endY - y)
+                    let path = this.tileCache.getPathForTile(subMapDescription, targetZoom, x, y)
                     imagePathList.push(path)
                     imageExtentList.push(new BoxWebMercator(
-                        subMapDescription.extent.getTopLeft().x + extentPerZoom.x * x, 
-                        subMapDescription.extent.getBottomRight().y + extentPerZoom.y * (y+1),
-                        subMapDescription.extent.getTopLeft().x + extentPerZoom.x * (x+1),
-                        subMapDescription.extent.getBottomRight().y + extentPerZoom.y * y))
+                        subMapDescription.extent.getTopLeft().x + extentPerTile.x * x, 
+                        subMapDescription.extent.getTopLeft().y - extentPerTile.y * y,
+                        subMapDescription.extent.getTopLeft().x + extentPerTile.x * (x+1),
+                        subMapDescription.extent.getTopLeft().y - extentPerTile.y * (y+1)))
                 }
             }
 
