@@ -26,11 +26,11 @@ export class BoxGeo {
     }
 
     /**
-     * Returns the union of two boxes.  There is an assumption that this box and the other box are both non wrapping.
+     * Returns the intersection of two boxes.  There is an assumption that this box and the other box are both non wrapping.
      * topLeft Longitude < bottomRight Longitude
      * @param o 
      */
-    public union(o: BoxGeo): BoxGeo | null {
+    public intersection(o: BoxGeo): BoxGeo | null {
         let upperLeft = new PointGeo();
         let lowerRight = new PointGeo();
         upperLeft.latitude = Math.min(this.topLeft.latitude, o.topLeft.latitude)

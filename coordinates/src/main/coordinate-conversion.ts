@@ -3,146 +3,112 @@ import { BoxGeo } from './box-geo'
 import { BoxWebMercator } from './box-web-mercator'
 import { Point2d } from './point-2d'
 import { PointGeo } from './point-geo'
-import { PointRadial } from './point-radial'
 import { PointWebMercator } from './point-web-mercator'
 
 export class CoordinateConversion {
-    /**
-     * Converts 2d points to radial points.  A radial point with angle 0 and radius 1 is along the 
-     * positive y axis on the 2d point and positivity goes towards the positive x axis.
-     * @param pointRadial 
-     */
-    public static convertPointRadialToPoint2d(pointRadial: PointRadial): Point2d {
-        let retVal = new Point2d();
-        retVal.y = Math.cos(pointRadial.getAngleRadians()) * pointRadial.getRadius();
-        retVal.x = Math.sin(pointRadial.getAngleRadians()) * pointRadial.getRadius();
-        return retVal;
-    }
+    public static readonly MAX_LONGITUDE: number = 180
+    public static readonly MIN_LONGITUDE: number = -180
+    public static readonly MAX_LATITUDE: number = 85
+    public static readonly MIN_LATITUDE: number = -85
 
-    /**
-     * Converts 2d points to radial points.  A radial point with angle 0 and radius 1 is along the 
-     * positive y axis on the 2d point.
-     * @param pointRadial 
-     */
-    public static convertPoint2dToPointRadial(point2d: Point2d): PointRadial {
-        let retVal = new PointRadial();
-        let radians = Math.atan(point2d.x / point2d.y);
-        if (point2d.y < 0)
-            radians += Math.PI
-        retVal.setAngleRadians(radians);
-        retVal.setRadius(Math.sqrt(point2d.x ** 2 + point2d.y ** 2));
-        return retVal;
-    }
+    private static maxMercator: BoxWebMercator | undefined
 
-    /**
-     * Returns a 2 dimensional point with respect to an observer at the origin with the negative y axis
-     * pointing to the radial point (0,0).
-     * @param point The point to convert to 2d
-     * @param origin The location of the observer
-     */
-    public static getRelativePoint2d(point: PointRadial, origin: PointRadial): Point2d {
-        let angleDiff = point.getAngleRadians() - origin.getAngleRadians();
-        let retVal = new Point2d();
-
-        // Get the divide by zero cases
-        if (angleDiff == 0) {
-            retVal.x = 0;
-            retVal.y = point.getRadius() - origin.getRadius();
-            return retVal;
-        } else if (angleDiff == Math.PI) {
-            retVal.x = 0;
-            retVal.y = -(point.getRadius() + origin.getRadius());
-            return retVal;
-        } else if (angleDiff == Math.PI / 2) {
-            retVal.x = -point.getRadius();
-            retVal.y = -origin.getRadius();
-        } else if (angleDiff == 3 * Math.PI / 2) {
-            retVal.x = point.getRadius();
-            retVal.y = -origin.getRadius();
-        }
- 
-        // Calculate the typical case
-        if (angleDiff > Math.PI) {
-            angleDiff = -(1 - angleDiff)
-        }
-
-        retVal.x = point.getRadius() * Math.sin(angleDiff)
-        retVal.y = (point.getRadius() * Math.cos(angleDiff)) - origin.getRadius()
-
-        return retVal;
-    }
- 
     /**
      * Converts the given longitude and latitude to a Web Mercator projection where the upper left is (0,0) and the lower right is (256, 256)
      * https://en.wikipedia.org/wiki/Web_Mercator_projection#Formulas
      * @param geoPoint 
      */
-    public static convertToWebMercator(geoPoint: PointGeo): PointWebMercator {
-        let newPoint = new PointWebMercator();
+    public static convertPointGeoToPointWebMercator(geoPoint: PointGeo): PointWebMercator {
+        let newPoint = new PointWebMercator()
 
-        let longitude = geoPoint.longitude * 2 * Math.PI / 360
-        newPoint.x = (256 / (2 * Math.PI)) * (longitude + Math.PI)
+        let longitude = geoPoint.longitude
+        let latitude = geoPoint.latitude
 
-        if ( geoPoint.latitude > 89 ) {
-            newPoint.y = 0;
-        } else if ( geoPoint.latitude < -89 ) {
-            newPoint.y = PointWebMercator.MAX_Y_MERCATOR;
-        } else {
-            let latitude = geoPoint.latitude * 2 * Math.PI / 360
-            newPoint.y = (256 / (2 * Math.PI)) * (Math.PI - Math.log(Math.tan((Math.PI / 4) + (latitude / 2))))
+        if ( latitude > CoordinateConversion.MAX_LATITUDE ) {
+            latitude = CoordinateConversion.MAX_LATITUDE
+        } else if ( latitude < CoordinateConversion.MIN_LATITUDE ) {
+            latitude = CoordinateConversion.MIN_LATITUDE
+        } else if ( longitude > CoordinateConversion.MAX_LONGITUDE ) {
+            longitude = CoordinateConversion.MAX_LONGITUDE
+        } else if ( longitude < CoordinateConversion.MIN_LONGITUDE ) {
+            longitude = CoordinateConversion.MIN_LONGITUDE
         }
 
-        if ( newPoint.x < 0 ) {
-            newPoint.x = 0;
-        } else if ( newPoint.x > PointWebMercator.MAX_X_MERCATOR ) {
-            newPoint.x = PointWebMercator.MAX_X_MERCATOR;
-        }
+        newPoint.x = longitude * 20037508.34 / 180
+        newPoint.y = Math.log(Math.tan((90 + latitude) * Math.PI / 360)) * (20037508.34 / Math.PI)
 
-        if ( newPoint.y < 0 ) {
-            newPoint.y = 0;
-        } else if ( newPoint.y > PointWebMercator.MAX_Y_MERCATOR ) {
-            newPoint.y = PointWebMercator.MAX_Y_MERCATOR;
-        }
-
-        return newPoint;
+        return newPoint
     }
 
     /**
      * Converts the given x,y coordinates to latitude and longitude.  Min x and y are (0,0) and max is (256, 256).
      * @param point2d 
      */
-    public static convertFromWebMercator(point2d: PointWebMercator): PointGeo {
-        let newPoint = new PointGeo();
+    public static convertPointWebMercatorToPointGeo(point2d: PointWebMercator): PointGeo {
+        let longitude = point2d.x * 180 / 20037508.34
+        let latitude = Math.atan(Math.exp(point2d.y * Math.PI / 20037508.34)) * 360 / Math.PI - 90
 
-        newPoint.longitude = point2d.x * 2 * Math.PI / 256 - Math.PI;
-        newPoint.latitude = 2 * Math.atan(Math.exp(Math.PI - ((point2d.y * 2 * Math.PI) / 256))) - Math.PI / 2;
+        if ( latitude > CoordinateConversion.MAX_LATITUDE ) {
+            latitude = CoordinateConversion.MAX_LATITUDE
+        } else if ( latitude < CoordinateConversion.MIN_LATITUDE ) {
+            latitude = CoordinateConversion.MIN_LATITUDE
+        } else if ( longitude > CoordinateConversion.MAX_LONGITUDE ) {
+            longitude = CoordinateConversion.MAX_LONGITUDE
+        } else if ( longitude < CoordinateConversion.MIN_LONGITUDE ) {
+            longitude = CoordinateConversion.MIN_LONGITUDE
+        }
 
-        newPoint.longitude = newPoint.longitude * 360 / (2 * Math.PI)
-        newPoint.latitude = newPoint.latitude * 360 / (2 * Math.PI)
+        return new PointGeo(longitude, latitude)
+    }
 
-        return newPoint;
+    private static getMaxMercator(): BoxWebMercator {
+        if ( CoordinateConversion.maxMercator === undefined ) {
+            CoordinateConversion.maxMercator = CoordinateConversion.convertBoxGeoToBoxMercator(new BoxGeo(
+                new PointGeo(CoordinateConversion.MIN_LONGITUDE, CoordinateConversion.MAX_LATITUDE),
+                new PointGeo(CoordinateConversion.MAX_LONGITUDE, CoordinateConversion.MIN_LATITUDE)))
+        }
+        return CoordinateConversion.maxMercator
+    }
+
+    public static convertPointMercatorToPoint2d(pointMercator: PointWebMercator): Point2d {
+        let maxMercator = CoordinateConversion.getMaxMercator()
+        return new Point2d(pointMercator.x, maxMercator.getTopLeft().y - pointMercator.y)
+    }
+
+    public static convertPoint2dToPointMercator(point2d: Point2d): PointWebMercator {
+        let maxMercator = CoordinateConversion.getMaxMercator()
+        return new PointWebMercator(point2d.x, maxMercator.getTopLeft().y - point2d.y)
     }
 
     public static convertBoxMercatorToBoxGeo(boxMercator: BoxWebMercator): BoxGeo {
-        let boxGeo = new BoxGeo(CoordinateConversion.convertFromWebMercator(boxMercator.getTopLeft()),
-            CoordinateConversion.convertFromWebMercator(boxMercator.getBottomRight()));
+        let boxGeo = new BoxGeo(CoordinateConversion.convertPointWebMercatorToPointGeo(boxMercator.getTopLeft()),
+            CoordinateConversion.convertPointWebMercatorToPointGeo(boxMercator.getBottomRight()));
         return boxGeo;
     }
 
+    public static convertBoxMercatorToBox2d(boxMercator: BoxWebMercator): Box2d {
+        let topLeft = CoordinateConversion.convertPointMercatorToPoint2d(boxMercator.getTopLeft())
+        let bottomRight = CoordinateConversion.convertPointMercatorToPoint2d(boxMercator.getBottomRight())
+        return new Box2d(topLeft.x, topLeft.y, bottomRight.x, bottomRight.y)
+    }
+
+    public static convertBox2dToBoxMercator(box2d: Box2d): BoxWebMercator {
+        let topLeft = CoordinateConversion.convertPoint2dToPointMercator(box2d.getUpperLeft())
+        let bottomRight = CoordinateConversion.convertPoint2dToPointMercator(box2d.getLowerRight())
+        return new BoxWebMercator(topLeft.x, topLeft.y, bottomRight.x, bottomRight.y)
+    }
+
     /**
-     * Assumes the 2d box is actually web mercator coordinates
+     * Assumes the 2d box is actually web mercator coordinates with origin in the upper left
      * @param boxMercator 
      */
     public static convertBox2dToBoxGeo(box2d: Box2d): BoxGeo {
-        let ul = box2d.getUpperLeft();
-        let lr = box2d.getLowerRight();
-        let boxMercator = new BoxWebMercator(ul.x, ul.y, lr.x, lr.y);
-        return this.convertBoxMercatorToBoxGeo(boxMercator);
+        return this.convertBoxMercatorToBoxGeo(this.convertBox2dToBoxMercator(box2d));
     }
 
     public static convertBoxGeoToBoxMercator(boxGeo: BoxGeo): BoxWebMercator {
-        let topLeft = CoordinateConversion.convertToWebMercator(boxGeo.getTopLeft());
-        let bottomRight = CoordinateConversion.convertToWebMercator(boxGeo.getBottomRight());
+        let topLeft = CoordinateConversion.convertPointGeoToPointWebMercator(boxGeo.getTopLeft());
+        let bottomRight = CoordinateConversion.convertPointGeoToPointWebMercator(boxGeo.getBottomRight());
         let boxMercator = new BoxWebMercator(topLeft.x, topLeft.y, bottomRight.x, bottomRight.y);
         return boxMercator;
     }

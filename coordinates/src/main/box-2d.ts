@@ -1,5 +1,8 @@
 import { Point2d } from './point-2d'
 
+/**
+ * Display coordinates.  Upper left is (0,0)
+ */
 export class Box2d {
     private upperLeft: Point2d;
     private lowerRight: Point2d;
@@ -17,10 +20,10 @@ export class Box2d {
     }
 
     /**
-     * Returns the union of the two boxes.  An real number range is allowed.
+     * Returns the intersection of the two boxes.  An real number range is allowed.
      * @param o 
      */
-    public union(o: Box2d): Box2d | null {
+    public intersection(o: Box2d): Box2d | null {
         let newBox = new Box2d();
         newBox.upperLeft.x = Math.max(this.upperLeft.x, o.upperLeft.x);
         newBox.upperLeft.y = Math.max(this.upperLeft.y, o.upperLeft.y);
@@ -42,7 +45,15 @@ export class Box2d {
         return this.lowerRight;
     }
 
+    public getWidth(): number {
+        return this.lowerRight.x - this.upperLeft.x
+    }
+
+    public getHeight(): number {
+        return this.lowerRight.y - this.upperLeft.y
+    }
+
     public getDimensions(): Point2d {
-        return new Point2d(this.lowerRight.x - this.upperLeft.x, this.lowerRight.y - this.upperLeft.y);
+        return new Point2d(this.getWidth(), this.getHeight());
     }
 }
