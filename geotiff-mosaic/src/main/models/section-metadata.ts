@@ -6,5 +6,7 @@ export class SectionMetadata {
     public tileWidth: number | undefined
     public version: string | undefined
     public imageWidth: number | undefined
+    public imageWidthScale: number | undefined
     public imageHeight: number | undefined
+    public imageHeightScale: number | undefined
 }

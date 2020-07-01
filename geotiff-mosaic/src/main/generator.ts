@@ -167,13 +167,19 @@ export class Generator {
 
         // Draw the background onto it
         let shadowImage = await loadImage("./data/world-shadow.png") // TODO: replace the world shadow with another image, preferably higher resolution
-        let percentageMultiplier = shadowImage.width / PointWebMercator.MAX_X_MERCATOR
+        let entireAreaBoxGeo = new BoxGeo(
+            new PointGeo(CoordinateConversion.MIN_LONGITUDE, CoordinateConversion.MAX_LATITUDE),
+            new PointGeo(CoordinateConversion.MAX_LONGITUDE, CoordinateConversion.MIN_LATITUDE))
+        let entireAreaBoxMercator = CoordinateConversion.convertBoxGeoToBoxMercator(entireAreaBoxGeo)
+        let entireAreaBox2d = CoordinateConversion.convertBoxMercatorToBox2d(entireAreaBoxMercator)
+        let tileExtent2d = CoordinateConversion.convertBoxMercatorToBox2d(tile.tileExtent)
+        let percentageMultiplier = shadowImage.width / entireAreaBoxMercator.getWidth()
 
         context.drawImage(shadowImage, 
-            tile.tileExtent.getTopLeft().x * percentageMultiplier,
-            tile.tileExtent.getTopLeft().y * percentageMultiplier,
-            (tile.tileExtent.getBottomRight().x - tile.tileExtent.getTopLeft().x) * percentageMultiplier,
-            (tile.tileExtent.getBottomRight().y - tile.tileExtent.getTopLeft().y) * percentageMultiplier,
+            (tileExtent2d.getUpperLeft().x - entireAreaBox2d.getUpperLeft().x) * percentageMultiplier,
+            (tileExtent2d.getUpperLeft().y - entireAreaBox2d.getUpperLeft().y) * percentageMultiplier,
+            tileExtent2d.getWidth() * percentageMultiplier,
+            tileExtent2d.getHeight() * percentageMultiplier,
             0, 0, tile.widthPixels, tile.heightPixels)
 
         // Draw each image onto the bitmap in the correct position
@@ -184,15 +190,15 @@ export class Generator {
             // For each image, load the image off the path and draw it on the parent tile
             for ( let j = 0; j < subTileImagePaths.length; j++ ) {
                 let image = await loadImage(subTileImagePaths[j])
-                let destinationExtent = subTileExtents[j]
+                let destinationExtent2d = subTileExtents[j]
 
                 context.drawImage(
                     image, 
                     0, 0, image.naturalWidth, image.naturalHeight,
-                    Math.floor(destinationExtent.getUpperLeft().x), 
-                    Math.floor(destinationExtent.getUpperLeft().y), 
-                    Math.ceil(destinationExtent.getLowerRight().x - destinationExtent.getUpperLeft().x), 
-                    Math.ceil(destinationExtent.getLowerRight().y - destinationExtent.getUpperLeft().y))
+                    Math.floor(destinationExtent2d.getUpperLeft().x), 
+                    Math.floor(destinationExtent2d.getUpperLeft().y), 
+                    Math.ceil(destinationExtent2d.getWidth()), 
+                    Math.ceil(destinationExtent2d.getHeight()))
             }
         }
 

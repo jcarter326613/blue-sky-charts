@@ -2,29 +2,8 @@
     "sections": {
         "alaska": {
             "subMaps": [
-                "Cape_Lisburne",
                 "Point_Barrow",
-                "Nome",
-                "Fairbanks",
-                "Dawson",
-                "Bethel",
-                "McGrath",
-                "Anchorage",
-                "Seward",
-                "Whitehorse",
-                "Kodiak",
-                "Juneau",
-                "Dutch_Harbor",
-                "Cold_Bay",
-                "Ketchikan"
-            ]
-        },
-        "usa48": {
-            "subMaps": [
-                "Seattle",
-                "Great_Falls",
-                "Billings",
-                "Twin_Cities"
+                "Fairbanks"
             ]
         }
     }

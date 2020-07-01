@@ -36,9 +36,9 @@ export class TileQueue {
                 // Get the mercator extents for this zoom level
                 let tileExtent = new BoxWebMercator(
                     extentsMercator.getTopLeft().x + x * (extentsMercator.getWidth() / tilesAcross), 
-                    extentsMercator.getTopLeft().y + y * (extentsMercator.getHeight() / tilesAcross),
+                    extentsMercator.getBottomRight().y + (y+1) * (extentsMercator.getHeight() / tilesAcross),
                     extentsMercator.getTopLeft().x + (x+1) * (extentsMercator.getWidth() / tilesAcross),
-                    extentsMercator.getTopLeft().y + (y+1) * (extentsMercator.getHeight() / tilesAcross))
+                    extentsMercator.getBottomRight().y + y * (extentsMercator.getHeight() / tilesAcross))
 
                 // Get the sections that overlap that extent
                 let overlaps: Array<SubMapDescription> = []
@@ -54,7 +54,20 @@ export class TileQueue {
                     }
 
                     let sectionExtentMercator = CoordinateConversion.convertBoxGeoToBoxMercator(sectionExtentGeo)
-                    let sectionOverlapMercator = sectionExtentMercator.union(tileExtent)
+                    /*
+                    if ( section.imageWidthScale !== undefined ) {
+                        let newWidth = sectionExtentMercator.getWidth() * section.imageWidthScale
+                        let topLeft = sectionExtentMercator.getTopLeft()
+                        sectionExtentMercator = new BoxWebMercator(topLeft.x, topLeft.y, 
+                            topLeft.x + newWidth, sectionExtentMercator.getBottomRight().y)
+                    }
+                    if ( section.imageHeightScale !== undefined ) {
+                        let newHeight = sectionExtentMercator.getHeight() * section.imageHeightScale
+                        let topLeft = sectionExtentMercator.getTopLeft()
+                        sectionExtentMercator = new BoxWebMercator(topLeft.x, topLeft.y, 
+                            sectionExtentMercator.getBottomRight().x, topLeft.y + newHeight)
+                    }*/
+                    let sectionOverlapMercator = sectionExtentMercator.intersection(tileExtent)
                     if ( sectionOverlapMercator != null && sectionOverlapMercator.getWidth() > 0 && sectionOverlapMercator.getHeight() > 0 ) {
                         let subMapDescription = new SubMapDescription(sectionName, sectionExtentMercator, section.maxZoom, 
                             section.tileWidth, section.version)
