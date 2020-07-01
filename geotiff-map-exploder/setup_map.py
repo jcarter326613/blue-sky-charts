@@ -21,9 +21,10 @@ TILE_WIDTH = 256
 
 use_defaults = False
 default_map = ""
-if len(sys.argv) == 3 and sys.argv[1] == "-use-defaults":
+if len(sys.argv) == 4 and sys.argv[1] == "-use-defaults":
     use_defaults = True
     default_map = sys.argv[2]
+    default_version = sys.argv[3]
     
 def getExtent(projectionType, src, geom):
     geom_lat_long = rasterio.warp.transform_geom(
@@ -85,15 +86,14 @@ else:
     map_name = sys.stdin.readline().strip()
 
 map_inventory = mi.read_inventory_metadata()
-version = None
-if map_name in map_inventory:
-    map_definition = map_inventory[map_name]
-    if "version" in map_definition:
-        version = int(map_definition["version"])
-else:
+
+if map_name not in map_inventory:
     map_inventory[map_name] = {}
 
+# Get the version we want to process
+version = None
 if use_defaults:
+    version = default_version
     if version <= 0:
         print("error, no defautl version")
         exit(1)
@@ -101,9 +101,6 @@ if use_defaults:
     version_requested = "{}".format(version)
 else:
     version_question = "What version?"
-    if version != None:
-        version_question += " ({})".format(version)
-
     print(version_question)
     version_requested = sys.stdin.readline().strip()
 
@@ -113,8 +110,21 @@ if version_requested == None or len(version_requested) == 0:
         exit()
 else:
     version = int(version_requested)
-map_inventory[map_name]["version"] = version
-map_inventory[map_name]["tileWidth"] = TILE_WIDTH
+if "versions" not in map_inventory[map_name]:
+    map_inventory[map_name]["versions"] = {}
+if version not in map_inventory[map_name]["versions"]:
+    map_inventory[map_name]["versions"][version] = {}
+map_version_metadata = map_inventory[map_name]["versions"][version]
+map_version_metadata["tileWidth"] = TILE_WIDTH
+mi.write_inventory_metadata(map_inventory)
+
+# Get the effective date
+print("What is the effective date? (YYYY-MM-DD)")
+if "effectiveDate" in map_version_metadata:
+    effective_date = map_version_metadata["effectiveDate"]
+    print("({})".format(effective_date))
+effective_date = sys.stdin.readline().strip()
+map_version_metadata["effectiveDate"] = effective_date
 mi.write_inventory_metadata(map_inventory)
 
 # Download the zip file and extract it
@@ -136,12 +146,12 @@ web_tiff_path = gdal_util.convert_tiff_to_web_mercator(tif_file)
 
 # Define the crop area
 if default_map:
-    map_bounds = map_inventory[map_name]["mapBounds"]
+    map_bounds = map_version_metadata["mapBounds"]
 else:
     existing_bounds = None
-    if "mapBounds" in map_inventory[map_name]:
+    if "mapBounds" in map_version_metadata:
         with rasterio.open(web_tiff_path) as src:
-            existing_bounds = map_inventory[map_name]["mapBounds"]
+            existing_bounds = map_version_metadata["mapBounds"]
             for i in range(len(existing_bounds)):
                 bound = existing_bounds[i]
                 outProj = Proj(src.crs.to_proj4())
@@ -161,7 +171,7 @@ else:
                 map_bounds[i] = transform(inProj,outProj, meterX, meterY)
                 map_bounds[i] = [map_bounds[i][1], map_bounds[i][0]]
         map_bounds.append(map_bounds[0])
-        map_inventory[map_name]["mapBounds"] = map_bounds
+        map_version_metadata["mapBounds"] = map_bounds
         mi.write_inventory_metadata(map_inventory)
     else:
         print("No bounds given.")
@@ -204,10 +214,10 @@ with rasterio.open(cropped_tiff_path) as src:
             if file_extent["bottomRight"]["longitude"] < new_extent["bottomRight"]["longitude"]:
                 file_extent["bottomRight"]["longitude"] = new_extent["bottomRight"]["longitude"]
                 file_extent["topRight"]["longitude"] = new_extent["bottomRight"]["longitude"]
-    map_inventory[map_name]["fileExtent"] = file_extent
-    map_inventory[map_name]["imageWidth"] = src.width
-    map_inventory[map_name]["imageHeight"] = src.height
-    map_inventory[map_name]["maxZoom"] = math.ceil(math.log2(src.width / TILE_WIDTH))
+    map_version_metadata["fileExtent"] = file_extent
+    map_version_metadata["imageWidth"] = src.width
+    map_version_metadata["imageHeight"] = src.height
+    map_version_metadata["maxZoom"] = math.ceil(math.log2(src.width / TILE_WIDTH))
 mi.write_inventory_metadata(map_inventory)
 
 # Cleanup intermediate files
