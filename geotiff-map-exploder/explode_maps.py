@@ -17,7 +17,7 @@ from tqdm import tqdm
 
 def _explode_map_helper(image_cache_folder, zoom_level, original_image, original_image_dimensions, this_xy, tile_width, max_zoom, zoom_restriction):
     # Check if we've zoomed far enough
-    if zoom_level > max_zoom or zoom_level > zoom_restriction:
+    if zoom_level > max_zoom or (zoom_restriction != None and zoom_level > zoom_restriction):
         return
 
     if zoom_restriction is None or zoom_restriction == zoom_level:
