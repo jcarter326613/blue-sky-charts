@@ -1,6 +1,7 @@
 
 import { readFileSync, writeFileSync, existsSync, mkdirSync } from 'fs'
 import { execSync } from 'child_process'
+import { exit } from "process"
 import { createCanvas, loadImage } from 'canvas'
 import { Config } from './models/config'
 import { SectionMetadata } from './models/section-metadata'
@@ -8,8 +9,6 @@ import { TileQueue } from './tile-queue'
 import { TileCache } from './tile-cache'
 import { TileDescription } from './tile-description'
 import { BoxGeo, CoordinateConversion, PointWebMercator, BoxWebMercator, PointGeo } from 'coordinates'
-import { FileExtent } from './models/file-extent'
-import { PointGeoModel } from './models/point-geo-model'
 import { Conversion } from './models/conversion'
 
 export class Generator {
@@ -138,7 +137,8 @@ export class Generator {
                 sectionMetadata.fileExtent.topLeft.latitude === undefined || sectionMetadata.fileExtent.topLeft.longitude === undefined ||
                 sectionMetadata.fileExtent.bottomRight === undefined || 
                 sectionMetadata.fileExtent.bottomRight.latitude === undefined || sectionMetadata.fileExtent.bottomRight.longitude === undefined ) {
-                continue
+                console.error(`Error loading map ${sectionName} from metadata.json`)
+                exit(1)
             }
 
             if ( endLatitude === undefined || sectionMetadata.fileExtent.topLeft.latitude > endLatitude ) {

@@ -1,7 +1,6 @@
 import { Box2d, BoxWebMercator, PointWebMercator, Point2d, CoordinateConversion } from "coordinates";
 import { SubMapDescription } from './sub-map-description'
 import { TileCache } from "./tile-cache";
-import { exit } from "process";
 
 export class TileDescription {
     public static readonly TILE_DIMENSIONS_PIXELS = 1024
