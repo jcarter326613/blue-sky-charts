@@ -112,9 +112,9 @@ else:
     version = int(version_requested)
 if "versions" not in map_inventory[map_name]:
     map_inventory[map_name]["versions"] = {}
-if version not in map_inventory[map_name]["versions"]:
-    map_inventory[map_name]["versions"][version] = {}
-map_version_metadata = map_inventory[map_name]["versions"][version]
+if str(version) not in map_inventory[map_name]["versions"]:
+    map_inventory[map_name]["versions"][str(version)] = {}
+map_version_metadata = map_inventory[map_name]["versions"][str(version)]
 map_version_metadata["tileWidth"] = TILE_WIDTH
 mi.write_inventory_metadata(map_inventory)
 
@@ -123,7 +123,9 @@ print("What is the effective date? (YYYY-MM-DD)")
 if "effectiveDate" in map_version_metadata:
     effective_date = map_version_metadata["effectiveDate"]
     print("({})".format(effective_date))
-effective_date = sys.stdin.readline().strip()
+effective_date_request = sys.stdin.readline().strip()
+if effective_date_request != None and len(effective_date_request) > 0:
+    effective_date = effective_date_request
 map_version_metadata["effectiveDate"] = effective_date
 mi.write_inventory_metadata(map_inventory)
 

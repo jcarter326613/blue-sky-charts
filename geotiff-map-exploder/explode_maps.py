@@ -62,13 +62,13 @@ def explode_map(name, definition, image_cache_folder, image_location, tile_width
 
     _explode_map_helper(image_cache_folder, 0, image, (image.width, image.height), (0, 0), tile_width, max_zoom, zoom_restriction)
 
-def explode_maps(map_name, location_name, zoom_restriction):
+def explode_maps(map_name, version, location_name, zoom_restriction):
     if location_name not in ["local", "remote", "relative"]:
         print("bad location")
         exit()
 
     inventory = mi.read_inventory_metadata()
-    map_definition = inventory[map_name]
+    map_definition = inventory[map_name]["versions"][version]
 
     if "tileWidth" not in map_definition:
         print("Missing tile width for map " + map_name)
@@ -76,8 +76,8 @@ def explode_maps(map_name, location_name, zoom_restriction):
 
     tile_width = map_definition["tileWidth"]
     max_zoom = map_definition["maxZoom"]
-    image_path = "maps/{}_SEC_{}_WEB_CROPPED.tif".format(map_name, map_definition["version"])
-    image_cache_folder = "maps/tiles/{}_SEC_{}".format(map_name, map_definition["version"])
+    image_path = "maps/{}_SEC_{}_WEB_CROPPED.tif".format(map_name, version)
+    image_cache_folder = "maps/tiles/{}_SEC_{}".format(map_name, version)
     if os.path.exists("maps/tiles"):
         os.system("rm -rf maps/tiles")
     os.makedirs(image_cache_folder)
@@ -91,11 +91,11 @@ def explode_maps(map_name, location_name, zoom_restriction):
         os.system("aws s3 sync ./maps/tiles s3://blueskycharts.com/maps/world-vfr/sectional")
     #os.system("rm -f {}*".format(png_image_path))
 
-if len(sys.argv) not in [3,4]:
-    print("Usage python3 explode_maps.py <mapname> <local|remote> (<zoom_restriction>)")
+if len(sys.argv) not in [4,5]:
+    print("Usage python3 explode_maps.py <mapname> <version> <local|remote> (<zoom_restriction>)")
     exit()
     
 zoom_restriction = None
-if len(sys.argv) == 4:
-    zoom_restriction = int(sys.argv[3])
-explode_maps(sys.argv[1], sys.argv[2], zoom_restriction)
+if len(sys.argv) == 5:
+    zoom_restriction = int(sys.argv[4])
+explode_maps(sys.argv[1], sys.argv[2], sys.argv[3], zoom_restriction)
