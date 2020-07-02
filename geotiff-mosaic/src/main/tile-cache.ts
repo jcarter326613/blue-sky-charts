@@ -28,7 +28,7 @@ export class TileCache {
             execSync(`python3 ../geotiff-map-exploder/setup_map.py -use-defaults ${subMapDescription.name}`)
         }
         console.log(`Exploding map ${subMapDescription.name}`)
-        execSync(`python3 ../geotiff-map-exploder/explode_maps.py ${subMapDescription.name} relative ${targetZoom}`)
+        execSync(`python3 ../geotiff-map-exploder/explode_maps.py ${subMapDescription.name} ${subMapDescription.version} relative ${targetZoom}`)
         console.log(`Explosion complete. Cleaning up.`)
         execSync(`mv ./maps/tiles/* ./maps/cache`)
         execSync(`rm -rf ./maps/tiles`)

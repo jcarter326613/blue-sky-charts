@@ -3,7 +3,9 @@ import { BoxGeo, CoordinateConversion, PointGeo, Point2d, BoxWebMercator } from 
 import { Conversion } from './models/conversion'
 import { exit } from 'process'
 import { Heap } from 'ts-heap'
-import { SectionMetadata } from './models/section-metadata'
+import { MetadataManager } from './metadata-manager'
+import { SectionVersion } from './models/section-version'
+import { SectionVersionList } from './models/section-version-list'
 import { TileDescription } from './tile-description'
 import { SubMapDescription } from './sub-map-description'
 import { TileCache } from './tile-cache'
@@ -11,7 +13,9 @@ import { TileCache } from './tile-cache'
 export class TileQueue {
     private queue: Heap<TileDescription>
 
-    public constructor (maps: Array<string>, metadata: Record<string, SectionMetadata>, tileCache: TileCache, zoom: number) {
+    public constructor (maps: Array<string>, metadata: Record<string, SectionVersion>, metadataManager: MetadataManager,
+        tileCache: TileCache, zoom: number) {
+
         // Load all the configs for each map and determine the mosaic rectangular extents
         let extents = this.getExtents(maps, metadata)
         let extentsMercator = CoordinateConversion.convertBoxGeoToBoxMercator(extents)
@@ -54,19 +58,6 @@ export class TileQueue {
                     }
 
                     let sectionExtentMercator = CoordinateConversion.convertBoxGeoToBoxMercator(sectionExtentGeo)
-                    /*
-                    if ( section.imageWidthScale !== undefined ) {
-                        let newWidth = sectionExtentMercator.getWidth() * section.imageWidthScale
-                        let topLeft = sectionExtentMercator.getTopLeft()
-                        sectionExtentMercator = new BoxWebMercator(topLeft.x, topLeft.y, 
-                            topLeft.x + newWidth, sectionExtentMercator.getBottomRight().y)
-                    }
-                    if ( section.imageHeightScale !== undefined ) {
-                        let newHeight = sectionExtentMercator.getHeight() * section.imageHeightScale
-                        let topLeft = sectionExtentMercator.getTopLeft()
-                        sectionExtentMercator = new BoxWebMercator(topLeft.x, topLeft.y, 
-                            sectionExtentMercator.getBottomRight().x, topLeft.y + newHeight)
-                    }*/
                     let sectionOverlapMercator = sectionExtentMercator.intersection(tileExtent)
                     if ( sectionOverlapMercator != null && sectionOverlapMercator.getWidth() > 0 && sectionOverlapMercator.getHeight() > 0 ) {
                         let subMapDescription = new SubMapDescription(sectionName, sectionExtentMercator, section.maxZoom, 
@@ -91,7 +82,7 @@ export class TileQueue {
         return this.queue.pop()
     }
 
-    private getExtents(subMaps: string[], subSectionMetadata: Record<string, SectionMetadata>): BoxGeo {
+    private getExtents(subMaps: string[], subSectionMetadata: Record<string, SectionVersion>): BoxGeo {
         let maxLatitude: number | undefined
         let maxLongitude: number | undefined
         let minLatitude: number | undefined

@@ -4,12 +4,14 @@ import { execSync } from 'child_process'
 import { exit } from "process"
 import { createCanvas, loadImage } from 'canvas'
 import { Config } from './models/config'
-import { SectionMetadata } from './models/section-metadata'
+import { SectionVersion } from './models/section-version'
+import { SectionVersionList } from './models/section-version-list'
 import { TileQueue } from './tile-queue'
 import { TileCache } from './tile-cache'
 import { TileDescription } from './tile-description'
 import { BoxGeo, CoordinateConversion, PointWebMercator, BoxWebMercator, PointGeo } from 'coordinates'
 import { Conversion } from './models/conversion'
+import { MetadataManager } from './metadata-manager'
 
 export class Generator {
     private MAP_CONFIGURATION_FILE = "./data/config.json"
@@ -17,6 +19,7 @@ export class Generator {
     private OUTPUT_DIRECTORY = "./output"
 
     public async generateMosaics(): Promise<void> {
+        let metadataManager = new MetadataManager()
         let mosaicVersion = (new Date()).toISOString().replace(/\..+/, "").replace(":", "-").replace(":", "-")
 
         // Load the configuration
@@ -32,7 +35,8 @@ export class Generator {
         // Load the map subsection metadata
         let subsectionMetaFile = this.SUBSECTION_META_FILE
         rawdata = readFileSync(subsectionMetaFile)
-        let subSectionMetadata: Record<string, SectionMetadata> = JSON.parse(rawdata.toString())
+        let subSectionVersions: Record<string, SectionVersionList> = JSON.parse(rawdata.toString())
+        let subSectionMetadata = metadataManager.extractCurrentVersions(subSectionVersions)
 
         // Delete the output directory
         if (existsSync("./output")) {
@@ -40,7 +44,7 @@ export class Generator {
         }
         
         // For each mosaic image to make
-        let newSubSectionMetadata: Record<string, SectionMetadata> = {}
+        let newSubSectionMetadata: Record<string, SectionVersionList> = {}
         for ( let imageConfigurationName in configuration.sections ) {
             let imageConfiguration = configuration.sections[imageConfigurationName]
             if ( imageConfiguration.subMaps === undefined ) {
@@ -81,7 +85,7 @@ export class Generator {
             }
 
             // Start setting up the metadata for the mosaic tile
-            let newSectionData = new SectionMetadata()
+            let newSectionData = new SectionVersion()
             newSectionData.maxZoom = maxZoom
             newSectionData.tileWidth = TileDescription.TILE_DIMENSIONS_PIXELS
             newSectionData.version = mosaicVersion
@@ -92,7 +96,7 @@ export class Generator {
 
                 // Create a lookup of all the tiles to generate and which sections are needed to create them
                 let tileCache = new TileCache()
-                let tileQueue = new TileQueue(imageConfiguration.subMaps, subSectionMetadata, tileCache, zoom)
+                let tileQueue = new TileQueue(imageConfiguration.subMaps, subSectionMetadata, metadataManager, tileCache, zoom)
     
                 // For each tile to generate, sorted in order of the alphabetical order of dependents
                 while ( tileQueue.hasNext() ) {
@@ -110,13 +114,16 @@ export class Generator {
 
                     // Compose the tile with world map drawn first, then each section in alphabetical order
                     await this.createTile(tile, imageConfigurationName, mosaicVersion)
-                } 
+                }
 
                 tileCache.dispose()
             }
 
             // Save the metadata for this new tile
-            newSubSectionMetadata[imageConfigurationName] = newSectionData
+            let versionList = new SectionVersionList()
+            versionList.versions = {}
+            versionList.versions[newSectionData.version] = newSectionData
+            newSubSectionMetadata[imageConfigurationName] = versionList
         }
 
         // Write out the new metadata
@@ -124,7 +131,7 @@ export class Generator {
         writeFileSync("./output/metadata.json", newMetadataString)
     }
 
-    private getMosaicExtentsMercator(imageConfiguration: string[], subSectionMetadata: Record<string, SectionMetadata>): BoxWebMercator {
+    private getMosaicExtentsMercator(imageConfiguration: string[], subSectionMetadata: Record<string, SectionVersion>): BoxWebMercator {
         let startLatitude: number | undefined
         let endLatitude: number | undefined
         let startLongtude: number | undefined

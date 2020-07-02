@@ -1,6 +1,7 @@
 import { FileExtent } from './file-extent'
 
-export class SectionMetadata {
+export class SectionVersion {
+    public effectiveDate: string | undefined
     public fileExtent: FileExtent | undefined
     public maxZoom: number | undefined
     public tileWidth: number | undefined
