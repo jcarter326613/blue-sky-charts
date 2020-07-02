@@ -17,12 +17,19 @@ export class SubMapDescription {
 
     public getZoomForResolution(pixelsPerMercator: number): number {
         // Get the zoom level that means we are equal or greater resolution
+        let zoom: number;
         if ( this.extent.getHeight() > this.extent.getWidth() ) {
             let extentHeight = this.extent.getHeight()
-            return Math.ceil(Math.log2(extentHeight * pixelsPerMercator / this.tileWidth))
+            zoom = Math.ceil(Math.log2(extentHeight * pixelsPerMercator / this.tileWidth))
         } else {
             let extentWidth = this.extent.getWidth()
-            return Math.ceil(Math.log2(extentWidth * pixelsPerMercator / this.tileWidth))
+            zoom = Math.ceil(Math.log2(extentWidth * pixelsPerMercator / this.tileWidth))
         }
+
+        if ( zoom < 0 ) {
+            zoom = 0
+        }
+
+        return zoom
     }
 }

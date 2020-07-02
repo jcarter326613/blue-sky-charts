@@ -55,35 +55,39 @@ export class Generator {
 
             // Figure out the max zoom
             let maxZoom: number | undefined
-            let mosaicExtentsMercator = this.getMosaicExtentsMercator(imageConfiguration.subMaps, subSectionMetadata)
-            for ( let subTileName of imageConfiguration.subMaps ) {
-                // Get the max resolution of the sub map
-                let metadata = subSectionMetadata[subTileName]
-                if ( metadata.imageHeight === undefined || metadata.imageWidth === undefined || 
-                    metadata.tileWidth === undefined || metadata.maxZoom === undefined || metadata.fileExtent === undefined) {
+            if ( imageConfiguration.maxZoom === undefined ) {
+                let mosaicExtentsMercator = this.getMosaicExtentsMercator(imageConfiguration.subMaps, subSectionMetadata)
+                for ( let subTileName of imageConfiguration.subMaps ) {
+                    // Get the max resolution of the sub map
+                    let metadata = subSectionMetadata[subTileName]
+                    if ( metadata.imageHeight === undefined || metadata.imageWidth === undefined || 
+                        metadata.tileWidth === undefined || metadata.maxZoom === undefined || metadata.fileExtent === undefined) {
+                        continue
+                    }
+                    let extentsBoxGeo = Conversion.convertFileExtentToBoxGeo(metadata.fileExtent)
+                    if ( extentsBoxGeo === undefined ) {
+                        continue
+                    }
+                    let extentsMercator = CoordinateConversion.convertBoxGeoToBoxMercator(extentsBoxGeo)
+                    let multiplier = 1
+                    if ( metadata.imageHeight > metadata.imageWidth ) {
+                        multiplier = metadata.imageWidth / metadata.imageHeight
+                    }
+                    let maxZoomPixelWidth = metadata.tileWidth * multiplier * (2 ** metadata.maxZoom)
+                    let maxZoomResolution = maxZoomPixelWidth / extentsMercator.getWidth()
+                    
+                    // Get the corresponding zoom for the large tile
+                    let targetPixelWidth = maxZoomResolution * mosaicExtentsMercator.getWidth()
+                    let targetZoom = Math.ceil(Math.log2(targetPixelWidth / TileDescription.TILE_DIMENSIONS_PIXELS))
+                    if ( maxZoom === undefined || maxZoom > targetZoom ) {
+                        maxZoom = targetZoom
+                    }
+                }
+                if ( maxZoom === undefined ) {
                     continue
                 }
-                let extentsBoxGeo = Conversion.convertFileExtentToBoxGeo(metadata.fileExtent)
-                if ( extentsBoxGeo === undefined ) {
-                    continue
-                }
-                let extentsMercator = CoordinateConversion.convertBoxGeoToBoxMercator(extentsBoxGeo)
-                let multiplier = 1
-                if ( metadata.imageHeight > metadata.imageWidth ) {
-                    multiplier = metadata.imageWidth / metadata.imageHeight
-                }
-                let maxZoomPixelWidth = metadata.tileWidth * multiplier * (2 ** metadata.maxZoom)
-                let maxZoomResolution = maxZoomPixelWidth / extentsMercator.getWidth()
-                
-                // Get the corresponding zoom for the large tile
-                let targetPixelWidth = maxZoomResolution * mosaicExtentsMercator.getWidth()
-                let targetZoom = Math.ceil(Math.log2(targetPixelWidth / TileDescription.TILE_DIMENSIONS_PIXELS))
-                if ( maxZoom === undefined || maxZoom > targetZoom ) {
-                    maxZoom = targetZoom
-                }
-            }
-            if ( maxZoom === undefined ) {
-                continue
+            } else {
+                maxZoom = imageConfiguration.maxZoom
             }
 
             // Start setting up the metadata for the mosaic tile
