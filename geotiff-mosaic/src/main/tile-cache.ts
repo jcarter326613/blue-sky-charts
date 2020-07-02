@@ -25,7 +25,7 @@ export class TileCache {
         let pngFilePath = `./maps/${subMapDescription.name}_SEC_${subMapDescription.version}_WEB_CROPPED_RGB.png`
         if ( !existsSync(pngFilePath) ) {
             console.log(`Setting up map ${subMapDescription.name}`)
-            execSync(`python3 ../geotiff-map-exploder/setup_map.py -use-defaults ${subMapDescription.name}`)
+            execSync(`python3 ../geotiff-map-exploder/setup_map.py -use-defaults ${subMapDescription.name} ${subMapDescription.version}`)
         }
         console.log(`Exploding map ${subMapDescription.name}`)
         execSync(`python3 ../geotiff-map-exploder/explode_maps.py ${subMapDescription.name} ${subMapDescription.version} relative ${targetZoom}`)
