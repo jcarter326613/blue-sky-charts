@@ -271,7 +271,11 @@ export class Generator {
         if (!existsSync(areaDirectory)){
             mkdirSync(areaDirectory);
         }
-        let zoomDirectory = `${areaDirectory}/${tile.zoom}`
+        let versionDirectory = `${areaDirectory}/${mapVersion}`
+        if (!existsSync(versionDirectory)){
+            mkdirSync(versionDirectory);
+        }
+        let zoomDirectory = `${versionDirectory}/${tile.zoom}`
         if (!existsSync(zoomDirectory)){
             mkdirSync(zoomDirectory);
         }
