@@ -17,7 +17,8 @@
                 "Dutch_Harbor",
                 "Cold_Bay",
                 "Ketchikan"
-            ]
+            ],
+            "maxZoom": 5
         },
         "usa48": {
             "subMaps": [
@@ -58,12 +59,14 @@
                 "Jacksonville",
                 "Brownsville",
                 "Miami"
-            ]
+            ],
+            "maxZoom": 5
         },
         "hawaii": {
             "subMaps": [
                 "Hawaiian_Islands"
-            ]
+            ],
+            "maxZoom": 5
         }
     }
 }
