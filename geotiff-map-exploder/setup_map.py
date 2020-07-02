@@ -24,7 +24,7 @@ default_map = ""
 if len(sys.argv) == 4 and sys.argv[1] == "-use-defaults":
     use_defaults = True
     default_map = sys.argv[2]
-    default_version = sys.argv[3]
+    default_version = int(sys.argv[3])
     
 def getExtent(projectionType, src, geom):
     geom_lat_long = rasterio.warp.transform_geom(
