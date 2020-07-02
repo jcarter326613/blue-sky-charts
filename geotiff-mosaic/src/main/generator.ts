@@ -268,7 +268,7 @@ export class Generator {
         if (!existsSync(this.OUTPUT_DIRECTORY)){
             mkdirSync(this.OUTPUT_DIRECTORY);
         }
-        let areaDirectory = `${this.OUTPUT_DIRECTORY}/${mapName}_${mapVersion}`
+        let areaDirectory = `${this.OUTPUT_DIRECTORY}/${mapName}`
         if (!existsSync(areaDirectory)){
             mkdirSync(areaDirectory);
         }
