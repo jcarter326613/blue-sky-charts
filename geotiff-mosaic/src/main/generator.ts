@@ -20,9 +20,11 @@ export class Generator {
     private OUTPUT_DIRECTORY = "./output"
 
     public async generateMosaics(): Promise<void> {
-        if (!existsSync(this.OUTPUT_DIRECTORY)){
-            mkdirSync(this.OUTPUT_DIRECTORY);
+        // Clean the output directory
+        if (existsSync(this.OUTPUT_DIRECTORY)) {
+            execSync(`rm -rf ${this.OUTPUT_DIRECTORY}`)
         }
+        mkdirSync(this.OUTPUT_DIRECTORY);
 
         let metadataManager = new MetadataManager()
         let mosaicVersion = (new Date()).toISOString().replace(/\..+/, "").replace(":", "-").replace(":", "-")
@@ -43,11 +45,6 @@ export class Generator {
         let subSectionVersions: Record<string, SectionVersionList> = JSON.parse(rawdata.toString())
         let subSectionMetadata = metadataManager.extractCurrentVersions(subSectionVersions)
 
-        // Delete the output directory
-        if (existsSync("./output")) {
-            execSync("rm -rf ./output")
-        }
-        
         // For each mosaic image to make
         let newSubSectionMetadata: Record<string, SectionVersionList> = {}
         for ( let imageConfigurationName in configuration.sections ) {
