@@ -13,7 +13,7 @@ import { TileCache } from './tile-cache'
 
 export class TileQueue {
     private queue: Heap<TileDescription>
-    private changeSet = new ChangeSet()
+    private changeSet: Record<string, ChangeSet> = {}
     private changeSetKeys: Record<string, Date> = {}
 
     public constructor (maps: Array<string>, metadata: Record<string, SectionVersion>, metadataManager: MetadataManager,
@@ -66,7 +66,7 @@ export class TileQueue {
                         let subMapDescription = new SubMapDescription(sectionName, sectionExtentMercator, section.maxZoom, 
                             section.tileWidth, section.version)
                         if ( section.effectiveDate !== undefined ) {
-                            this.addToChangeSet(x, y, section.effectiveDate)
+                            this.addToChangeSet(zoom, x, y, section.effectiveDate)
                         }
                         overlaps.push(subMapDescription)
                     }
@@ -88,20 +88,47 @@ export class TileQueue {
         return this.queue.pop()
     }
 
-    private addToChangeSet(x: number, y: number, effectiveDate: string): void {
-        //Create a key from the x/y
-        let key = `${x}_${y}`
-        if ( key in this.changeSetKeys ) {
-            return
-        }
-        //${effectiveDate.getFullYear()}-${effectiveDate.getMonth()}-${effectiveDate.getDate()}
+    public getChangeSet(): Record<string, ChangeSet> {
+        return this.changeSet
+    }
 
-        //Check if the tile was already added to an earlier effectiveDate
-            //If it was remove it
-        //else Check if the tile was already added to a later effectiveDate
-            //If it was, return
+    private addToChangeSet(zoom: number, x: number, y: number, effectiveDateString: string): void {
+        //Create a key from the x/y
+        let key = `${zoom}_${x}_${y}`
+        let effectiveDate = this.convertStringToDate(effectiveDateString)
+
+        //Check if the tile was already added
+        if ( key in this.changeSetKeys ) {
+            let previousDate = this.changeSetKeys[key]
+            if ( effectiveDate <= previousDate ) {
+                return
+            }
+            let previousDateKey = `${previousDate.getFullYear()}-${previousDate.getMonth().toString().padStart(2, "0")}-${previousDate.getDate().toString().padStart(2, "0")}`
+            delete this.changeSetKeys[key]
+            let tileList = this.changeSet[previousDateKey].tiles
+            if ( tileList !== undefined ) {
+                for ( let i = 0; i < tileList.length; i++ ) {
+                    if ( tileList[i][0] == zoom && tileList[i][1] == x && tileList[i][2] == y ) {
+                        this.changeSet[previousDateKey].tiles = tileList.splice(i, 1)
+                        break
+                    }
+                }
+            }
+        }
 
         //Add the tile to the changeset with the specified effective date
+        this.changeSetKeys[key] = effectiveDate
+        if ( this.changeSet[effectiveDateString] === undefined ) {
+            this.changeSet[effectiveDateString] = new ChangeSet()
+        }
+        if ( this.changeSet[effectiveDateString].tiles === undefined ) {
+            this.changeSet[effectiveDateString].tiles = []
+        }
+        this.changeSet[effectiveDateString].tiles?.push([zoom,x,y])
+    }
+
+    private convertStringToDate(s: string): Date {
+        return new Date(parseInt(s.substring(0, 4)), parseInt(s.substring(5,7)), parseInt(s.substring(8,10)))
     }
 
     private getExtents(subMaps: string[], subSectionMetadata: Record<string, SectionVersion>): BoxGeo {

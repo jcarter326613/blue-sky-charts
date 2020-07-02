@@ -1,5 +1,6 @@
 
 import { readFileSync, writeFileSync, existsSync, mkdirSync } from 'fs'
+import { ChangeSet } from './models/change-set'
 import { execSync } from 'child_process'
 import { exit } from "process"
 import { createCanvas, loadImage } from 'canvas'
@@ -89,6 +90,7 @@ export class Generator {
             newSectionData.maxZoom = maxZoom
             newSectionData.tileWidth = TileDescription.TILE_DIMENSIONS_PIXELS
             newSectionData.version = mosaicVersion
+            let changeSet: Record<string, ChangeSet> = {}
 
             // For each zoom level
             for ( let zoom = 0; zoom <= maxZoom; zoom++ ) {
@@ -97,6 +99,21 @@ export class Generator {
                 // Create a lookup of all the tiles to generate and which sections are needed to create them
                 let tileCache = new TileCache()
                 let tileQueue = new TileQueue(imageConfiguration.subMaps, subSectionMetadata, metadataManager, tileCache, zoom)
+
+                // Update the changeset
+                let newChangeSet = tileQueue.getChangeSet()
+                for ( let effectiveDate of Object.keys(newChangeSet) ) {
+                    if ( !(effectiveDate in changeSet) ) {
+                        changeSet[effectiveDate] = new ChangeSet()
+                        changeSet[effectiveDate].tiles = []
+                    }
+                    let newTiles = newChangeSet[effectiveDate].tiles
+                    if ( newTiles != undefined ) {
+                        for ( let newTile of newTiles ) {
+                            changeSet[effectiveDate].tiles?.push(newTile)
+                        }
+                    }
+                }
     
                 // For each tile to generate, sorted in order of the alphabetical order of dependents
                 while ( tileQueue.hasNext() ) {
@@ -120,6 +137,15 @@ export class Generator {
             }
 
             // Save the metadata for this new tile
+            if ( newSectionData.changeSet === undefined ) {
+                newSectionData.changeSet = {}
+            }
+            for ( let effectiveDate of Object.keys(changeSet) ) {
+                if ( !(effectiveDate in newSectionData.changeSet) ) {
+                    newSectionData.changeSet[effectiveDate] = changeSet[effectiveDate]
+                }
+            }
+
             let versionList = new SectionVersionList()
             versionList.versions = {}
             versionList.versions[newSectionData.version] = newSectionData

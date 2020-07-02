@@ -1,3 +1,4 @@
+import { ChangeSet } from './change-set'
 import { FileExtent } from './file-extent'
 
 export class SectionVersion {
@@ -10,4 +11,5 @@ export class SectionVersion {
     public imageWidthScale: number | undefined
     public imageHeight: number | undefined
     public imageHeightScale: number | undefined
+    public changeSet: Record<string, ChangeSet> | undefined
 }
