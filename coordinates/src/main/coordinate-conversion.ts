@@ -28,7 +28,9 @@ export class CoordinateConversion {
             latitude = CoordinateConversion.MAX_LATITUDE
         } else if ( latitude < CoordinateConversion.MIN_LATITUDE ) {
             latitude = CoordinateConversion.MIN_LATITUDE
-        } else if ( longitude > CoordinateConversion.MAX_LONGITUDE ) {
+        } 
+        
+        if ( longitude > CoordinateConversion.MAX_LONGITUDE ) {
             longitude = CoordinateConversion.MAX_LONGITUDE
         } else if ( longitude < CoordinateConversion.MIN_LONGITUDE ) {
             longitude = CoordinateConversion.MIN_LONGITUDE
@@ -52,7 +54,9 @@ export class CoordinateConversion {
             latitude = CoordinateConversion.MAX_LATITUDE
         } else if ( latitude < CoordinateConversion.MIN_LATITUDE ) {
             latitude = CoordinateConversion.MIN_LATITUDE
-        } else if ( longitude > CoordinateConversion.MAX_LONGITUDE ) {
+        } 
+        
+        if ( longitude > CoordinateConversion.MAX_LONGITUDE ) {
             longitude = CoordinateConversion.MAX_LONGITUDE
         } else if ( longitude < CoordinateConversion.MIN_LONGITUDE ) {
             longitude = CoordinateConversion.MIN_LONGITUDE
