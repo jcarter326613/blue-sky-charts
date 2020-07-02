@@ -20,6 +20,10 @@ export class Generator {
     private OUTPUT_DIRECTORY = "./output"
 
     public async generateMosaics(): Promise<void> {
+        if (!existsSync(this.OUTPUT_DIRECTORY)){
+            mkdirSync(this.OUTPUT_DIRECTORY);
+        }
+
         let metadataManager = new MetadataManager()
         let mosaicVersion = (new Date()).toISOString().replace(/\..+/, "").replace(":", "-").replace(":", "-")
 
