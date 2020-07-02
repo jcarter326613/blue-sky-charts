@@ -1,3 +1,3 @@
 export class ChangeSet {
-    public tiles: Array<Array<number>> | undefined  // [zoom, x, y]
+    public tiles: Record<number, Record<number, Array<number>>> | undefined  // [zoom, x, y]
 }

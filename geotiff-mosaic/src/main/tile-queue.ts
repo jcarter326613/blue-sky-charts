@@ -107,10 +107,18 @@ export class TileQueue {
             delete this.changeSetKeys[key]
             let tileList = this.changeSet[previousDateKey].tiles
             if ( tileList !== undefined ) {
-                for ( let i = 0; i < tileList.length; i++ ) {
-                    if ( tileList[i][0] == zoom && tileList[i][1] == x && tileList[i][2] == y ) {
-                        this.changeSet[previousDateKey].tiles = tileList.splice(i, 1)
-                        break
+                if ( zoom in tileList && x in tileList[zoom] ) {
+                    for ( let i = 0; i < tileList[zoom][x].length; i++ ) {
+                        if ( y == tileList[zoom][x][i] ) {
+                            tileList[zoom][x] = tileList[zoom][x].splice(i, 1)
+                            if (tileList[zoom][x].length == 0) {
+                                delete tileList[zoom][x]
+                                if ( Object.keys(tileList[zoom]).length == 0 ) {
+                                    delete tileList[zoom]
+                                }
+                            }
+                            break
+                        }
                     }
                 }
             }
@@ -121,10 +129,18 @@ export class TileQueue {
         if ( this.changeSet[effectiveDateString] === undefined ) {
             this.changeSet[effectiveDateString] = new ChangeSet()
         }
-        if ( this.changeSet[effectiveDateString].tiles === undefined ) {
-            this.changeSet[effectiveDateString].tiles = []
+        let lookup = this.changeSet[effectiveDateString].tiles
+        if ( lookup === undefined ) {
+            lookup = {}
+            this.changeSet[effectiveDateString].tiles = lookup
         }
-        this.changeSet[effectiveDateString].tiles?.push([zoom,x,y])
+        if ( !(zoom in lookup) ) {
+            lookup[zoom] = {}
+        }
+        if ( !(x in lookup[zoom]) ) {
+            lookup[zoom][x] = []
+        }
+        lookup[zoom][x].push(y)
     }
 
     private convertStringToDate(s: string): Date {

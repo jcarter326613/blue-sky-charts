@@ -108,9 +108,36 @@ export class Generator {
                         changeSet[effectiveDate].tiles = []
                     }
                     let newTiles = newChangeSet[effectiveDate].tiles
+                    let oldTiles = changeSet[effectiveDate].tiles
+                    if ( oldTiles === undefined ) {
+                        oldTiles = {}
+                        changeSet[effectiveDate].tiles = oldTiles
+                    }
                     if ( newTiles != undefined ) {
-                        for ( let newTile of newTiles ) {
-                            changeSet[effectiveDate].tiles?.push(newTile)
+                        for ( let zoom of Object.keys(newTiles) ) {
+                            let zoomNum = parseInt(zoom)
+                            if ( !(zoomNum in oldTiles) ) {
+                                oldTiles[zoomNum] = {}
+                            }
+                            
+                            for ( let x of Object.keys(newTiles[zoomNum])) {
+                                let xNum = parseInt(x)
+                                if ( !(xNum in oldTiles[zoomNum]) ) {
+                                    oldTiles[zoomNum][xNum] = []
+                                }
+                                for ( let y of newTiles[zoomNum][xNum] ) {
+                                    let hasY = false
+                                    for ( let oldY of oldTiles[zoomNum][xNum] ) {
+                                        if ( oldY == y ) {
+                                            hasY = true
+                                            break
+                                        }
+                                    }
+                                    if ( !hasY ) {
+                                        oldTiles[zoomNum][xNum].push(y)
+                                    }
+                                }
+                            }
                         }
                     }
                 }
@@ -155,6 +182,7 @@ export class Generator {
         // Write out the new metadata
         let newMetadataString = JSON.stringify(newSubSectionMetadata)
         writeFileSync("./output/metadata.json", newMetadataString)
+        writeFileSync("./data/metadata.json", newMetadataString)
     }
 
     private getMosaicExtentsMercator(imageConfiguration: string[], subSectionMetadata: Record<string, SectionVersion>): BoxWebMercator {
