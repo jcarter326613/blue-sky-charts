@@ -1,5 +1,6 @@
 
 import { BoxGeo, CoordinateConversion, PointGeo, Point2d, BoxWebMercator } from 'coordinates'
+import { ChangeSet } from './models/change-set'
 import { Conversion } from './models/conversion'
 import { exit } from 'process'
 import { Heap } from 'ts-heap'
@@ -12,6 +13,8 @@ import { TileCache } from './tile-cache'
 
 export class TileQueue {
     private queue: Heap<TileDescription>
+    private changeSet = new ChangeSet()
+    private changeSetKeys: Record<string, Date> = {}
 
     public constructor (maps: Array<string>, metadata: Record<string, SectionVersion>, metadataManager: MetadataManager,
         tileCache: TileCache, zoom: number) {
@@ -62,6 +65,9 @@ export class TileQueue {
                     if ( sectionOverlapMercator != null && sectionOverlapMercator.getWidth() > 0 && sectionOverlapMercator.getHeight() > 0 ) {
                         let subMapDescription = new SubMapDescription(sectionName, sectionExtentMercator, section.maxZoom, 
                             section.tileWidth, section.version)
+                        if ( section.effectiveDate !== undefined ) {
+                            this.addToChangeSet(x, y, section.effectiveDate)
+                        }
                         overlaps.push(subMapDescription)
                     }
                 }
@@ -80,6 +86,22 @@ export class TileQueue {
 
     public pop(): TileDescription | undefined {
         return this.queue.pop()
+    }
+
+    private addToChangeSet(x: number, y: number, effectiveDate: string): void {
+        //Create a key from the x/y
+        let key = `${x}_${y}`
+        if ( key in this.changeSetKeys ) {
+            return
+        }
+        //${effectiveDate.getFullYear()}-${effectiveDate.getMonth()}-${effectiveDate.getDate()}
+
+        //Check if the tile was already added to an earlier effectiveDate
+            //If it was remove it
+        //else Check if the tile was already added to a later effectiveDate
+            //If it was, return
+
+        //Add the tile to the changeset with the specified effective date
     }
 
     private getExtents(subMaps: string[], subSectionMetadata: Record<string, SectionVersion>): BoxGeo {
