@@ -30,7 +30,11 @@ export class TileCache {
         console.log(`Exploding map ${subMapDescription.name}`)
         execSync(`python3 ../geotiff-map-exploder/explode_maps.py ${subMapDescription.name} ${subMapDescription.version} relative ${targetZoom}`)
         console.log(`Explosion complete. Cleaning up.`)
-        execSync(`mv ./maps/tiles/* ./maps/cache`)
+        if ( existsSync(`./maps/cache/${subMapDescription.name}_SEC_${subMapDescription.version}`) ) {
+            execSync(`mv ./maps/tiles/${subMapDescription.name}_SEC_${subMapDescription.version}/${targetZoom} ./maps/cache/${subMapDescription.name}_SEC_${subMapDescription.version}/${targetZoom}`)
+        } else {
+            execSync(`mv ./maps/tiles/* ./maps/cache`)
+        }
         execSync(`rm -rf ./maps/tiles`)
         execSync(`rm -f ./maps/*.png.*`)
         execSync(`rm -f ./maps/*.tif`)
