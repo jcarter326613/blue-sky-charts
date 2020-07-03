@@ -14,6 +14,7 @@ import com.blueskycharts.app.map.models.BoxGeoModel
 import com.blueskycharts.app.map.models.OverlayViewModel
 import com.blueskycharts.app.map.models.SubMapModel
 import com.blueskycharts.app.map.resources.DataProvider
+import com.blueskycharts.app.map.resources.ShadowProvider
 import com.blueskycharts.app.map.resources.TileProvider
 import com.blueskycharts.app.remoteassests.AssetProvider
 import com.blueskycharts.app.remoteassests.Volatility
@@ -59,7 +60,7 @@ class NavigableMap2d(context: Context, attributes: AttributeSet) : Map(context, 
                 scaleDriver = getFloat(R.styleable.NavigableMap2d_zoom, 4.25F);
                 val originLongitude = getFloat(R.styleable.NavigableMap2d_originLongitude, -98.5795F)
                 val originLatitude = getFloat(R.styleable.NavigableMap2d_originLongitude, 39.8283F)
-                origin2d = CoordinateConversion.convertToWebMercator(PointGeo(originLongitude.toDouble(), originLatitude.toDouble()));
+                origin2d = CoordinateConversion.convertPointGeoToPointWebMercator(PointGeo(originLongitude.toDouble(), originLatitude.toDouble()));
             } finally {
                 recycle()
             }
@@ -83,8 +84,8 @@ class NavigableMap2d(context: Context, attributes: AttributeSet) : Map(context, 
         textStrokePaint.strokeWidth = convertDipToPixels(1f)
 
         // Set all constant and derived defaults
-        this.tileProvider = TileProvider("${mapRoot}/sectional", context);
-        this.shadowTileProvider = TileProvider("${mapRoot}/world-shadow", context);
+        this.tileProvider = TileProvider(mapRoot, "jpg", context)
+        this.shadowTileProvider = ShadowProvider(context)
         this.dataProvider = DataProvider(context)
 
         if ( this.scaleDriver > this.maxScaleDriver ) {
@@ -157,8 +158,8 @@ class NavigableMap2d(context: Context, attributes: AttributeSet) : Map(context, 
             tileWidth = 256,
             maxZoom = 0,
             fileExtent = shadowBoxGeoModel,
-            imageHeight = 256,
-            imageWidth = 256,
+            imageHeight = 256.0,
+            imageWidth = 256.0,
             imageHeightScale = 1.0,
             imageWidthScale = 1.0,
             version = "1",
@@ -263,17 +264,17 @@ class NavigableMap2d(context: Context, attributes: AttributeSet) : Map(context, 
     private fun drawSubMap(submap: SubMapPosition, viewport2d: BoxWebMercator, canvas: Canvas) {
         // Calculate the viewport from the perspective of the un modified sub map
         val mapPosition2d: BoxWebMercator = submap.location;
-        val viewportOverlap2d = mapPosition2d.union(viewport2d);
+        val viewportOverlap2d = mapPosition2d.intersection(viewport2d)
         if (viewportOverlap2d != null) {
             val originalWidth = submap.subMapView.originalWidth;
             val originalHeight = submap.subMapView.originalHeight;
 
             val mapMercatorWidth = mapPosition2d.bottomRight.x - mapPosition2d.topLeft.x;
             val mapMercatorHeight = mapPosition2d.bottomRight.y - mapPosition2d.topLeft.y;
-            val mapScale = (this.width * mapMercatorWidth) / (originalWidth * viewport2d.getWidth());
+            val mapScale = (this.width * mapMercatorWidth) / (originalWidth * viewport2d.width);
 
-            val mapShiftX = (mapPosition2d.topLeft.x - this.origin2d.x) * this.width / viewport2d.getWidth()
-            val mapShiftY = (mapPosition2d.topLeft.y - this.origin2d.y) * this.height / viewport2d.getHeight()
+            val mapShiftX = (mapPosition2d.topLeft.x - this.origin2d.x) * this.width / viewport2d.width
+            val mapShiftY = (mapPosition2d.topLeft.y - this.origin2d.y) * this.height / viewport2d.width
 
             canvas.translate(this.width / 2.0F, this.height / 2.0F);
             canvas.translate(mapShiftX.toFloat(), mapShiftY.toFloat());

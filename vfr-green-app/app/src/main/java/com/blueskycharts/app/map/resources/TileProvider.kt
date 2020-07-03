@@ -8,8 +8,8 @@ import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
 import kotlin.math.floor
 
-class TileProvider(private val mapRoot: String, val context: Context) : CachedProvider(0) {
-    fun retrieveTile(mapName: String, mapVersion: String, zoomLevel: Int, location: Point2d, tileDimensions: Point2d,
+open class TileProvider(private val mapRoot: String, private val imageExtension: String, val context: Context) : CachedProvider(0) {
+    open fun retrieveTile(mapName: String, mapVersion: String, zoomLevel: Int, location: Point2d, tileDimensions: Point2d,
                      receiver: TileReceiver, data: Any?, canvas: Canvas ) {
         val key = this.createKey(mapName, zoomLevel, location);
         val tileRequest = this.getCachedItem(key);
@@ -35,7 +35,7 @@ class TileProvider(private val mapRoot: String, val context: Context) : CachedPr
                         }
                     } else {
                         val url =
-                            "${mapRoot}/${mapName}_SEC_$mapVersion/$zoomLevel/${location.x.toInt()}_${location.y.toInt()}.png";
+                            "${mapRoot}/${mapName}_$mapVersion/$zoomLevel/${location.x.toInt()}_${location.y.toInt()}.${imageExtension}";
                         val newRequest = TileRequest(
                             this@TileProvider,
                             receiver,
@@ -84,7 +84,7 @@ class TileProvider(private val mapRoot: String, val context: Context) : CachedPr
                 }
             } else if ( cachedRequest == null ) {
                 GlobalScope.launch {
-                    val url = "${mapRoot}/${mapName}_SEC_${mapVersion}/${i}/${zoomLocation.x.toInt()}_${zoomLocation.y.toInt()}.png";
+                    val url = "${mapRoot}/${mapName}_${mapVersion}/${i}/${zoomLocation.x.toInt()}_${zoomLocation.y.toInt()}.${imageExtension}";
                     val newRequest = TileRequest(this@TileProvider, receiver, zoomLocation, tileDimensions, data, url, i);
                     this@TileProvider.addRequestToQueue(key, newRequest);
                 }

@@ -10,8 +10,8 @@ interface SubMapView {
     /**
      * Some original width and height in any unit which is used determine the region parameter into the render function.
      */
-    val originalWidth: Int
-    val originalHeight: Int
+    val originalWidth: Double
+    val originalHeight: Double
 
     /**
      * Initializes the view

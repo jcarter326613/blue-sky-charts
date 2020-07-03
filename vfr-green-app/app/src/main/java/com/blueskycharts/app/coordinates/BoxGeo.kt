@@ -37,11 +37,11 @@ class BoxGeo(topLeft: PointGeo = PointGeo(), bottomRight: PointGeo = PointGeo(),
     }
 
     /**
-     * Returns the union of two boxes.  There is an assumption that this box and the other box are both non wrapping.
+     * Returns the intersection of two boxes.  There is an assumption that this box and the other box are both non wrapping.
      * topLeft Longitude < bottomRight Longitude
      * @param o
      */
-    fun union(o: BoxGeo): BoxGeo? {
+    fun intersection(o: BoxGeo): BoxGeo? {
         val upperLeft = PointGeo();
         val lowerRight = PointGeo();
         upperLeft.latitude = min(this.topLeft.latitude, o.topLeft.latitude)

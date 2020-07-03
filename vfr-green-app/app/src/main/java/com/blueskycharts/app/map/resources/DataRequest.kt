@@ -75,7 +75,7 @@ class DataRequest(private val provider: DataProvider, var receiver: DataReceiver
             if (longitude == null || latitude == null) continue
 
             val geoLocation = PointGeo(longitude.toDouble(), latitude.toDouble())
-            val mercatorLocation = CoordinateConversion.convertToWebMercator(geoLocation)
+            val mercatorLocation = CoordinateConversion.convertPointGeoToPointWebMercator(geoLocation)
 
             receiver.receiveData(mercatorLocation, condition, dataAgeSeconds, immediate, canvas)
         }

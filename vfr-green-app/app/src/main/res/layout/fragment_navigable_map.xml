@@ -13,7 +13,7 @@
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent"
-        app:mapRoot="https://blueskycharts.com/maps/world-vfr"
+        app:mapRoot="https://blueskycharts.com/maps/world-vfr-mosaic"
         app:zoom="8" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>

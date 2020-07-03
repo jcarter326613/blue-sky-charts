@@ -16,8 +16,8 @@ import kotlin.math.sin
 class MapDataView(private val dataProvider: DataProvider, private val overlayType: OverlayTypes, private val map: Map) : SubMapView, DataReceiver {
     // Metadata
     private var dataAgeSeconds: Int? = null
-    override val originalWidth: Int = PointWebMercator.MAX_X_MERCATOR
-    override val originalHeight: Int = PointWebMercator.MAX_Y_MERCATOR
+    override val originalWidth: Double = PointWebMercator.MAX_X_MERCATOR.toDouble()
+    override val originalHeight: Double = PointWebMercator.MAX_Y_MERCATOR.toDouble()
 
     // Rendering
     private var contextScale: Double? = null

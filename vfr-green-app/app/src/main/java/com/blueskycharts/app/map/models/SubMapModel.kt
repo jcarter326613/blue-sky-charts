@@ -7,8 +7,8 @@ import java.util.*
 data class SubMapModel ( val mapBounds: Array<Point2d>?,
                          val tileWidth: Int?,
                          val version: String?,
-                         val imageWidth: Int?,
-                         val imageHeight: Int?,
+                         val imageWidth: Double?,
+                         val imageHeight: Double?,
                          val imageWidthScale: Double?,
                          val imageHeightScale: Double?,
                          val fileExtent: BoxGeoModel?,
@@ -42,8 +42,8 @@ data class SubMapModel ( val mapBounds: Array<Point2d>?,
         var result = mapBounds?.contentHashCode() ?: 0
         result = 31 * result + (tileWidth ?: 0)
         result = 31 * result + (version?.hashCode() ?: 0)
-        result = 31 * result + (imageWidth ?: 0)
-        result = 31 * result + (imageHeight ?: 0)
+        result = 31 * result + (imageWidth?.hashCode() ?: 0)
+        result = 31 * result + (imageHeight?.hashCode() ?: 0)
         result = 31 * result + (imageWidthScale?.hashCode() ?: 0)
         result = 31 * result + (imageHeightScale?.hashCode() ?: 0)
         result = 31 * result + (fileExtent?.hashCode() ?: 0)
@@ -58,11 +58,11 @@ data class SubMapModel ( val mapBounds: Array<Point2d>?,
 
             reader.beginObject()
             while (reader.hasNext()) {
-                var mapBounds: Array<Point2d>? = null
+                val mapBounds: Array<Point2d>? = null
                 var tileWidth: Int? = null
                 var version: String? = null
-                var imageWidth: Int? = null
-                var imageHeight: Int? = null
+                var imageWidth: Double? = null
+                var imageHeight: Double? = null
                 var imageWidthScale: Double? = null
                 var imageHeightScale: Double? = null
                 var fileExtent: BoxGeoModel? = null
@@ -76,13 +76,13 @@ data class SubMapModel ( val mapBounds: Array<Point2d>?,
                             fileExtent = BoxGeoModel.readFromJsonReader(reader)
                         }
                         "imageHeight" -> {
-                            imageHeight = reader.nextInt()
+                            imageHeight = reader.nextDouble()
                         }
                         "imageHeightScale" -> {
                             imageHeightScale = reader.nextDouble()
                         }
                         "imageWidth" -> {
-                            imageWidth = reader.nextInt()
+                            imageWidth = reader.nextDouble()
                         }
                         "imageWidthScale" -> {
                             imageWidthScale = reader.nextDouble()

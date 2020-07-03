@@ -16,9 +16,9 @@ import androidx.core.graphics.drawable.toDrawable as toDrawable1
 
 class MapTileView(private val tileProvider: TileProvider, private val map: Map) : SubMapView, TileReceiver {
     // Metadata
-    override var originalWidth: Int = 0
+    override var originalWidth: Double = 0.0
         private set
-    override var originalHeight: Int = 0
+    override var originalHeight: Double = 0.0
         private set
     private var imageWidthScale: Double = 1.0;
     private var imageHeightScale: Double = 1.0;

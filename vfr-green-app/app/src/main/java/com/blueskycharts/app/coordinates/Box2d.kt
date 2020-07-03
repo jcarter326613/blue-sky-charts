@@ -2,12 +2,18 @@ package com.blueskycharts.app.coordinates
 
 import kotlin.math.max;
 import kotlin.math.min;
-
+/**
+ * Display coordinates.  Upper left is (0,0)
+ */
 class Box2d(upperLeftX: Double = 0.0, upperLeftY: Double = 0.0, lowerRightX: Double = 0.0, lowerRightY: Double = 0.0) {
     var upperLeft: Point2d
         private set;
     var lowerRight: Point2d
         private set;
+    val width: Double
+        get() = this.lowerRight.x - this.upperLeft.x
+    val height: Double
+        get() = this.lowerRight.y - this.upperLeft.y
 
     init {
         upperLeft = Point2d(upperLeftX, upperLeftY);
@@ -22,10 +28,10 @@ class Box2d(upperLeftX: Double = 0.0, upperLeftY: Double = 0.0, lowerRightX: Dou
     }
 
     /**
-     * Returns the union of the two boxes.  An real number range is allowed.
+     * Returns the intersection of the two boxes.  An real number range is allowed.
      * @param o
      */
-    public fun union(o: Box2d): Box2d? {
+    public fun intersection(o: Box2d): Box2d? {
         val newBox = Box2d();
         newBox.upperLeft.x = max(this.upperLeft.x, o.upperLeft.x);
         newBox.upperLeft.y = max(this.upperLeft.y, o.upperLeft.y);
@@ -40,6 +46,6 @@ class Box2d(upperLeftX: Double = 0.0, upperLeftY: Double = 0.0, lowerRightX: Dou
     }
 
     public fun getDimensions(): Point2d {
-        return Point2d(this.lowerRight.x - this.upperLeft.x, this.lowerRight.y - this.upperLeft.y);
+        return Point2d(this.width, this.height)
     }
 }
