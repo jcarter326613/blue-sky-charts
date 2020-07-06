@@ -1,6 +1,5 @@
 package com.blueskycharts.app.map.view
 
-import android.content.Context
 import android.graphics.*
 import android.util.Log
 import com.blueskycharts.app.coordinates.*
@@ -16,8 +15,8 @@ import kotlin.math.sin
 class MapDataView(private val dataProvider: DataProvider, private val overlayType: OverlayTypes, private val map: Map) : SubMapView, DataReceiver {
     // Metadata
     private var dataAgeSeconds: Int? = null
-    override val originalWidth: Double = PointWebMercator.MAX_X_MERCATOR.toDouble()
-    override val originalHeight: Double = PointWebMercator.MAX_Y_MERCATOR.toDouble()
+    override val originalWidth2d: Double = CoordinateConversion.maxMercator.width
+    override val originalHeight2d: Double = CoordinateConversion.maxMercator.height
 
     // Rendering
     private var contextScale: Double? = null
@@ -51,12 +50,12 @@ class MapDataView(private val dataProvider: DataProvider, private val overlayTyp
         itemFillPaint.style = Paint.Style.FILL
     }
 
-    override fun initialize(model: SubMapModel?): BoxWebMercator? {
+    override fun initialize(name: String, model: SubMapModel?): BoxWebMercator? {
         if ( this.overlayType == OverlayTypes.None ) {
             return null;
         }
 
-        return BoxWebMercator(0.0, 0.0, PointWebMercator.MAX_X_MERCATOR.toDouble(), PointWebMercator.MAX_Y_MERCATOR.toDouble())
+        return CoordinateConversion.maxMercator
     }
 
     override fun dispose() {
@@ -82,8 +81,8 @@ class MapDataView(private val dataProvider: DataProvider, private val overlayTyp
             return;
         }
 
-        val dataAgeSeconds = this.dataAgeSeconds
-        if ( dataAgeSeconds == null || dataAgeSeconds < dataAgeSeconds ) {
+        val das = this.dataAgeSeconds
+        if ( das == null || das < dataAgeSeconds ) {
             this.dataAgeSeconds = dataAgeSeconds
         }
 
@@ -347,7 +346,7 @@ class MapDataView(private val dataProvider: DataProvider, private val overlayTyp
         this.contextScale = scale;
 
         val pixelsAcross = region.getDimensions().x * scale;
-        val longitudeAcross = 360 * region.getDimensions().x / this.originalWidth;
+        val longitudeAcross = 360 * region.getDimensions().x / this.originalWidth2d;
         val longitudeBuffer = longitudeAcross * this.expectedBuffer.width() / pixelsAcross
         val latitudeBuffer = longitudeBuffer * 0.6
 

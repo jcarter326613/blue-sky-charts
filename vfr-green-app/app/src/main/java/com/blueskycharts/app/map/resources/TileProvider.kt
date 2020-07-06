@@ -34,8 +34,7 @@ open class TileProvider(private val mapRoot: String, private val imageExtension:
                             tileRequestScoped.broadcastData(false, canvas);
                         }
                     } else {
-                        val url =
-                            "${mapRoot}/${mapName}_$mapVersion/$zoomLevel/${location.x.toInt()}_${location.y.toInt()}.${imageExtension}";
+                        val url = this@TileProvider.createUrl(mapName, mapVersion, zoomLevel, location)
                         val newRequest = TileRequest(
                             this@TileProvider,
                             receiver,
@@ -52,6 +51,10 @@ open class TileProvider(private val mapRoot: String, private val imageExtension:
                 }
             }
         }
+    }
+
+    private fun createUrl(mapName: String, mapVersion: String, zoomLevel: Int, location: Point2d): String {
+        return "${mapRoot}/${mapName}/$mapVersion/$zoomLevel/${location.x.toInt()}_${location.y.toInt()}.${imageExtension}"
     }
 
     private fun createKey(mapName: String, zoomLevel: Int, location: Point2d): String {
@@ -84,7 +87,7 @@ open class TileProvider(private val mapRoot: String, private val imageExtension:
                 }
             } else if ( cachedRequest == null ) {
                 GlobalScope.launch {
-                    val url = "${mapRoot}/${mapName}_${mapVersion}/${i}/${zoomLocation.x.toInt()}_${zoomLocation.y.toInt()}.${imageExtension}";
+                    val url = this@TileProvider.createUrl(mapName, mapVersion, zoomLevel, zoomLocation)
                     val newRequest = TileRequest(this@TileProvider, receiver, zoomLocation, tileDimensions, data, url, i);
                     this@TileProvider.addRequestToQueue(key, newRequest);
                 }

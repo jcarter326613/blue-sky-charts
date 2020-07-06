@@ -10,8 +10,8 @@ interface SubMapView {
     /**
      * Some original width and height in any unit which is used determine the region parameter into the render function.
      */
-    val originalWidth: Double
-    val originalHeight: Double
+    val originalWidth2d: Double
+    val originalHeight2d: Double
 
     /**
      * Initializes the view
@@ -20,7 +20,7 @@ interface SubMapView {
      * @returns A BoxGeo representing the full extent of the map.  undefined if this map should be discarded from view because of a
      *  bad configuration.
      */
-    fun initialize(model: SubMapModel?): BoxWebMercator?;
+    fun initialize(name: String, model: SubMapModel?): BoxWebMercator?;
 
     /**
      * Returns the age of any data beign displayed and resets the age counter prior to rendering

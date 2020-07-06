@@ -12,8 +12,7 @@ data class SubMapModel ( val mapBounds: Array<Point2d>?,
                          val imageWidthScale: Double?,
                          val imageHeightScale: Double?,
                          val fileExtent: BoxGeoModel?,
-                         val maxZoom: Int?,
-                         val name: String?
+                         val maxZoom: Int?
 ) {
     override fun equals(other: Any?): Boolean {
         if (this === other) return true
@@ -33,7 +32,6 @@ data class SubMapModel ( val mapBounds: Array<Point2d>?,
         if (imageHeightScale != other.imageHeightScale) return false
         if (fileExtent != other.fileExtent) return false
         if (maxZoom != other.maxZoom) return false
-        if (name != other.name) return false
 
         return true
     }
@@ -48,75 +46,66 @@ data class SubMapModel ( val mapBounds: Array<Point2d>?,
         result = 31 * result + (imageHeightScale?.hashCode() ?: 0)
         result = 31 * result + (fileExtent?.hashCode() ?: 0)
         result = 31 * result + (maxZoom ?: 0)
-        result = 31 * result + (name?.hashCode() ?: 0)
         return result
     }
 
     companion object {
-        fun readFromJsonReader(reader: JsonReader): Collection<SubMapModel> {
-            val retVal = LinkedList<SubMapModel>()
+        fun readFromJsonReader(reader: JsonReader): SubMapModel {
+            val mapBounds: Array<Point2d>? = null
+            var tileWidth: Int? = null
+            var version: String? = null
+            var imageWidth: Double? = null
+            var imageHeight: Double? = null
+            var imageWidthScale: Double? = null
+            var imageHeightScale: Double? = null
+            var fileExtent: BoxGeoModel? = null
+            var maxZoom: Int? = null
 
             reader.beginObject()
-            while (reader.hasNext()) {
-                val mapBounds: Array<Point2d>? = null
-                var tileWidth: Int? = null
-                var version: String? = null
-                var imageWidth: Double? = null
-                var imageHeight: Double? = null
-                var imageWidthScale: Double? = null
-                var imageHeightScale: Double? = null
-                var fileExtent: BoxGeoModel? = null
-                var maxZoom: Int? = null
-                val mapName = reader.nextName();
-
-                reader.beginObject()
-                while ( reader.hasNext() ) {
-                    when (reader.nextName()) {
-                        "fileExtent" -> {
-                            fileExtent = BoxGeoModel.readFromJsonReader(reader)
-                        }
-                        "imageHeight" -> {
-                            imageHeight = reader.nextDouble()
-                        }
-                        "imageHeightScale" -> {
-                            imageHeightScale = reader.nextDouble()
-                        }
-                        "imageWidth" -> {
-                            imageWidth = reader.nextDouble()
-                        }
-                        "imageWidthScale" -> {
-                            imageWidthScale = reader.nextDouble()
-                        }
-                        "maxZoom" -> {
-                            maxZoom = reader.nextInt()
-                        }
-                        "tileWidth" -> {
-                            tileWidth = reader.nextInt()
-                        }
-                        "version" -> {
-                            version = reader.nextString()
-                        }
+            while ( reader.hasNext() ) {
+                when (reader.nextName()) {
+                    "fileExtent" -> {
+                        fileExtent = BoxGeoModel.readFromJsonReader(reader)
+                    }
+                    "imageHeight" -> {
+                        imageHeight = reader.nextDouble()
+                    }
+                    "imageHeightScale" -> {
+                        imageHeightScale = reader.nextDouble()
+                    }
+                    "imageWidth" -> {
+                        imageWidth = reader.nextDouble()
+                    }
+                    "imageWidthScale" -> {
+                        imageWidthScale = reader.nextDouble()
+                    }
+                    "maxZoom" -> {
+                        maxZoom = reader.nextInt()
+                    }
+                    "tileWidth" -> {
+                        tileWidth = reader.nextInt()
+                    }
+                    "version" -> {
+                        version = reader.nextString()
+                    }
+                    else -> {
+                        reader.skipValue()
                     }
                 }
-                reader.endObject();
-
-                val mapModel = SubMapModel(
-                    mapBounds = mapBounds,
-                    tileWidth = tileWidth,
-                    version = version,
-                    imageWidth = imageWidth,
-                    imageHeight = imageHeight,
-                    imageWidthScale = imageWidthScale,
-                    imageHeightScale = imageHeightScale,
-                    fileExtent = fileExtent,
-                    maxZoom = maxZoom,
-                    name = mapName
-                )
-                retVal.add(mapModel)
             }
-            reader.endObject()
+            reader.endObject();
 
-            return retVal
+            return SubMapModel(
+                mapBounds = mapBounds,
+                tileWidth = tileWidth,
+                version = version,
+                imageWidth = imageWidth,
+                imageHeight = imageHeight,
+                imageWidthScale = imageWidthScale,
+                imageHeightScale = imageHeightScale,
+                fileExtent = fileExtent,
+                maxZoom = maxZoom
+            )
         }
     }
 }

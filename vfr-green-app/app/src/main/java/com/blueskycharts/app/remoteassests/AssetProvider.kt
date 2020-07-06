@@ -17,9 +17,14 @@ class AssetProvider(private val context: Context) {
     fun retrieveAsset(url: URL, volatility: Volatility, requiresCors: Boolean = false, callback: ((asset: Asset) -> Unit)) {
         var asset = Asset(url, volatility)
         asset.requiresCors = requiresCors
-        if ( diskCache.retrieveAssetBytes(asset) ) {
-            callback(asset)
-            return
+        try {
+            if ( diskCache.retrieveAssetBytes(asset) ) {
+                callback(asset)
+                return
+            }
+        } catch ( e: Throwable ) {
+            Log.e(null, "Error processing file at url ${url.toString()}")
+            asset.errorLoading = true
         }
         download(asset, callback)
     }

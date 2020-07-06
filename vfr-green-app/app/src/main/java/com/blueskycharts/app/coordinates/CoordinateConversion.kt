@@ -8,7 +8,18 @@ object CoordinateConversion {
     const val MAX_LATITUDE: Double = 85.0
     const val MIN_LATITUDE: Double = -85.0
 
-    private var maxMercator: BoxWebMercator? = null
+    private var _maxMercator: BoxWebMercator? = null
+    val maxMercator: BoxWebMercator
+        get() {
+            if ( _maxMercator == null ) {
+                _maxMercator = convertBoxGeoToBoxMercator(BoxGeo(
+                    PointGeo(MIN_LONGITUDE,MAX_LATITUDE),
+                    PointGeo(MAX_LONGITUDE, MIN_LATITUDE)
+                ))
+            }
+
+            return _maxMercator!!
+        }
 
     /**
      * Converts the given longitude and latitude to a Web Mercator projection where the upper left is (0,0) and the lower right is (256, 256)
@@ -62,25 +73,13 @@ object CoordinateConversion {
         return PointGeo(longitude, latitude)
     }
 
-    private fun getMaxMercator(): BoxWebMercator {
-        var maxMercator = CoordinateConversion.maxMercator
-        if ( maxMercator == null ) {
-            maxMercator = CoordinateConversion.convertBoxGeoToBoxMercator(BoxGeo(
-                PointGeo(CoordinateConversion.MIN_LONGITUDE, CoordinateConversion.MAX_LATITUDE),
-                PointGeo(CoordinateConversion.MAX_LONGITUDE, CoordinateConversion.MIN_LATITUDE)))
-            CoordinateConversion.maxMercator = maxMercator
-        }
-
-        return maxMercator
-    }
-
     fun convertPointMercatorToPoint2d(pointMercator: PointWebMercator): Point2d {
-        val maxMercator = CoordinateConversion.getMaxMercator()
+        val maxMercator = CoordinateConversion.maxMercator
         return Point2d(pointMercator.x, maxMercator.topLeft.y - pointMercator.y)
     }
 
     fun convertPoint2dToPointMercator(point2d: Point2d): PointWebMercator {
-        val maxMercator = CoordinateConversion.getMaxMercator()
+        val maxMercator = CoordinateConversion.maxMercator
         return PointWebMercator(point2d.x, maxMercator.topLeft.y - point2d.y)
     }
 

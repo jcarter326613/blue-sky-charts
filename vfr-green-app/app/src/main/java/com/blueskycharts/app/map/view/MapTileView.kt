@@ -1,9 +1,6 @@
 package com.blueskycharts.app.map.view
 
-import android.content.Context
 import android.graphics.*
-import android.graphics.drawable.Drawable
-import com.blueskycharts.app.R
 import com.blueskycharts.app.coordinates.Box2d
 import com.blueskycharts.app.coordinates.BoxWebMercator
 import com.blueskycharts.app.coordinates.CoordinateConversion
@@ -12,13 +9,12 @@ import com.blueskycharts.app.map.models.SubMapModel
 import com.blueskycharts.app.map.resources.TileProvider
 import com.blueskycharts.app.map.resources.TileReceiver
 import kotlin.math.*
-import androidx.core.graphics.drawable.toDrawable as toDrawable1
 
 class MapTileView(private val tileProvider: TileProvider, private val map: Map) : SubMapView, TileReceiver {
     // Metadata
-    override var originalWidth: Double = 0.0
+    override var originalWidth2d: Double = 0.0
         private set
-    override var originalHeight: Double = 0.0
+    override var originalHeight2d: Double = 0.0
         private set
     private var imageWidthScale: Double = 1.0;
     private var imageHeightScale: Double = 1.0;
@@ -33,11 +29,10 @@ class MapTileView(private val tileProvider: TileProvider, private val map: Map) 
     private var scaledTileWidth: Double = 0.0;
     private var isDisposed: Boolean = false;
 
-    override fun initialize(model: SubMapModel?): BoxWebMercator? {
+    override fun initialize(name: String, model: SubMapModel?): BoxWebMercator? {
         if (model == null ||
             model.imageHeight == null || model.imageWidth == null || model.tileWidth == null ||
-            model.version == null || model.fileExtent == null || model.maxZoom == null ||
-            model.name == null)
+            model.version == null || model.fileExtent == null || model.maxZoom == null)
             return null
 
         if ( model.imageWidthScale != null ) {
@@ -47,18 +42,18 @@ class MapTileView(private val tileProvider: TileProvider, private val map: Map) 
             this.imageHeightScale = model.imageHeightScale;
         }
 
-        this.originalWidth = model.imageWidth;
-        this.originalHeight = model.imageHeight;
-        this.tileWidth = model.tileWidth;
-        this.tileHeight = model.tileWidth;
-        this.mapName = model.name;
-        this.mapVersion = model.version;
-        this.maxZoom = model.maxZoom;
+        this.originalWidth2d = model.imageWidth
+        this.originalHeight2d = model.imageHeight
+        this.tileWidth = model.tileWidth
+        this.tileHeight = model.tileWidth
+        this.mapName = name
+        this.mapVersion = model.version
+        this.maxZoom = model.maxZoom
 
-        if (this.originalWidth > this.originalHeight)
-            this.tileHeight = round(this.tileWidth * this.originalHeight / this.originalWidth.toDouble()).toInt()
+        if (this.originalWidth2d > this.originalHeight2d)
+            this.tileHeight = round(this.tileWidth * this.originalHeight2d / this.originalWidth2d.toDouble()).toInt()
         else
-            this.tileWidth = round(this.tileHeight * this.originalWidth / this.originalHeight.toDouble()).toInt()
+            this.tileWidth = round(this.tileHeight * this.originalWidth2d / this.originalHeight2d.toDouble()).toInt()
 
         val fileExtent = model.fileExtent.createBoxGeo()
         return CoordinateConversion.convertBoxGeoToBoxMercator(fileExtent)
@@ -127,24 +122,24 @@ class MapTileView(private val tileProvider: TileProvider, private val map: Map) 
         val reg = region.clone();
         if ( reg.upperLeft.x < 0 )
             reg.upperLeft.x = 0.0;
-        else if ( reg.upperLeft.x >= this.originalWidth )
-            reg.upperLeft.x = this.originalWidth.toDouble();
+        else if ( reg.upperLeft.x >= this.originalWidth2d )
+            reg.upperLeft.x = this.originalWidth2d.toDouble();
         if ( reg.upperLeft.y < 0 )
             reg.upperLeft.y = 0.0;
-        else if ( reg.upperLeft.y >= this.originalHeight )
-            reg.upperLeft.y = this.originalHeight.toDouble();
+        else if ( reg.upperLeft.y >= this.originalHeight2d )
+            reg.upperLeft.y = this.originalHeight2d.toDouble();
 
         if ( reg.lowerRight.x < 0 )
             reg.lowerRight.x = 0.0;
-        else if ( reg.lowerRight.x >= this.originalWidth )
-            reg.lowerRight.x = this.originalWidth.toDouble();
+        else if ( reg.lowerRight.x >= this.originalWidth2d )
+            reg.lowerRight.x = this.originalWidth2d.toDouble();
         if ( reg.lowerRight.y < 0 )
             reg.lowerRight.y = 0.0;
-        else if ( reg.lowerRight.y >= this.originalHeight )
-            reg.lowerRight.y = this.originalHeight.toDouble();
+        else if ( reg.lowerRight.y >= this.originalHeight2d )
+            reg.lowerRight.y = this.originalHeight2d.toDouble();
 
         // Figure out the size of what we are drawing
-        val m = this.originalWidth * scale
+        val m = this.originalWidth2d * scale
         var zoomLevel = ceil(log2(m / this.tileWidth)).toInt()
         if (zoomLevel < 0)
             zoomLevel = 0;
@@ -152,8 +147,8 @@ class MapTileView(private val tileProvider: TileProvider, private val map: Map) 
             zoomLevel = this.maxZoom;
         val numTilesAcross = 2.0.pow(zoomLevel)
         this.scaledTileWidth = m / numTilesAcross;
-        val originalImageTileWidth = this.originalWidth / numTilesAcross
-        val originalImageTileHeight = this.originalHeight / numTilesAcross
+        val originalImageTileWidth = this.originalWidth2d / numTilesAcross
+        val originalImageTileHeight = this.originalHeight2d / numTilesAcross
 
         // Ensure we aren't looping too much
         val startX = floor(reg.upperLeft.x / originalImageTileWidth).toInt()
