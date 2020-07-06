@@ -25,7 +25,7 @@ class BoxWebMercator(topLeftX: Double = 0.0, topLeftY: Double = 0.0, bottomRight
      * Returns the intersection of the two boxes.  An real number range is allowed.
      * @param o
      */
-    public fun intersection(o: BoxWebMercator): BoxWebMercator? {
+    fun intersection(o: BoxWebMercator): BoxWebMercator? {
         val newBox = BoxWebMercator();
         newBox.topLeft.x = max(this.topLeft.x, o.topLeft.x);
         newBox.topLeft.y = min(this.topLeft.y, o.topLeft.y);
@@ -37,5 +37,24 @@ class BoxWebMercator(topLeftX: Double = 0.0, topLeftY: Double = 0.0, bottomRight
         }
 
         return newBox;
+    }
+
+    fun clone(): BoxWebMercator {
+        val newRect = BoxWebMercator()
+        newRect.topLeft = this.topLeft.clone()
+        newRect.bottomRight = this.bottomRight.clone()
+        return newRect
+    }
+
+    /**
+     * Returns how far along the height and width each corner of the parameter box is relative to the
+     * upper left point with x going right and y going down.
+     */
+    fun overlapPercentageUpperLeft(o: BoxWebMercator): Box2d {
+        val topLeftX = (o.topLeft.x - this.topLeft.x) / this.width
+        val topLeftY = (this.topLeft.y - o.topLeft.y) / this.height
+        val bottomRightX = (o.bottomRight.x - this.topLeft.x) / this.width
+        val bottomRightY = (this.topLeft.y - o.bottomRight.y) / this.height
+        return Box2d(topLeftX, topLeftY, bottomRightX, bottomRightY)
     }
 }

@@ -16,22 +16,44 @@ class Box2d(upperLeftX: Double = 0.0, upperLeftY: Double = 0.0, lowerRightX: Dou
         get() = this.lowerRight.y - this.upperLeft.y
 
     init {
-        upperLeft = Point2d(upperLeftX, upperLeftY);
-        lowerRight = Point2d(lowerRightX, lowerRightY);
+        upperLeft = Point2d(upperLeftX, upperLeftY)
+        lowerRight = Point2d(lowerRightX, lowerRightY)
     }
 
-    public fun clone(): Box2d {
+    fun clone(): Box2d {
         val newRect = Box2d();
-        newRect.upperLeft = this.upperLeft.clone();
-        newRect.lowerRight = this.lowerRight.clone();
+        newRect.upperLeft = this.upperLeft.clone()
+        newRect.lowerRight = this.lowerRight.clone()
         return newRect;
+    }
+
+    fun shift(p: Point2d, reverse: Boolean): Box2d {
+        return if ( reverse ) {
+            Box2d(
+                this.upperLeft.x - p.x,
+                this.upperLeft.y - p.y,
+                this.lowerRight.x - p.x,
+                this.lowerRight.y - p.y
+            )
+        } else {
+            Box2d(
+                this.upperLeft.x + p.x,
+                this.upperLeft.y + p.y,
+                this.lowerRight.x + p.x,
+                this.lowerRight.y + p.y
+            )
+        }
+    }
+
+    fun scale(s: Double): Box2d {
+        return Box2d(upperLeft.x * s, upperLeft.y * s, lowerRight.x * s, lowerRight.y * s)
     }
 
     /**
      * Returns the intersection of the two boxes.  An real number range is allowed.
      * @param o
      */
-    public fun intersection(o: Box2d): Box2d? {
+    fun intersection(o: Box2d): Box2d? {
         val newBox = Box2d();
         newBox.upperLeft.x = max(this.upperLeft.x, o.upperLeft.x);
         newBox.upperLeft.y = max(this.upperLeft.y, o.upperLeft.y);
@@ -45,7 +67,7 @@ class Box2d(upperLeftX: Double = 0.0, upperLeftY: Double = 0.0, lowerRightX: Dou
         return newBox;
     }
 
-    public fun getDimensions(): Point2d {
+    fun getDimensions(): Point2d {
         return Point2d(this.width, this.height)
     }
 }

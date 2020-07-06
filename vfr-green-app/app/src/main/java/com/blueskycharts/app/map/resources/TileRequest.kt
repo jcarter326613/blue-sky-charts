@@ -42,7 +42,7 @@ class TileRequest(private val provider: TileProvider, private var receiver: Tile
     override fun broadcastData(immediate: Boolean, canvas: Canvas?) {
         if (this.loaded && this.receiver != null && this.location != null && this.image != null && this.dimensions != null) {
             val region = Box2d(0.0, 0.0, this.dimensions.x, this.dimensions.y);
-            this.receiver?.receiveTile(this.location, region, this.image, this.data, immediate, canvas);
+            this.receiver?.receiveTile(region, this.image, this.data, immediate, canvas);
             this.receiver = null;
             this.data = null;
         }

@@ -15,8 +15,15 @@ import kotlin.math.sin
 class MapDataView(private val dataProvider: DataProvider, private val overlayType: OverlayTypes, private val map: Map) : SubMapView, DataReceiver {
     // Metadata
     private var dataAgeSeconds: Int? = null
-    override val originalWidth2d: Double = CoordinateConversion.maxMercator.width
-    override val originalHeight2d: Double = CoordinateConversion.maxMercator.height
+    override val fileExtentMercator: BoxWebMercator?
+        get() {
+            return CoordinateConversion.maxMercator
+        }
+
+    val fileExtent2d: Box2d
+        get() {
+            return CoordinateConversion.convertBoxMercatorToBox2d(CoordinateConversion.maxMercator)
+        }
 
     // Rendering
     private var contextScale: Double? = null
@@ -73,12 +80,12 @@ class MapDataView(private val dataProvider: DataProvider, private val overlayTyp
     override fun receiveData(location: PointWebMercator, data: WeatherCondition, dataAgeSeconds: Int, immediate: Boolean, canvas: Canvas?) {
         val contextScale = this.contextScale
         if ( this.isDisposed || contextScale == null ) {
-            return;
+            return
         }
 
         if ( !immediate || canvas == null ) {
-            this.map.requestRedraw();
-            return;
+            this.map.requestRedraw()
+            return
         }
 
         val das = this.dataAgeSeconds
@@ -86,7 +93,7 @@ class MapDataView(private val dataProvider: DataProvider, private val overlayTyp
             this.dataAgeSeconds = dataAgeSeconds
         }
 
-        val restoreTo = canvas.save();
+        val restoreTo = canvas.save()
         canvas.translate((location.x * contextScale).toFloat(), (location.y * contextScale).toFloat())
         when ( this.overlayType ) {
             OverlayTypes.Ceiling -> this.renderCeiling(data, canvas)
@@ -339,19 +346,22 @@ class MapDataView(private val dataProvider: DataProvider, private val overlayTyp
         canvas.drawText(text, 0f, lineHeight / 2f, this.itemTextPaint)
     }
 
-    override fun render(canvas: Canvas, region: Box2d, scale: Double) {
+    override fun render(canvas: Canvas, region: BoxWebMercator, destination: Box2d) {
         if ( this.isDisposed ) {
-            return;
+            return
         }
+        /*
         this.contextScale = scale;
 
         val pixelsAcross = region.getDimensions().x * scale;
-        val longitudeAcross = 360 * region.getDimensions().x / this.originalWidth2d;
+        val longitudeAcross = 360 * region.getDimensions().x / this.fileExtent2d.width
         val longitudeBuffer = longitudeAcross * this.expectedBuffer.width() / pixelsAcross
         val latitudeBuffer = longitudeBuffer * 0.6
 
         this.dataProvider.retrieveTile(CoordinateConversion.convertBox2dToBoxGeo(region), PointGeo(longitudeBuffer, latitudeBuffer),
             this.overlayType, this, canvas)
+
+         */
     }
 
     override fun moveOffscreen() {

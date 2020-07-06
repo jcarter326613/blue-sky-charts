@@ -82,7 +82,7 @@ open class TileProvider(private val mapRoot: String, private val imageExtension:
                 // Get the image and draw it
                 val image = (cachedRequest as TileRequest).image;
                 if ( image != null ) {
-                    receiver.receiveTile(requestLocation, subsection, image, data, true, canvas);
+                    receiver.receiveTile(subsection, image, data, true, canvas);
                     return;
                 }
             } else if ( cachedRequest == null ) {

@@ -13,6 +13,6 @@ class ShadowProvider(context: Context): TileProvider("", "", context) {
                      receiver: TileReceiver, data: Any?, canvas: Canvas ) {
         val image = ResourcesCompat.getDrawable(context.resources, R.drawable.world_shadow, null)
         val box = Box2d(0.0, 0.0, 1.0, 1.0)
-        receiver.receiveTile(location, box, image?.toBitmap(), data, true, canvas)
+        receiver.receiveTile(box, image?.toBitmap(), data, true, canvas)
     }
 }

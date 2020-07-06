@@ -8,10 +8,9 @@ import com.blueskycharts.app.map.models.SubMapModel
 
 interface SubMapView {
     /**
-     * Some original width and height in any unit which is used determine the region parameter into the render function.
+     * Mercator coordinates of map
      */
-    val originalWidth2d: Double
-    val originalHeight2d: Double
+    val fileExtentMercator: BoxWebMercator?
 
     /**
      * Initializes the view
@@ -34,7 +33,7 @@ interface SubMapView {
      * @param region The region in relation to the original width and height
      * @param scale All aspects of the region are multiplied by this value
      */
-    fun render(canvas: Canvas, region: Box2d, scale: Double);
+    fun render(canvas: Canvas, region: BoxWebMercator, destination: Box2d)
 
     /**
      * Prevents any further drawing from this view

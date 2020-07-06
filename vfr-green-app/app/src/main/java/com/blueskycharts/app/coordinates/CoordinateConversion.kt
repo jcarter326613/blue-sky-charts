@@ -111,6 +111,10 @@ object CoordinateConversion {
         return this.convertBoxMercatorToBoxGeo(this.convertBox2dToBoxMercator(box2d))
     }
 
+    fun convertBoxGeoToBox2d(boxGeo: BoxGeo): Box2d {
+        return this.convertBoxMercatorToBox2d(this.convertBoxGeoToBoxMercator(boxGeo))
+    }
+
     fun convertBoxGeoToBoxMercator(boxGeo: BoxGeo): BoxWebMercator {
         val topLeft = convertPointGeoToPointWebMercator(boxGeo.topLeft);
         val bottomRight = convertPointGeoToPointWebMercator(boxGeo.bottomRight);
