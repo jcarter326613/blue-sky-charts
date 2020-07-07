@@ -60,7 +60,7 @@
                 "Brownsville",
                 "Miami"
             ],
-            "maxZoom": 5
+            "maxZoom": 6
         },
         "hawaii": {
             "subMaps": [
