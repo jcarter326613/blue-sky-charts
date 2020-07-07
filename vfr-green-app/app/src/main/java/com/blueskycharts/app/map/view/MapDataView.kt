@@ -20,13 +20,12 @@ class MapDataView(private val dataProvider: DataProvider, private val overlayTyp
             return CoordinateConversion.maxMercator
         }
 
-    val fileExtent2d: Box2d
+    private val fileExtent2d: Box2d
         get() {
             return CoordinateConversion.convertBoxMercatorToBox2d(CoordinateConversion.maxMercator)
         }
 
     // Rendering
-    private var contextScale: Double? = null
     private var isDisposed: Boolean = false
     private val itemLightBackgroundPaint = Paint()
     private val itemDarkBackgroundPaint = Paint()
@@ -77,13 +76,12 @@ class MapDataView(private val dataProvider: DataProvider, private val overlayTyp
         return this.dataAgeSeconds;
     }
 
-    override fun receiveData(location: PointWebMercator, data: WeatherCondition, dataAgeSeconds: Int, immediate: Boolean, canvas: Canvas?) {
-        val contextScale = this.contextScale
-        if ( this.isDisposed || contextScale == null ) {
+    override fun receiveData(location: PointWebMercator, data: WeatherCondition, dataAgeSeconds: Int, immediate: Boolean, canvas: Canvas?, receiverData: Any?) {
+        if ( this.isDisposed ) {
             return
         }
 
-        if ( !immediate || canvas == null ) {
+        if ( !immediate || canvas == null || receiverData == null || receiverData !is RenderData) {
             this.map.requestRedraw()
             return
         }
@@ -93,8 +91,14 @@ class MapDataView(private val dataProvider: DataProvider, private val overlayTyp
             this.dataAgeSeconds = dataAgeSeconds
         }
 
+        // Figure out where the canvas should be translated to
+        val locationPercentage = receiverData.region.positionPercentageUpperLeft(location)
+        val drawLocationX = receiverData.destination.upperLeft.x + receiverData.destination.width * locationPercentage.x
+        val drawLocationY = receiverData.destination.upperLeft.y + receiverData.destination.height * locationPercentage.y
+
+        // Draw the information on the screen
         val restoreTo = canvas.save()
-        canvas.translate((location.x * contextScale).toFloat(), (location.y * contextScale).toFloat())
+        canvas.translate(drawLocationX.toFloat(), drawLocationY.toFloat())
         when ( this.overlayType ) {
             OverlayTypes.Ceiling -> this.renderCeiling(data, canvas)
             OverlayTypes.Category -> this.renderCategory(data, canvas)
@@ -350,20 +354,20 @@ class MapDataView(private val dataProvider: DataProvider, private val overlayTyp
         if ( this.isDisposed ) {
             return
         }
-        /*
-        this.contextScale = scale;
 
-        val pixelsAcross = region.getDimensions().x * scale;
-        val longitudeAcross = 360 * region.getDimensions().x / this.fileExtent2d.width
-        val longitudeBuffer = longitudeAcross * this.expectedBuffer.width() / pixelsAcross
+        val geoArea = CoordinateConversion.convertBoxMercatorToBoxGeo(region)
+        val longitudeBuffer = geoArea.width * this.expectedBuffer.width() / destination.width
         val latitudeBuffer = longitudeBuffer * 0.6
 
-        this.dataProvider.retrieveTile(CoordinateConversion.convertBox2dToBoxGeo(region), PointGeo(longitudeBuffer, latitudeBuffer),
-            this.overlayType, this, canvas)
-
-         */
+        this.dataProvider.retrieveTile(geoArea, PointGeo(longitudeBuffer, latitudeBuffer),
+            this.overlayType, this, canvas, data=RenderData(region, destination))
     }
 
     override fun moveOffscreen() {
     }
+
+    private data class RenderData(
+        val region: BoxWebMercator,
+        val destination: Box2d
+    )
 }

@@ -5,6 +5,11 @@ import kotlin.math.min;
 
 class BoxGeo(topLeft: PointGeo = PointGeo(), bottomRight: PointGeo = PointGeo(),
              topRight: PointGeo? = null, bottomLeft: PointGeo? = null) {
+    val width: Double
+        get() = this.bottomRight.longitude - this.topLeft.longitude
+    val height: Double
+        get() = this.topLeft.latitude - this.bottomRight.latitude
+
     var topLeft: PointGeo = topLeft
         set(value) {
             field = value;

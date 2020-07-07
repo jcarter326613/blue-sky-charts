@@ -57,4 +57,10 @@ class BoxWebMercator(topLeftX: Double = 0.0, topLeftY: Double = 0.0, bottomRight
         val bottomRightY = (this.topLeft.y - o.bottomRight.y) / this.height
         return Box2d(topLeftX, topLeftY, bottomRightX, bottomRightY)
     }
+
+    fun positionPercentageUpperLeft(o: PointWebMercator): Point2d {
+        val x = (o.x - this.topLeft.x) / this.width
+        val y = (this.topLeft.y - o.y) / this.height
+        return Point2d(x, y)
+    }
 }

@@ -3,6 +3,7 @@ package com.blueskycharts.app.map.resources
 import android.provider.Settings
 import android.util.Log
 import com.blueskycharts.app.map.utility.PriorityArray
+import com.blueskycharts.app.map.view.Map
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.sync.Mutex
@@ -11,7 +12,7 @@ import java.util.*
 import java.util.concurrent.atomic.AtomicInteger
 import kotlin.concurrent.timerTask
 
-abstract class CachedProvider( private val requestDelayMilliseconds: Int = 0 ) {
+abstract class CachedProvider( private val map: Map, private val requestDelayMilliseconds: Int = 0 ) {
     private val maxActiveRequests = 2
     private val cache = Hashtable<String, CachedProviderRequest>(); //Need to add ageoff, causing memory leak
     private var numActiveRequests = AtomicInteger(0)
@@ -68,6 +69,7 @@ abstract class CachedProvider( private val requestDelayMilliseconds: Int = 0 ) {
     fun completeRequest() {
         this.numActiveRequests.getAndDecrement();
         this.processQueue();
+        this.map.requestRedraw()
     }
 
     protected fun incrementAwaitingQueueAddition() {

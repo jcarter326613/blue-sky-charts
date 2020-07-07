@@ -13,7 +13,8 @@ import com.blueskycharts.app.remoteassests.Volatility
 import java.net.URL
 import kotlin.math.ceil
 
-class DataRequest(private val provider: DataProvider, var receiver: DataReceiver?, private val area: BoxGeo, private val resolution: PointGeo, private val type: OverlayTypes) :
+class DataRequest(private val provider: DataProvider, private var receiver: DataReceiver?, private val area: BoxGeo,
+                  private val resolution: PointGeo, private val type: OverlayTypes, private var receiverData: Any?) :
     CachedProviderRequest(provider, 1) {
 
     private var data: WeatherConditionResponse? = null
@@ -32,6 +33,11 @@ class DataRequest(private val provider: DataProvider, var receiver: DataReceiver
             }
         }
 
+    fun setReceiver(receiver: DataReceiver?, data: Any?) {
+        this.receiver = receiver
+        this.receiverData = data
+    }
+
     override fun sendRequest() {
         val tl = this.area.topLeft
         val br = this.area.bottomRight
@@ -46,8 +52,7 @@ class DataRequest(private val provider: DataProvider, var receiver: DataReceiver
                     this@DataRequest.timeReceived = System.currentTimeMillis()
                     if (conditionResponse != null) {
                         this@DataRequest.oldestDataAgeAtRetrievalSeconds = conditionResponse.oldestDataAgeSeconds
-                        val success = conditionResponse.oldestDataAgeSeconds != null
-                        this@DataRequest.completeRequest(success);
+                        this@DataRequest.completeRequest(true);
                     } else {
                         this@DataRequest.completeRequest(false);
                     }
@@ -77,7 +82,7 @@ class DataRequest(private val provider: DataProvider, var receiver: DataReceiver
             val geoLocation = PointGeo(longitude.toDouble(), latitude.toDouble())
             val mercatorLocation = CoordinateConversion.convertPointGeoToPointWebMercator(geoLocation)
 
-            receiver.receiveData(mercatorLocation, condition, dataAgeSeconds, immediate, canvas)
+            receiver.receiveData(mercatorLocation, condition, dataAgeSeconds, immediate, canvas, this.receiverData)
         }
     }
 

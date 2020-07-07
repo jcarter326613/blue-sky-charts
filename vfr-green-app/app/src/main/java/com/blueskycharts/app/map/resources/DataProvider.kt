@@ -4,6 +4,7 @@ import android.content.Context
 import android.graphics.Canvas
 import com.blueskycharts.app.coordinates.BoxGeo
 import com.blueskycharts.app.coordinates.PointGeo
+import com.blueskycharts.app.map.view.Map
 import com.blueskycharts.app.map.view.OverlayTypes
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
@@ -15,7 +16,7 @@ import kotlin.math.ceil
 import kotlin.math.log2
 import kotlin.math.pow
 
-class DataProvider(val context: Context) : CachedProvider(700) {
+class DataProvider(val context: Context, map: Map) : CachedProvider(map, 700) {
     private val areaBucketMultiplier = 2
     private val usedBuckets: HashMap<OverlayTypes, HashMap<String, LinkedList<BoxGeo>>> = HashMap()  //<overlay_type, <resolution as string, box geos>>
 
@@ -23,7 +24,7 @@ class DataProvider(val context: Context) : CachedProvider(700) {
         for ( type in OverlayTypes.values() ) this.usedBuckets[type] = HashMap()
     }
 
-    fun retrieveTile(area: BoxGeo, resolution: PointGeo, type: OverlayTypes, receiver: DataReceiver, canvas: Canvas) {
+    fun retrieveTile(area: BoxGeo, resolution: PointGeo, type: OverlayTypes, receiver: DataReceiver, canvas: Canvas, data: Any?) {
         val resolutionBucket = this.createResolutionBucket(resolution)
         val areaBucket = this.createAreaBucket(area, resolutionBucket, type)
         val key = this.getCacheKey(areaBucket, resolutionBucket, type)
@@ -31,7 +32,7 @@ class DataProvider(val context: Context) : CachedProvider(700) {
 
         if ( tileRequest != null && tileRequest.loaded ) {
             val tileRequestScoped = tileRequest as DataRequest
-            tileRequestScoped.receiver = receiver
+            tileRequestScoped.setReceiver(receiver, data)
             tileRequestScoped.broadcastData(true, canvas)
         } else {
             incrementAwaitingQueueAddition()
@@ -40,7 +41,7 @@ class DataProvider(val context: Context) : CachedProvider(700) {
                     val newTileRequest = this@DataProvider.getExistingRequest(key)
                     if (newTileRequest != null && !newTileRequest.inError) {
                         val tileRequestScoped = newTileRequest as DataRequest
-                        tileRequestScoped.receiver = receiver
+                        tileRequestScoped.setReceiver(receiver, data)
                         if (tileRequestScoped.loaded) {
                             tileRequestScoped.broadcastData(false, canvas)
                         }
@@ -50,7 +51,8 @@ class DataProvider(val context: Context) : CachedProvider(700) {
                             receiver,
                             areaBucket,
                             resolutionBucket,
-                            type
+                            type,
+                            data
                         )
                         this@DataProvider.addRequestToQueue(key, newRequest);
                     }

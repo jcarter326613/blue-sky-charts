@@ -189,7 +189,5 @@ class MapTileView(private val tileProvider: TileProvider, private val map: Map) 
     override fun moveOffscreen() {
     }
 
-    private data class RenderData(
-        val destination: Box2d) {
-    }
+    private data class RenderData(val destination: Box2d)
 }

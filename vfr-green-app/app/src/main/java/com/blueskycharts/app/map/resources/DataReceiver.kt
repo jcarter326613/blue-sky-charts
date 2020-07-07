@@ -6,5 +6,5 @@ import com.blueskycharts.app.map.models.WeatherCondition
 import com.blueskycharts.app.map.models.WeatherConditionResponse
 
 interface DataReceiver {
-    fun receiveData(location: PointWebMercator, data: WeatherCondition, dataAgeSeconds: Int, immediate: Boolean, canvas: Canvas?)
+    fun receiveData(location: PointWebMercator, data: WeatherCondition, dataAgeSeconds: Int, immediate: Boolean, canvas: Canvas?, receiverData: Any?)
 }

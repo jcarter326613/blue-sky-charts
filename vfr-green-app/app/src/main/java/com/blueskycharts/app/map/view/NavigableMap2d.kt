@@ -81,9 +81,9 @@ class NavigableMap2d(context: Context, attributes: AttributeSet) : Map(context, 
         textStrokePaint.strokeWidth = convertDipToPixels(1f)
 
         // Set all constant and derived defaults
-        this.tileProvider = TileProvider(mapRoot, "jpg", context)
-        this.shadowTileProvider = ShadowProvider(context)
-        this.dataProvider = DataProvider(context)
+        this.tileProvider = TileProvider(mapRoot, "jpg", context, this)
+        this.shadowTileProvider = ShadowProvider(context, this)
+        this.dataProvider = DataProvider(context, this)
 
         if ( this.scaleDriver > this.maxScaleDriver ) {
             this.scaleDriver = this.maxScaleDriver;
@@ -244,6 +244,7 @@ class NavigableMap2d(context: Context, attributes: AttributeSet) : Map(context, 
             }
         }
 
+        // Draw any data overlays
         val dataOverlayView = this.dataOverlayView
         if ( dataOverlayView != null ) {
             val dataOverlay = dataOverlayView.subMapView
@@ -252,15 +253,20 @@ class NavigableMap2d(context: Context, attributes: AttributeSet) : Map(context, 
             canvas.save()
             this.drawSubMap(dataOverlayView, viewportMercator, canvas)
             canvas.restore()
+        }
 
-            // Draw the date indicating the oldest data displayed
-            if ( this.dataProvider.isLoading() ) {
+        canvas.restoreToCount(originCenterRestoreCount)
+
+        // Draw the date indicating the oldest data displayed
+        if ( dataOverlayView != null) {
+            val dataOverlay = dataOverlayView.subMapView
+            if (this.dataProvider.isLoading()) {
                 canvas.save()
                 this.renderInformationAgeBox("Loading weather data...", canvas)
                 canvas.restore()
             } else {
                 val informationAge = dataOverlay.getRequestedInformationAgeSeconds()
-                if ( informationAge != null ) {
+                if (informationAge != null) {
                     // Draw the information age
                     canvas.save()
                     val informationAgeLabel = this.getInformationAgeLabel(informationAge)
@@ -282,8 +288,6 @@ class NavigableMap2d(context: Context, attributes: AttributeSet) : Map(context, 
                 }
             }
         }
-
-        canvas.restoreToCount(originCenterRestoreCount)
     }
 
     private fun drawSubMap(submap: SubMapPosition, viewportMercator: BoxWebMercator, canvas: Canvas) {

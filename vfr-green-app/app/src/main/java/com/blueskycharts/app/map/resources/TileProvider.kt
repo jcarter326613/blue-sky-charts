@@ -4,11 +4,12 @@ import android.content.Context
 import android.graphics.Canvas
 import com.blueskycharts.app.coordinates.Box2d
 import com.blueskycharts.app.coordinates.Point2d
+import com.blueskycharts.app.map.view.Map
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
 import kotlin.math.floor
 
-open class TileProvider(private val mapRoot: String, private val imageExtension: String, val context: Context) : CachedProvider(0) {
+open class TileProvider(private val mapRoot: String, private val imageExtension: String, val context: Context, map: Map) : CachedProvider(map, 0) {
     open fun retrieveTile(mapName: String, mapVersion: String, zoomLevel: Int, location: Point2d, tileDimensions: Point2d,
                      receiver: TileReceiver, data: Any?, canvas: Canvas ) {
         val key = this.createKey(mapName, zoomLevel, location);

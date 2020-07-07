@@ -1,8 +1,8 @@
 package com.blueskycharts.app.map.models
 
 data class WeatherConditionResponse (
-    var oldestDataAgeSeconds: Int?,
-    var conditions: Array<WeatherCondition>?
+    var oldestDataAgeSeconds: Int? = null,
+    var conditions: Array<WeatherCondition>? = null
 ) {
     override fun equals(other: Any?): Boolean {
         if (this === other) return true
