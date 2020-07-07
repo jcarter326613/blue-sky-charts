@@ -87,7 +87,7 @@ open class TileProvider(private val mapRoot: String, private val imageExtension:
                 }
             } else if ( cachedRequest == null ) {
                 GlobalScope.launch {
-                    val url = this@TileProvider.createUrl(mapName, mapVersion, zoomLevel, zoomLocation)
+                    val url = this@TileProvider.createUrl(mapName, mapVersion, i, zoomLocation)
                     val newRequest = TileRequest(this@TileProvider, receiver, zoomLocation, tileDimensions, data, url, i);
                     this@TileProvider.addRequestToQueue(key, newRequest);
                 }
