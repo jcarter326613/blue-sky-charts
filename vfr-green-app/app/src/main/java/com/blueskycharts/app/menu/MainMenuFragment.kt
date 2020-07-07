@@ -52,7 +52,13 @@ class MainMenuFragment() : Fragment() {
     }
 
     private fun setupWeatherHandlers() {
-        var button: Button? = view?.findViewById(R.id.ceiling)
+        var button: Button? = view?.findViewById(R.id.none)
+        button?.setOnClickListener {
+            showOrToggleMenu()
+            overlayModel?.setOverlayType(OverlayTypes.None)
+        }
+
+        button = view?.findViewById(R.id.ceiling)
         button?.setOnClickListener {
             showOrToggleMenu()
             overlayModel?.setOverlayType(OverlayTypes.Ceiling)

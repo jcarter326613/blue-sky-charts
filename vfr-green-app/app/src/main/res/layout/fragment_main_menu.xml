@@ -52,6 +52,12 @@
         android:visibility="invisible">
 
         <Button
+            android:id="@+id/none"
+            android:layout_width="100dp"
+            android:layout_height="100dp"
+            android:text="None" />
+
+        <Button
             android:id="@+id/ceiling"
             android:layout_width="100dp"
             android:layout_height="100dp"
