@@ -2,21 +2,23 @@ package com.blueskycharts.app.map.resources
 
 import android.graphics.Bitmap
 import android.graphics.Canvas
+import com.blueskycharts.app.assests.AssetProvider
 import com.blueskycharts.app.coordinates.Box2d
 import com.blueskycharts.app.coordinates.Point2d
-import com.blueskycharts.app.assests.AssetProviderFactory
 import com.blueskycharts.app.assests.RemoteAssetDescription
 import com.blueskycharts.app.assests.Volatility
+import com.blueskycharts.app.map.assetmanagement.TileAssetProvider
 import java.net.URL
 
-class TileRequest(private val provider: TileProvider, private var receiver: TileReceiver?, private val location: Point2d?, private val dimensions: Point2d?,
-                  private var data: Any?, private val url: String, private val zoomLevel: Int  ) : CachedProviderRequest(provider, zoomLevel) {
+class TileRequest(private val provider: TileProvider, private var receiver: TileReceiver?, private var data: Any?,
+                  private val location: Point2d, private val dimensions: Point2d,
+                  private val zoomLevel: Int, private val mapName: String, private val mapVersion: String ) : CachedProviderRequest(provider, zoomLevel) {
     var image: Bitmap? = null
         private set
 
     override fun sendRequest() {
-        val provider = AssetProviderFactory.instance
-        provider.retrieveAsset(RemoteAssetDescription(URL(url), Volatility.Indefinite)) {
+        val provider = provider.assetProvider
+        provider.retrieveTile(mapName, mapVersion, zoomLevel, location.x.toInt(), location.y.toInt() ) {
             try {
                 val bitmap = it.asBitmap()
                 if ( bitmap != null ) {
@@ -33,7 +35,7 @@ class TileRequest(private val provider: TileProvider, private var receiver: Tile
     }
 
     override fun broadcastData(immediate: Boolean, canvas: Canvas?) {
-        if (this.loaded && this.receiver != null && this.location != null && this.image != null && this.dimensions != null) {
+        if (this.loaded && this.receiver != null && this.image != null) {
             val region = Box2d(0.0, 0.0, this.dimensions.x, this.dimensions.y);
             this.receiver?.receiveTile(region, this.image, this.data, immediate, canvas);
             this.receiver = null;

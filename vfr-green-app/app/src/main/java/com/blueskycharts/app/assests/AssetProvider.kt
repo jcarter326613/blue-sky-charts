@@ -7,8 +7,11 @@ import kotlinx.coroutines.launch
 import java.io.InputStream
 import java.net.URL
 
-class AssetProvider() {
-    fun retrieveAsset(assetDescription: AssetDescription, callback: ((asset: Asset) -> Unit)) {
+/**
+ * Provides access to assets whether on disk or remotely stored
+ */
+open class AssetProvider() {
+    open fun retrieveAsset(assetDescription: AssetDescription, callback: ((asset: Asset) -> Unit)) {
         try {
             val newAsset = Asset(assetDescription)
             if ( DiskCacheFactory.instance.retrieveAssetBytes(newAsset) ) {

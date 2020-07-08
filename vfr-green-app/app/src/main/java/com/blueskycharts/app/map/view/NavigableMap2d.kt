@@ -6,6 +6,7 @@ import android.util.AttributeSet
 import android.view.MotionEvent
 import androidx.core.content.res.getStringOrThrow
 import com.blueskycharts.app.R
+import com.blueskycharts.app.assests.AssetProvider
 import com.blueskycharts.app.coordinates.*
 import com.blueskycharts.app.map.models.BoxGeoModel
 import com.blueskycharts.app.map.models.MapMetaDataModelCollection
@@ -13,9 +14,9 @@ import com.blueskycharts.app.map.models.SubMapModel
 import com.blueskycharts.app.map.resources.DataProvider
 import com.blueskycharts.app.map.resources.ShadowProvider
 import com.blueskycharts.app.map.resources.TileProvider
-import com.blueskycharts.app.assests.AssetProviderFactory
 import com.blueskycharts.app.assests.RemoteAssetDescription
 import com.blueskycharts.app.assests.Volatility
+import com.blueskycharts.app.map.configuration.MapConfiguration
 import java.net.URL
 import java.util.*
 import kotlin.concurrent.timerTask
@@ -82,7 +83,7 @@ class NavigableMap2d(context: Context, attributes: AttributeSet) : Map(context, 
         textStrokePaint.strokeWidth = convertDipToPixels(1f)
 
         // Set all constant and derived defaults
-        this.tileProvider = TileProvider(mapRoot, "jpg", context, this)
+        this.tileProvider = TileProvider(mapRoot, context, this)
         this.shadowTileProvider = ShadowProvider(context, this)
         this.dataProvider = DataProvider(context, this)
 
@@ -166,46 +167,26 @@ class NavigableMap2d(context: Context, attributes: AttributeSet) : Map(context, 
         this.mapBackground = SubMapPosition(worldShadowView, worldShadowMercatorExtents)
     }
 
-    private fun initializeMapModel(data: MapMetaDataModelCollection) {
+    private fun initializeMapModel(configuration: MapConfiguration) {
         // Add the world  VFR charts
         val mapViewList = LinkedList<SubMapPosition>()
-        val now = Date()
-        for (map in data.maps) {
-            val mapName = map.key
-            val mapData = map.value
-            var latestActiveVersion: Date? = null
-            var latestActiveVersionMap: SubMapModel? = null
-            for (versionEntry in mapData.versions) {
-                val versionDate = this.convertVersionStringToDate(versionEntry.key)
-                if ( versionDate != null && ( versionDate < now && (latestActiveVersion == null || versionDate > latestActiveVersion)) ) {
-                    latestActiveVersion = versionDate
-                    latestActiveVersionMap = versionEntry.value
-                }
-            }
-            if ( latestActiveVersionMap != null ) {
+        for (mapName in configuration.mapList) {
+            val mapData = configuration.getCurrentVersion(mapName)
+            if ( mapData != null ) {
                 val subMapView = MapTileView(this.tileProvider, this)
-                val fileExtent = subMapView.initialize(mapName, latestActiveVersionMap) ?: continue
+                val fileExtent = subMapView.initialize(mapName, mapData) ?: continue
                 mapViewList.add(SubMapPosition(subMapView, fileExtent));
             }
         }
         this.mapViews = mapViewList
     }
 
-    private fun convertVersionStringToDate(dateString: String): Date? {
-        if (dateString.length < 19 ) {
-            return null
-        }
-        @Suppress("DEPRECATION")
-        return Date(dateString.substring(0, 4).toInt() - 1900, dateString.substring(5, 7).toInt() - 1, dateString.substring(8, 10).toInt(),
-                dateString.substring(11, 13).toInt(), dateString.substring(14, 16).toInt(), dateString.substring(17, 19).toInt())
-    }
-
     private fun retrieveConfiguration(mapConfigurationFile: URL) {
-        val assetProvider = AssetProviderFactory.instance
+        val assetProvider = AssetProvider()
         assetProvider.retrieveAsset(RemoteAssetDescription(mapConfigurationFile, Volatility.DayCache)) {
             val reader = it.asJsonReader()
             if ( reader != null ) {
-                val mapPositions = MapMetaDataModelCollection.readFromJsonReader(reader);
+                val mapPositions = MapConfiguration(MapMetaDataModelCollection.readFromJsonReader(reader))
                 this@NavigableMap2d.initializeMapModel(mapPositions)
                 this@NavigableMap2d.postInvalidate()
             }

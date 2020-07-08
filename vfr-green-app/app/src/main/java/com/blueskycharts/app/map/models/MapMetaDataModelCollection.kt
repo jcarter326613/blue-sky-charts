@@ -5,9 +5,7 @@ import com.blueskycharts.app.coordinates.Point2d
 import java.util.*
 import kotlin.collections.HashMap
 
-data class MapMetaDataModelCollection (val maps: HashMap<String, MapMetaDataModel>) {
-
-
+data class MapMetaDataModelCollection (val maps: MutableMap<String, MapMetaDataModel>) {
     override fun equals(other: Any?): Boolean {
         if (this === other) return true
         if (javaClass != other?.javaClass) return false

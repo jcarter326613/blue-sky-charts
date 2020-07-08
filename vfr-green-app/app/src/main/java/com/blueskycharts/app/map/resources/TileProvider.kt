@@ -4,12 +4,16 @@ import android.content.Context
 import android.graphics.Canvas
 import com.blueskycharts.app.coordinates.Box2d
 import com.blueskycharts.app.coordinates.Point2d
+import com.blueskycharts.app.map.assetmanagement.TileAssetProvider
 import com.blueskycharts.app.map.view.Map
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
 import kotlin.math.floor
 
-open class TileProvider(private val mapRoot: String, private val imageExtension: String, val context: Context, map: Map) : CachedProvider(map, 0) {
+open class TileProvider(private val mapRoot: String, val context: Context, map: Map) : CachedProvider(map, 0) {
+    val assetProvider
+        get() = TileAssetProvider.getInstance(mapRoot)
+
     open fun retrieveTile(mapName: String, mapVersion: String, zoomLevel: Int, location: Point2d, tileDimensions: Point2d,
                      receiver: TileReceiver, data: Any?, canvas: Canvas ) {
         val key = this.createKey(mapName, zoomLevel, location);
@@ -35,15 +39,15 @@ open class TileProvider(private val mapRoot: String, private val imageExtension:
                             tileRequestScoped.broadcastData(false, canvas);
                         }
                     } else {
-                        val url = this@TileProvider.createUrl(mapName, mapVersion, zoomLevel, location)
                         val newRequest = TileRequest(
                             this@TileProvider,
                             receiver,
+                            data,
                             location,
                             tileDimensions,
-                            data,
-                            url,
-                            zoomLevel
+                            zoomLevel,
+                            mapName,
+                            mapVersion
                         );
                         this@TileProvider.addRequestToQueue(key, newRequest);
                     }
@@ -52,10 +56,6 @@ open class TileProvider(private val mapRoot: String, private val imageExtension:
                 }
             }
         }
-    }
-
-    private fun createUrl(mapName: String, mapVersion: String, zoomLevel: Int, location: Point2d): String {
-        return "${mapRoot}/${mapName}/$mapVersion/$zoomLevel/${location.x.toInt()}_${location.y.toInt()}.${imageExtension}"
     }
 
     private fun createKey(mapName: String, zoomLevel: Int, location: Point2d): String {
@@ -88,8 +88,7 @@ open class TileProvider(private val mapRoot: String, private val imageExtension:
                 }
             } else if ( cachedRequest == null ) {
                 GlobalScope.launch {
-                    val url = this@TileProvider.createUrl(mapName, mapVersion, i, zoomLocation)
-                    val newRequest = TileRequest(this@TileProvider, receiver, zoomLocation, tileDimensions, data, url, i);
+                    val newRequest = TileRequest(this@TileProvider, receiver, data, zoomLocation, tileDimensions, i, mapName, mapVersion)
                     this@TileProvider.addRequestToQueue(key, newRequest);
                 }
             }

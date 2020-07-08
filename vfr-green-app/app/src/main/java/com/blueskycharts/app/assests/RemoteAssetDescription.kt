@@ -26,8 +26,7 @@ class RemoteAssetDescription(private val url: URL, volatility: Volatility, priva
                 // Write the file to disk
                 when (volatility) {
                     Volatility.DayCache,
-                    Volatility.Indefinite,
-                    Volatility.ScheduledLifetime -> {
+                    Volatility.Indefinite -> {
                         DiskCacheFactory.instance.writeAsset(asset)
                     }
                     else -> {

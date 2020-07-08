@@ -5,11 +5,15 @@ import android.util.Log
 import java.io.File
 import java.io.FileInputStream
 
-class DiskCache(private val context: Context) {
+/**
+ * Handles manipulation of the on disk cache.
+ * Performs all file system direct manipulation and IO
+ */
+final class DiskCache(private val context: Context) {
     fun retrieveAssetBytes(asset: Asset): Boolean {
         var fileInput: FileInputStream? = null
         return try {
-            fileInput = context.openFileInput(getFileForAsset(asset).path.replace("/", "-"))
+            fileInput = context.openFileInput(getFilePathForAsset(asset))
             asset.bytes = fileInput.readBytes()
             true
         } catch ( e: Throwable ) {
@@ -22,7 +26,7 @@ class DiskCache(private val context: Context) {
     fun writeAsset(asset: Asset) {
         try {
             // Write the file to disk
-            val outputStream = context.openFileOutput(getFileForAsset(asset).path.replace("/", "-"), Context.MODE_PRIVATE);
+            val outputStream = context.openFileOutput(getFilePathForAsset(asset), Context.MODE_PRIVATE);
             outputStream.write(asset.bytes)
             outputStream.close()
         } catch ( e: Throwable ) {
@@ -30,5 +34,5 @@ class DiskCache(private val context: Context) {
         }
     }
 
-    private fun getFileForAsset(asset: Asset) = File(context.filesDir, asset.description.localPath)
+    private fun getFilePathForAsset(asset: Asset) = asset.description.localPath.replace("/", "-").replace(":", "_")
 }

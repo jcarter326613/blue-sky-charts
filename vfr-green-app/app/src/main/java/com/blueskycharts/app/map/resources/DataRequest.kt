@@ -2,12 +2,12 @@ package com.blueskycharts.app.map.resources
 
 import android.graphics.Canvas
 import android.util.Log
+import com.blueskycharts.app.assests.AssetProvider
 import com.blueskycharts.app.coordinates.BoxGeo
 import com.blueskycharts.app.coordinates.CoordinateConversion
 import com.blueskycharts.app.coordinates.PointGeo
 import com.blueskycharts.app.map.models.WeatherConditionResponse
 import com.blueskycharts.app.map.view.OverlayTypes
-import com.blueskycharts.app.assests.AssetProviderFactory
 import com.blueskycharts.app.assests.RemoteAssetDescription
 import com.blueskycharts.app.assests.Volatility
 import java.net.URL
@@ -23,7 +23,7 @@ class DataRequest(private val provider: DataProvider, private var receiver: Data
     private val urlBase = "https://api.blueskycharts.com/condition-v2/getConditions"
     private val maxAgeMilliseconds = 5 * 60 * 1000
 
-    val expired: Boolean
+    val expired: Boolean        //TODO: Make sure expired is respected by the cache
         get() {
             return if (this.loaded) {
                 val now = System.currentTimeMillis()
@@ -43,9 +43,9 @@ class DataRequest(private val provider: DataProvider, private var receiver: Data
         val br = this.area.bottomRight
         val url = "$urlBase?startLongitude=${tl.longitude}&endLongitude=${br.longitude}&startLatitude=${br.latitude}&endLatitude=${tl.latitude}&bufferLongitude=${this.resolution.longitude}&bufferLatitude=${this.resolution.latitude}&information=${this.getInformationForType(this.type)}"
 
-        val provider = AssetProviderFactory.instance
+        val provider = AssetProvider()
 
-        provider.retrieveAsset(RemoteAssetDescription(URL(url), Volatility.ScheduledLifetime, true)) {
+        provider.retrieveAsset(RemoteAssetDescription(URL(url), Volatility.NeverCache, true)) {
             try {
                 if ( !it.errorLoading ) {
                     val conditionResponse = it.asJsonObject<WeatherConditionResponse>()

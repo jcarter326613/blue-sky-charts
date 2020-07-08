@@ -2,7 +2,7 @@ package com.blueskycharts.app.map.models
 
 import android.util.JsonReader
 
-data class MapMetaDataModel ( val versions: HashMap<String, SubMapModel>) {
+data class MapMetaDataModel ( val versions: MutableMap<String, SubMapModel>) {
     override fun equals(other: Any?): Boolean {
         if (this === other) return true
         if (javaClass != other?.javaClass) return false
