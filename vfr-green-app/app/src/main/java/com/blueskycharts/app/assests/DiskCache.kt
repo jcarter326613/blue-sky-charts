@@ -1,4 +1,4 @@
-package com.blueskycharts.app.remoteassests
+package com.blueskycharts.app.assests
 
 import android.content.Context
 import android.util.Log
@@ -26,9 +26,9 @@ class DiskCache(private val context: Context) {
             outputStream.write(asset.bytes)
             outputStream.close()
         } catch ( e: Throwable ) {
-            Log.e(null, e.message ?: "Error writing asset to disk ${asset.localPath}")
+            Log.e(null, e.message ?: "Error writing asset to disk ${asset.description.localPath}")
         }
     }
 
-    private fun getFileForAsset(asset: Asset) = File(context.filesDir, asset.localPath)
+    private fun getFileForAsset(asset: Asset) = File(context.filesDir, asset.description.localPath)
 }

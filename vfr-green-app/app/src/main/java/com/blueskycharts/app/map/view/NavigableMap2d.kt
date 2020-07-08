@@ -13,8 +13,9 @@ import com.blueskycharts.app.map.models.SubMapModel
 import com.blueskycharts.app.map.resources.DataProvider
 import com.blueskycharts.app.map.resources.ShadowProvider
 import com.blueskycharts.app.map.resources.TileProvider
-import com.blueskycharts.app.remoteassests.AssetProvider
-import com.blueskycharts.app.remoteassests.Volatility
+import com.blueskycharts.app.assests.AssetProviderFactory
+import com.blueskycharts.app.assests.RemoteAssetDescription
+import com.blueskycharts.app.assests.Volatility
 import java.net.URL
 import java.util.*
 import kotlin.concurrent.timerTask
@@ -200,8 +201,8 @@ class NavigableMap2d(context: Context, attributes: AttributeSet) : Map(context, 
     }
 
     private fun retrieveConfiguration(mapConfigurationFile: URL) {
-        val assetProvider = AssetProvider(context)
-        assetProvider.retrieveAsset(mapConfigurationFile, Volatility.DayCache) {
+        val assetProvider = AssetProviderFactory.instance
+        assetProvider.retrieveAsset(RemoteAssetDescription(mapConfigurationFile, Volatility.DayCache)) {
             val reader = it.asJsonReader()
             if ( reader != null ) {
                 val mapPositions = MapMetaDataModelCollection.readFromJsonReader(reader);

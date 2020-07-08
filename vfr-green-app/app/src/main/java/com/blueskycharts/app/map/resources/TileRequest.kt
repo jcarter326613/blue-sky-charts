@@ -1,19 +1,12 @@
 package com.blueskycharts.app.map.resources
 
 import android.graphics.Bitmap
-import android.graphics.BitmapFactory
 import android.graphics.Canvas
-import android.graphics.drawable.BitmapDrawable
-import android.graphics.drawable.Drawable
-import android.util.Log
-import androidx.core.graphics.drawable.toDrawable
 import com.blueskycharts.app.coordinates.Box2d
 import com.blueskycharts.app.coordinates.Point2d
-import com.blueskycharts.app.remoteassests.AssetProvider
-import com.blueskycharts.app.remoteassests.Volatility
-import kotlinx.coroutines.GlobalScope
-import kotlinx.coroutines.launch
-import java.io.InputStream
+import com.blueskycharts.app.assests.AssetProviderFactory
+import com.blueskycharts.app.assests.RemoteAssetDescription
+import com.blueskycharts.app.assests.Volatility
 import java.net.URL
 
 class TileRequest(private val provider: TileProvider, private var receiver: TileReceiver?, private val location: Point2d?, private val dimensions: Point2d?,
@@ -22,8 +15,8 @@ class TileRequest(private val provider: TileProvider, private var receiver: Tile
         private set
 
     override fun sendRequest() {
-        val provider = AssetProvider(provider.context)
-        provider.retrieveAsset(URL(url), Volatility.Indefinite) {
+        val provider = AssetProviderFactory.instance
+        provider.retrieveAsset(RemoteAssetDescription(URL(url), Volatility.Indefinite)) {
             try {
                 val bitmap = it.asBitmap()
                 if ( bitmap != null ) {

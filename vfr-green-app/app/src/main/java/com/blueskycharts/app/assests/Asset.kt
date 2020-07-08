@@ -1,4 +1,4 @@
-package com.blueskycharts.app.remoteassests
+package com.blueskycharts.app.assests
 
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory
@@ -8,12 +8,9 @@ import com.fasterxml.jackson.module.kotlin.readValue
 import java.io.InputStreamReader
 import java.net.URL
 
-class Asset( val url: URL, val volatility: Volatility ) {
-    val localPath: String
-        get() = "${url.host}/${url.path}/${url.query}"
+class Asset( val description: AssetDescription ) {
     var bytes: ByteArray? = null
     var errorLoading: Boolean = false
-    var requiresCors: Boolean = false
 
     fun asJsonReader(): JsonReader? {
         val bytes = this.bytes

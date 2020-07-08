@@ -1,4 +1,4 @@
-package com.blueskycharts.app.remoteassests
+package com.blueskycharts.app.assests
 
 enum class PreferredStorage {
     InternalOnly,

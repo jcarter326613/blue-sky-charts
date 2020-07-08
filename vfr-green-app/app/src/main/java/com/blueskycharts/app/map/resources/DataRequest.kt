@@ -5,11 +5,11 @@ import android.util.Log
 import com.blueskycharts.app.coordinates.BoxGeo
 import com.blueskycharts.app.coordinates.CoordinateConversion
 import com.blueskycharts.app.coordinates.PointGeo
-import com.blueskycharts.app.map.models.WeatherCondition
 import com.blueskycharts.app.map.models.WeatherConditionResponse
 import com.blueskycharts.app.map.view.OverlayTypes
-import com.blueskycharts.app.remoteassests.AssetProvider
-import com.blueskycharts.app.remoteassests.Volatility
+import com.blueskycharts.app.assests.AssetProviderFactory
+import com.blueskycharts.app.assests.RemoteAssetDescription
+import com.blueskycharts.app.assests.Volatility
 import java.net.URL
 import kotlin.math.ceil
 
@@ -43,8 +43,9 @@ class DataRequest(private val provider: DataProvider, private var receiver: Data
         val br = this.area.bottomRight
         val url = "$urlBase?startLongitude=${tl.longitude}&endLongitude=${br.longitude}&startLatitude=${br.latitude}&endLatitude=${tl.latitude}&bufferLongitude=${this.resolution.longitude}&bufferLatitude=${this.resolution.latitude}&information=${this.getInformationForType(this.type)}"
 
-        val provider = AssetProvider(provider.context)
-        provider.retrieveAsset(URL(url), Volatility.ScheduledLifetime, true) {
+        val provider = AssetProviderFactory.instance
+
+        provider.retrieveAsset(RemoteAssetDescription(URL(url), Volatility.ScheduledLifetime, true)) {
             try {
                 if ( !it.errorLoading ) {
                     val conditionResponse = it.asJsonObject<WeatherConditionResponse>()

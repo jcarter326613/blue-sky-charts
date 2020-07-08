@@ -1,8 +1,6 @@
 package com.blueskycharts.app.map.resources
 
-import android.provider.Settings
-import android.util.Log
-import com.blueskycharts.app.map.utility.PriorityArray
+import com.blueskycharts.app.utility.PriorityArray
 import com.blueskycharts.app.map.view.Map
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
