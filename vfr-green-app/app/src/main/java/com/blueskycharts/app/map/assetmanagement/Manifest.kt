@@ -127,18 +127,26 @@ data class Manifest(val mapGroups: MutableMap<String, MapList> = mutableMapOf())
                 }
             }
 
-            data class MapVersion(val xMap: MutableMap<Int, MutableSet<Int>> = mutableMapOf()) {
+            data class MapVersion(val zoomMap: MutableMap<Int,MutableMap<Int, MutableSet<Int>>> = mutableMapOf()) {
                 fun write(jsonWriter: JsonWriter) {
                     jsonWriter.beginObject()
-                    jsonWriter.name("x")
+                    jsonWriter.name("zoom")
                     jsonWriter.beginObject()
-                    for ( x in xMap ) {
-                        jsonWriter.name(x.key.toString())
-                        jsonWriter.beginArray()
-                        for (y in x.value) {
-                            jsonWriter.value(y)
+                    for (z in zoomMap) {
+                        jsonWriter.name(z.key.toString())
+                        jsonWriter.beginObject()
+                        jsonWriter.name("x")
+                        jsonWriter.beginObject()
+                        for ( x in z.value ) {
+                            jsonWriter.name(x.key.toString())
+                            jsonWriter.beginArray()
+                            for (y in x.value) {
+                                jsonWriter.value(y)
+                            }
+                            jsonWriter.endArray()
                         }
-                        jsonWriter.endArray()
+                        jsonWriter.endObject()
+                        jsonWriter.endObject()
                     }
                     jsonWriter.endObject()
                     jsonWriter.endObject()
@@ -150,17 +158,35 @@ data class Manifest(val mapGroups: MutableMap<String, MapList> = mutableMapOf())
                         reader.beginObject()
                         while ( reader.hasNext() ) {
                             when ( reader.nextName() ) {
-                                "x" -> {
+                                "zoom" -> {
                                     reader.beginObject()
                                     while ( reader.hasNext() ) {
-                                        val xString = reader.nextName()
-                                        val ySet = mutableSetOf<Int>()
-                                        reader.beginArray()
+                                        val zoom = reader.nextName().toInt()
+                                        reader.beginObject()
                                         while ( reader.hasNext() ) {
-                                            ySet.add(reader.nextInt())
+                                            when ( reader.nextName() ) {
+                                                "x" -> {
+                                                    val xMap = mutableMapOf<Int, MutableSet<Int>>()
+                                                    reader.beginObject()
+                                                    while ( reader.hasNext() ) {
+                                                        val xString = reader.nextName()
+                                                        val ySet = mutableSetOf<Int>()
+                                                        reader.beginArray()
+                                                        while ( reader.hasNext() ) {
+                                                            ySet.add(reader.nextInt())
+                                                        }
+                                                        xMap[xString.toInt()] = ySet
+                                                        reader.endArray()
+                                                    }
+                                                    reader.endObject()
+                                                    retVal.zoomMap[zoom] = xMap
+                                                }
+                                                else -> {
+                                                    reader.skipValue()
+                                                }
+                                            }
                                         }
-                                        retVal.xMap[xString.toInt()] = ySet
-                                        reader.endArray()
+                                        reader.endObject()
                                     }
                                     reader.endObject()
                                 }

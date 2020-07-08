@@ -55,7 +55,7 @@ class MapConfiguration(val data: MapMetaDataModelCollection) {
     /**
      * Sorted from earliest to latest
      */
-    fun getFutureSortedVersionList(mapName: String): List<String> {
+    fun getFutureSortedVersionList(mapName: String, includeCurrent: Boolean = false): List<String> {
         val currentVersion = getCurrentVersion(mapName)
         if (currentVersion?.version == null) {
             return listOf()
@@ -70,26 +70,32 @@ class MapConfiguration(val data: MapMetaDataModelCollection) {
                 retVal.add(versionEntry.key)
             }
         }
+        if ( includeCurrent ) {
+            retVal.add(currentVersion.version)
+        }
         return retVal.sorted()
     }
 
     /**
      * Sorted from latest to earliest
      */
-    fun getPastSortedVersionList(mapName: String): List<String> {
+    fun getPastSortedVersionList(mapName: String, includeCurrent: Boolean = false): List<String> {
         val currentVersion = getCurrentVersion(mapName)
         if (currentVersion?.version == null) {
             return listOf()
         }
 
         val mapVersionCollection = data.maps[mapName] ?: return listOf()
-        val now = Date()
+        val now = convertVersionToDateTime(currentVersion.version)
         val retVal = mutableListOf<String>()
         for (versionEntry in mapVersionCollection.versions) {
-            val versionDate = MapConfiguration.convertVersionToDateTime(versionEntry.key)
+            val versionDate = convertVersionToDateTime(versionEntry.key)
             if ( versionDate != null && versionDate < now ) {
                 retVal.add(versionEntry.key)
             }
+        }
+        if ( includeCurrent ) {
+            retVal.add(currentVersion.version)
         }
         return retVal.sortedDescending()
     }

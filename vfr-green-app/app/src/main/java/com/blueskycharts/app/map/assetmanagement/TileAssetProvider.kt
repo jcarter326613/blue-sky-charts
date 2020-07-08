@@ -77,10 +77,15 @@ class TileAssetProvider private constructor(private val mapRoot: String) {
                             version = Manifest.MapList.MapVersionList.MapVersion()
                             map.versionList[mapVersion] = version
                         }
-                        var xMap = version.xMap[x]
+                        var zoomMap = version.zoomMap[zoom]
+                        if (zoomMap == null) {
+                            zoomMap = mutableMapOf()
+                            version.zoomMap[zoom] = zoomMap
+                        }
+                        var xMap = zoomMap[x]
                         if (xMap == null) {
                             xMap = mutableSetOf()
-                            version.xMap[x] = xMap
+                            zoomMap[x] = xMap
                         }
                         val changeMade = xMap.add(y)
 

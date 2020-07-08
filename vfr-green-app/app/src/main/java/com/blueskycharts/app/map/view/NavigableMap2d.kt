@@ -16,6 +16,7 @@ import com.blueskycharts.app.map.resources.ShadowProvider
 import com.blueskycharts.app.map.resources.TileProvider
 import com.blueskycharts.app.assests.RemoteAssetDescription
 import com.blueskycharts.app.assests.Volatility
+import com.blueskycharts.app.map.configuration.ConfigurationRetriever
 import com.blueskycharts.app.map.configuration.MapConfiguration
 import java.net.URL
 import java.util.*
@@ -52,10 +53,8 @@ class NavigableMap2d(context: Context, attributes: AttributeSet) : Map(context, 
     private var pinchOriginalScale: Double
 
     init {
-        val mapRoot: String;
         context.theme.obtainStyledAttributes(attributes, R.styleable.NavigableMap2d, 0, 0).apply {
             try {
-                mapRoot = getStringOrThrow(R.styleable.NavigableMap2d_mapRoot)
                 scaleDriver = getFloat(R.styleable.NavigableMap2d_zoom, 4.25F);
                 val originLongitude = getFloat(R.styleable.NavigableMap2d_originLongitude, -98.5795F)
                 val originLatitude = getFloat(R.styleable.NavigableMap2d_originLongitude, 39.8283F)
@@ -83,7 +82,7 @@ class NavigableMap2d(context: Context, attributes: AttributeSet) : Map(context, 
         textStrokePaint.strokeWidth = convertDipToPixels(1f)
 
         // Set all constant and derived defaults
-        this.tileProvider = TileProvider(mapRoot, context, this)
+        this.tileProvider = TileProvider(context, this)
         this.shadowTileProvider = ShadowProvider(context, this)
         this.dataProvider = DataProvider(context, this)
 
@@ -105,7 +104,7 @@ class NavigableMap2d(context: Context, attributes: AttributeSet) : Map(context, 
 
         // Startup the map
         this.setupBackgroundShadow()
-        this.retrieveConfiguration(URL("${mapRoot}/metadata.json"))
+        this.retrieveConfiguration()
     }
 
     fun setOverlayType(type: OverlayTypes): Boolean {
@@ -181,13 +180,11 @@ class NavigableMap2d(context: Context, attributes: AttributeSet) : Map(context, 
         this.mapViews = mapViewList
     }
 
-    private fun retrieveConfiguration(mapConfigurationFile: URL) {
-        val assetProvider = AssetProvider()
-        assetProvider.retrieveAsset(RemoteAssetDescription(mapConfigurationFile, Volatility.DayCache)) {
-            val reader = it.asJsonReader()
-            if ( reader != null ) {
-                val mapPositions = MapConfiguration(MapMetaDataModelCollection.readFromJsonReader(reader))
-                this@NavigableMap2d.initializeMapModel(mapPositions)
+    private fun retrieveConfiguration() {
+        val retriever = ConfigurationRetriever()
+        retriever.retrieveConfiguration {
+            if ( it != null ) {
+                this@NavigableMap2d.initializeMapModel(it)
                 this@NavigableMap2d.postInvalidate()
             }
         }
