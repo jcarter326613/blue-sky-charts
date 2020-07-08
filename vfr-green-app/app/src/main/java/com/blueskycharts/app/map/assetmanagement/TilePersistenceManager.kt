@@ -64,18 +64,19 @@ class TilePersistenceManager( private val mapsMetaData: MapConfiguration ) {
                         for ( y in 0 until 2.0.pow(z.toDouble()).toInt() ) {
                             // For this version and descending into the past for each version
                             val listOfVersions = mapsMetaData.getPastSortedVersionList(name, includeCurrent = true)
-                            /*
                             for ( version in listOfVersions ) {
                                 // Check if the manifest has the needed file
-                                val fileProof = manifest.versionList[version]?.xMap?.get(x)
-                                if ( fileProof == null )
+                                val fileProof = manifest.versionList[version]?.zoomMap?.get(z)?.get(x)?.contains(y)
+                                if ( fileProof != null && fileProof ) {
                                     // If it does and this isn't the current version, create an alias to the current version
                                     // Remove the file from the needed list
-                                // Else
+                                } else {
                                     // Check if the file is in the changeset for this version
-                                        // If they are, download them
+                                    //if ( metaData.)
+                                       // If they are, download them
+                                }
                             }
-*/
+
                             // If the file was not downloaded, download it
                         }
                     }
