@@ -59,18 +59,18 @@ export class Generator {
             for ( let subTileName of imageConfiguration.subMaps ) {
                 // Get the max resolution of the sub map
                 let metadata = subSectionMetadata[subTileName]
-                if ( metadata.imageHeight === undefined || metadata.imageWidth === undefined || 
-                    metadata.tileWidth === undefined || metadata.mosaicMaxZoom === undefined || metadata.fileExtent === undefined) {
+                if ( metadata.mosaicImageHeight === undefined || metadata.mosaicImageWidth === undefined || 
+                    metadata.tileWidth === undefined || metadata.mosaicMaxZoom === undefined || metadata.mosaicFileExtent === undefined) {
                     continue
                 }
-                let extentsBoxGeo = Conversion.convertFileExtentToBoxGeo(metadata.fileExtent)
+                let extentsBoxGeo = Conversion.convertFileExtentToBoxGeo(metadata.mosaicFileExtent)
                 if ( extentsBoxGeo === undefined ) {
                     continue
                 }
                 let extentsMercator = CoordinateConversion.convertBoxGeoToBoxMercator(extentsBoxGeo)
                 let multiplier = 1
-                if ( metadata.imageHeight > metadata.imageWidth ) {
-                    multiplier = metadata.imageWidth / metadata.imageHeight
+                if ( metadata.mosaicImageHeight > metadata.mosaicImageWidth ) {
+                    multiplier = metadata.mosaicImageWidth / metadata.mosaicImageHeight
                 }
                 let maxZoomPixelWidth = metadata.tileWidth * multiplier * (2 ** metadata.mosaicMaxZoom)
                 let maxZoomResolution = maxZoomPixelWidth / extentsMercator.getWidth()
@@ -197,26 +197,26 @@ export class Generator {
         for ( let sectionName of imageConfiguration ) {
             let sectionMetadata = subSectionMetadata[sectionName]
 
-            if ( sectionMetadata === undefined || sectionMetadata.fileExtent === undefined ||
-                sectionMetadata.fileExtent.topLeft === undefined || 
-                sectionMetadata.fileExtent.topLeft.latitude === undefined || sectionMetadata.fileExtent.topLeft.longitude === undefined ||
-                sectionMetadata.fileExtent.bottomRight === undefined || 
-                sectionMetadata.fileExtent.bottomRight.latitude === undefined || sectionMetadata.fileExtent.bottomRight.longitude === undefined ) {
+            if ( sectionMetadata === undefined || sectionMetadata.mosaicFileExtent === undefined ||
+                sectionMetadata.mosaicFileExtent.topLeft === undefined || 
+                sectionMetadata.mosaicFileExtent.topLeft.latitude === undefined || sectionMetadata.mosaicFileExtent.topLeft.longitude === undefined ||
+                sectionMetadata.mosaicFileExtent.bottomRight === undefined || 
+                sectionMetadata.mosaicFileExtent.bottomRight.latitude === undefined || sectionMetadata.mosaicFileExtent.bottomRight.longitude === undefined ) {
                 console.error(`Error loading map ${sectionName} from metadata.json`)
                 exit(1)
             }
 
-            if ( endLatitude === undefined || sectionMetadata.fileExtent.topLeft.latitude > endLatitude ) {
-                endLatitude = sectionMetadata.fileExtent.topLeft.latitude
+            if ( endLatitude === undefined || sectionMetadata.mosaicFileExtent.topLeft.latitude > endLatitude ) {
+                endLatitude = sectionMetadata.mosaicFileExtent.topLeft.latitude
             }
-            if ( startLatitude === undefined || sectionMetadata.fileExtent.bottomRight.latitude < startLatitude ) {
-                startLatitude = sectionMetadata.fileExtent.bottomRight.latitude
+            if ( startLatitude === undefined || sectionMetadata.mosaicFileExtent.bottomRight.latitude < startLatitude ) {
+                startLatitude = sectionMetadata.mosaicFileExtent.bottomRight.latitude
             }
-            if ( endLongtude === undefined || sectionMetadata.fileExtent.bottomRight.longitude > endLongtude ) {
-                endLongtude = sectionMetadata.fileExtent.bottomRight.longitude
+            if ( endLongtude === undefined || sectionMetadata.mosaicFileExtent.bottomRight.longitude > endLongtude ) {
+                endLongtude = sectionMetadata.mosaicFileExtent.bottomRight.longitude
             }
-            if ( startLongtude === undefined || sectionMetadata.fileExtent.topLeft.longitude < startLongtude ) {
-                startLongtude = sectionMetadata.fileExtent.topLeft.longitude
+            if ( startLongtude === undefined || sectionMetadata.mosaicFileExtent.topLeft.longitude < startLongtude ) {
+                startLongtude = sectionMetadata.mosaicFileExtent.topLeft.longitude
             }
         }
 

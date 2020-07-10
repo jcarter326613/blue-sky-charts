@@ -51,11 +51,11 @@ export class TileQueue {
                 let overlaps: Array<SubMapDescription> = []
                 for ( let sectionName in metadata ) {
                     let section = metadata[sectionName]
-                    if ( section.fileExtent === undefined || section.mosaicMaxZoom === undefined || section.tileWidth === undefined ||
+                    if ( section.mosaicFileExtent === undefined || section.mosaicMaxZoom === undefined || section.tileWidth === undefined ||
                         section.version === undefined ) {
                         continue
                     }
-                    let sectionExtentGeo = Conversion.convertFileExtentToBoxGeo(section.fileExtent)
+                    let sectionExtentGeo = Conversion.convertFileExtentToBoxGeo(section.mosaicFileExtent)
                     if ( sectionExtentGeo === undefined ) {
                         continue
                     }
@@ -161,32 +161,32 @@ export class TileQueue {
                 exit(1)
             }
     
-            if ( metadata.fileExtent === undefined || 
+            if ( metadata.mosaicFileExtent === undefined || 
     
-                metadata.fileExtent.topLeft === undefined || 
-                metadata.fileExtent.topLeft.latitude === undefined || 
-                metadata.fileExtent.topLeft.longitude === undefined ||
+                metadata.mosaicFileExtent.topLeft === undefined || 
+                metadata.mosaicFileExtent.topLeft.latitude === undefined || 
+                metadata.mosaicFileExtent.topLeft.longitude === undefined ||
     
-                metadata.fileExtent.bottomRight === undefined ||
-                metadata.fileExtent.bottomRight.latitude === undefined || 
-                metadata.fileExtent.bottomRight.longitude === undefined ) {
+                metadata.mosaicFileExtent.bottomRight === undefined ||
+                metadata.mosaicFileExtent.bottomRight.latitude === undefined || 
+                metadata.mosaicFileExtent.bottomRight.longitude === undefined ) {
     
                 console.error(`Metadata for map ${map} missing file extents`)
                 exit(1)
             }
     
             // Update the extents
-            if ( maxLatitude === undefined || maxLatitude < metadata.fileExtent.topLeft.latitude ) {
-                maxLatitude = metadata.fileExtent.topLeft.latitude
+            if ( maxLatitude === undefined || maxLatitude < metadata.mosaicFileExtent.topLeft.latitude ) {
+                maxLatitude = metadata.mosaicFileExtent.topLeft.latitude
             }
-            if ( maxLongitude === undefined || maxLongitude < metadata.fileExtent.bottomRight.longitude ) {
-                maxLongitude = metadata.fileExtent.bottomRight.longitude
+            if ( maxLongitude === undefined || maxLongitude < metadata.mosaicFileExtent.bottomRight.longitude ) {
+                maxLongitude = metadata.mosaicFileExtent.bottomRight.longitude
             }
-            if ( minLatitude === undefined || minLatitude > metadata.fileExtent.bottomRight.latitude ) {
-                minLatitude = metadata.fileExtent.bottomRight.latitude
+            if ( minLatitude === undefined || minLatitude > metadata.mosaicFileExtent.bottomRight.latitude ) {
+                minLatitude = metadata.mosaicFileExtent.bottomRight.latitude
             }
-            if ( minLongitude === undefined || minLongitude > metadata.fileExtent.topLeft.longitude ) {
-                minLongitude = metadata.fileExtent.topLeft.longitude
+            if ( minLongitude === undefined || minLongitude > metadata.mosaicFileExtent.topLeft.longitude ) {
+                minLongitude = metadata.mosaicFileExtent.topLeft.longitude
             }
         }
     
