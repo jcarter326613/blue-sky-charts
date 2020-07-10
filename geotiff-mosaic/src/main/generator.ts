@@ -60,7 +60,7 @@ export class Generator {
                 // Get the max resolution of the sub map
                 let metadata = subSectionMetadata[subTileName]
                 if ( metadata.imageHeight === undefined || metadata.imageWidth === undefined || 
-                    metadata.tileWidth === undefined || metadata.maxZoom === undefined || metadata.fileExtent === undefined) {
+                    metadata.tileWidth === undefined || metadata.mosaicMaxZoom === undefined || metadata.fileExtent === undefined) {
                     continue
                 }
                 let extentsBoxGeo = Conversion.convertFileExtentToBoxGeo(metadata.fileExtent)
@@ -72,7 +72,7 @@ export class Generator {
                 if ( metadata.imageHeight > metadata.imageWidth ) {
                     multiplier = metadata.imageWidth / metadata.imageHeight
                 }
-                let maxZoomPixelWidth = metadata.tileWidth * multiplier * (2 ** metadata.maxZoom)
+                let maxZoomPixelWidth = metadata.tileWidth * multiplier * (2 ** metadata.mosaicMaxZoom)
                 let maxZoomResolution = maxZoomPixelWidth / extentsMercator.getWidth()
                 
                 // Get the corresponding zoom for the large tile

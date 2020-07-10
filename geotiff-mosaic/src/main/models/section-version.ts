@@ -5,6 +5,7 @@ export class SectionVersion {
     public effectiveDate: string | undefined
     public fileExtent: FileExtent | undefined
     public maxZoom: number | undefined
+    public mosaicMaxZoom: number | undefined
     public tileWidth: number | undefined
     public version: string | undefined
     public imageWidth: number | undefined
