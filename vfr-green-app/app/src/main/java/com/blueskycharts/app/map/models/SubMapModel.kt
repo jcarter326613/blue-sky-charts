@@ -12,7 +12,8 @@ data class SubMapModel ( val mapBounds: Array<Point2d>?,
                          val imageWidthScale: Double?,
                          val imageHeightScale: Double?,
                          val fileExtent: BoxGeoModel?,
-                         val maxZoom: Int?
+                         val maxZoom: Int?,
+                         val changeSet: ChangeSet?
 ) {
     override fun equals(other: Any?): Boolean {
         if (this === other) return true
@@ -32,6 +33,7 @@ data class SubMapModel ( val mapBounds: Array<Point2d>?,
         if (imageHeightScale != other.imageHeightScale) return false
         if (fileExtent != other.fileExtent) return false
         if (maxZoom != other.maxZoom) return false
+        if (changeSet != other.changeSet) return false
 
         return true
     }
@@ -46,6 +48,7 @@ data class SubMapModel ( val mapBounds: Array<Point2d>?,
         result = 31 * result + (imageHeightScale?.hashCode() ?: 0)
         result = 31 * result + (fileExtent?.hashCode() ?: 0)
         result = 31 * result + (maxZoom ?: 0)
+        result = 31 * result + (changeSet?.hashCode() ?: 0)
         return result
     }
 
@@ -60,6 +63,7 @@ data class SubMapModel ( val mapBounds: Array<Point2d>?,
             var imageHeightScale: Double? = null
             var fileExtent: BoxGeoModel? = null
             var maxZoom: Int? = null
+            var changeSet: ChangeSet? = null
 
             reader.beginObject()
             while ( reader.hasNext() ) {
@@ -88,6 +92,9 @@ data class SubMapModel ( val mapBounds: Array<Point2d>?,
                     "version" -> {
                         version = reader.nextString()
                     }
+                    "changeSet" -> {
+                        changeSet = ChangeSet.readFromJsonReader(reader)
+                    }
                     else -> {
                         reader.skipValue()
                     }
@@ -104,8 +111,68 @@ data class SubMapModel ( val mapBounds: Array<Point2d>?,
                 imageWidthScale = imageWidthScale,
                 imageHeightScale = imageHeightScale,
                 fileExtent = fileExtent,
-                maxZoom = maxZoom
+                maxZoom = maxZoom,
+                changeSet = changeSet
             )
+        }
+    }
+
+    data class ChangeSet(val tiles: ArrayList<Map<Int, ArrayList<Int>>>?) {
+        override fun equals(other: Any?): Boolean {
+            if (this === other) return true
+            if (javaClass != other?.javaClass) return false
+
+            other as ChangeSet
+
+            if (tiles != other.tiles) return false
+
+            return true
+        }
+
+        override fun hashCode(): Int {
+            return tiles?.hashCode() ?: 0
+        }
+
+        companion object {
+            fun readFromJsonReader(reader: JsonReader): ChangeSet {
+                var tiles: ArrayList<Map<Int, ArrayList<Int>>>? = null
+
+                reader.beginObject()
+                while ( reader.hasNext() ) {
+                    when (reader.nextName()) {
+                        "tiles" -> {
+                            tiles = arrayListOf()
+                            reader.beginArray()
+                            while ( reader.hasNext() ) {
+                                val zoomRecord = mutableMapOf<Int, ArrayList<Int>>()
+                                reader.beginObject()
+                                while ( reader.hasNext() ) {
+                                    val x = reader.nextName().toInt()
+                                    reader.beginArray()
+                                    val yArray = arrayListOf<Int>()
+                                    while ( reader.hasNext() ) {
+                                        val y = reader.nextInt()
+                                        yArray.add(y)
+                                    }
+                                    reader.endArray()
+                                    zoomRecord[x] = yArray
+                                }
+                                reader.endObject()
+                                tiles.add(zoomRecord)
+                            }
+                            reader.endArray()
+                        }
+                        else -> {
+                            reader.skipValue()
+                        }
+                    }
+                }
+                reader.endObject();
+
+                return ChangeSet(
+                    tiles = tiles
+                )
+            }
         }
     }
 }

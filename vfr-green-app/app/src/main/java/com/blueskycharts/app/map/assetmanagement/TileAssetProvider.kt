@@ -1,5 +1,6 @@
 package com.blueskycharts.app.map.assetmanagement
 
+import com.blueskycharts.app.Constants
 import com.blueskycharts.app.assests.*
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
@@ -17,55 +18,49 @@ import java.net.URL
  */
 class TileAssetProvider private constructor(private val mapRoot: String) {
     private val imageExtension = "jpg"
-    private val manifestLocation: String
     private val manifestDescription: AssetDescription
-    private var manifest: Manifest? = null
-    private var manifestVersion = 0
-    private var manifestWrittenVersion = 0
-    private val manifestMutex: Mutex = Mutex()
-    private val manifestSerializationMutex: Mutex = Mutex()
+    private var manifest: PersistentFile<Manifest>? = null
 
     private val assetProvider = AssetProvider()
 
     init {
-        manifestLocation = "tileAssetProvider/$mapRoot/manifest" //TODO: Make this change based on map root so we can have seperate manifests per tile provider
+        val manifestLocation = "tileAssetProvider/$mapRoot/manifest"
         manifestDescription = LocalAssetDescription(manifestLocation, Volatility.Indefinite)
 
         assetProvider.retrieveAsset(manifestDescription) {
-            manifest = if ( it.errorLoading ) {
-                Manifest()
-            } else {
-                val reader = it.asJsonReader()
-                if (reader == null) {
+            manifest = PersistentFile(if ( it.errorLoading ) {
                     Manifest()
                 } else {
-                    Manifest.readFromJsonReader(reader)
-                }
-            }
+                    val reader = it.asJsonReader()
+                    if (reader == null) {
+                        Manifest()
+                    } else {
+                        Manifest.readFromJsonReader(reader)
+                    }
+                }, manifestDescription)
         }
     }
 
     fun retrieveTile(mapName: String, mapVersion: String, zoom: Int, x: Int, y: Int, callback: ((asset: Asset) -> Unit)) {
         GlobalScope.launch {
             // Make sure the manifest is loaded before requesting any tiles
-            var manifest: Manifest? = this@TileAssetProvider.manifest
+            var manifest: PersistentFile<Manifest>? = this@TileAssetProvider.manifest
             while ( manifest == null ) {
                 yield()
                 manifest = this@TileAssetProvider.manifest
             }
 
             // Request the tile from the base class
-            val tileUrl = "${mapRoot}/${mapName}/$mapVersion/$zoom/${x}_${y}.${imageExtension}"
-            val assetDescription = RemoteAssetDescription(URL(tileUrl), Volatility.Indefinite)
+            val assetDescription = getTileFileDescription(mapName, mapVersion, zoom, x, y)
             assetProvider.retrieveAsset(assetDescription) {
                 GlobalScope.launch {
-                    manifestMutex.withLock {
+                    manifest.access { manifestContents ->
                         // Make sure the file is added to the manifest
-                        val defaultMapGroup = "world-vfr"
-                        var mapList = manifest.mapGroups[defaultMapGroup]
+                        val defaultMapGroup = Constants.worldVfrMosaicMapName
+                        var mapList = manifestContents.mapGroups[defaultMapGroup]
                         if (mapList == null) {
                             mapList = Manifest.MapList()
-                            manifest.mapGroups[defaultMapGroup] = mapList
+                            manifestContents.mapGroups[defaultMapGroup] = mapList
                         }
                         var map = mapList.mapList[mapName]
                         if (map == null) {
@@ -87,13 +82,7 @@ class TileAssetProvider private constructor(private val mapRoot: String) {
                             xMap = mutableSetOf()
                             zoomMap[x] = xMap
                         }
-                        val changeMade = xMap.add(y)
-
-                        // Write the new manifest out if there were changes made
-                        if (changeMade) {
-                            manifestVersion++
-                            serializeManifest()
-                        }
+                        return@access xMap.add(y)
                     }
                 }
 
@@ -103,38 +92,25 @@ class TileAssetProvider private constructor(private val mapRoot: String) {
         }
     }
 
+    fun getTileFileDescription(mapName: String, mapVersion: String, zoom: Int, x: Int, y: Int): AssetDescription {
+        val tileUrl = "${mapRoot}/${mapName}/$mapVersion/$zoom/${x}_${y}.${imageExtension}"
+        return RemoteAssetDescription(URL(tileUrl), Volatility.Indefinite)
+    }
+
     suspend fun getManifest(mapGroup: String, map: String): Manifest.MapList.MapVersionList? {
         // Ensure the manifest is loaded
-        var manifest: Manifest? = this@TileAssetProvider.manifest
+        var manifest: PersistentFile<Manifest>? = this@TileAssetProvider.manifest
         while ( manifest == null ) {
             yield()
             manifest = this@TileAssetProvider.manifest
         }
 
-        manifestMutex.withLock {
-            return manifest.mapGroups[mapGroup]?.mapList?.get(map)?.copy()
+        var retVal: Manifest.MapList.MapVersionList? = null
+        manifest.access {
+            retVal = it.mapGroups[mapGroup]?.mapList?.get(map)?.copy()
+            return@access false
         }
-    }
-
-    /**
-     * Writes out the manifest in a seperate thread.  This can be called multiple times from many threads and will only
-     * run once if those requests pile up faster than than the file can be written to disk
-     */
-    private fun serializeManifest() {
-        GlobalScope.launch {
-            manifestSerializationMutex.withLock {
-                if (manifestVersion > manifestWrittenVersion) {
-                    var versionToWrite: Int
-                    val manifestAsset = Asset(manifestDescription)
-                    manifestMutex.withLock {
-                        versionToWrite = manifestVersion
-                        manifestAsset.bytes = manifest?.jsonString?.toByteArray()
-                    }
-                    DiskCacheFactory.instance.writeAsset(manifestAsset)
-                    manifestWrittenVersion = versionToWrite
-                }
-            }
-        }
+        return retVal
     }
 
     companion object {

@@ -24,6 +24,15 @@ class Asset( val description: AssetDescription ) {
         return null
     }
 
+    /**
+     * Assumes the content is \n delimited
+     */
+    fun asStringArray(): Array<String>? {
+        val bytes = this.bytes
+        if ( !errorLoading && bytes != null ) return bytes.toString().split("\n").toTypedArray()
+        return null
+    }
+
     inline fun <reified T: Any> asJsonObject(): T? {
         val toParse = bytes?.toString(kotlin.text.charset("UTF_8"))
         if ( toParse != null ) {

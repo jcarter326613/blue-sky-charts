@@ -1,12 +1,13 @@
-package com.blueskycharts.app.map.assetmanagement
+package com.blueskycharts.app.preferences
 
 import android.util.JsonReader
 import com.blueskycharts.app.assests.PreferredStorage
 
-data class TilePersistencePreferences(var storageType: PreferredStorage = PreferredStorage.InternalOnly, var proactiveDownload: Boolean = false) {
+data class SubMapPersistencePreferences(var storageType: PreferredStorage = PreferredStorage.InternalOnly, var proactiveDownload: Boolean = false) {
     companion object {
-        fun fromJsonReader(jsonReader: JsonReader): TilePersistencePreferences {
-            val retVal = TilePersistencePreferences()
+        fun fromJsonReader(jsonReader: JsonReader): SubMapPersistencePreferences {
+            val retVal =
+                SubMapPersistencePreferences()
             jsonReader.beginObject()
             while ( jsonReader.hasNext() ) {
                 when ( jsonReader.nextName() ) {

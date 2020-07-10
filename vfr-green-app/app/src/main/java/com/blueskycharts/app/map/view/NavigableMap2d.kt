@@ -160,7 +160,8 @@ class NavigableMap2d(context: Context, attributes: AttributeSet) : Map(context, 
             imageWidth = 256.0,
             imageHeightScale = 1.0,
             imageWidthScale = 1.0,
-            version = "1"
+            version = "1",
+            changeSet = null
         )
         worldShadowView.initialize("world-shadow", shadowMapModel)
         this.mapBackground = SubMapPosition(worldShadowView, worldShadowMercatorExtents)
