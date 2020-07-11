@@ -7,7 +7,7 @@
         {
             "type": "node",
             "request": "launch",
-            "name": "Launch Program",
+            "name": "Launch Mosaic",
             "skipFiles": [
                 "<node_internals>/**"
             ],
@@ -20,7 +20,32 @@
         {
             "type": "node",
             "request": "launch",
-            "name": "Launch Program no compile",
+            "name": "Launch Mosaic no compile",
+            "skipFiles": [
+                "<node_internals>/**"
+            ],
+            "program": "${workspaceFolder}/src/test/index.js",
+            "outFiles": [
+                "${workspaceFolder}/**/*.js"
+            ]
+        },
+        {
+            "type": "node",
+            "request": "launch",
+            "name": "Launch Original",
+            "skipFiles": [
+                "<node_internals>/**"
+            ],
+            "program": "${workspaceFolder}/src/test/index.js",
+            "outFiles": [
+                "${workspaceFolder}/**/*.js"
+            ],
+            "preLaunchTask": "tsc: build - tsconfig.json"
+        },
+        {
+            "type": "node",
+            "request": "launch",
+            "name": "Launch Original no compile",
             "skipFiles": [
                 "<node_internals>/**"
             ],

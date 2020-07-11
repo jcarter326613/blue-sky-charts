@@ -7,7 +7,7 @@
     "./": "./src/"
   },
   "scripts": {
-    "generate": "node src/test/index.js"
+    "generate_mosaic": "node src/test/mosaic.js"
   },
   "repository": {
     "type": "git",

@@ -1,6 +1,6 @@
 import { exit } from 'process'
-import { SectionVersion } from './models/section-version'
-import { SectionVersionList } from './models/section-version-list'
+import { SectionVersion } from '../models/section-version'
+import { SectionVersionList } from '../models/section-version-list'
 
 export class MetadataManager {
     public extractCurrentVersions(versionLists: Record<string, SectionVersionList>): Record<string, SectionVersion> {

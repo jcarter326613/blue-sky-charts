@@ -1,17 +1,17 @@
 
 import { readFileSync, writeFileSync, existsSync, mkdirSync } from 'fs'
-import { ChangeSet } from './models/change-set'
+import { ChangeSet } from '../models/change-set'
 import { execSync } from 'child_process'
 import { exit } from "process"
 import { createCanvas, loadImage } from 'canvas'
-import { Config } from './models/config'
-import { SectionVersion } from './models/section-version'
-import { SectionVersionList } from './models/section-version-list'
+import { Config } from '../models/config'
+import { SectionVersion } from '../models/section-version'
+import { SectionVersionList } from '../models/section-version-list'
 import { TileQueue } from './tile-queue'
 import { TileCache } from './tile-cache'
 import { TileDescription } from './tile-description'
 import { BoxGeo, CoordinateConversion, PointWebMercator, BoxWebMercator, PointGeo } from 'coordinates'
-import { Conversion } from './models/conversion'
+import { Conversion } from '../models/conversion'
 import { MetadataManager } from './metadata-manager'
 
 export class Generator {
