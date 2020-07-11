@@ -4,8 +4,9 @@ import { PreviousOriginals } from '../models/previous_originals'
 import { SectionVersionList } from '../models/section-version-list'
 
 export class Loader {
-    private PEVIOUS_UPLOADS_FILE = "./data/previous_uploads.json"
     private OUTPUT_DIRECTORY = "./output"
+    private PEVIOUS_UPLOADS_FILE = "./data/previous_uploads.json"
+    private SUBSECTION_META_FILE = "../geotiff-map-exploder/maps/metadata.json"
 
     public syncChangedMaps(): void {
         // Clean the output directory
@@ -15,17 +16,36 @@ export class Loader {
         mkdirSync(this.OUTPUT_DIRECTORY);
 
         // Load the data files which tells us all the uploaded versions of each map
-        let previousUploadsFile = this.PEVIOUS_UPLOADS_FILE
-        let rawdata = readFileSync(previousUploadsFile)
-        let configuration: PreviousOriginals = JSON.parse(rawdata.toString())
+        let configuration: PreviousOriginals
+        try {
+            let previousUploadsFile = this.PEVIOUS_UPLOADS_FILE
+            let rawdata = readFileSync(previousUploadsFile)
+            configuration = JSON.parse(rawdata.toString())
+        } catch (error) {
+            configuration = new PreviousOriginals()
+        }
 
         // Get all the versions of maps in the metadata
         let subsectionMetaFile = this.SUBSECTION_META_FILE
-        rawdata = readFileSync(subsectionMetaFile)
+        let rawdata = readFileSync(subsectionMetaFile)
         let subSectionVersions: Record<string, SectionVersionList> = JSON.parse(rawdata.toString())
 
         // Grab all the versions we haven't uploaded from the geotiff exploder metadata file
-
+        let neededMapVersions: Record<string, Array<string>> = {}
+        for (let map of Object.keys(subSectionVersions)) {
+            let mapValue = subSectionVersions[map]
+            if ( mapValue.versions != null ) {
+                for (let version of Object.keys(mapValue.versions)) {
+                    if (configuration.maps === undefined || version !in configuration.maps[map]) {
+                        if (!(map in neededMapVersions)) {
+                            neededMapVersions[map] = []
+                        }
+                        neededMapVersions[map].push(version)
+                    }
+                }
+            }
+        }
+        console.log("test")
 
         //For each version,
             //Explode the map

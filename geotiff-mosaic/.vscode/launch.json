@@ -11,7 +11,7 @@
             "skipFiles": [
                 "<node_internals>/**"
             ],
-            "program": "${workspaceFolder}/src/test/index.js",
+            "program": "${workspaceFolder}/src/test/mosaic.js",
             "outFiles": [
                 "${workspaceFolder}/**/*.js"
             ],
@@ -24,7 +24,7 @@
             "skipFiles": [
                 "<node_internals>/**"
             ],
-            "program": "${workspaceFolder}/src/test/index.js",
+            "program": "${workspaceFolder}/src/test/mosaic.js",
             "outFiles": [
                 "${workspaceFolder}/**/*.js"
             ]
@@ -36,7 +36,7 @@
             "skipFiles": [
                 "<node_internals>/**"
             ],
-            "program": "${workspaceFolder}/src/test/index.js",
+            "program": "${workspaceFolder}/src/test/original.js",
             "outFiles": [
                 "${workspaceFolder}/**/*.js"
             ],
@@ -49,7 +49,7 @@
             "skipFiles": [
                 "<node_internals>/**"
             ],
-            "program": "${workspaceFolder}/src/test/index.js",
+            "program": "${workspaceFolder}/src/test/original.js",
             "outFiles": [
                 "${workspaceFolder}/**/*.js"
             ]
