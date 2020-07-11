@@ -526,9 +526,10 @@
         }
     },
     "Atlanta": {
+        "type": "Sectional",
         "versions": {
             "104": {
-                "effectiveDate": "2020-07-01",
+                "effectiveDate": "2020-02-27",
                 "fileExtent": {
                     "bottomLeft": {
                         "latitude": 32.009628,
@@ -547,8 +548,8 @@
                         "longitude": -80.780147
                     }
                 },
-                "imageHeight": 11141,
-                "imageWidth": 15657,
+                "imageHeight": 12354,
+                "imageWidth": 17951,
                 "mapBounds": [
                     [
                         -87.96376115670347,
@@ -615,8 +616,47 @@
                         36.17872992620275
                     ]
                 ],
-                "maxZoom": 6,
-                "tileWidth": 256
+                "maxZoom": 5,
+                "mosaicFileExtent": {
+                    "bottomLeft": {
+                        "latitude": 32.009628,
+                        "longitude": -87.989316
+                    },
+                    "bottomRight": {
+                        "latitude": 32.009628,
+                        "longitude": -80.780147
+                    },
+                    "topLeft": {
+                        "latitude": 36.253955,
+                        "longitude": -87.989316
+                    },
+                    "topRight": {
+                        "latitude": 36.253955,
+                        "longitude": -80.780147
+                    }
+                },
+                "mosaicImageHeight": 11141,
+                "mosaicImageWidth": 15657,
+                "mosaicMaxZoom": 4,
+                "originalProjectionBounds": [
+                    -424300.4989163972,
+                    -244410.91968771745,
+                    335631.47504449857,
+                    278559.45448675624
+                ],
+                "originalProjectionData": {
+                    "datum": "NAD83",
+                    "lat_0": 34.10833333333333,
+                    "lat_1": 38.66666666666666,
+                    "lat_2": 33.33333333333334,
+                    "lon_0": -84.5,
+                    "no_defs": true,
+                    "proj": "lcc",
+                    "units": "m",
+                    "x_0": 0,
+                    "y_0": 0
+                },
+                "tileWidth": 1024
             }
         }
     },

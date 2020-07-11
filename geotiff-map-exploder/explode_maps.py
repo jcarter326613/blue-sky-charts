@@ -62,7 +62,7 @@ def explode_map(name, definition, image_cache_folder, image_location, tile_width
 
     _explode_map_helper(image_cache_folder, 0, image, (image.width, image.height), (0, 0), tile_width, max_zoom, zoom_restriction)
 
-def explode_maps(map_name, version, location_name, zoom_restriction):
+def explode_maps(map_name, version, location_name, zoom_restriction, type):
     if location_name not in ["local", "remote", "relative"]:
         print("bad location")
         exit()
@@ -75,27 +75,32 @@ def explode_maps(map_name, version, location_name, zoom_restriction):
         exit()
 
     tile_width = map_definition["tileWidth"]
-    max_zoom = map_definition["maxZoom"]
-    image_path = "maps/{}_SEC_{}_WEB_CROPPED.tif".format(map_name, version)
-    image_cache_folder = "maps/tiles/{}_SEC_{}".format(map_name, version)
+    if type == "mosaic":
+        max_zoom = map_definition["mosaicMaxZoom"]
+        image_path = "maps/{}_SEC_{}_WEB_CROPPED.tif".format(map_name, version)
+        image_cache_folder = "maps/tiles/{}_SEC_{}".format(map_name, version)
+    else:
+        max_zoom = map_definition["maxZoom"]
+        image_path = "maps/{}_SEC_{}.tif".format(map_name, version)
+        image_cache_folder = "maps/tiles/{}_SEC_{}".format(map_name, version)
     if os.path.exists("maps/tiles"):
         os.system("rm -rf maps/tiles")
     os.makedirs(image_cache_folder)
     png_image_path = gdal_util.convert_tiff_to_png(image_path)
     explode_map(map_name, map_definition, image_cache_folder, png_image_path, tile_width, max_zoom, zoom_restriction)
-    if location_name == "local":
-        if not os.path.exists("../vfr-green-site/static/maps/world-vfr/sectional"):
-            os.makedirs("../vfr-green-site/static/maps/world-vfr/sectional")
-        os.system("mv {} ../vfr-green-site/static/maps/world-vfr/sectional".format(image_cache_folder))
-    elif location_name == "remote":
-        os.system("aws s3 sync ./maps/tiles s3://blueskycharts.com/maps/world-vfr/sectional")
-    #os.system("rm -f {}*".format(png_image_path))
+
+    #if location_name == "local":
+    #    if not os.path.exists("../vfr-green-site/static/maps/world-vfr/sectional"):
+    #        os.makedirs("../vfr-green-site/static/maps/world-vfr/sectional")
+    #    os.system("mv {} ../vfr-green-site/static/maps/world-vfr/sectional".format(image_cache_folder))
+    #elif location_name == "remote":
+    #    os.system("aws s3 sync ./maps/tiles s3://blueskycharts.com/maps/world-vfr/sectional")
 
 if len(sys.argv) not in [4,5]:
-    print("Usage python3 explode_maps.py <mapname> <version> <local|remote> (<zoom_restriction>)")
+    print("Usage python3 explode_maps.py <mapname> <version> <local|remote|relative> <type> (<zoom_restriction>)")
     exit()
     
 zoom_restriction = None
-if len(sys.argv) == 5:
-    zoom_restriction = int(sys.argv[4])
-explode_maps(sys.argv[1], sys.argv[2], sys.argv[3], zoom_restriction)
+if len(sys.argv) == 6:
+    zoom_restriction = int(sys.argv[5])
+explode_maps(sys.argv[1], sys.argv[2], sys.argv[3], zoom_restriction, sys.argv[4])
