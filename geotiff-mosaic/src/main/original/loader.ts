@@ -1,5 +1,5 @@
 import { execSync } from 'child_process'
-import { readFileSync, writeFileSync, existsSync, mkdirSync } from 'fs'
+import { readFileSync, writeFileSync, existsSync, mkdirSync, fstat, readdirSync } from 'fs'
 import { PreviousOriginals } from '../models/previous_originals'
 import { SectionVersionList } from '../models/section-version-list'
 
@@ -30,7 +30,7 @@ export class Loader {
         let rawdata = readFileSync(subsectionMetaFile)
         let subSectionVersions: Record<string, SectionVersionList> = JSON.parse(rawdata.toString())
 
-        // Grab all the versions we haven't uploaded from the geotiff exploder metadata file
+        // Search for all the versions we haven't uploaded from the geotiff exploder metadata file
         let neededMapVersions: Record<string, Array<string>> = {}
         for (let map of Object.keys(subSectionVersions)) {
             let mapValue = subSectionVersions[map]
@@ -45,17 +45,60 @@ export class Loader {
                 }
             }
         }
-        console.log("test")
 
         //For each version,
-            //Explode the map
+        for ( let mapName of Object.keys(neededMapVersions) ) {
+            let versionList = neededMapVersions[mapName]
+            for ( let version of versionList ) {
+                //Ensure png present
+                let pngFilePath = `./maps/${mapName}_SEC_${version}.tif`
+                if ( !existsSync(pngFilePath) ) {
+                    let pngGeoFilePath = `../geotiff-map-exploder/maps/${mapName}_SEC_${version}.tif`
+                    if ( !existsSync(pngGeoFilePath) ) {
+                        console.log(`Setting up map ${mapName} version ${version}`)
+                        execSync(`python3 ../geotiff-map-exploder/setup_map.py -use-defaults ${mapName} ${version} sectional`)
+                    } else {
+                        execSync(`cp ${pngGeoFilePath} ./maps/`)
+                    }
+                }
 
-            //Convert all the artifacts to jpg files
+                //Explode the map
+                console.log(`Exploding map ${mapName} version ${version}`)
+                if ( existsSync("./maps/tiles") ) {
+                    execSync("rm -rf ./maps/tiles")
+                }
+                execSync(`python3 ../geotiff-map-exploder/explode_maps.py ${mapName} ${version} relative sectional`)
 
-            //Sync the folder up to AWS
+                //Prep the output directory
+                let mapOutputDirectory = `${this.OUTPUT_DIRECTORY}/${mapName}_SEC_${version}`
+                mkdirSync(mapOutputDirectory)
 
-            //Write out the new metadata file
+                //Convert all the artifacts to jpg files
+                let tileMapDirectory = `./maps/tiles/${mapName}_SEC_${version}`
+                let zoomDirectories = readdirSync(tileMapDirectory)
+                for ( let zoomDirectory of zoomDirectories ) {
+                    let fillZoomDirectory = `${mapOutputDirectory}/${zoomDirectory}`
+                    mkdirSync(fillZoomDirectory)
+                    let imageFiles = readdirSync(`${tileMapDirectory}/${zoomDirectory}`)
+                    for ( let imageFile of imageFiles ) {
+                        let lastDotIndex = imageFile.lastIndexOf(".")
+                        let jpegPath = `${fillZoomDirectory}/${imageFile.substring(0, lastDotIndex)}.jpg`
+                        let originalPath = `${tileMapDirectory}/${zoomDirectory}/${imageFile}`
+                        execSync(`convert ${originalPath} -quality 90 ${jpegPath}`)
+                    }
+                    
+                    console.log("rgsg")
+                }
 
-            //Sync the metadata file to AWS
+                console.log("rgsg")
+
+                //Sync the folder up to AWS
+
+            }
+        }
+
+        //Write out the new metadata file
+
+        //Sync the metadata file to AWS
     }
 }
