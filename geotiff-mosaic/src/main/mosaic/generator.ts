@@ -13,6 +13,8 @@ import { TileDescription } from './tile-description'
 import { BoxGeo, CoordinateConversion, PointWebMercator, BoxWebMercator, PointGeo } from 'coordinates'
 import { Conversion } from '../models/conversion'
 import { MetadataManager } from './metadata-manager'
+import { ProjectionWebMercator } from '../models/projection-web-mercator'
+import { ProjectionExtents } from '../models/projection-extents'
 
 export class Generator {
     private MAP_CONFIGURATION_FILE = "./data/config.json"
@@ -107,6 +109,8 @@ export class Generator {
                 // Update the changeset
                 let newChangeSet = tileQueue.getChangeSet()
                 for ( let effectiveDate of Object.keys(newChangeSet) ) {
+                    newSectionData.effectiveDate = effectiveDate    // This is arbitrary but it has to be.
+                                                                    // There should only ever be one in the list anyway
                     if ( !(effectiveDate in changeSet) ) {
                         changeSet[effectiveDate] = new ChangeSet()
                         changeSet[effectiveDate].tiles = []
@@ -153,11 +157,15 @@ export class Generator {
                         continue
                     }
                     if ( zoom == 0 ) {
-                        newSectionData.fileExtent = 
-                            Conversion.convertBoxGeoToFileExtent(CoordinateConversion.convertBoxMercatorToBoxGeo(tile.tileExtent))
+                        newSectionData.projectionWebMercator = new ProjectionWebMercator()
+                        newSectionData.projectionWebMercator.extents = new ProjectionExtents()
+                        newSectionData.projectionWebMercator.extents.left = tile.tileExtent.getTopLeft().x
+                        newSectionData.projectionWebMercator.extents.top = tile.tileExtent.getTopLeft().y
+                        newSectionData.projectionWebMercator.extents.right = tile.tileExtent.getBottomRight().x
+                        newSectionData.projectionWebMercator.extents.bottom = tile.tileExtent.getBottomRight().y
 
-                        newSectionData.imageWidth = tile.tileExtent.getWidth() * maxZoom
-                        newSectionData.imageHeight = tile.tileExtent.getHeight() * maxZoom
+                        newSectionData.imageWidth = tile.tileExtent.getWidth() * (maxZoom + 1)
+                        newSectionData.imageHeight = tile.tileExtent.getHeight() * (maxZoom + 1)
                     }
 
                     // Compose the tile with world map drawn first, then each section in alphabetical order
@@ -169,12 +177,14 @@ export class Generator {
 
             // Save the metadata for this new tile
             if ( newSectionData.changeSet === undefined ) {
-                newSectionData.changeSet = {}
+                newSectionData.changeSet = new ChangeSet()
+            }
+            if ( Object.keys(changeSet).length != 1 ) {
+                console.error("Major issues with changeset effective dates")
+                exit(1)
             }
             for ( let effectiveDate of Object.keys(changeSet) ) {
-                if ( !(effectiveDate in newSectionData.changeSet) ) {
-                    newSectionData.changeSet[effectiveDate] = changeSet[effectiveDate]
-                }
+                newSectionData.changeSet.tiles = changeSet[effectiveDate].tiles
             }
 
             let versionList = new SectionVersionList()

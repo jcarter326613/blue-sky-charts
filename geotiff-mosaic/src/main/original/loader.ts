@@ -1,6 +1,6 @@
 import { execSync } from 'child_process'
 import { readFileSync, writeFileSync, existsSync, mkdirSync, fstat, readdirSync } from 'fs'
-import { PreviousOriginals } from '../models/previous_originals'
+import { PreviousOriginals } from '../models/previous-originals'
 import { ProjectionLcc } from '../models/projection-lcc'
 import { ProjectionExtents } from '../models/projection-extents'
 import { SectionVersion } from '../models/section-version'

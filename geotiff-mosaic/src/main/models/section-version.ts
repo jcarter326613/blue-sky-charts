@@ -1,6 +1,7 @@
 import { ChangeSet } from './change-set'
 import { FileExtent } from './file-extent'
 import { ProjectionLcc } from './projection-lcc'
+import { ProjectionWebMercator } from './projection-web-mercator'
 
 export class SectionVersion {
     public effectiveDate: string | undefined
@@ -14,8 +15,9 @@ export class SectionVersion {
     public mosaicImageWidth: number | undefined
     public imageHeight: number | undefined
     public mosaicImageHeight: number | undefined
-    public changeSet: Record<string, ChangeSet> | undefined
+    public changeSet: ChangeSet | undefined
     public originalProjectionBounds: Array<Number> | undefined
     public originalProjectionData: ProjectionLcc | undefined
+    public projectionWebMercator: ProjectionWebMercator | undefined
     public projectionLcc: ProjectionLcc | undefined
 }
