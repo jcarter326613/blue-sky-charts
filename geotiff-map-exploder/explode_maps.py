@@ -96,7 +96,7 @@ def explode_maps(map_name, version, location_name, zoom_restriction, type):
     #elif location_name == "remote":
     #    os.system("aws s3 sync ./maps/tiles s3://blueskycharts.com/maps/world-vfr/sectional")
 
-if len(sys.argv) not in [4,5]:
+if len(sys.argv) not in [5,6]:
     print("Usage python3 explode_maps.py <mapname> <version> <local|remote|relative> <type> (<zoom_restriction>)")
     exit()
     
