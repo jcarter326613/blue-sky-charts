@@ -1,17 +1,11 @@
 package com.blueskycharts.app.map.assetmanagement
 
 import com.blueskycharts.app.Constants
-import com.blueskycharts.app.assests.AssetProvider
 import com.blueskycharts.app.assests.DiskCacheFactory
-import com.blueskycharts.app.assests.LocalAssetDescription
-import com.blueskycharts.app.assests.Volatility
-import com.blueskycharts.app.map.configuration.ConfigurationRetriever
 import com.blueskycharts.app.map.configuration.MapConfiguration
 import com.blueskycharts.app.preferences.Preferences
-import com.blueskycharts.app.preferences.SubMapPersistencePreferences
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
-import java.util.*
 import kotlin.math.pow
 
 /**

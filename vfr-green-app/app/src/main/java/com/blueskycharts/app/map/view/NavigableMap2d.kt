@@ -4,21 +4,13 @@ import android.content.Context
 import android.graphics.*
 import android.util.AttributeSet
 import android.view.MotionEvent
-import androidx.core.content.res.getStringOrThrow
 import com.blueskycharts.app.R
-import com.blueskycharts.app.assests.AssetProvider
 import com.blueskycharts.app.coordinates.*
-import com.blueskycharts.app.map.models.BoxGeoModel
-import com.blueskycharts.app.map.models.MapMetaDataModelCollection
 import com.blueskycharts.app.map.models.SubMapModel
 import com.blueskycharts.app.map.resources.DataProvider
 import com.blueskycharts.app.map.resources.ShadowProvider
 import com.blueskycharts.app.map.resources.TileProvider
-import com.blueskycharts.app.assests.RemoteAssetDescription
-import com.blueskycharts.app.assests.Volatility
-import com.blueskycharts.app.map.configuration.ConfigurationRetriever
 import com.blueskycharts.app.map.configuration.MapConfiguration
-import java.net.URL
 import java.util.*
 import kotlin.concurrent.timerTask
 import kotlin.math.ceil
@@ -144,24 +136,25 @@ class NavigableMap2d(context: Context, attributes: AttributeSet) : Map(context, 
     private fun setupBackgroundShadow() {
         val worldShadowView = MapTileView(this.shadowTileProvider, this);
         val worldShadowMercatorExtents = CoordinateConversion.maxMercator
-        val shadowBoxGeo = CoordinateConversion.convertBoxMercatorToBoxGeo(worldShadowMercatorExtents);
+        /*
+        val shadowBoxGeo = CoordinateConversion.convertBoxMercatorToBoxGeo(worldShadowMercatorExtents)
         val shadowBoxGeoModel = BoxGeoModel(
             topLeft = shadowBoxGeo.topLeft,
             topRight = shadowBoxGeo.topRight,
             bottomLeft = shadowBoxGeo.bottomLeft,
             bottomRight = shadowBoxGeo.bottomRight
         )
+        */
         val shadowMapModel = SubMapModel(
-            mapBounds = null,
             tileWidth = 256,
             maxZoom = 0,
-            fileExtent = shadowBoxGeoModel,
             imageHeight = 256.0,
             imageWidth = 256.0,
-            imageHeightScale = 1.0,
-            imageWidthScale = 1.0,
             version = "1",
-            changeSet = null
+            changeSet = null,
+            effectiveDate = null,
+            projectionLcc = null,
+            projectionWebMercator = null
         )
         worldShadowView.initialize("world-shadow", shadowMapModel)
         this.mapBackground = SubMapPosition(worldShadowView, worldShadowMercatorExtents)

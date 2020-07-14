@@ -18,15 +18,6 @@ class MapTileView(private val tileProvider: TileProvider, private val map: Map) 
             return field
         }
         private set
-    var fileExtent2d: Box2d? = null
-        get() {
-            val extent = this.fileExtent ?: return null
-            if ( field == null ) {
-                field = CoordinateConversion.convertBoxGeoToBox2d(extent)
-            }
-            return field
-        }
-        private set
 
     private var fileExtent: BoxGeo? = null
     private var tileWidth: Int = 0

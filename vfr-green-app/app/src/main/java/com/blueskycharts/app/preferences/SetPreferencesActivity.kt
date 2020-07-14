@@ -2,13 +2,7 @@ package com.blueskycharts.app.preferences
 
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
-import android.provider.Contacts
-import android.provider.Settings
-import android.widget.LinearLayout
-import android.widget.ToggleButton
-import androidx.constraintlayout.widget.ConstraintLayout
 import com.blueskycharts.app.R
-import com.blueskycharts.app.map.configuration.ConfigurationRetriever
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch

@@ -4,6 +4,7 @@ import com.blueskycharts.app.map.models.MapMetaDataModelCollection
 import com.blueskycharts.app.map.models.SubMapModel
 import com.blueskycharts.app.map.view.MapTileView
 import com.blueskycharts.app.map.view.SubMapPosition
+import java.net.URL
 import java.time.LocalDateTime
 import java.util.*
 
@@ -11,7 +12,7 @@ import java.util.*
  * Represents the configuration for an entire map
  * Allows convenience queries into a MapMetaDataModelCollection
  */
-class MapConfiguration(val data: MapMetaDataModelCollection) {
+class MapConfiguration(val data: MapMetaDataModelCollection, val baseUrl: String) {
     private var _mapList: List<String>? = null
     val mapList: List<String>
         get() {
