@@ -20,7 +20,8 @@
           "x0": 0,
           "y0": 0
         },
-        "tileWidth": 1024
+        "tileWidth": 1024,
+        "version": "105"
       }
     }
   }

@@ -125,7 +125,7 @@ export class Loader {
                 outputVersions[version].imageWidth = inputVerions[version].imageWidth
                 outputVersions[version].maxZoom = inputVerions[version].maxZoom
                 outputVersions[version].tileWidth = inputVerions[version].tileWidth
-                outputVersions[version].version = inputVerions[version].version
+                outputVersions[version].version = version
 
                 // Validate the projection
                 let originalProjectionLcc = inputVerions[version].originalProjectionData
