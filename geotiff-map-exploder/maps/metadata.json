@@ -1,5 +1,6 @@
 {
     "Albuquerque": {
+        "type": "Sectional",
         "versions": {
             "105": {
                 "effectiveDate": "2020-07-01",
@@ -21,8 +22,8 @@
                         "longitude": -101.78902
                     }
                 },
-                "imageHeight": 11237,
-                "imageWidth": 15706,
+                "imageHeight": 12315,
+                "imageWidth": 17947,
                 "mapBounds": [
                     [
                         -108.96378197413146,
@@ -277,8 +278,47 @@
                         36.205592140507676
                     ]
                 ],
-                "maxZoom": 6,
-                "tileWidth": 256
+                "maxZoom": 5,
+                "mosaicFileExtent": {
+                    "bottomLeft": {
+                        "latitude": 32.003117,
+                        "longitude": -108.991987
+                    },
+                    "bottomRight": {
+                        "latitude": 32.003117,
+                        "longitude": -101.78902
+                    },
+                    "topLeft": {
+                        "latitude": 36.266812,
+                        "longitude": -108.991987
+                    },
+                    "topRight": {
+                        "latitude": 36.266812,
+                        "longitude": -101.78902
+                    }
+                },
+                "mosaicImageHeight": 11237,
+                "mosaicImageWidth": 15706,
+                "mosaicMaxZoom": 4,
+                "originalProjectionBounds": [
+                    -418330.8767417697,
+                    -267793.6948373228,
+                    341443.3190732248,
+                    253556.58229693052
+                ],
+                "originalProjectionData": {
+                    "datum": "NAD83",
+                    "lat_0": 34,
+                    "lat_1": 38.66667,
+                    "lat_2": 33.33333,
+                    "lon_0": -105.56667,
+                    "no_defs": true,
+                    "proj": "lcc",
+                    "units": "m",
+                    "x_0": 0,
+                    "y_0": 0
+                },
+                "tileWidth": 1024
             }
         }
     },
@@ -1054,9 +1094,10 @@
         }
     },
     "Cape_Lisburne": {
+        "type": "Sectional",
         "versions": {
             "54": {
-                "effectiveDate": "2020-07-01",
+                "effectiveDate": "2020-06-18",
                 "fileExtent": {
                     "bottomLeft": {
                         "latitude": 68.005666,
@@ -1075,8 +1116,8 @@
                         "longitude": -154.971013
                     }
                 },
-                "imageHeight": 11445,
-                "imageWidth": 14958,
+                "imageHeight": 12258,
+                "imageWidth": 16583,
                 "mapBounds": [
                     [
                         -171.34651070725155,
@@ -1151,8 +1192,47 @@
                         72.17272228802487
                     ]
                 ],
-                "maxZoom": 6,
-                "tileWidth": 256
+                "maxZoom": 5,
+                "mosaicFileExtent": {
+                    "bottomLeft": {
+                        "latitude": 68.005666,
+                        "longitude": -171.48284
+                    },
+                    "bottomRight": {
+                        "latitude": 68.005666,
+                        "longitude": -154.971013
+                    },
+                    "topLeft": {
+                        "latitude": 72.280718,
+                        "longitude": -171.48284
+                    },
+                    "topRight": {
+                        "latitude": 72.280718,
+                        "longitude": -154.971013
+                    }
+                },
+                "mosaicImageHeight": 11445,
+                "mosaicImageWidth": 14958,
+                "mosaicMaxZoom": 4,
+                "originalProjectionBounds": [
+                    -365107.7011206396,
+                    -300099.3458732818,
+                    336947.6449643465,
+                    218858.07272628532
+                ],
+                "originalProjectionData": {
+                    "datum": "NAD83",
+                    "lat_0": 70.3333333333,
+                    "lat_1": 65.33333333333333,
+                    "lat_2": 70.66666666666667,
+                    "lon_0": -164.75,
+                    "no_defs": true,
+                    "proj": "lcc",
+                    "units": "m",
+                    "x_0": 0,
+                    "y_0": 0
+                },
+                "tileWidth": 1024
             }
         }
     },
