@@ -1,12 +1,18 @@
 import { execSync } from 'child_process'
 import { readFileSync, writeFileSync, existsSync, mkdirSync, fstat, readdirSync } from 'fs'
 import { PreviousOriginals } from '../models/previous_originals'
+import { ProjectionLcc } from '../models/projection-lcc'
+import { ProjectionExtents } from '../models/projection-extents'
+import { SectionVersion } from '../models/section-version'
 import { SectionVersionList } from '../models/section-version-list'
+import { exit } from 'process'
 
 export class Loader {
     private OUTPUT_DIRECTORY = "./output"
     private PEVIOUS_UPLOADS_FILE = "./data/previous_uploads.json"
     private SUBSECTION_META_FILE = "../geotiff-map-exploder/maps/metadata.json"
+    private SECTIONAL_METADATA_FILE = "./data/sectional_metadata.json"
+    private SECTIONAL_METADATA_FILE_OUTPUT = "./output/metadata.json"
 
     public syncChangedMaps(): void {
         // Clean the output directory
@@ -14,6 +20,15 @@ export class Loader {
             execSync(`rm -rf ${this.OUTPUT_DIRECTORY}`)
         }
         mkdirSync(this.OUTPUT_DIRECTORY);
+
+        // Load the previous metadata file
+        let outputMetadata: Record<string, SectionVersionList>
+        try {
+            let rawdata = readFileSync(this.SECTIONAL_METADATA_FILE)
+            outputMetadata = JSON.parse(rawdata.toString())
+        } catch (error) {
+            outputMetadata = {}
+        }
 
         // Load the data files which tells us all the uploaded versions of each map
         let configuration: PreviousOriginals
@@ -48,6 +63,13 @@ export class Loader {
 
         //For each version,
         for ( let mapName of Object.keys(neededMapVersions) ) {
+            if ( !(mapName in outputMetadata) ) {
+                outputMetadata[mapName] = new SectionVersionList()
+                outputMetadata[mapName].versions = {}
+            }
+            if ( outputMetadata[mapName].versions === undefined ) {
+                outputMetadata[mapName].versions = {}
+            }
             let versionList = neededMapVersions[mapName]
             for ( let version of versionList ) {
                 //Ensure png present
@@ -70,7 +92,9 @@ export class Loader {
                 execSync(`python3 ../geotiff-map-exploder/explode_maps.py ${mapName} ${version} relative sectional`)
 
                 //Prep the output directory
-                let mapOutputDirectory = `${this.OUTPUT_DIRECTORY}/${mapName}_SEC_${version}`
+                let mapOutputDirectory = `${this.OUTPUT_DIRECTORY}/${mapName}`
+                mkdirSync(mapOutputDirectory)
+                mapOutputDirectory = `${mapOutputDirectory}/${version}`
                 mkdirSync(mapOutputDirectory)
 
                 //Convert all the artifacts to jpg files
@@ -86,19 +110,66 @@ export class Loader {
                         let originalPath = `${tileMapDirectory}/${zoomDirectory}/${imageFile}`
                         execSync(`convert ${originalPath} -quality 90 ${jpegPath}`)
                     }
-                    
-                    console.log("rgsg")
                 }
 
-                console.log("rgsg")
+                //Update the metadata output file
+                let outputVersions = outputMetadata[mapName].versions
+                let inputVerions = subSectionVersions[mapName].versions
+                if (outputVersions === undefined || inputVerions === undefined) {
+                    console.error("Broken code")
+                    exit(1)
+                }
+                outputVersions[version] = new SectionVersion()
+                outputVersions[version].effectiveDate = inputVerions[version].effectiveDate
+                outputVersions[version].imageHeight = inputVerions[version].imageHeight
+                outputVersions[version].imageWidth = inputVerions[version].imageWidth
+                outputVersions[version].maxZoom = inputVerions[version].maxZoom
+                outputVersions[version].tileWidth = inputVerions[version].tileWidth
+                outputVersions[version].version = inputVerions[version].version
 
-                //Sync the folder up to AWS
+                // Validate the projection
+                let originalProjectionLcc = inputVerions[version].originalProjectionData
+                if ( originalProjectionLcc === undefined ) {
+                    console.error("Projection undefined")
+                    exit(1)
+                }
+                let projectionLcc = new ProjectionLcc()
+                projectionLcc.lat0 = originalProjectionLcc.lat_0
+                projectionLcc.lat1 = originalProjectionLcc.lat_1
+                projectionLcc.lat2 = originalProjectionLcc.lat_2
+                projectionLcc.lon0 = originalProjectionLcc.lon_0
+                projectionLcc.x0 = originalProjectionLcc.x_0
+                projectionLcc.y0 = originalProjectionLcc.y_0
 
+                if (originalProjectionLcc.datum != "NAD83" ||
+                    originalProjectionLcc.no_defs != true ||
+                    originalProjectionLcc.proj != "lcc" || 
+                    originalProjectionLcc.units != "m") {
+                    console.error("Bad projection")
+                    exit(1)
+                }
+                outputVersions[version].projectionLcc = projectionLcc
+
+                // Validate the projection extents
+                let originalExtents = inputVerions[version].originalProjectionBounds
+                if ( originalExtents == null || originalExtents.length != 4 ) {
+                    console.error("Bad projection extents")
+                    exit(1)
+                }
+
+                projectionLcc.extents = new ProjectionExtents()
+                projectionLcc.extents.left = originalExtents[0]
+                projectionLcc.extents.top = originalExtents[1]
+                projectionLcc.extents.right = originalExtents[2]
+                projectionLcc.extents.bottom = originalExtents[3]
             }
+
+            break
         }
 
         //Write out the new metadata file
-
-        //Sync the metadata file to AWS
+        let rawOutputdata = JSON.stringify(outputMetadata)
+        writeFileSync(this.SECTIONAL_METADATA_FILE_OUTPUT, rawOutputdata)
+        writeFileSync(this.SECTIONAL_METADATA_FILE, rawOutputdata)
     }
 }

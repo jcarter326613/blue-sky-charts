@@ -1,5 +1,6 @@
 import { ChangeSet } from './change-set'
 import { FileExtent } from './file-extent'
+import { ProjectionLcc } from './projection-lcc'
 
 export class SectionVersion {
     public effectiveDate: string | undefined
@@ -14,4 +15,7 @@ export class SectionVersion {
     public imageHeight: number | undefined
     public mosaicImageHeight: number | undefined
     public changeSet: Record<string, ChangeSet> | undefined
+    public originalProjectionBounds: Array<Number> | undefined
+    public originalProjectionData: ProjectionLcc | undefined
+    public projectionLcc: ProjectionLcc | undefined
 }

@@ -1,0 +1,11 @@
+#!/bin/bash
+set -e
+
+tsc --build --clean
+tsc --build
+npm run generate_original
+cd data
+jq --sort-keys . sectional_metadata.json > metadata2.json
+mv metadata2.json sectional_metadata.json
+cd ..
+tsc --build --clean

@@ -3,7 +3,7 @@ set -e
 
 tsc --build --clean
 tsc --build
-npm run generate
+npm run generate_mosaic
 cd data
 jq --sort-keys . metadata.json > metadata2.json
 mv metadata2.json metadata.json

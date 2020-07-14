@@ -1,0 +1,27 @@
+{
+  "Albuquerque": {
+    "versions": {
+      "105": {
+        "effectiveDate": "2020-07-01",
+        "imageHeight": 12315,
+        "imageWidth": 17947,
+        "maxZoom": 5,
+        "projectionLcc": {
+          "extents": {
+            "bottom": 253556.58229693052,
+            "left": -418330.8767417697,
+            "right": 341443.3190732248,
+            "top": -267793.6948373228
+          },
+          "lat0": 34,
+          "lat1": 38.66667,
+          "lat2": 33.33333,
+          "lon0": -105.56667,
+          "x0": 0,
+          "y0": 0
+        },
+        "tileWidth": 1024
+      }
+    }
+  }
+}
