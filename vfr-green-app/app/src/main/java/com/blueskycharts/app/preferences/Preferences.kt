@@ -112,8 +112,12 @@ class Preferences private constructor() {
 
         // Property constants
         fun propertyTemplateMapProactiveDownload(mapName: String): String = "map.$mapName.proactiveDownload"
+        val propertyNameDisplayedMapGroupId: String = "map.active.group"
+        val propertyNameDisplayedSubMapId: String = "map.active.submap"
 
         // Default values
-        const val defaultTemplateMapProactiveDownload = false
+        const val defaultValueMapProactiveDownload = false
+        const val defaultValueDisplayedMapGroupId = 2 //1
+        const val defaultValueDisplayedSubMapId: String = "Albuquerque" //""
     }
 }

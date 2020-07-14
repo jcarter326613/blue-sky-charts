@@ -2,24 +2,38 @@ package com.blueskycharts.app.map.assetmanagement
 
 import com.blueskycharts.app.Constants
 import com.blueskycharts.app.assests.DiskCacheFactory
+import com.blueskycharts.app.map.configuration.Inventory
 import com.blueskycharts.app.map.configuration.MapConfiguration
 import com.blueskycharts.app.preferences.Preferences
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.sync.Mutex
+import kotlinx.coroutines.sync.withLock
 import kotlin.math.pow
 
 /**
  * Performs background updates of the local cache by comparing the desired state to the current state
  * and issuing the necessary commands to the asset namespace to make changes
  */
-class TilePersistenceManager( private val mapsMetaData: MapConfiguration ) {
-    private val mapNames: List<String>
-        get() = mapsMetaData.mapList
+class TilePersistenceManager {
     private var destroyed = false
+    private var singleThreadMutex = Mutex()
 
     init {
-        for ( name in mapNames ) {
-            enforcePreferences(name)
+        for ( group in Inventory.instance.mapGroups ) {
+            group.getConfiguration {
+                if ( it != null ) {
+                    GlobalScope.launch {
+                        singleThreadMutex.withLock {
+                            if ( !destroyed ) {
+                                for (name in it.mapList) {
+                                    enforcePreferences(name, it)
+                                }
+                            }
+                        }
+                    }
+                }
+            }
         }
     }
 
@@ -27,13 +41,13 @@ class TilePersistenceManager( private val mapsMetaData: MapConfiguration ) {
         this.destroyed = true
     }
 
-    private fun enforcePreferences(name: String) {
+    private fun enforcePreferences(name: String, mapsMetaData: MapConfiguration) {
         val metaData = mapsMetaData.getCurrentVersion(name)
         if (metaData?.maxZoom == null) {
             return
         }
 
-        if (Preferences.instance.getBooleanValue(Preferences.propertyTemplateMapProactiveDownload(name), Preferences.defaultTemplateMapProactiveDownload)) {
+        if (Preferences.instance.getBooleanValue(Preferences.propertyTemplateMapProactiveDownload(name), Preferences.defaultValueMapProactiveDownload)) {
             GlobalScope.launch {
                 val currentMapVersion = metaData.version ?: return@launch
 
@@ -104,13 +118,8 @@ class TilePersistenceManager( private val mapsMetaData: MapConfiguration ) {
         var instance: TilePersistenceManager? = null
 
         fun initializeOrRefresh() {
-            val configurationRetriever = ConfigurationRetriever()
-            configurationRetriever.retrieveConfiguration {
-                if ( it != null ) {
-                    instance?.destroy()
-                    instance = TilePersistenceManager(it)
-                }
-            }
+            instance?.destroy()
+            instance = TilePersistenceManager()
         }
     }
 }

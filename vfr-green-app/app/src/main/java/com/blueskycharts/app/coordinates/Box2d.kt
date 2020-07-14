@@ -1,7 +1,8 @@
 package com.blueskycharts.app.coordinates
 
-import kotlin.math.max;
-import kotlin.math.min;
+import kotlin.math.max
+import kotlin.math.min
+
 /**
  * Display coordinates.  Upper left is (0,0)
  */
@@ -49,25 +50,30 @@ class Box2d(upperLeftX: Double = 0.0, upperLeftY: Double = 0.0, lowerRightX: Dou
         return Box2d(upperLeft.x * s, upperLeft.y * s, lowerRight.x * s, lowerRight.y * s)
     }
 
+    fun overlapPercentageUpperLeft(o: Box2d): Box2d {
+        val topLeftX = (o.upperLeft.x - this.upperLeft.x) / this.width
+        val topLeftY = (o.upperLeft.y - this.upperLeft.y) / this.height
+        val bottomRightX = (o.lowerRight.x - this.upperLeft.x) / this.width
+        val bottomRightY = (o.lowerRight.y - this.upperLeft.y) / this.height
+        return Box2d(topLeftX, topLeftY, bottomRightX, bottomRightY)
+    }
+
     /**
      * Returns the intersection of the two boxes.  An real number range is allowed.
      * @param o
      */
     fun intersection(o: Box2d): Box2d? {
-        val newBox = Box2d();
-        newBox.upperLeft.x = max(this.upperLeft.x, o.upperLeft.x);
-        newBox.upperLeft.y = max(this.upperLeft.y, o.upperLeft.y);
-        newBox.lowerRight.x = min(this.lowerRight.x, o.lowerRight.x);
-        newBox.lowerRight.y = min(this.lowerRight.y, o.lowerRight.y);
+        val newBox = Box2d(
+            max(this.upperLeft.x, o.upperLeft.x),
+            max(this.upperLeft.y, o.upperLeft.y),
+            min(this.lowerRight.x, o.lowerRight.x),
+            min(this.lowerRight.y, o.lowerRight.y)
+        )
 
         if (newBox.lowerRight.x < newBox.upperLeft.x || newBox.lowerRight.y < newBox.upperLeft.y) {
-            return null;
+            return null
         }
 
-        return newBox;
-    }
-
-    fun getDimensions(): Point2d {
-        return Point2d(this.width, this.height)
+        return newBox
     }
 }

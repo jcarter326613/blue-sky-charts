@@ -2,13 +2,8 @@ package com.blueskycharts.app.map.resources
 
 import android.graphics.Bitmap
 import android.graphics.Canvas
-import com.blueskycharts.app.assests.AssetProvider
 import com.blueskycharts.app.coordinates.Box2d
 import com.blueskycharts.app.coordinates.Point2d
-import com.blueskycharts.app.assests.RemoteAssetDescription
-import com.blueskycharts.app.assests.Volatility
-import com.blueskycharts.app.map.assetmanagement.TileAssetProvider
-import java.net.URL
 
 class TileRequest(private val provider: TileProvider, private var receiver: TileReceiver?, private var data: Any?,
                   private val location: Point2d, private val dimensions: Point2d,

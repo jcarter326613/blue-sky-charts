@@ -27,7 +27,7 @@ class PreferenceToggleFragment(private val mapName: String) : Fragment() {
 
         val proactiveDownload = Preferences.instance.getBooleanValue(
             Preferences.propertyTemplateMapProactiveDownload(mapName),
-            Preferences.defaultTemplateMapProactiveDownload
+            Preferences.defaultValueMapProactiveDownload
         )
         val toggleButton = view.findViewById<ToggleButton>(R.id.proactivePersistToggleButton)
         toggleButton.isChecked = proactiveDownload

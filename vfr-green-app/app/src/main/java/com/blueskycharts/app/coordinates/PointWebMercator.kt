@@ -1,11 +1,37 @@
 package com.blueskycharts.app.coordinates
 
-class PointWebMercator(var x: Double = 0.0, var y: Double = 0.0) {
+import kotlin.math.PI
+import kotlin.math.atan
+import kotlin.math.exp
+
+class PointWebMercator(override var x: Double = 0.0, override var y: Double = 0.0): Location {
     fun clone(): PointWebMercator {
         return PointWebMercator(x, y);
     }
 
-    fun createBoxAround(size: PointWebMercator): BoxWebMercator {
-        return BoxWebMercator(this.x - (size.x / 2.0), this.y + (size.y / 2.0), this.x + (size.x / 2.0), this.y - (size.y / 2.0))
+    /*
+    fun createBoxAround(size: PointWebMercator): RectangularBoxWebMercator {
+        return RectangularBoxWebMercator(this.x - (size.x / 2.0), this.y + (size.y / 2.0), this.x + (size.x / 2.0), this.y - (size.y / 2.0))
+    }
+
+     */
+
+    fun convertToPointGeo(): PointGeo {
+        var longitude = x * 180.0 / 20037508.34
+        var latitude = atan(exp(y * PI / 20037508.34)) * 360.0 / PI - 90.0
+
+        if ( latitude > PointGeo.maxLatitude ) {
+            latitude = PointGeo.maxLatitude
+        } else if ( latitude < PointGeo.minLatitude ) {
+            latitude = PointGeo.minLatitude
+        }
+
+        if ( longitude > PointGeo.maxLongitude ) {
+            longitude = PointGeo.maxLongitude
+        } else if ( longitude < PointGeo.minLongitude ) {
+            longitude = PointGeo.minLongitude
+        }
+
+        return PointGeo(longitude, latitude)
     }
 }

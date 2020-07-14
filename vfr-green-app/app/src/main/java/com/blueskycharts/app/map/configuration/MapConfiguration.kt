@@ -12,7 +12,7 @@ import java.util.*
  * Represents the configuration for an entire map
  * Allows convenience queries into a MapMetaDataModelCollection
  */
-class MapConfiguration(val data: MapMetaDataModelCollection, val baseUrl: String) {
+class MapConfiguration(val data: MapMetaDataModelCollection, val baseUrl: String, val displayAll: Boolean) {
     private var _mapList: List<String>? = null
     val mapList: List<String>
         get() {
@@ -26,6 +26,19 @@ class MapConfiguration(val data: MapMetaDataModelCollection, val baseUrl: String
             }
             return retVal
         }
+
+    fun filterForSubMap(mapName: String): MapConfiguration? {
+        for (key in data.maps.keys) {
+            if ( key == mapName ) {
+                val mapData = data.maps[mapName]
+                if ( mapData != null ) {
+                    val newData = MapMetaDataModelCollection(mutableMapOf(Pair(mapName, mapData)))
+                    return MapConfiguration(newData, baseUrl, displayAll)
+                }
+            }
+        }
+        return null
+    }
 
     fun getCurrentVersion(mapName: String): SubMapModel? {
         //TODO: fix the fact that this doens't respect effectiveDate

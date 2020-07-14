@@ -1,4 +1,4 @@
 package com.blueskycharts.app.coordinates
 
-class PointLcc {
+class PointLcc(override var x: Double = 0.0, override var y: Double = 0.0): Location {
 }

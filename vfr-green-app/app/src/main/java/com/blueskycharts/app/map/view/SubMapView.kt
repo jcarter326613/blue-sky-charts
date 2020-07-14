@@ -1,16 +1,15 @@
 package com.blueskycharts.app.map.view
 
-import android.content.Context
 import android.graphics.Canvas
+import com.blueskycharts.app.coordinates.RectangularArea
 import com.blueskycharts.app.coordinates.Box2d
-import com.blueskycharts.app.coordinates.BoxWebMercator
 import com.blueskycharts.app.map.models.SubMapModel
 
 interface SubMapView {
     /**
-     * Mercator coordinates of map
+     * Projected coordinates of map
      */
-    val fileExtentMercator: BoxWebMercator?
+    val fileExtent: RectangularArea?
 
     /**
      * Initializes the view
@@ -19,7 +18,7 @@ interface SubMapView {
      * @returns A BoxGeo representing the full extent of the map.  undefined if this map should be discarded from view because of a
      *  bad configuration.
      */
-    fun initialize(name: String, model: SubMapModel?): BoxWebMercator?;
+    fun initialize(name: String, model: SubMapModel?): Box2d?
 
     /**
      * Returns the age of any data beign displayed and resets the age counter prior to rendering
@@ -33,7 +32,7 @@ interface SubMapView {
      * @param region The region in relation to the original width and height
      * @param scale All aspects of the region are multiplied by this value
      */
-    fun render(canvas: Canvas, region: BoxWebMercator, destination: Box2d)
+    fun render(canvas: Canvas, region: Box2d, destination: Box2d)
 
     /**
      * Prevents any further drawing from this view

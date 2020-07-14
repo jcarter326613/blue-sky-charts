@@ -4,7 +4,6 @@ import android.graphics.Canvas
 import android.util.Log
 import com.blueskycharts.app.assests.AssetProvider
 import com.blueskycharts.app.coordinates.BoxGeo
-import com.blueskycharts.app.coordinates.CoordinateConversion
 import com.blueskycharts.app.coordinates.PointGeo
 import com.blueskycharts.app.map.models.WeatherConditionResponse
 import com.blueskycharts.app.map.view.OverlayTypes
@@ -81,9 +80,7 @@ class DataRequest(private val provider: DataProvider, private var receiver: Data
             if (longitude == null || latitude == null) continue
 
             val geoLocation = PointGeo(longitude.toDouble(), latitude.toDouble())
-            val mercatorLocation = CoordinateConversion.convertPointGeoToPointWebMercator(geoLocation)
-
-            receiver.receiveData(mercatorLocation, condition, dataAgeSeconds, immediate, canvas, this.receiverData)
+            receiver.receiveData(geoLocation, condition, dataAgeSeconds, immediate, canvas, this.receiverData)
         }
     }
 

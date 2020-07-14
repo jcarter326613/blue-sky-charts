@@ -6,18 +6,24 @@ import android.util.AttributeSet
 import android.view.MotionEvent
 import com.blueskycharts.app.R
 import com.blueskycharts.app.coordinates.*
+import com.blueskycharts.app.map.configuration.Inventory
 import com.blueskycharts.app.map.models.SubMapModel
 import com.blueskycharts.app.map.resources.DataProvider
 import com.blueskycharts.app.map.resources.ShadowProvider
 import com.blueskycharts.app.map.resources.TileProvider
 import com.blueskycharts.app.map.configuration.MapConfiguration
+import com.blueskycharts.app.map.models.ExtentModel
+import com.blueskycharts.app.map.models.ProjectionLccModel
+import com.blueskycharts.app.map.models.ProjectionWebMercatorModel
+import com.blueskycharts.app.preferences.Preferences
 import java.util.*
 import kotlin.concurrent.timerTask
 import kotlin.math.ceil
 import kotlin.math.log2
 import kotlin.math.pow
 
-class NavigableMap2d(context: Context, attributes: AttributeSet) : Map(context, attributes) {
+class NavigableMap2d(context: Context, attributes: AttributeSet) :
+    Map(context, attributes) {
     private val tileProvider: TileProvider
     private val shadowTileProvider: TileProvider
     private val dataProvider: DataProvider
@@ -31,10 +37,11 @@ class NavigableMap2d(context: Context, attributes: AttributeSet) : Map(context, 
     private var mapBackground: SubMapPosition? = null
     private var mapViews: LinkedList<SubMapPosition>? = null
     private var dataOverlayView: SubMapPosition? = null
-    private var originMercator: PointWebMercator
+    private var origin2d: Point2d? = null
     private var scale: Double
     private var scaleDriver: Float
     private val maxScaleDriver: Float = 12F
+    private var drawnBounds: Box2d? = null
 
     // Mouse event variables
     private var isDragging: Boolean
@@ -48,9 +55,11 @@ class NavigableMap2d(context: Context, attributes: AttributeSet) : Map(context, 
         context.theme.obtainStyledAttributes(attributes, R.styleable.NavigableMap2d, 0, 0).apply {
             try {
                 scaleDriver = getFloat(R.styleable.NavigableMap2d_zoom, 4.25F);
+                /*
                 val originLongitude = getFloat(R.styleable.NavigableMap2d_originLongitude, -98.5795F)
                 val originLatitude = getFloat(R.styleable.NavigableMap2d_originLongitude, 39.8283F)
                 originMercator = CoordinateConversion.convertPointGeoToPointWebMercator(PointGeo(originLongitude.toDouble(), originLatitude.toDouble()));
+                 */
             } finally {
                 recycle()
             }
@@ -95,7 +104,7 @@ class NavigableMap2d(context: Context, attributes: AttributeSet) : Map(context, 
         this.pinchOriginalScale = 0.0;
 
         // Startup the map
-        this.setupBackgroundShadow()
+        //this.setupBackgroundShadow()
         this.retrieveConfiguration()
     }
 
@@ -133,31 +142,41 @@ class NavigableMap2d(context: Context, attributes: AttributeSet) : Map(context, 
         this.scale = 1 / (2.0.pow(this.scaleDriver.toDouble()));
     }
 
-    private fun setupBackgroundShadow() {
-        val worldShadowView = MapTileView(this.shadowTileProvider, this);
-        val worldShadowMercatorExtents = CoordinateConversion.maxMercator
-        /*
-        val shadowBoxGeo = CoordinateConversion.convertBoxMercatorToBoxGeo(worldShadowMercatorExtents)
-        val shadowBoxGeoModel = BoxGeoModel(
-            topLeft = shadowBoxGeo.topLeft,
-            topRight = shadowBoxGeo.topRight,
-            bottomLeft = shadowBoxGeo.bottomLeft,
-            bottomRight = shadowBoxGeo.bottomRight
-        )
-        */
-        val shadowMapModel = SubMapModel(
-            tileWidth = 256,
-            maxZoom = 0,
-            imageHeight = 256.0,
-            imageWidth = 256.0,
-            version = "1",
-            changeSet = null,
-            effectiveDate = null,
-            projectionLcc = null,
-            projectionWebMercator = null
-        )
-        worldShadowView.initialize("world-shadow", shadowMapModel)
-        this.mapBackground = SubMapPosition(worldShadowView, worldShadowMercatorExtents)
+    private fun setupBackgroundShadow(configuration: MapConfiguration) {
+        // Only setup the background if the map config contains web mercator maps
+        val firstKey = configuration.data.maps.keys.firstOrNull()
+        if ( firstKey != null ) {
+            val firstConfig = configuration.data.maps[firstKey]
+            val firstVersionKey = firstConfig?.versions?.keys?.firstOrNull()
+            if ( firstVersionKey != null ) {
+                val firstVersion = firstConfig.versions[firstVersionKey]
+                if ( firstVersion?.projectionWebMercator?.extents != null ) {
+                    val topLeft = PointGeo(PointGeo.minLongitude, PointGeo.maxLatitude)
+                    val bottomRight = PointGeo(PointGeo.maxLongitude, PointGeo.minLatitude)
+                    val topLeftMercator = topLeft.convertToPointWebMercator()
+                    val bottomRightMercator = bottomRight.convertToPointWebMercator()
+                    val projectionWebMercator = ProjectionWebMercatorModel(ExtentModel(
+                        topLeftMercator.x, topLeftMercator.y, bottomRightMercator.x, bottomRightMercator.y
+                    ))
+
+                    val worldShadowView = MapTileView(this.shadowTileProvider, this);
+                    val worldShadowMercatorExtents = RectangularAreaWebMercator.maxMercator
+                    val shadowMapModel = SubMapModel(
+                        tileWidth = 256,
+                        maxZoom = 0,
+                        imageHeight = 256.0,
+                        imageWidth = 256.0,
+                        version = "1",
+                        changeSet = null,
+                        effectiveDate = null,
+                        projectionLcc = null,
+                        projectionWebMercator = projectionWebMercator
+                    )
+                    worldShadowView.initialize("world-shadow", shadowMapModel)
+                    this.mapBackground = SubMapPosition(worldShadowView, worldShadowMercatorExtents.convertToBox2d())
+                }
+            }
+        }
     }
 
     private fun initializeMapModel(configuration: MapConfiguration) {
@@ -175,21 +194,31 @@ class NavigableMap2d(context: Context, attributes: AttributeSet) : Map(context, 
     }
 
     private fun retrieveConfiguration() {
-        val retriever = ConfigurationRetriever()
-        retriever.retrieveConfiguration {
-            if ( it != null ) {
-                this@NavigableMap2d.initializeMapModel(it)
-                this@NavigableMap2d.postInvalidate()
+        val mapGroupId = Preferences.instance.getIntValue(Preferences.propertyNameDisplayedMapGroupId, Preferences.defaultValueDisplayedMapGroupId)
+        val mapGroup = Inventory.instance.findGroupById(mapGroupId)
+        mapGroup?.getConfiguration {
+            if (it == null) {
+                return@getConfiguration
             }
+            var config = it
+            if (!it.displayAll) {
+                val subMapId = Preferences.instance.getStringValue(Preferences.propertyNameDisplayedSubMapId, Preferences.defaultValueDisplayedSubMapId)
+                config = config.filterForSubMap(subMapId)
+                if ( config == null ) {
+                    return@getConfiguration
+                }
+            }
+            this@NavigableMap2d.initializeMapModel(config)
+            this@NavigableMap2d.postInvalidate()
         }
     }
 
     override fun onDraw(canvas: Canvas?) {
         super.onDraw(canvas)
         if (canvas == null)
-            return;
+            return
 
-        val viewportMercator = this.calculateViewport();
+        val viewportMercator = this.calculateViewport()?: return
 
         // Draw the solid background color
         val paint = Paint()
@@ -263,21 +292,18 @@ class NavigableMap2d(context: Context, attributes: AttributeSet) : Map(context, 
         }
     }
 
-    private fun drawSubMap(submap: SubMapPosition, viewportMercator: BoxWebMercator, canvas: Canvas) {
-        // Calculate the viewport from the perspective of the un modified sub map
-        val mapPositionMercator = submap.location
-        val viewportOverlapMercator = mapPositionMercator.intersection(viewportMercator)
-        if (viewportOverlapMercator != null) {
-            val viewportOverlap2d = CoordinateConversion.convertBoxMercatorToBox2d(viewportOverlapMercator)
-            val viewport2d = CoordinateConversion.convertBoxMercatorToBox2d(viewportMercator)
-            val origin2d = CoordinateConversion.convertPointMercatorToPoint2d(this.originMercator)
+    private fun drawSubMap(submap: SubMapPosition, viewport2d: Box2d, canvas: Canvas) {
+        val origin2d = this.origin2d?: return
 
+        // Calculate the viewport from the perspective of the un modified sub map
+        val viewportOverlap2d = submap.location.intersection(viewport2d)
+        if (viewportOverlap2d != null) {
             // Figure out what we need to scale the viewport by to fit it on the screen
             val scale = this.width / viewport2d.width
             val drawArea = viewportOverlap2d.shift(origin2d, reverse=true).scale(scale)
 
             // Draw the submap
-            submap.subMapView.render(canvas, viewportOverlapMercator, drawArea)
+            submap.subMapView.render(canvas, viewportOverlap2d, drawArea)
         } else {
             submap.subMapView.moveOffscreen();
         }
@@ -312,20 +338,21 @@ class NavigableMap2d(context: Context, attributes: AttributeSet) : Map(context, 
     /**
      * Returns the viewport in unscaled coordinates.
      */
-    private fun calculateViewport(): BoxWebMercator {
-        val viewportDimensionsMercator = this.getViewportDimensionsMercator();
-        return originMercator.createBoxAround(viewportDimensionsMercator)
+    private fun calculateViewport(): Box2d? {
+        val viewportDimensions = this.getViewportDimensions();
+        return origin2d?.createBoxAround(viewportDimensions)
     }
 
-    private fun getViewportDimensionsMercator(): PointWebMercator {
+    private fun getViewportDimensions(): Point2d {
+        val drawnBounds = this.drawnBounds ?: return Point2d(0.0, 0.0)
+
         return if ( this.width > this.height ) {
-            PointWebMercator(
-                CoordinateConversion.maxMercator.width * scale,
-                CoordinateConversion.maxMercator.width * scale * (this.height / this.width.toDouble()))
+            Point2d(drawnBounds.width * scale,
+                drawnBounds.width * scale * (this.height / this.width.toDouble()))
         } else {
-            PointWebMercator(
-                CoordinateConversion.maxMercator.height * scale * (this.width / this.height.toDouble()),
-                CoordinateConversion.maxMercator.height * scale)
+            Point2d(
+                drawnBounds.height * scale * (this.width / this.height.toDouble()),
+                drawnBounds.height * scale)
         }
     }
 
@@ -405,8 +432,8 @@ class NavigableMap2d(context: Context, attributes: AttributeSet) : Map(context, 
         }
 
         // Continue with starting the drag state
+        this.mouseDownOrigin2d = this.origin2d?.clone()?: return false
         this.mouseDownClient = Point2d(offsetX.toDouble(), offsetY.toDouble())
-        this.mouseDownOrigin2d = CoordinateConversion.convertPointMercatorToPoint2d(this.originMercator)
         this.isDragging = true
 
         return true
@@ -416,15 +443,15 @@ class NavigableMap2d(context: Context, attributes: AttributeSet) : Map(context, 
         if (this.isDragging) {
             val xDifference = offsetX - this.mouseDownClient.x
             val yDifference = offsetY - this.mouseDownClient.y
-            val viewport = this.calculateViewport()
+            val viewport = this.calculateViewport()?: return
             val viewportDimensions = Point2d(viewport.width, viewport.height)
 
             val percentageClientTraverseX = xDifference / this.width
             val percentageClientTraverseY = yDifference / this.height
 
-            this.originMercator = CoordinateConversion.convertPoint2dToPointMercator(
+            this.origin2d =
                 Point2d(this.mouseDownOrigin2d.x - viewportDimensions.x * percentageClientTraverseX,
-                    this.mouseDownOrigin2d.y - viewportDimensions.y * percentageClientTraverseY))
+                    this.mouseDownOrigin2d.y - viewportDimensions.y * percentageClientTraverseY)
 
             this.viewportChanged()
             this.requestRedraw()

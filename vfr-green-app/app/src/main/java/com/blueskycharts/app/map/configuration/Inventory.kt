@@ -14,14 +14,14 @@ class Inventory(val mapGroups: List<Group>) {
         }
     }
 
-    class Group(val id: Int, val humanName: String, private val urlRoot: String) {
+    class Group(val id: Int, val humanName: String, private val urlRoot: String, private val displayAll: Boolean) {
         fun getConfiguration(callback: (it: MapConfiguration?) -> Unit) {
             var mapConfigurationFile = URL("${urlRoot}/metadata.json")
             val assetProvider = AssetProvider()
             assetProvider.retrieveAsset(RemoteAssetDescription(mapConfigurationFile, Volatility.DayCache)) {
                 val reader = it.asJsonReader()
                 if ( reader != null ) {
-                    val mapPositions = MapConfiguration(MapMetaDataModelCollection.readFromJsonReader(reader), urlRoot)
+                    val mapPositions = MapConfiguration(MapMetaDataModelCollection.readFromJsonReader(reader), urlRoot, displayAll)
                     callback(mapPositions)
                 } else {
                     callback(null)
@@ -36,8 +36,8 @@ class Inventory(val mapGroups: List<Group>) {
             get() {
                 if ( _instance == null ) {
                     val groups = mutableListOf<Group>()
-                    val worldVfrInventoryGroup = Group(1, "World VFR", "https://blueskycharts.com/maps/world-vfr-mosaic")
-                    val usSectionalVfrGroup = Group(2, "VFR Sectional", "https://blueskycharts.com/maps/vfr-sectional")
+                    val worldVfrInventoryGroup = Group(1, "World VFR", "https://blueskycharts.com/maps/world-vfr-mosaic", true)
+                    val usSectionalVfrGroup = Group(2, "VFR Sectional", "https://blueskycharts.com/maps/vfr-sectional", false)
                     groups.add(worldVfrInventoryGroup)
                     groups.add(usSectionalVfrGroup)
                     _instance = Inventory(groups)
