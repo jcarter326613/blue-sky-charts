@@ -62,6 +62,7 @@ export class Loader {
         }
 
         //For each version,
+        let outputVersionId = (new Date()).toISOString().replace(/\..+/, "").replace(":", "-").replace(":", "-")
         for ( let mapName of Object.keys(neededMapVersions) ) {
             if ( !(mapName in outputMetadata) ) {
                 outputMetadata[mapName] = new SectionVersionList()
@@ -94,7 +95,7 @@ export class Loader {
                 //Prep the output directory
                 let mapOutputDirectory = `${this.OUTPUT_DIRECTORY}/${mapName}`
                 mkdirSync(mapOutputDirectory)
-                mapOutputDirectory = `${mapOutputDirectory}/${version}`
+                mapOutputDirectory = `${mapOutputDirectory}/${outputVersionId}`
                 mkdirSync(mapOutputDirectory)
 
                 //Convert all the artifacts to jpg files
@@ -119,13 +120,13 @@ export class Loader {
                     console.error("Broken code")
                     exit(1)
                 }
-                outputVersions[version] = new SectionVersion()
-                outputVersions[version].effectiveDate = inputVerions[version].effectiveDate
-                outputVersions[version].imageHeight = inputVerions[version].imageHeight
-                outputVersions[version].imageWidth = inputVerions[version].imageWidth
-                outputVersions[version].maxZoom = inputVerions[version].maxZoom
-                outputVersions[version].tileWidth = inputVerions[version].tileWidth
-                outputVersions[version].version = version
+                outputVersions[outputVersionId] = new SectionVersion()
+                outputVersions[outputVersionId].effectiveDate = inputVerions[version].effectiveDate
+                outputVersions[outputVersionId].imageHeight = inputVerions[version].imageHeight
+                outputVersions[outputVersionId].imageWidth = inputVerions[version].imageWidth
+                outputVersions[outputVersionId].maxZoom = inputVerions[version].maxZoom
+                outputVersions[outputVersionId].tileWidth = inputVerions[version].tileWidth
+                outputVersions[outputVersionId].version = outputVersionId
 
                 // Validate the projection
                 let originalProjectionLcc = inputVerions[version].originalProjectionData
@@ -148,7 +149,7 @@ export class Loader {
                     console.error("Bad projection")
                     exit(1)
                 }
-                outputVersions[version].projectionLcc = projectionLcc
+                outputVersions[outputVersionId].projectionLcc = projectionLcc
 
                 // Validate the projection extents
                 let originalExtents = inputVerions[version].originalProjectionBounds

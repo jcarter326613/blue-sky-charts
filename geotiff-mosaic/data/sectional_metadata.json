@@ -1,7 +1,7 @@
 {
   "Albuquerque": {
     "versions": {
-      "105": {
+      "2020-07-14T20-22-09": {
         "effectiveDate": "2020-07-01",
         "imageHeight": 12315,
         "imageWidth": 17947,
@@ -21,7 +21,7 @@
           "y0": 0
         },
         "tileWidth": 1024,
-        "version": "105"
+        "version": "2020-07-14T20-22-09"
       }
     }
   }
