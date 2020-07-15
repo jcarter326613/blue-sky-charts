@@ -3,7 +3,7 @@
         "type": "Sectional",
         "versions": {
             "105": {
-                "effectiveDate": "2020-07-01",
+                "effectiveDate": "2020-04-23",
                 "fileExtent": {
                     "bottomLeft": {
                         "latitude": 32.003117,
@@ -323,9 +323,10 @@
         }
     },
     "Anchorage": {
+        "type": "Sectional",
         "versions": {
             "106": {
-                "effectiveDate": "2020-07-01",
+                "effectiveDate": "2020-05-21",
                 "fileExtent": {
                     "bottomLeft": {
                         "latitude": 60.006308,
@@ -344,8 +345,8 @@
                         "longitude": -139.403375
                     }
                 },
-                "imageHeight": 11334,
-                "imageWidth": 14998,
+                "imageHeight": 12355,
+                "imageWidth": 16677,
                 "mapBounds": [
                     [
                         -151.46210679461865,
@@ -560,8 +561,47 @@
                         64.1286079127071
                     ]
                 ],
-                "maxZoom": 6,
-                "tileWidth": 256
+                "maxZoom": 5,
+                "mosaicFileExtent": {
+                    "bottomLeft": {
+                        "latitude": 60.006308,
+                        "longitude": -151.490717
+                    },
+                    "bottomRight": {
+                        "latitude": 60.006308,
+                        "longitude": -139.403375
+                    },
+                    "topLeft": {
+                        "latitude": 64.267346,
+                        "longitude": -151.490717
+                    },
+                    "topRight": {
+                        "latitude": 64.267346,
+                        "longitude": -139.403375
+                    }
+                },
+                "mosaicImageHeight": 11334,
+                "mosaicImageWidth": 14998,
+                "mosaicMaxZoom": 4,
+                "originalProjectionBounds": [
+                    -365734.82352279394,
+                    -282917.9570005102,
+                    340284.9523282362,
+                    240148.84399361737
+                ],
+                "originalProjectionData": {
+                    "datum": "NAD83",
+                    "lat_0": 62.13333333333334,
+                    "lat_1": 62.66666666666667,
+                    "lat_2": 57.33333333333334,
+                    "lon_0": -146.3333333333333,
+                    "no_defs": true,
+                    "proj": "lcc",
+                    "units": "m",
+                    "x_0": 0,
+                    "y_0": 0
+                },
+                "tileWidth": 1024
             }
         }
     },
@@ -701,9 +741,10 @@
         }
     },
     "Bethel": {
+        "type": "Sectional",
         "versions": {
             "61": {
-                "effectiveDate": "2020-07-01",
+                "effectiveDate": "2019-07-18",
                 "fileExtent": {
                     "bottomLeft": {
                         "latitude": 59.582308,
@@ -722,8 +763,8 @@
                         "longitude": -160.339332
                     }
                 },
-                "imageHeight": 12370,
-                "imageWidth": 15923,
+                "imageHeight": 12244,
+                "imageWidth": 16666,
                 "mapBounds": [
                     [
                         -172.916346721909,
@@ -870,15 +911,55 @@
                         64.16229925924355
                     ]
                 ],
-                "maxZoom": 6,
-                "tileWidth": 256
+                "maxZoom": 5,
+                "mosaicFileExtent": {
+                    "bottomLeft": {
+                        "latitude": 59.582308,
+                        "longitude": -173.181283
+                    },
+                    "bottomRight": {
+                        "latitude": 59.582308,
+                        "longitude": -160.339332
+                    },
+                    "topLeft": {
+                        "latitude": 64.267022,
+                        "longitude": -173.181283
+                    },
+                    "topRight": {
+                        "latitude": 64.267022,
+                        "longitude": -160.339332
+                    }
+                },
+                "mosaicImageHeight": 12370,
+                "mosaicImageWidth": 15923,
+                "mosaicMaxZoom": 4,
+                "originalProjectionBounds": [
+                    -355595.20109473955,
+                    -263143.9521230123,
+                    349942.3617145711,
+                    255202.62766987222
+                ],
+                "originalProjectionData": {
+                    "datum": "NAD83",
+                    "lat_0": 62,
+                    "lat_1": 62.66666666666667,
+                    "lat_2": 57.33333333333334,
+                    "lon_0": -167.5,
+                    "no_defs": true,
+                    "proj": "lcc",
+                    "units": "m",
+                    "x_0": 0,
+                    "y_0": 0
+                },
+                "tileWidth": 1024
             }
         }
     },
     "Billings": {
+        "type": "Sectional",
         "versions": {
             "99": {
-                "effectiveDate": "2020-07-01",
+                "effectiveDate": "2020-03-26",
                 "fileExtent": {
                     "bottomLeft": {
                         "latitude": 44.415147,
@@ -897,8 +978,8 @@
                         "longitude": -100.280885
                     }
                 },
-                "imageHeight": 12319,
-                "imageWidth": 15703,
+                "imageHeight": 12322,
+                "imageWidth": 17881,
                 "mapBounds": [
                     [
                         -108.95427038771614,
@@ -1009,15 +1090,55 @@
                         49.017031522569404
                     ]
                 ],
-                "maxZoom": 6,
-                "tileWidth": 256
+                "maxZoom": 5,
+                "mosaicFileExtent": {
+                    "bottomLeft": {
+                        "latitude": 44.415147,
+                        "longitude": -108.984478
+                    },
+                    "bottomRight": {
+                        "latitude": 44.415147,
+                        "longitude": -100.280885
+                    },
+                    "topLeft": {
+                        "latitude": 49.089135,
+                        "longitude": -108.984478
+                    },
+                    "topRight": {
+                        "latitude": 49.089135,
+                        "longitude": -100.280885
+                    }
+                },
+                "mosaicImageHeight": 12319,
+                "mosaicImageWidth": 15703,
+                "mosaicMaxZoom": 4,
+                "originalProjectionBounds": [
+                    -409952.31566575664,
+                    -260184.40370777552,
+                    347035.557049449,
+                    261491.78403074283
+                ],
+                "originalProjectionData": {
+                    "datum": "NAD83",
+                    "lat_0": 46.75,
+                    "lat_1": 46.66667,
+                    "lat_2": 41.33333,
+                    "lon_0": -105,
+                    "no_defs": true,
+                    "proj": "lcc",
+                    "units": "m",
+                    "x_0": 0,
+                    "y_0": 0
+                },
+                "tileWidth": 1024
             }
         }
     },
     "Brownsville": {
+        "type": "Sectional",
         "versions": {
             "104": {
-                "effectiveDate": "2020-07-01",
+                "effectiveDate": "2020-01-30",
                 "fileExtent": {
                     "bottomLeft": {
                         "latitude": 24.002229,
@@ -1036,8 +1157,8 @@
                         "longitude": -96.58596
                     }
                 },
-                "imageHeight": 11218,
-                "imageWidth": 15133,
+                "imageHeight": 12323,
+                "imageWidth": 16602,
                 "mapBounds": [
                     [
                         -102.97137702702533,
@@ -1088,8 +1209,47 @@
                         28.20085033591331
                     ]
                 ],
-                "maxZoom": 6,
-                "tileWidth": 256
+                "maxZoom": 5,
+                "mosaicFileExtent": {
+                    "bottomLeft": {
+                        "latitude": 24.002229,
+                        "longitude": -102.994882
+                    },
+                    "bottomRight": {
+                        "latitude": 24.002229,
+                        "longitude": -96.58596
+                    },
+                    "topLeft": {
+                        "latitude": 28.26596,
+                        "longitude": -102.994882
+                    },
+                    "topRight": {
+                        "latitude": 28.26596,
+                        "longitude": -96.58596
+                    }
+                },
+                "mosaicImageHeight": 11218,
+                "mosaicImageWidth": 15133,
+                "mosaicMaxZoom": 4,
+                "originalProjectionBounds": [
+                    -367473.13154097897,
+                    -279088.17738815583,
+                    335374.4851765582,
+                    242619.5021685572
+                ],
+                "originalProjectionData": {
+                    "datum": "NAD83",
+                    "lat_0": 26.083333333,
+                    "lat_1": 30.66666666666667,
+                    "lat_2": 25.33333333333333,
+                    "lon_0": -100,
+                    "no_defs": true,
+                    "proj": "lcc",
+                    "units": "m",
+                    "x_0": 0,
+                    "y_0": 0
+                },
+                "tileWidth": 1024
             }
         }
     },
@@ -1237,9 +1397,10 @@
         }
     },
     "Charlotte": {
+        "type": "Sectional",
         "versions": {
             "107": {
-                "effectiveDate": "2020-07-01",
+                "effectiveDate": "2020-01-02",
                 "fileExtent": {
                     "bottomLeft": {
                         "latitude": 32.003282,
@@ -1258,8 +1419,8 @@
                         "longitude": -74.870727
                     }
                 },
-                "imageHeight": 11248,
-                "imageWidth": 15528,
+                "imageHeight": 12358,
+                "imageWidth": 16867,
                 "mapBounds": [
                     [
                         -81.76526670318464,
@@ -1494,15 +1655,55 @@
                         36.226641357771406
                     ]
                 ],
-                "maxZoom": 6,
-                "tileWidth": 256
+                "maxZoom": 5,
+                "mosaicFileExtent": {
+                    "bottomLeft": {
+                        "latitude": 32.003282,
+                        "longitude": -81.992998
+                    },
+                    "bottomRight": {
+                        "latitude": 32.003282,
+                        "longitude": -74.870727
+                    },
+                    "topLeft": {
+                        "latitude": 36.271584,
+                        "longitude": -81.992998
+                    },
+                    "topRight": {
+                        "latitude": 36.271584,
+                        "longitude": -74.870727
+                    }
+                },
+                "mosaicImageHeight": 11248,
+                "mosaicImageWidth": 15528,
+                "mosaicMaxZoom": 4,
+                "originalProjectionBounds": [
+                    -365041.822331818,
+                    -282638.2617066932,
+                    349015.64090143313,
+                    240536.41974715286
+                ],
+                "originalProjectionData": {
+                    "datum": "NAD83",
+                    "lat_0": 34.11666666666667,
+                    "lat_1": 38.66666666666666,
+                    "lat_2": 33.33333333333334,
+                    "lon_0": -78.75,
+                    "no_defs": true,
+                    "proj": "lcc",
+                    "units": "m",
+                    "x_0": 0,
+                    "y_0": 0
+                },
+                "tileWidth": 1024
             }
         }
     },
     "Cheyenne": {
+        "type": "Sectional",
         "versions": {
             "101": {
-                "effectiveDate": "2020-07-01",
+                "effectiveDate": "2020-01-02",
                 "fileExtent": {
                     "bottomLeft": {
                         "latitude": 40.005239,
@@ -1521,8 +1722,8 @@
                         "longitude": -100.623605
                     }
                 },
-                "imageHeight": 12108,
-                "imageWidth": 16297,
+                "imageHeight": 12350,
+                "imageWidth": 17921,
                 "mapBounds": [
                     [
                         -108.95011460661442,
@@ -1685,15 +1886,55 @@
                         44.52692830477025
                     ]
                 ],
-                "maxZoom": 6,
-                "tileWidth": 256
+                "maxZoom": 5,
+                "mosaicFileExtent": {
+                    "bottomLeft": {
+                        "latitude": 40.005239,
+                        "longitude": -108.994029
+                    },
+                    "bottomRight": {
+                        "latitude": 40.005239,
+                        "longitude": -100.623605
+                    },
+                    "topLeft": {
+                        "latitude": 44.601396,
+                        "longitude": -108.994029
+                    },
+                    "topRight": {
+                        "latitude": 44.601396,
+                        "longitude": -100.623605
+                    }
+                },
+                "mosaicImageHeight": 12108,
+                "mosaicImageWidth": 16297,
+                "mosaicMaxZoom": 4,
+                "originalProjectionBounds": [
+                    -412109.07086401526,
+                    -262866.1738387225,
+                    346536.00458172057,
+                    259954.38931921168
+                ],
+                "originalProjectionData": {
+                    "datum": "NAD83",
+                    "lat_0": 42.26667,
+                    "lat_1": 46.66667,
+                    "lat_2": 41.33333,
+                    "lon_0": -104.983333333333,
+                    "no_defs": true,
+                    "proj": "lcc",
+                    "units": "m",
+                    "x_0": 0,
+                    "y_0": 0
+                },
+                "tileWidth": 1024
             }
         }
     },
     "Chicago": {
+        "type": "Sectional",
         "versions": {
             "100": {
-                "effectiveDate": "2020-07-01",
+                "effectiveDate": "2020-04-23",
                 "fileExtent": {
                     "bottomLeft": {
                         "latitude": 40.0004,
@@ -1712,8 +1953,8 @@
                         "longitude": -84.653567
                     }
                 },
-                "imageHeight": 11216,
-                "imageWidth": 16247,
+                "imageHeight": 12384,
+                "imageWidth": 17932,
                 "mapBounds": [
                     [
                         -92.98959658429365,
@@ -1968,15 +2209,55 @@
                         44.16833754481175
                     ]
                 ],
-                "maxZoom": 6,
-                "tileWidth": 256
+                "maxZoom": 5,
+                "mosaicFileExtent": {
+                    "bottomLeft": {
+                        "latitude": 40.0004,
+                        "longitude": -92.996015
+                    },
+                    "bottomRight": {
+                        "latitude": 40.0004,
+                        "longitude": -84.653567
+                    },
+                    "topLeft": {
+                        "latitude": 44.268618,
+                        "longitude": -92.996015
+                    },
+                    "topRight": {
+                        "latitude": 44.268618,
+                        "longitude": -84.653567
+                    }
+                },
+                "mosaicImageHeight": 11216,
+                "mosaicImageWidth": 16247,
+                "mosaicMaxZoom": 4,
+                "originalProjectionBounds": [
+                    -411299.2735706505,
+                    -254802.56427225424,
+                    347853.41624134104,
+                    269487.46017175296
+                ],
+                "originalProjectionData": {
+                    "datum": "NAD83",
+                    "lat_0": 42.166666666666,
+                    "lat_1": 46.66666666666666,
+                    "lat_2": 41.33333333333334,
+                    "lon_0": -89,
+                    "no_defs": true,
+                    "proj": "lcc",
+                    "units": "m",
+                    "x_0": 0,
+                    "y_0": 0
+                },
+                "tileWidth": 1024
             }
         }
     },
     "Cincinnati": {
+        "type": "Sectional",
         "versions": {
             "104": {
-                "effectiveDate": "2020-07-01",
+                "effectiveDate": "2020-06-18",
                 "fileExtent": {
                     "bottomLeft": {
                         "latitude": 36.00706,
@@ -1995,8 +2276,8 @@
                         "longitude": -77.720788
                     }
                 },
-                "imageHeight": 11294,
-                "imageWidth": 15082,
+                "imageHeight": 12323,
+                "imageWidth": 17921,
                 "mapBounds": [
                     [
                         -84.99583157501444,
@@ -2091,15 +2372,55 @@
                         40.23688555343835
                     ]
                 ],
-                "maxZoom": 6,
-                "tileWidth": 256
+                "maxZoom": 5,
+                "mosaicFileExtent": {
+                    "bottomLeft": {
+                        "latitude": 36.00706,
+                        "longitude": -84.99559
+                    },
+                    "bottomRight": {
+                        "latitude": 36.00706,
+                        "longitude": -77.720788
+                    },
+                    "topLeft": {
+                        "latitude": 40.288968,
+                        "longitude": -84.99559
+                    },
+                    "topRight": {
+                        "latitude": 40.288968,
+                        "longitude": -77.720788
+                    }
+                },
+                "mosaicImageHeight": 11294,
+                "mosaicImageWidth": 15082,
+                "mosaicMaxZoom": 4,
+                "originalProjectionBounds": [
+                    -433050.3054343029,
+                    -285431.7449504633,
+                    325645.8372038838,
+                    236283.803539551
+                ],
+                "originalProjectionData": {
+                    "datum": "NAD83",
+                    "lat_0": 38.16666666666666,
+                    "lat_1": 38.66666666666666,
+                    "lat_2": 33.33333333333334,
+                    "lon_0": -81.53333333333333,
+                    "no_defs": true,
+                    "proj": "lcc",
+                    "units": "m",
+                    "x_0": 0,
+                    "y_0": 0
+                },
+                "tileWidth": 1024
             }
         }
     },
     "Cold_Bay": {
+        "type": "Sectional",
         "versions": {
             "53": {
-                "effectiveDate": "2020-07-01",
+                "effectiveDate": "2020-01-30",
                 "fileExtent": {
                     "bottomLeft": {
                         "latitude": 53.844297,
@@ -2118,8 +2439,8 @@
                         "longitude": -154.101129
                     }
                 },
-                "imageHeight": 6346,
-                "imageWidth": 14954,
+                "imageHeight": 6270,
+                "imageWidth": 16570,
                 "mapBounds": [
                     [
                         -163.98628016975988,
@@ -2230,15 +2551,55 @@
                         56.13377041879805
                     ]
                 ],
-                "maxZoom": 6,
-                "tileWidth": 256
+                "maxZoom": 5,
+                "mosaicFileExtent": {
+                    "bottomLeft": {
+                        "latitude": 53.844297,
+                        "longitude": -163.993226
+                    },
+                    "bottomRight": {
+                        "latitude": 53.844297,
+                        "longitude": -154.101129
+                    },
+                    "topLeft": {
+                        "latitude": 56.248426,
+                        "longitude": -163.993226
+                    },
+                    "topRight": {
+                        "latitude": 56.248426,
+                        "longitude": -154.101129
+                    }
+                },
+                "mosaicImageHeight": 6346,
+                "mosaicImageWidth": 14954,
+                "mosaicMaxZoom": 4,
+                "originalProjectionBounds": [
+                    -364520.25768703513,
+                    -134619.36275380588,
+                    336973.30070251843,
+                    130831.23836676263
+                ],
+                "originalProjectionData": {
+                    "datum": "NAD83",
+                    "lat_0": 55.08333333333334,
+                    "lat_1": 54.66666666666666,
+                    "lat_2": 49.33333333333334,
+                    "lon_0": -159.5,
+                    "no_defs": true,
+                    "proj": "lcc",
+                    "units": "m",
+                    "x_0": 0,
+                    "y_0": 0
+                },
+                "tileWidth": 1024
             }
         }
     },
     "Dallas-Ft_Worth": {
+        "type": "Sectional",
         "versions": {
             "104": {
-                "effectiveDate": "2020-07-01",
+                "effectiveDate": "2020-02-27",
                 "fileExtent": {
                     "bottomLeft": {
                         "latitude": 32.011568,
@@ -2257,8 +2618,8 @@
                         "longitude": -94.785055
                     }
                 },
-                "imageHeight": 11234,
-                "imageWidth": 15706,
+                "imageHeight": 12243,
+                "imageWidth": 17957,
                 "mapBounds": [
                     [
                         -101.96630471477285,
@@ -2313,15 +2674,55 @@
                         36.18284382670888
                     ]
                 ],
-                "maxZoom": 6,
-                "tileWidth": 256
+                "maxZoom": 5,
+                "mosaicFileExtent": {
+                    "bottomLeft": {
+                        "latitude": 32.011568,
+                        "longitude": -101.988549
+                    },
+                    "bottomRight": {
+                        "latitude": 32.011568,
+                        "longitude": -94.785055
+                    },
+                    "topLeft": {
+                        "latitude": 36.274043,
+                        "longitude": -101.988549
+                    },
+                    "topRight": {
+                        "latitude": 36.274043,
+                        "longitude": -94.785055
+                    }
+                },
+                "mosaicImageHeight": 11234,
+                "mosaicImageWidth": 15706,
+                "mosaicMaxZoom": 4,
+                "originalProjectionBounds": [
+                    -424886.4493610589,
+                    -265457.2528606856,
+                    335321.8706107156,
+                    252841.78048021006
+                ],
+                "originalProjectionData": {
+                    "datum": "NAD83",
+                    "lat_0": 34,
+                    "lat_1": 38.66666666666666,
+                    "lat_2": 33.33333333333334,
+                    "lon_0": -98.5,
+                    "no_defs": true,
+                    "proj": "lcc",
+                    "units": "m",
+                    "x_0": 0,
+                    "y_0": 0
+                },
+                "tileWidth": 1024
             }
         }
     },
     "Dawson": {
+        "type": "Sectional",
         "versions": {
             "53": {
-                "effectiveDate": "2020-07-01",
+                "effectiveDate": "2019-10-10",
                 "fileExtent": {
                     "bottomLeft": {
                         "latitude": 64.009832,
@@ -2340,8 +2741,8 @@
                         "longitude": -130.769988
                     }
                 },
-                "imageHeight": 11423,
-                "imageWidth": 15279,
+                "imageHeight": 12279,
+                "imageWidth": 16608,
                 "mapBounds": [
                     [
                         -144.9279546903569,
@@ -2396,15 +2797,55 @@
                         68.14936929830445
                     ]
                 ],
-                "maxZoom": 6,
-                "tileWidth": 256
+                "maxZoom": 5,
+                "mosaicFileExtent": {
+                    "bottomLeft": {
+                        "latitude": 64.009832,
+                        "longitude": -144.973039
+                    },
+                    "bottomRight": {
+                        "latitude": 64.009832,
+                        "longitude": -130.769988
+                    },
+                    "topLeft": {
+                        "latitude": 68.291987,
+                        "longitude": -144.973039
+                    },
+                    "topRight": {
+                        "latitude": 68.291987,
+                        "longitude": -130.769988
+                    }
+                },
+                "mosaicImageHeight": 11423,
+                "mosaicImageWidth": 15279,
+                "mosaicMaxZoom": 4,
+                "originalProjectionBounds": [
+                    -380325.30966296047,
+                    -291127.9106425153,
+                    322749.169906056,
+                    228706.87061451777
+                ],
+                "originalProjectionData": {
+                    "datum": "NAD83",
+                    "lat_0": 66.25,
+                    "lat_1": 70.66666666666667,
+                    "lat_2": 65.33333333333333,
+                    "lon_0": -138.5,
+                    "no_defs": true,
+                    "proj": "lcc",
+                    "units": "m",
+                    "x_0": 0,
+                    "y_0": 0
+                },
+                "tileWidth": 1024
             }
         }
     },
     "Denver": {
+        "type": "Sectional",
         "versions": {
             "102": {
-                "effectiveDate": "2020-07-01",
+                "effectiveDate": "2020-01-02",
                 "fileExtent": {
                     "bottomLeft": {
                         "latitude": 35.592512,
@@ -2423,8 +2864,8 @@
                         "longitude": -103.729168
                     }
                 },
-                "imageHeight": 11917,
-                "imageWidth": 15083,
+                "imageHeight": 12391,
+                "imageWidth": 16635,
                 "mapBounds": [
                     [
                         -110.96203228919136,
@@ -2507,15 +2948,55 @@
                         40.0222340968208
                     ]
                 ],
-                "maxZoom": 6,
-                "tileWidth": 256
+                "maxZoom": 5,
+                "mosaicFileExtent": {
+                    "bottomLeft": {
+                        "latitude": 35.592512,
+                        "longitude": -110.989228
+                    },
+                    "bottomRight": {
+                        "latitude": 35.592512,
+                        "longitude": -103.729168
+                    },
+                    "topLeft": {
+                        "latitude": 40.118925,
+                        "longitude": -110.989228
+                    },
+                    "topRight": {
+                        "latitude": 40.118925,
+                        "longitude": -103.729168
+                    }
+                },
+                "mosaicImageHeight": 11917,
+                "mosaicImageWidth": 15083,
+                "mosaicMaxZoom": 4,
+                "originalProjectionBounds": [
+                    -380521.03540481767,
+                    -233041.36166950542,
+                    323716.1402511905,
+                    291529.8546345103
+                ],
+                "originalProjectionData": {
+                    "datum": "NAD83",
+                    "lat_0": 37.5,
+                    "lat_1": 38.66666666666666,
+                    "lat_2": 33.33333333333334,
+                    "lon_0": -107.5,
+                    "no_defs": true,
+                    "proj": "lcc",
+                    "units": "m",
+                    "x_0": 0,
+                    "y_0": 0
+                },
+                "tileWidth": 1024
             }
         }
     },
     "Detroit": {
+        "type": "Sectional",
         "versions": {
             "100": {
-                "effectiveDate": "2020-07-01",
+                "effectiveDate": "2020-03-26",
                 "fileExtent": {
                     "bottomLeft": {
                         "latitude": 40.010983,
@@ -2534,8 +3015,8 @@
                         "longitude": -76.650374
                     }
                 },
-                "imageHeight": 11253,
-                "imageWidth": 16305,
+                "imageHeight": 12380,
+                "imageWidth": 17925,
                 "mapBounds": [
                     [
                         -84.96149893356959,
@@ -2598,15 +3079,55 @@
                         44.18201356504057
                     ]
                 ],
-                "maxZoom": 6,
-                "tileWidth": 256
+                "maxZoom": 5,
+                "mosaicFileExtent": {
+                    "bottomLeft": {
+                        "latitude": 40.010983,
+                        "longitude": -84.983219
+                    },
+                    "bottomRight": {
+                        "latitude": 40.010983,
+                        "longitude": -76.650374
+                    },
+                    "topLeft": {
+                        "latitude": 44.272652,
+                        "longitude": -84.983219
+                    },
+                    "topRight": {
+                        "latitude": 44.272652,
+                        "longitude": -76.650374
+                    }
+                },
+                "mosaicImageHeight": 11253,
+                "mosaicImageWidth": 16305,
+                "mosaicMaxZoom": 4,
+                "originalProjectionBounds": [
+                    -410068.63233939634,
+                    -287022.0219205457,
+                    348805.4146823673,
+                    237081.56223214883
+                ],
+                "originalProjectionData": {
+                    "datum": "NAD83",
+                    "lat_0": 42.16666666666666,
+                    "lat_1": 46.66666666666666,
+                    "lat_2": 41.33333333333334,
+                    "lon_0": -81,
+                    "no_defs": true,
+                    "proj": "lcc",
+                    "units": "m",
+                    "x_0": 0,
+                    "y_0": 0
+                },
+                "tileWidth": 1024
             }
         }
     },
     "Dutch_Harbor": {
+        "type": "Sectional",
         "versions": {
             "53": {
-                "effectiveDate": "2020-07-01",
+                "effectiveDate": "2019-02-27",
                 "fileExtent": {
                     "bottomLeft": {
                         "latitude": 52.017791,
@@ -2625,8 +3146,8 @@
                         "longitude": -163.113773
                     }
                 },
-                "imageHeight": 11072,
-                "imageWidth": 15293,
+                "imageHeight": 12331,
+                "imageWidth": 16600,
                 "mapBounds": [
                     [
                         -165.18053807142397,
@@ -2681,15 +3202,55 @@
                         54.85235400176978
                     ]
                 ],
-                "maxZoom": 6,
-                "tileWidth": 256
+                "maxZoom": 5,
+                "mosaicFileExtent": {
+                    "bottomLeft": {
+                        "latitude": 52.017791,
+                        "longitude": -172.970949
+                    },
+                    "bottomRight": {
+                        "latitude": 52.017791,
+                        "longitude": -163.113773
+                    },
+                    "topLeft": {
+                        "latitude": 56.197212,
+                        "longitude": -172.970949
+                    },
+                    "topRight": {
+                        "latitude": 56.197212,
+                        "longitude": -163.113773
+                    }
+                },
+                "mosaicImageHeight": 11072,
+                "mosaicImageWidth": 15293,
+                "mosaicMaxZoom": 4,
+                "originalProjectionBounds": [
+                    -365400.6295524279,
+                    -289512.0054175186,
+                    337374.5596672124,
+                    232527.75223247206
+                ],
+                "originalProjectionData": {
+                    "datum": "NAD83",
+                    "lat_0": 54.16666666666666,
+                    "lat_1": 54.66666666666666,
+                    "lat_2": 49.33333333333334,
+                    "lon_0": -168.5,
+                    "no_defs": true,
+                    "proj": "lcc",
+                    "units": "m",
+                    "x_0": 0,
+                    "y_0": 0
+                },
+                "tileWidth": 1024
             }
         }
     },
     "El_Paso": {
+        "type": "Sectional",
         "versions": {
             "104": {
-                "effectiveDate": "2020-07-01",
+                "effectiveDate": "2020-01-30",
                 "fileExtent": {
                     "bottomLeft": {
                         "latitude": 28.015065,
@@ -2708,8 +3269,8 @@
                         "longitude": -102.459224
                     }
                 },
-                "imageHeight": 11184,
-                "imageWidth": 14846,
+                "imageHeight": 12296,
+                "imageWidth": 16562,
                 "mapBounds": [
                     [
                         -108.96041490211063,
@@ -2764,15 +3325,55 @@
                         32.19662891635608
                     ]
                 ],
-                "maxZoom": 6,
-                "tileWidth": 256
+                "maxZoom": 5,
+                "mosaicFileExtent": {
+                    "bottomLeft": {
+                        "latitude": 28.015065,
+                        "longitude": -108.982605
+                    },
+                    "bottomRight": {
+                        "latitude": 28.015065,
+                        "longitude": -102.459224
+                    },
+                    "topLeft": {
+                        "latitude": 32.263349,
+                        "longitude": -108.982605
+                    },
+                    "topRight": {
+                        "latitude": 32.263349,
+                        "longitude": -102.459224
+                    }
+                },
+                "mosaicImageHeight": 11184,
+                "mosaicImageWidth": 14846,
+                "mosaicMaxZoom": 4,
+                "originalProjectionBounds": [
+                    -360564.08382327284,
+                    -286967.448073268,
+                    340600.98460284073,
+                    233585.1169055567
+                ],
+                "originalProjectionData": {
+                    "datum": "NAD83",
+                    "lat_0": 30.16666666666667,
+                    "lat_1": 30.66666666666667,
+                    "lat_2": 25.33333333333333,
+                    "lon_0": -106.05,
+                    "no_defs": true,
+                    "proj": "lcc",
+                    "units": "m",
+                    "x_0": 0,
+                    "y_0": 0
+                },
+                "tileWidth": 1024
             }
         }
     },
     "Fairbanks": {
+        "type": "Sectional",
         "versions": {
             "106": {
-                "effectiveDate": "2020-07-01",
+                "effectiveDate": "2020-05-21",
                 "fileExtent": {
                     "bottomLeft": {
                         "latitude": 64.003932,
@@ -2791,8 +3392,8 @@
                         "longitude": -143.73943
                     }
                 },
-                "imageHeight": 11447,
-                "imageWidth": 15319,
+                "imageHeight": 12260,
+                "imageWidth": 16666,
                 "mapBounds": [
                     [
                         -157.90081992571479,
@@ -3079,15 +3680,55 @@
                         68.17094166889393
                     ]
                 ],
-                "maxZoom": 6,
-                "tileWidth": 256
+                "maxZoom": 5,
+                "mosaicFileExtent": {
+                    "bottomLeft": {
+                        "latitude": 64.003932,
+                        "longitude": -157.985914
+                    },
+                    "bottomRight": {
+                        "latitude": 64.003932,
+                        "longitude": -143.73943
+                    },
+                    "topLeft": {
+                        "latitude": 68.296986,
+                        "longitude": -157.985914
+                    },
+                    "topRight": {
+                        "latitude": 68.296986,
+                        "longitude": -143.73943
+                    }
+                },
+                "mosaicImageHeight": 11447,
+                "mosaicImageWidth": 15319,
+                "mosaicMaxZoom": 4,
+                "originalProjectionBounds": [
+                    -382327.3260097644,
+                    -270655.08609036,
+                    323200.1704888108,
+                    248336.89629140095
+                ],
+                "originalProjectionData": {
+                    "datum": "NAD83",
+                    "lat_0": 66.08333333333333,
+                    "lat_1": 70.66666666666667,
+                    "lat_2": 65.33333333333333,
+                    "lon_0": -151.5,
+                    "no_defs": true,
+                    "proj": "lcc",
+                    "units": "m",
+                    "x_0": 0,
+                    "y_0": 0
+                },
+                "tileWidth": 1024
             }
         }
     },
     "Great_Falls": {
+        "type": "Sectional",
         "versions": {
             "99": {
-                "effectiveDate": "2020-07-01",
+                "effectiveDate": "2020-06-18",
                 "fileExtent": {
                     "bottomLeft": {
                         "latitude": 44.478893,
@@ -3106,8 +3747,8 @@
                         "longitude": -108.280196
                     }
                 },
-                "imageHeight": 12159,
-                "imageWidth": 15717,
+                "imageHeight": 12398,
+                "imageWidth": 17885,
                 "mapBounds": [
                     [
                         -116.9507998909173,
@@ -3190,15 +3831,55 @@
                         48.96813561255491
                     ]
                 ],
-                "maxZoom": 6,
-                "tileWidth": 256
+                "maxZoom": 5,
+                "mosaicFileExtent": {
+                    "bottomLeft": {
+                        "latitude": 44.478893,
+                        "longitude": -116.988198
+                    },
+                    "bottomRight": {
+                        "latitude": 44.478893,
+                        "longitude": -108.280196
+                    },
+                    "topLeft": {
+                        "latitude": 49.087838,
+                        "longitude": -116.988198
+                    },
+                    "topRight": {
+                        "latitude": 49.087838,
+                        "longitude": -108.280196
+                    }
+                },
+                "mosaicImageHeight": 12159,
+                "mosaicImageWidth": 15717,
+                "mosaicMaxZoom": 4,
+                "originalProjectionBounds": [
+                    -410022.41335725447,
+                    -273303.1776708993,
+                    347112.5402853305,
+                    251555.80006461494
+                ],
+                "originalProjectionData": {
+                    "datum": "NAD83",
+                    "lat_0": 46.83333333333334,
+                    "lat_1": 46.66666666666666,
+                    "lat_2": 41.33333333333334,
+                    "lon_0": -113,
+                    "no_defs": true,
+                    "proj": "lcc",
+                    "units": "m",
+                    "x_0": 0,
+                    "y_0": 0
+                },
+                "tileWidth": 1024
             }
         }
     },
     "Green_Bay": {
+        "type": "Sectional",
         "versions": {
             "100": {
-                "effectiveDate": "2020-07-01",
+                "effectiveDate": "2020-05-21",
                 "fileExtent": {
                     "bottomLeft": {
                         "latitude": 44.011321,
@@ -3217,8 +3898,8 @@
                         "longitude": -84.32792
                     }
                 },
-                "imageHeight": 11611,
-                "imageWidth": 15807,
+                "imageHeight": 12331,
+                "imageWidth": 17909,
                 "mapBounds": [
                     [
                         -92.96902219817025,
@@ -3285,15 +3966,64 @@
                         48.309280743882674
                     ]
                 ],
-                "maxZoom": 6,
-                "tileWidth": 256
+                "maxZoom": 5,
+                "mosaicFileExtent": {
+                    "bottomLeft": {
+                        "latitude": 44.011321,
+                        "longitude": -92.985728
+                    },
+                    "bottomRight": {
+                        "latitude": 44.011321,
+                        "longitude": -84.32792
+                    },
+                    "topLeft": {
+                        "latitude": 48.408818,
+                        "longitude": -92.985728
+                    },
+                    "topRight": {
+                        "latitude": 48.408818,
+                        "longitude": -84.32792
+                    }
+                },
+                "mosaicImageHeight": 11611,
+                "mosaicImageWidth": 15807,
+                "mosaicMaxZoom": 4,
+                "originalProjectionBounds": [
+                    -410322.55126935255,
+                    -271072.95383529144,
+                    347864.92865084554,
+                    250973.3586330577
+                ],
+                "originalProjectionData": {
+                    "datum": "NAD83",
+                    "lat_0": 46.16666666666666,
+                    "lat_1": 46.66666666666666,
+                    "lat_2": 41.33333333333334,
+                    "lon_0": -89,
+                    "no_defs": true,
+                    "proj": "lcc",
+                    "units": "m",
+                    "x_0": 0,
+                    "y_0": 0
+                },
+                "tileWidth": 1024
+            }
+        }
+    },
+    "Greenbay": {
+        "type": "Sectional",
+        "versions": {
+            "100": {
+                "effectiveDate": "2020-05-21",
+                "tileWidth": 1024
             }
         }
     },
     "Halifax": {
+        "type": "Sectional",
         "versions": {
             "102": {
-                "effectiveDate": "2020-07-01",
+                "effectiveDate": "2020-02-27",
                 "fileExtent": {
                     "bottomLeft": {
                         "latitude": 43.634409,
@@ -3312,8 +4042,8 @@
                         "longitude": -60.637221
                     }
                 },
-                "imageHeight": 12261,
-                "imageWidth": 15264,
+                "imageHeight": 12349,
+                "imageWidth": 16598,
                 "mapBounds": [
                     [
                         -68.96818334437467,
@@ -3412,15 +4142,55 @@
                         48.21174096915764
                     ]
                 ],
-                "maxZoom": 6,
-                "tileWidth": 256
+                "maxZoom": 5,
+                "mosaicFileExtent": {
+                    "bottomLeft": {
+                        "latitude": 43.634409,
+                        "longitude": -68.980482
+                    },
+                    "bottomRight": {
+                        "latitude": 43.634409,
+                        "longitude": -60.637221
+                    },
+                    "topLeft": {
+                        "latitude": 48.289084,
+                        "longitude": -68.980482
+                    },
+                    "topRight": {
+                        "latitude": 48.289084,
+                        "longitude": -60.637221
+                    }
+                },
+                "mosaicImageHeight": 12261,
+                "mosaicImageWidth": 15264,
+                "mosaicMaxZoom": 4,
+                "originalProjectionBounds": [
+                    -376878.14586541033,
+                    -286167.1237233703,
+                    325773.2402717995,
+                    236622.74587395455
+                ],
+                "originalProjectionData": {
+                    "datum": "NAD83",
+                    "lat_0": 46.16666666666666,
+                    "lat_1": 46.66666666666666,
+                    "lat_2": 41.33333333333334,
+                    "lon_0": -65,
+                    "no_defs": true,
+                    "proj": "lcc",
+                    "units": "m",
+                    "x_0": 0,
+                    "y_0": 0
+                },
+                "tileWidth": 1024
             }
         }
     },
     "Hawaiian_Islands": {
+        "type": "Sectional",
         "versions": {
             "102": {
-                "effectiveDate": "2020-07-01",
+                "effectiveDate": "2020-04-23",
                 "fileExtent": {
                     "bottomLeft": {
                         "latitude": 18.385672,
@@ -3439,8 +4209,8 @@
                         "longitude": -154.125366
                     }
                 },
-                "imageHeight": 13703,
-                "imageWidth": 16672,
+                "imageHeight": 16370,
+                "imageWidth": 20186,
                 "mapBounds": [
                     [
                         -159.72523126384223,
@@ -3483,15 +4253,55 @@
                         23.601585502895844
                     ]
                 ],
-                "maxZoom": 6,
-                "tileWidth": 256
+                "maxZoom": 5,
+                "mosaicFileExtent": {
+                    "bottomLeft": {
+                        "latitude": 18.385672,
+                        "longitude": -160.925392
+                    },
+                    "bottomRight": {
+                        "latitude": 18.385672,
+                        "longitude": -154.125366
+                    },
+                    "topLeft": {
+                        "latitude": 23.601399,
+                        "longitude": -160.925392
+                    },
+                    "topRight": {
+                        "latitude": 23.601399,
+                        "longitude": -154.125366
+                    }
+                },
+                "mosaicImageHeight": 13703,
+                "mosaicImageWidth": 16672,
+                "mosaicMaxZoom": 5,
+                "originalProjectionBounds": [
+                    -433359.64125889057,
+                    -358790.2116237371,
+                    421279.5239399855,
+                    334315.18390010414
+                ],
+                "originalProjectionData": {
+                    "datum": "NAD83",
+                    "lat_0": 21,
+                    "lat_1": 23.33333333333333,
+                    "lat_2": 20.66666666666667,
+                    "lon_0": -157.5,
+                    "no_defs": true,
+                    "proj": "lcc",
+                    "units": "m",
+                    "x_0": 0,
+                    "y_0": 0
+                },
+                "tileWidth": 1024
             }
         }
     },
     "Houston": {
+        "type": "Sectional",
         "versions": {
             "105": {
-                "effectiveDate": "2020-07-01",
+                "effectiveDate": "2020-02-27",
                 "fileExtent": {
                     "bottomLeft": {
                         "latitude": 28.006874,
@@ -3510,8 +4320,8 @@
                         "longitude": -90.45115
                     }
                 },
-                "imageHeight": 11199,
-                "imageWidth": 14875,
+                "imageHeight": 12218,
+                "imageWidth": 16572,
                 "mapBounds": [
                     [
                         -96.96601046970926,
@@ -3594,15 +4404,55 @@
                         32.15290513269768
                     ]
                 ],
-                "maxZoom": 6,
-                "tileWidth": 256
+                "maxZoom": 5,
+                "mosaicFileExtent": {
+                    "bottomLeft": {
+                        "latitude": 28.006874,
+                        "longitude": -96.988203
+                    },
+                    "bottomRight": {
+                        "latitude": 28.006874,
+                        "longitude": -90.45115
+                    },
+                    "topLeft": {
+                        "latitude": 32.261669,
+                        "longitude": -96.988203
+                    },
+                    "topRight": {
+                        "latitude": 32.261669,
+                        "longitude": -90.45115
+                    }
+                },
+                "mosaicImageHeight": 11199,
+                "mosaicImageWidth": 14875,
+                "mosaicMaxZoom": 4,
+                "originalProjectionBounds": [
+                    -365612.2523916611,
+                    -278774.61841112433,
+                    335981.7945063505,
+                    238469.58814489326
+                ],
+                "originalProjectionData": {
+                    "datum": "NAD83",
+                    "lat_0": 30.125,
+                    "lat_1": 30.66666666666667,
+                    "lat_2": 25.33333333333333,
+                    "lon_0": -94,
+                    "no_defs": true,
+                    "proj": "lcc",
+                    "units": "m",
+                    "x_0": 0,
+                    "y_0": 0
+                },
+                "tileWidth": 1024
             }
         }
     },
     "Jacksonville": {
+        "type": "Sectional",
         "versions": {
             "105": {
-                "effectiveDate": "2020-07-01",
+                "effectiveDate": "2020-01-30",
                 "fileExtent": {
                     "bottomLeft": {
                         "latitude": 28.019603,
@@ -3621,8 +4471,8 @@
                         "longitude": -78.518484
                     }
                 },
-                "imageHeight": 11187,
-                "imageWidth": 14734,
+                "imageHeight": 12412,
+                "imageWidth": 16617,
                 "mapBounds": [
                     [
                         -84.97674740313558,
@@ -3685,15 +4535,55 @@
                         32.11282578754036
                     ]
                 ],
-                "maxZoom": 6,
-                "tileWidth": 256
+                "maxZoom": 5,
+                "mosaicFileExtent": {
+                    "bottomLeft": {
+                        "latitude": 28.019603,
+                        "longitude": -84.991465
+                    },
+                    "bottomRight": {
+                        "latitude": 28.019603,
+                        "longitude": -78.518484
+                    },
+                    "topLeft": {
+                        "latitude": 32.268048,
+                        "longitude": -84.991465
+                    },
+                    "topRight": {
+                        "latitude": 32.268048,
+                        "longitude": -78.518484
+                    }
+                },
+                "mosaicImageHeight": 11187,
+                "mosaicImageWidth": 14734,
+                "mosaicMaxZoom": 4,
+                "originalProjectionBounds": [
+                    -366632.06548702955,
+                    -300575.80360185704,
+                    336837.4563858385,
+                    224871.75127304034
+                ],
+                "originalProjectionData": {
+                    "datum": "NAD83",
+                    "lat_0": 30.25,
+                    "lat_1": 30.66666666666667,
+                    "lat_2": 25.33333333333333,
+                    "lon_0": -82,
+                    "no_defs": true,
+                    "proj": "lcc",
+                    "units": "m",
+                    "x_0": 0,
+                    "y_0": 0
+                },
+                "tileWidth": 1024
             }
         }
     },
     "Juneau": {
+        "type": "Sectional",
         "versions": {
             "60": {
-                "effectiveDate": "2020-07-01",
+                "effectiveDate": "2020-03-26",
                 "fileExtent": {
                     "bottomLeft": {
                         "latitude": 56.013502,
@@ -3712,8 +4602,8 @@
                         "longitude": -129.724043
                     }
                 },
-                "imageHeight": 11313,
-                "imageWidth": 15746,
+                "imageHeight": 12333,
+                "imageWidth": 16574,
                 "mapBounds": [
                     [
                         -140.9298080927376,
@@ -3800,15 +4690,55 @@
                         60.143999797357615
                     ]
                 ],
-                "maxZoom": 6,
-                "tileWidth": 256
+                "maxZoom": 5,
+                "mosaicFileExtent": {
+                    "bottomLeft": {
+                        "latitude": 56.013502,
+                        "longitude": -140.975899
+                    },
+                    "bottomRight": {
+                        "latitude": 56.013502,
+                        "longitude": -129.724043
+                    },
+                    "topLeft": {
+                        "latitude": 60.274119,
+                        "longitude": -140.975899
+                    },
+                    "topRight": {
+                        "latitude": 60.274119,
+                        "longitude": -129.724043
+                    }
+                },
+                "mosaicImageHeight": 11313,
+                "mosaicImageWidth": 15746,
+                "mosaicMaxZoom": 4,
+                "originalProjectionBounds": [
+                    -383263.22719937796,
+                    -267574.23813819815,
+                    318385.9417616989,
+                    254524.2847661077
+                ],
+                "originalProjectionData": {
+                    "datum": "NAD83",
+                    "lat_0": 58,
+                    "lat_1": 62.66666666666666,
+                    "lat_2": 57.33333333333334,
+                    "lon_0": -135.45,
+                    "no_defs": true,
+                    "proj": "lcc",
+                    "units": "m",
+                    "x_0": 0,
+                    "y_0": 0
+                },
+                "tileWidth": 1024
             }
         }
     },
     "Kansas_City": {
+        "type": "Sectional",
         "versions": {
             "104": {
-                "effectiveDate": "2020-07-01",
+                "effectiveDate": "2020-03-21",
                 "fileExtent": {
                     "bottomLeft": {
                         "latitude": 36.020607,
@@ -3827,8 +4757,8 @@
                         "longitude": -89.724617
                     }
                 },
-                "imageHeight": 11210,
-                "imageWidth": 15052,
+                "imageHeight": 12345,
+                "imageWidth": 16601,
                 "mapBounds": [
                     [
                         -96.96660491174805,
@@ -3907,15 +4837,55 @@
                         40.20440189149652
                     ]
                 ],
-                "maxZoom": 6,
-                "tileWidth": 256
+                "maxZoom": 5,
+                "mosaicFileExtent": {
+                    "bottomLeft": {
+                        "latitude": 36.020607,
+                        "longitude": -96.98566
+                    },
+                    "bottomRight": {
+                        "latitude": 36.020607,
+                        "longitude": -89.724617
+                    },
+                    "topLeft": {
+                        "latitude": 40.271239,
+                        "longitude": -96.98566
+                    },
+                    "topRight": {
+                        "latitude": 40.271239,
+                        "longitude": -89.724617
+                    }
+                },
+                "mosaicImageHeight": 11210,
+                "mosaicImageWidth": 15052,
+                "mosaicMaxZoom": 4,
+                "originalProjectionBounds": [
+                    -385558.56235633197,
+                    -287171.8799450082,
+                    317246.3609868974,
+                    235458.11451694355
+                ],
+                "originalProjectionData": {
+                    "datum": "NAD83",
+                    "lat_0": 38.16666666666666,
+                    "lat_1": 38.66666666666666,
+                    "lat_2": 33.33333333333334,
+                    "lon_0": -93.43333333333334,
+                    "no_defs": true,
+                    "proj": "lcc",
+                    "units": "m",
+                    "x_0": 0,
+                    "y_0": 0
+                },
+                "tileWidth": 1024
             }
         }
     },
     "Ketchikan": {
+        "type": "Sectional",
         "versions": {
             "60": {
-                "effectiveDate": "2020-07-01",
+                "effectiveDate": "2020-04-23",
                 "fileExtent": {
                     "bottomLeft": {
                         "latitude": 52.025865,
@@ -3934,8 +4904,8 @@
                         "longitude": -129.273414
                     }
                 },
-                "imageHeight": 11189,
-                "imageWidth": 9727,
+                "imageHeight": 12247,
+                "imageWidth": 16539,
                 "mapBounds": [
                     [
                         -135.5455978726918,
@@ -4002,15 +4972,55 @@
                         56.23337908689679
                     ]
                 ],
-                "maxZoom": 6,
-                "tileWidth": 256
+                "maxZoom": 5,
+                "mosaicFileExtent": {
+                    "bottomLeft": {
+                        "latitude": 52.025865,
+                        "longitude": -135.545275
+                    },
+                    "bottomRight": {
+                        "latitude": 52.025865,
+                        "longitude": -129.273414
+                    },
+                    "topLeft": {
+                        "latitude": 56.247891,
+                        "longitude": -135.545275
+                    },
+                    "topRight": {
+                        "latitude": 56.247891,
+                        "longitude": -129.273414
+                    }
+                },
+                "mosaicImageHeight": 11189,
+                "mosaicImageWidth": 9727,
+                "mosaicMaxZoom": 4,
+                "originalProjectionBounds": [
+                    -373013.5694418973,
+                    -285947.95697582036,
+                    327186.888730037,
+                    232545.2834237912
+                ],
+                "originalProjectionData": {
+                    "datum": "NAD83",
+                    "lat_0": 54.16666666666666,
+                    "lat_1": 54.66666666666666,
+                    "lat_2": 49.33333333333334,
+                    "lon_0": -134.5,
+                    "no_defs": true,
+                    "proj": "lcc",
+                    "units": "m",
+                    "x_0": 0,
+                    "y_0": 0
+                },
+                "tileWidth": 1024
             }
         }
     },
     "Klamath_Falls": {
+        "type": "Sectional",
         "versions": {
             "102": {
-                "effectiveDate": "2020-07-01",
+                "effectiveDate": "2020-03-26",
                 "fileExtent": {
                     "bottomLeft": {
                         "latitude": 40.022993,
@@ -4029,8 +5039,8 @@
                         "longitude": -116.637352
                     }
                 },
-                "imageHeight": 12062,
-                "imageWidth": 16270,
+                "imageHeight": 12398,
+                "imageWidth": 17910,
                 "mapBounds": [
                     [
                         -124.75478691111383,
@@ -4093,15 +5103,55 @@
                         44.537668364818906
                     ]
                 ],
-                "maxZoom": 6,
-                "tileWidth": 256
+                "maxZoom": 5,
+                "mosaicFileExtent": {
+                    "bottomLeft": {
+                        "latitude": 40.022993,
+                        "longitude": -124.993346
+                    },
+                    "bottomRight": {
+                        "latitude": 40.022993,
+                        "longitude": -116.637352
+                    },
+                    "topLeft": {
+                        "latitude": 44.600782,
+                        "longitude": -124.993346
+                    },
+                    "topRight": {
+                        "latitude": 44.600782,
+                        "longitude": -116.637352
+                    }
+                },
+                "mosaicImageHeight": 12062,
+                "mosaicImageWidth": 16270,
+                "mosaicMaxZoom": 4,
+                "originalProjectionBounds": [
+                    -410914.93518698367,
+                    -272132.699790275,
+                    347306.1211978358,
+                    252729.25994233502
+                ],
+                "originalProjectionData": {
+                    "datum": "NAD83",
+                    "lat_0": 42.33333333333334,
+                    "lat_1": 46.66666666666666,
+                    "lat_2": 41.33333333333334,
+                    "lon_0": -121,
+                    "no_defs": true,
+                    "proj": "lcc",
+                    "units": "m",
+                    "x_0": 0,
+                    "y_0": 0
+                },
+                "tileWidth": 1024
             }
         }
     },
     "Kodiak": {
+        "type": "Sectional",
         "versions": {
             "60": {
-                "effectiveDate": "2020-07-01",
+                "effectiveDate": "2019-11-07",
                 "fileExtent": {
                     "bottomLeft": {
                         "latitude": 56.009035,
@@ -4120,8 +5170,8 @@
                         "longitude": -150.721398
                     }
                 },
-                "imageHeight": 11327,
-                "imageWidth": 16110,
+                "imageHeight": 12282,
+                "imageWidth": 16612,
                 "mapBounds": [
                     [
                         -161.9187660810653,
@@ -4240,15 +5290,55 @@
                         60.14794518430975
                     ]
                 ],
-                "maxZoom": 6,
-                "tileWidth": 256
+                "maxZoom": 5,
+                "mosaicFileExtent": {
+                    "bottomLeft": {
+                        "latitude": 56.009035,
+                        "longitude": -162.23575
+                    },
+                    "bottomRight": {
+                        "latitude": 56.009035,
+                        "longitude": -150.721398
+                    },
+                    "topLeft": {
+                        "latitude": 60.275949,
+                        "longitude": -162.23575
+                    },
+                    "topRight": {
+                        "latitude": 60.275949,
+                        "longitude": -150.721398
+                    }
+                },
+                "mosaicImageHeight": 11327,
+                "mosaicImageWidth": 16110,
+                "mosaicMaxZoom": 4,
+                "originalProjectionBounds": [
+                    -367754.07153018663,
+                    -265913.5169149918,
+                    335501.0748898966,
+                    254057.5412773035
+                ],
+                "originalProjectionData": {
+                    "datum": "NAD83",
+                    "lat_0": 58,
+                    "lat_1": 62.66666666666666,
+                    "lat_2": 57.33333333333334,
+                    "lon_0": -156.75,
+                    "no_defs": true,
+                    "proj": "lcc",
+                    "units": "m",
+                    "x_0": 0,
+                    "y_0": 0
+                },
+                "tileWidth": 1024
             }
         }
     },
     "Lake_Huron": {
+        "type": "Sectional",
         "versions": {
             "99": {
-                "effectiveDate": "2020-07-01",
+                "effectiveDate": "2020-03-26",
                 "fileExtent": {
                     "bottomLeft": {
                         "latitude": 44.013925,
@@ -4267,8 +5357,8 @@
                         "longitude": -76.341107
                     }
                 },
-                "imageHeight": 11291,
-                "imageWidth": 15819,
+                "imageHeight": 12291,
+                "imageWidth": 17898,
                 "mapBounds": [
                     [
                         -84.96809572164693,
@@ -4331,15 +5421,55 @@
                         48.19599990956678
                     ]
                 ],
-                "maxZoom": 6,
-                "tileWidth": 256
+                "maxZoom": 5,
+                "mosaicFileExtent": {
+                    "bottomLeft": {
+                        "latitude": 44.013925,
+                        "longitude": -84.988047
+                    },
+                    "bottomRight": {
+                        "latitude": 44.013925,
+                        "longitude": -76.341107
+                    },
+                    "topLeft": {
+                        "latitude": 48.286465,
+                        "longitude": -84.988047
+                    },
+                    "topRight": {
+                        "latitude": 48.286465,
+                        "longitude": -76.341107
+                    }
+                },
+                "mosaicImageHeight": 11291,
+                "mosaicImageWidth": 15819,
+                "mosaicMaxZoom": 4,
+                "originalProjectionBounds": [
+                    -410061.0355129037,
+                    -279031.6672207168,
+                    347622.69761529414,
+                    241290.09400961077
+                ],
+                "originalProjectionData": {
+                    "datum": "NAD83",
+                    "lat_0": 46.13333333333333,
+                    "lat_1": 46.66666666666666,
+                    "lat_2": 41.33333333333334,
+                    "lon_0": -81,
+                    "no_defs": true,
+                    "proj": "lcc",
+                    "units": "m",
+                    "x_0": 0,
+                    "y_0": 0
+                },
+                "tileWidth": 1024
             }
         }
     },
     "Las_Vegas": {
+        "type": "Sectional",
         "versions": {
             "103": {
-                "effectiveDate": "2020-07-01",
+                "effectiveDate": "2020-02-27",
                 "fileExtent": {
                     "bottomLeft": {
                         "latitude": 35.595088,
@@ -4358,8 +5488,8 @@
                         "longitude": -110.708093
                     }
                 },
-                "imageHeight": 11890,
-                "imageWidth": 15123,
+                "imageHeight": 12280,
+                "imageWidth": 17849,
                 "mapBounds": [
                     [
                         -117.9636247110543,
@@ -4442,15 +5572,55 @@
                         40.03250941484487
                     ]
                 ],
-                "maxZoom": 6,
-                "tileWidth": 256
+                "maxZoom": 5,
+                "mosaicFileExtent": {
+                    "bottomLeft": {
+                        "latitude": 35.595088,
+                        "longitude": -117.986968
+                    },
+                    "bottomRight": {
+                        "latitude": 35.595088,
+                        "longitude": -110.708093
+                    },
+                    "topLeft": {
+                        "latitude": 40.111145,
+                        "longitude": -117.986968
+                    },
+                    "topRight": {
+                        "latitude": 40.111145,
+                        "longitude": -110.708093
+                    }
+                },
+                "mosaicImageHeight": 11890,
+                "mosaicImageWidth": 15123,
+                "mosaicMaxZoom": 4,
+                "originalProjectionBounds": [
+                    -431009.93039572437,
+                    -275109.31765375135,
+                    324613.24103234895,
+                    244775.46352365174
+                ],
+                "originalProjectionData": {
+                    "datum": "NAD83",
+                    "lat_0": 37.91666666666666,
+                    "lat_1": 38.66666666666666,
+                    "lat_2": 33.33333333333334,
+                    "lon_0": -114.5,
+                    "no_defs": true,
+                    "proj": "lcc",
+                    "units": "m",
+                    "x_0": 0,
+                    "y_0": 0
+                },
+                "tileWidth": 1024
             }
         }
     },
     "Los_Angeles": {
+        "type": "Sectional",
         "versions": {
             "107": {
-                "effectiveDate": "2020-07-01",
+                "effectiveDate": "2020-06-18",
                 "fileExtent": {
                     "bottomLeft": {
                         "latitude": 32.014704,
@@ -4469,8 +5639,8 @@
                         "longitude": -114.548148
                     }
                 },
-                "imageHeight": 10818,
-                "imageWidth": 16152,
+                "imageHeight": 12349,
+                "imageWidth": 16645,
                 "mapBounds": [
                     [
                         -121.60645222037968,
@@ -4581,15 +5751,55 @@
                         36.08998454556745
                     ]
                 ],
-                "maxZoom": 6,
-                "tileWidth": 256
+                "maxZoom": 5,
+                "mosaicFileExtent": {
+                    "bottomLeft": {
+                        "latitude": 32.014704,
+                        "longitude": -121.992448
+                    },
+                    "bottomRight": {
+                        "latitude": 32.014704,
+                        "longitude": -114.548148
+                    },
+                    "topLeft": {
+                        "latitude": 36.142667,
+                        "longitude": -121.992448
+                    },
+                    "topRight": {
+                        "latitude": 36.142667,
+                        "longitude": -114.548148
+                    }
+                },
+                "mosaicImageHeight": 10818,
+                "mosaicImageWidth": 16152,
+                "mosaicMaxZoom": 4,
+                "originalProjectionBounds": [
+                    -351020.4576958068,
+                    -245067.92468142207,
+                    353646.13725918817,
+                    277738.9876785168
+                ],
+                "originalProjectionData": {
+                    "datum": "NAD83",
+                    "lat_0": 34.16666666666666,
+                    "lat_1": 38.66666666666666,
+                    "lat_2": 33.33333333333334,
+                    "lon_0": -118.4666666666667,
+                    "no_defs": true,
+                    "proj": "lcc",
+                    "units": "m",
+                    "x_0": 0,
+                    "y_0": 0
+                },
+                "tileWidth": 1024
             }
         }
     },
     "McGrath": {
+        "type": "Sectional",
         "versions": {
             "61": {
-                "effectiveDate": "2020-07-01",
+                "effectiveDate": "2019-07-18",
                 "fileExtent": {
                     "bottomLeft": {
                         "latitude": 60.012646,
@@ -4608,8 +5818,8 @@
                         "longitude": -149.916973
                     }
                 },
-                "imageHeight": 11302,
-                "imageWidth": 14973,
+                "imageHeight": 12291,
+                "imageWidth": 16499,
                 "mapBounds": [
                     [
                         -161.93009589457444,
@@ -4700,15 +5910,55 @@
                         64.1615812318528
                     ]
                 ],
-                "maxZoom": 6,
-                "tileWidth": 256
+                "maxZoom": 5,
+                "mosaicFileExtent": {
+                    "bottomLeft": {
+                        "latitude": 60.012646,
+                        "longitude": -161.982069
+                    },
+                    "bottomRight": {
+                        "latitude": 60.012646,
+                        "longitude": -149.916973
+                    },
+                    "topLeft": {
+                        "latitude": 64.260965,
+                        "longitude": -161.982069
+                    },
+                    "topRight": {
+                        "latitude": 64.260965,
+                        "longitude": -149.916973
+                    }
+                },
+                "mosaicImageHeight": 11302,
+                "mosaicImageWidth": 14973,
+                "mosaicMaxZoom": 4,
+                "originalProjectionBounds": [
+                    -360261.3336766682,
+                    -282313.0447479518,
+                    338207.3952307334,
+                    238031.22203392102
+                ],
+                "originalProjectionData": {
+                    "datum": "NAD83",
+                    "lat_0": 62.13333333333333,
+                    "lat_1": 62.66666666666666,
+                    "lat_2": 57.33333333333334,
+                    "lon_0": -156.8333333333333,
+                    "no_defs": true,
+                    "proj": "lcc",
+                    "units": "m",
+                    "x_0": 0,
+                    "y_0": 0
+                },
+                "tileWidth": 1024
             }
         }
     },
     "Memphis": {
+        "type": "Sectional",
         "versions": {
             "104": {
-                "effectiveDate": "2020-07-01",
+                "effectiveDate": "2020-03-26",
                 "fileExtent": {
                     "bottomLeft": {
                         "latitude": 32.016171,
@@ -4727,8 +5977,8 @@
                         "longitude": -87.782035
                     }
                 },
-                "imageHeight": 11237,
-                "imageWidth": 15715,
+                "imageHeight": 12346,
+                "imageWidth": 17929,
                 "mapBounds": [
                     [
                         -94.97269633933637,
@@ -4807,15 +6057,55 @@
                         36.21818792625977
                     ]
                 ],
-                "maxZoom": 6,
-                "tileWidth": 256
+                "maxZoom": 5,
+                "mosaicFileExtent": {
+                    "bottomLeft": {
+                        "latitude": 32.016171,
+                        "longitude": -94.989436
+                    },
+                    "bottomRight": {
+                        "latitude": 32.016171,
+                        "longitude": -87.782035
+                    },
+                    "topLeft": {
+                        "latitude": 36.279401,
+                        "longitude": -94.989436
+                    },
+                    "topRight": {
+                        "latitude": 36.279401,
+                        "longitude": -87.782035
+                    }
+                },
+                "mosaicImageHeight": 11237,
+                "mosaicImageWidth": 15715,
+                "mosaicMaxZoom": 4,
+                "originalProjectionBounds": [
+                    -423493.6137214036,
+                    -268471.16438144876,
+                    335548.18163760885,
+                    254214.3128805741
+                ],
+                "originalProjectionData": {
+                    "datum": "NAD83",
+                    "lat_0": 34,
+                    "lat_1": 38.66666666666666,
+                    "lat_2": 33.33333333333334,
+                    "lon_0": -91.5,
+                    "no_defs": true,
+                    "proj": "lcc",
+                    "units": "m",
+                    "x_0": 0,
+                    "y_0": 0
+                },
+                "tileWidth": 1024
             }
         }
     },
     "Miami": {
+        "type": "Sectional",
         "versions": {
             "106": {
-                "effectiveDate": "2020-07-01",
+                "effectiveDate": "2020-01-30",
                 "fileExtent": {
                     "bottomLeft": {
                         "latitude": 24.008871,
@@ -4834,8 +6124,8 @@
                         "longitude": -76.417048
                     }
                 },
-                "imageHeight": 11774,
-                "imageWidth": 15480,
+                "imageHeight": 12313,
+                "imageWidth": 17198,
                 "mapBounds": [
                     [
                         -82.97630381639426,
@@ -4906,15 +6196,55 @@
                         28.48783519938639
                     ]
                 ],
-                "maxZoom": 6,
-                "tileWidth": 256
+                "maxZoom": 5,
+                "mosaicFileExtent": {
+                    "bottomLeft": {
+                        "latitude": 24.008871,
+                        "longitude": -82.988402
+                    },
+                    "bottomRight": {
+                        "latitude": 24.008871,
+                        "longitude": -76.417048
+                    },
+                    "topLeft": {
+                        "latitude": 28.489887,
+                        "longitude": -82.988402
+                    },
+                    "topRight": {
+                        "latitude": 28.489887,
+                        "longitude": -76.417048
+                    }
+                },
+                "mosaicImageHeight": 11774,
+                "mosaicImageWidth": 15480,
+                "mosaicMaxZoom": 4,
+                "originalProjectionBounds": [
+                    -377598.9529860567,
+                    -266742.03087195934,
+                    350455.0635108446,
+                    254530.3044284882
+                ],
+                "originalProjectionData": {
+                    "datum": "NAD83",
+                    "lat_0": 26.25,
+                    "lat_1": 30.66666666666667,
+                    "lat_2": 25.33333333333333,
+                    "lon_0": -79.91666666666667,
+                    "no_defs": true,
+                    "proj": "lcc",
+                    "units": "m",
+                    "x_0": 0,
+                    "y_0": 0
+                },
+                "tileWidth": 1024
             }
         }
     },
     "Montreal": {
+        "type": "Sectional",
         "versions": {
             "102": {
-                "effectiveDate": "2020-07-01",
+                "effectiveDate": "2020-02-27",
                 "fileExtent": {
                     "bottomLeft": {
                         "latitude": 44.007265,
@@ -4933,8 +6263,8 @@
                         "longitude": -68.34596
                     }
                 },
-                "imageHeight": 11311,
-                "imageWidth": 15808,
+                "imageHeight": 12341,
+                "imageWidth": 17911,
                 "mapBounds": [
                     [
                         -76.96073327358177,
@@ -5017,15 +6347,55 @@
                         48.201653450011854
                     ]
                 ],
-                "maxZoom": 6,
-                "tileWidth": 256
+                "maxZoom": 5,
+                "mosaicFileExtent": {
+                    "bottomLeft": {
+                        "latitude": 44.007265,
+                        "longitude": -76.987245
+                    },
+                    "bottomRight": {
+                        "latitude": 44.007265,
+                        "longitude": -68.34596
+                    },
+                    "topLeft": {
+                        "latitude": 48.287748,
+                        "longitude": -76.987245
+                    },
+                    "topRight": {
+                        "latitude": 48.287748,
+                        "longitude": -68.34596
+                    }
+                },
+                "mosaicImageHeight": 11311,
+                "mosaicImageWidth": 15808,
+                "mosaicMaxZoom": 4,
+                "originalProjectionBounds": [
+                    -412008.52089930524,
+                    -292962.20515199384,
+                    346246.05518652324,
+                    229482.51721539948
+                ],
+                "originalProjectionData": {
+                    "datum": "NAD83",
+                    "lat_0": 46.25,
+                    "lat_1": 46.66666666666666,
+                    "lat_2": 41.33333333333334,
+                    "lon_0": -72.96666666666667,
+                    "no_defs": true,
+                    "proj": "lcc",
+                    "units": "m",
+                    "x_0": 0,
+                    "y_0": 0
+                },
+                "tileWidth": 1024
             }
         }
     },
     "New_Orleans": {
+        "type": "Sectional",
         "versions": {
             "106": {
-                "effectiveDate": "2020-07-01",
+                "effectiveDate": "2020-05-21",
                 "fileExtent": {
                     "bottomLeft": {
                         "latitude": 28.00972,
@@ -5044,8 +6414,8 @@
                         "longitude": -84.44989
                     }
                 },
-                "imageHeight": 11188,
-                "imageWidth": 14885,
+                "imageHeight": 12347,
+                "imageWidth": 16617,
                 "mapBounds": [
                     [
                         -90.97982538804627,
@@ -5124,15 +6494,55 @@
                         32.230102293957785
                     ]
                 ],
-                "maxZoom": 6,
-                "tileWidth": 256
+                "maxZoom": 5,
+                "mosaicFileExtent": {
+                    "bottomLeft": {
+                        "latitude": 28.00972,
+                        "longitude": -90.989711
+                    },
+                    "bottomRight": {
+                        "latitude": 28.00972,
+                        "longitude": -84.44989
+                    },
+                    "topLeft": {
+                        "latitude": 32.259273,
+                        "longitude": -90.989711
+                    },
+                    "topRight": {
+                        "latitude": 32.259273,
+                        "longitude": -84.44989
+                    }
+                },
+                "mosaicImageHeight": 11188,
+                "mosaicImageWidth": 14885,
+                "mosaicMaxZoom": 4,
+                "originalProjectionBounds": [
+                    -362693.3879016663,
+                    -280369.7057441403,
+                    340807.1966382885,
+                    242366.56261117946
+                ],
+                "originalProjectionData": {
+                    "datum": "NAD83",
+                    "lat_0": 30.08333333333333,
+                    "lat_1": 30.66666666666667,
+                    "lat_2": 25.33333333333333,
+                    "lon_0": -88.05,
+                    "no_defs": true,
+                    "proj": "lcc",
+                    "units": "m",
+                    "x_0": 0,
+                    "y_0": 0
+                },
+                "tileWidth": 1024
             }
         }
     },
     "New_York": {
+        "type": "Sectional",
         "versions": {
             "101": {
-                "effectiveDate": "2020-07-01",
+                "effectiveDate": "2020-04-23",
                 "fileExtent": {
                     "bottomLeft": {
                         "latitude": 40.010395,
@@ -5151,8 +6561,8 @@
                         "longitude": -68.663021
                     }
                 },
-                "imageHeight": 11289,
-                "imageWidth": 16293,
+                "imageHeight": 12377,
+                "imageWidth": 17885,
                 "mapBounds": [
                     [
                         -76.96982563711042,
@@ -5223,15 +6633,55 @@
                         44.164727966396384
                     ]
                 ],
-                "maxZoom": 6,
-                "tileWidth": 256
+                "maxZoom": 5,
+                "mosaicFileExtent": {
+                    "bottomLeft": {
+                        "latitude": 40.010395,
+                        "longitude": -76.988477
+                    },
+                    "bottomRight": {
+                        "latitude": 40.010395,
+                        "longitude": -68.663021
+                    },
+                    "topLeft": {
+                        "latitude": 44.284651,
+                        "longitude": -76.988477
+                    },
+                    "topRight": {
+                        "latitude": 44.284651,
+                        "longitude": -68.663021
+                    }
+                },
+                "mosaicImageHeight": 11289,
+                "mosaicImageWidth": 16293,
+                "mosaicMaxZoom": 4,
+                "originalProjectionBounds": [
+                    -412711.3146548136,
+                    -287850.3137815215,
+                    344432.6710232431,
+                    236140.23584681543
+                ],
+                "originalProjectionData": {
+                    "datum": "NAD83",
+                    "lat_0": 42.16666666666666,
+                    "lat_1": 46.66666666666666,
+                    "lat_2": 41.33333333333334,
+                    "lon_0": -72.96666666666667,
+                    "no_defs": true,
+                    "proj": "lcc",
+                    "units": "m",
+                    "x_0": 0,
+                    "y_0": 0
+                },
+                "tileWidth": 1024
             }
         }
     },
     "Nome": {
+        "type": "Sectional",
         "versions": {
             "61": {
-                "effectiveDate": "2020-07-01",
+                "effectiveDate": "2020-06-18",
                 "fileExtent": {
                     "bottomLeft": {
                         "latitude": 63.998217,
@@ -5250,8 +6700,8 @@
                         "longitude": -156.671481
                     }
                 },
-                "imageHeight": 11481,
-                "imageWidth": 15907,
+                "imageHeight": 12250,
+                "imageWidth": 16626,
                 "mapBounds": [
                     [
                         -169.27809912308646,
@@ -5406,15 +6856,55 @@
                         68.23722801059343
                     ]
                 ],
-                "maxZoom": 6,
-                "tileWidth": 256
+                "maxZoom": 5,
+                "mosaicFileExtent": {
+                    "bottomLeft": {
+                        "latitude": 63.998217,
+                        "longitude": -171.466086
+                    },
+                    "bottomRight": {
+                        "latitude": 63.998217,
+                        "longitude": -156.671481
+                    },
+                    "topLeft": {
+                        "latitude": 68.3042,
+                        "longitude": -171.466086
+                    },
+                    "topRight": {
+                        "latitude": 68.3042,
+                        "longitude": -156.671481
+                    }
+                },
+                "mosaicImageHeight": 11481,
+                "mosaicImageWidth": 15907,
+                "mosaicMaxZoom": 4,
+                "originalProjectionBounds": [
+                    -367529.67210986384,
+                    -289212.78314306936,
+                    336297.4342418817,
+                    229378.74334314166
+                ],
+                "originalProjectionData": {
+                    "datum": "NAD83",
+                    "lat_0": 66.25,
+                    "lat_1": 70.66666666666667,
+                    "lat_2": 65.33333333333333,
+                    "lon_0": -164.75,
+                    "no_defs": true,
+                    "proj": "lcc",
+                    "units": "m",
+                    "x_0": 0,
+                    "y_0": 0
+                },
+                "tileWidth": 1024
             }
         }
     },
     "Omaha": {
+        "type": "Sectional",
         "versions": {
             "101": {
-                "effectiveDate": "2020-07-01",
+                "effectiveDate": "2020-01-30",
                 "fileExtent": {
                     "bottomLeft": {
                         "latitude": 40.011772,
@@ -5433,8 +6923,8 @@
                         "longitude": -92.630809
                     }
                 },
-                "imageHeight": 12091,
-                "imageWidth": 16279,
+                "imageHeight": 12358,
+                "imageWidth": 17921,
                 "mapBounds": [
                     [
                         -100.9646952115187,
@@ -5517,15 +7007,55 @@
                         44.474658235972555
                     ]
                 ],
-                "maxZoom": 6,
-                "tileWidth": 256
+                "maxZoom": 5,
+                "mosaicFileExtent": {
+                    "bottomLeft": {
+                        "latitude": 40.011772,
+                        "longitude": -100.993205
+                    },
+                    "bottomRight": {
+                        "latitude": 40.011772,
+                        "longitude": -92.630809
+                    },
+                    "topLeft": {
+                        "latitude": 44.601895,
+                        "longitude": -100.993205
+                    },
+                    "topRight": {
+                        "latitude": 44.601895,
+                        "longitude": -92.630809
+                    }
+                },
+                "mosaicImageHeight": 12091,
+                "mosaicImageWidth": 16279,
+                "mosaicMaxZoom": 4,
+                "originalProjectionBounds": [
+                    -411171.57833969744,
+                    -266135.17518870113,
+                    347521.8521823075,
+                    257040.43010730788
+                ],
+                "originalProjectionData": {
+                    "datum": "NAD83",
+                    "lat_0": 42.3,
+                    "lat_1": 46.66666666666666,
+                    "lat_2": 41.33333333333334,
+                    "lon_0": -97,
+                    "no_defs": true,
+                    "proj": "lcc",
+                    "units": "m",
+                    "x_0": 0,
+                    "y_0": 0
+                },
+                "tileWidth": 1024
             }
         }
     },
     "Phoenix": {
+        "type": "Sectional",
         "versions": {
             "103": {
-                "effectiveDate": "2020-07-01",
+                "effectiveDate": "2020-04-23",
                 "fileExtent": {
                     "bottomLeft": {
                         "latitude": 31.275278,
@@ -5544,8 +7074,8 @@
                         "longitude": -108.749863
                     }
                 },
-                "imageHeight": 11727,
-                "imageWidth": 15841,
+                "imageHeight": 12299,
+                "imageWidth": 17908,
                 "mapBounds": [
                     [
                         -115.96753018497299,
@@ -5624,15 +7154,55 @@
                         35.673908412310986
                     ]
                 ],
-                "maxZoom": 6,
-                "tileWidth": 256
+                "maxZoom": 5,
+                "mosaicFileExtent": {
+                    "bottomLeft": {
+                        "latitude": 31.275278,
+                        "longitude": -115.989696
+                    },
+                    "bottomRight": {
+                        "latitude": 31.275278,
+                        "longitude": -108.749863
+                    },
+                    "topLeft": {
+                        "latitude": 35.742007,
+                        "longitude": -115.989696
+                    },
+                    "topRight": {
+                        "latitude": 35.742007,
+                        "longitude": -108.749863
+                    }
+                },
+                "mosaicImageHeight": 11727,
+                "mosaicImageWidth": 15841,
+                "mosaicMaxZoom": 4,
+                "originalProjectionBounds": [
+                    -413429.425167921,
+                    -243620.67233425146,
+                    344718.5921647351,
+                    277063.9050582208
+                ],
+                "originalProjectionData": {
+                    "datum": "NAD83",
+                    "lat_0": 33.5,
+                    "lat_1": 38.66666666666666,
+                    "lat_2": 33.33333333333334,
+                    "lon_0": -112.55,
+                    "no_defs": true,
+                    "proj": "lcc",
+                    "units": "m",
+                    "x_0": 0,
+                    "y_0": 0
+                },
+                "tileWidth": 1024
             }
         }
     },
     "Point_Barrow": {
+        "type": "Sectional",
         "versions": {
             "82": {
-                "effectiveDate": "2020-07-01",
+                "effectiveDate": "2020-04-23",
                 "fileExtent": {
                     "bottomLeft": {
                         "latitude": 68.009906,
@@ -5651,8 +7221,8 @@
                         "longitude": -139.160735
                     }
                 },
-                "imageHeight": 11553,
-                "imageWidth": 16111,
+                "imageHeight": 12363,
+                "imageWidth": 16576,
                 "mapBounds": [
                     [
                         -156.97165054796912,
@@ -5731,15 +7301,55 @@
                         72.12810801533492
                     ]
                 ],
-                "maxZoom": 6,
-                "tileWidth": 256
+                "maxZoom": 5,
+                "mosaicFileExtent": {
+                    "bottomLeft": {
+                        "latitude": 68.009906,
+                        "longitude": -156.971098
+                    },
+                    "bottomRight": {
+                        "latitude": 68.009906,
+                        "longitude": -139.160735
+                    },
+                    "topLeft": {
+                        "latitude": 72.326016,
+                        "longitude": -156.971098
+                    },
+                    "topRight": {
+                        "latitude": 72.326016,
+                        "longitude": -139.160735
+                    }
+                },
+                "mosaicImageHeight": 11553,
+                "mosaicImageWidth": 16111,
+                "mosaicMaxZoom": 4,
+                "originalProjectionBounds": [
+                    -363810.3299233788,
+                    -280414.0653025952,
+                    337938.215470636,
+                    242959.36327542207
+                ],
+                "originalProjectionData": {
+                    "datum": "NAD83",
+                    "lat_0": 70.16666666666667,
+                    "lat_1": 70.66666666666667,
+                    "lat_2": 65.33333333333333,
+                    "lon_0": -149,
+                    "no_defs": true,
+                    "proj": "lcc",
+                    "units": "m",
+                    "x_0": 0,
+                    "y_0": 0
+                },
+                "tileWidth": 1024
             }
         }
     },
     "Salt_Lake_City": {
+        "type": "Sectional",
         "versions": {
             "103": {
-                "effectiveDate": "2020-07-01",
+                "effectiveDate": "2020-03-26",
                 "fileExtent": {
                     "bottomLeft": {
                         "latitude": 40.021909,
@@ -5758,8 +7368,8 @@
                         "longitude": -108.628074
                     }
                 },
-                "imageHeight": 12062,
-                "imageWidth": 16276,
+                "imageHeight": 12361,
+                "imageWidth": 17897,
                 "mapBounds": [
                     [
                         -116.95244340399303,
@@ -5838,15 +7448,55 @@
                         44.47060478863252
                     ]
                 ],
-                "maxZoom": 6,
-                "tileWidth": 256
+                "maxZoom": 5,
+                "mosaicFileExtent": {
+                    "bottomLeft": {
+                        "latitude": 40.021909,
+                        "longitude": -116.987626
+                    },
+                    "bottomRight": {
+                        "latitude": 40.021909,
+                        "longitude": -108.628074
+                    },
+                    "topLeft": {
+                        "latitude": 44.600025,
+                        "longitude": -116.987626
+                    },
+                    "topRight": {
+                        "latitude": 44.600025,
+                        "longitude": -108.628074
+                    }
+                },
+                "mosaicImageHeight": 12062,
+                "mosaicImageWidth": 16276,
+                "mosaicMaxZoom": 4,
+                "originalProjectionBounds": [
+                    -409889.909891965,
+                    -267500.30265327345,
+                    347806.96960759256,
+                    255817.74817878698
+                ],
+                "originalProjectionData": {
+                    "datum": "NAD83",
+                    "lat_0": 42.3,
+                    "lat_1": 46.66666666666666,
+                    "lat_2": 41.33333333333334,
+                    "lon_0": -113,
+                    "no_defs": true,
+                    "proj": "lcc",
+                    "units": "m",
+                    "x_0": 0,
+                    "y_0": 0
+                },
+                "tileWidth": 1024
             }
         }
     },
     "San_Antonio": {
+        "type": "Sectional",
         "versions": {
             "105": {
-                "effectiveDate": "2020-07-01",
+                "effectiveDate": "2020-04-23",
                 "fileExtent": {
                     "bottomLeft": {
                         "latitude": 28.012769,
@@ -5865,8 +7515,8 @@
                         "longitude": -96.409558
                     }
                 },
-                "imageHeight": 11196,
-                "imageWidth": 14975,
+                "imageHeight": 12232,
+                "imageWidth": 16855,
                 "mapBounds": [
                     [
                         -102.9578326185942,
@@ -5925,15 +7575,55 @@
                         32.19362917427678
                     ]
                 ],
-                "maxZoom": 6,
-                "tileWidth": 256
+                "maxZoom": 5,
+                "mosaicFileExtent": {
+                    "bottomLeft": {
+                        "latitude": 28.012769,
+                        "longitude": -102.990131
+                    },
+                    "bottomRight": {
+                        "latitude": 28.012769,
+                        "longitude": -96.409558
+                    },
+                    "topLeft": {
+                        "latitude": 32.26593,
+                        "longitude": -102.990131
+                    },
+                    "topRight": {
+                        "latitude": 32.26593,
+                        "longitude": -96.409558
+                    }
+                },
+                "mosaicImageHeight": 11196,
+                "mosaicImageWidth": 14975,
+                "mosaicMaxZoom": 4,
+                "originalProjectionBounds": [
+                    -368445.1372337815,
+                    -279366.7752515225,
+                    345119.7145812389,
+                    238489.02048349666
+                ],
+                "originalProjectionData": {
+                    "datum": "NAD83",
+                    "lat_0": 30.125,
+                    "lat_1": 30.66666666666667,
+                    "lat_2": 25.33333333333333,
+                    "lon_0": -100,
+                    "no_defs": true,
+                    "proj": "lcc",
+                    "units": "m",
+                    "x_0": 0,
+                    "y_0": 0
+                },
+                "tileWidth": 1024
             }
         }
     },
     "San_Francisco": {
+        "type": "Sectional",
         "versions": {
             "104": {
-                "effectiveDate": "2020-07-01",
+                "effectiveDate": "2020-02-27",
                 "fileExtent": {
                     "bottomLeft": {
                         "latitude": 36.009556,
@@ -5952,8 +7642,8 @@
                         "longitude": -117.685936
                     }
                 },
-                "imageHeight": 11080,
-                "imageWidth": 15071,
+                "imageHeight": 12340,
+                "imageWidth": 16658,
                 "mapBounds": [
                     [
                         -124.98765346112211,
@@ -6028,15 +7718,55 @@
                         40.179109225141076
                     ]
                 ],
-                "maxZoom": 6,
-                "tileWidth": 256
+                "maxZoom": 5,
+                "mosaicFileExtent": {
+                    "bottomLeft": {
+                        "latitude": 36.009556,
+                        "longitude": -124.989834
+                    },
+                    "bottomRight": {
+                        "latitude": 36.009556,
+                        "longitude": -117.685936
+                    },
+                    "topLeft": {
+                        "latitude": 40.231853,
+                        "longitude": -124.989834
+                    },
+                    "topRight": {
+                        "latitude": 40.231853,
+                        "longitude": -117.685936
+                    }
+                },
+                "mosaicImageHeight": 11080,
+                "mosaicImageWidth": 15071,
+                "mosaicMaxZoom": 4,
+                "originalProjectionBounds": [
+                    -384321.7108235379,
+                    -266186.0601677208,
+                    320921.38326930406,
+                    256254.5947889543
+                ],
+                "originalProjectionData": {
+                    "datum": "NAD83",
+                    "lat_0": 38.33333333333334,
+                    "lat_1": 38.66666666666666,
+                    "lat_2": 33.33333333333334,
+                    "lon_0": -121.4166666666667,
+                    "no_defs": true,
+                    "proj": "lcc",
+                    "units": "m",
+                    "x_0": 0,
+                    "y_0": 0
+                },
+                "tileWidth": 1024
             }
         }
     },
     "Seattle": {
+        "type": "Sectional",
         "versions": {
             "99": {
-                "effectiveDate": "2020-07-01",
+                "effectiveDate": "2020-05-21",
                 "fileExtent": {
                     "bottomLeft": {
                         "latitude": 44.417134,
@@ -6055,8 +7785,8 @@
                         "longitude": -116.280419
                     }
                 },
-                "imageHeight": 12310,
-                "imageWidth": 15706,
+                "imageHeight": 12333,
+                "imageWidth": 17869,
                 "mapBounds": [
                     [
                         -124.9639218967055,
@@ -6179,15 +7909,55 @@
                         49.01545731111615
                     ]
                 ],
-                "maxZoom": 6,
-                "tileWidth": 256
+                "maxZoom": 5,
+                "mosaicFileExtent": {
+                    "bottomLeft": {
+                        "latitude": 44.417134,
+                        "longitude": -124.984704
+                    },
+                    "bottomRight": {
+                        "latitude": 44.417134,
+                        "longitude": -116.280419
+                    },
+                    "topLeft": {
+                        "latitude": 49.087192,
+                        "longitude": -124.984704
+                    },
+                    "topRight": {
+                        "latitude": 49.087192,
+                        "longitude": -116.280419
+                    }
+                },
+                "mosaicImageHeight": 12310,
+                "mosaicImageWidth": 15706,
+                "mosaicMaxZoom": 4,
+                "originalProjectionBounds": [
+                    -409375.32918691344,
+                    -261092.84451619166,
+                    347106.7269738652,
+                    261032.0796439337
+                ],
+                "originalProjectionData": {
+                    "datum": "NAD83",
+                    "lat_0": 46.75,
+                    "lat_1": 46.66666666666666,
+                    "lat_2": 41.33333333333334,
+                    "lon_0": -121,
+                    "no_defs": true,
+                    "proj": "lcc",
+                    "units": "m",
+                    "x_0": 0,
+                    "y_0": 0
+                },
+                "tileWidth": 1024
             }
         }
     },
     "Seward": {
+        "type": "Sectional",
         "versions": {
             "106": {
-                "effectiveDate": "2020-07-01",
+                "effectiveDate": "2020-05-21",
                 "fileExtent": {
                     "bottomLeft": {
                         "latitude": 59.130133,
@@ -6206,8 +7976,8 @@
                         "longitude": -139.992237
                     }
                 },
-                "imageHeight": 6481,
-                "imageWidth": 16306,
+                "imageHeight": 6253,
+                "imageWidth": 17886,
                 "mapBounds": [
                     [
                         -152.39071141867532,
@@ -6354,15 +8124,55 @@
                         61.46671066393346
                     ]
                 ],
-                "maxZoom": 6,
-                "tileWidth": 256
+                "maxZoom": 5,
+                "mosaicFileExtent": {
+                    "bottomLeft": {
+                        "latitude": 59.130133,
+                        "longitude": -152.494604
+                    },
+                    "bottomRight": {
+                        "latitude": 59.130133,
+                        "longitude": -139.992237
+                    },
+                    "topLeft": {
+                        "latitude": 61.586425,
+                        "longitude": -152.494604
+                    },
+                    "topRight": {
+                        "latitude": 61.586425,
+                        "longitude": -139.992237
+                    }
+                },
+                "mosaicImageHeight": 6481,
+                "mosaicImageWidth": 16306,
+                "mosaicMaxZoom": 4,
+                "originalProjectionBounds": [
+                    -396992.8912196884,
+                    -123923.71854677299,
+                    360257.2112973512,
+                    140801.46903282814
+                ],
+                "originalProjectionData": {
+                    "datum": "NAD83",
+                    "lat_0": 60.33333333333334,
+                    "lat_1": 62.66666666666666,
+                    "lat_2": 57.33333333333334,
+                    "lon_0": -146.7166666666667,
+                    "no_defs": true,
+                    "proj": "lcc",
+                    "units": "m",
+                    "x_0": 0,
+                    "y_0": 0
+                },
+                "tileWidth": 1024
             }
         }
     },
     "St_Louis": {
+        "type": "Sectional",
         "versions": {
             "102": {
-                "effectiveDate": "2020-07-01",
+                "effectiveDate": "2020-06-18",
                 "fileExtent": {
                     "bottomLeft": {
                         "latitude": 36.009823,
@@ -6381,8 +8191,8 @@
                         "longitude": -83.752449
                     }
                 },
-                "imageHeight": 11290,
-                "imageWidth": 15007,
+                "imageHeight": 12326,
+                "imageWidth": 17935,
                 "mapBounds": [
                     [
                         -90.96514330135224,
@@ -6457,15 +8267,55 @@
                         40.19991666977208
                     ]
                 ],
-                "maxZoom": 6,
-                "tileWidth": 256
+                "maxZoom": 5,
+                "mosaicFileExtent": {
+                    "bottomLeft": {
+                        "latitude": 36.009823,
+                        "longitude": -90.991433
+                    },
+                    "bottomRight": {
+                        "latitude": 36.009823,
+                        "longitude": -83.752449
+                    },
+                    "topLeft": {
+                        "latitude": 40.290307,
+                        "longitude": -90.991433
+                    },
+                    "topRight": {
+                        "latitude": 40.290307,
+                        "longitude": -83.752449
+                    }
+                },
+                "mosaicImageHeight": 11290,
+                "mosaicImageWidth": 15007,
+                "mosaicMaxZoom": 4,
+                "originalProjectionBounds": [
+                    -438932.632077822,
+                    -266386.02564842615,
+                    320341.9236261927,
+                    255456.73220059328
+                ],
+                "originalProjectionData": {
+                    "datum": "NAD83",
+                    "lat_0": 38,
+                    "lat_1": 38.66666666666666,
+                    "lat_2": 33.33333333333334,
+                    "lon_0": -87.5,
+                    "no_defs": true,
+                    "proj": "lcc",
+                    "units": "m",
+                    "x_0": 0,
+                    "y_0": 0
+                },
+                "tileWidth": 1024
             }
         }
     },
     "Twin_Cities": {
+        "type": "Sectional",
         "versions": {
             "100": {
-                "effectiveDate": "2020-07-01",
+                "effectiveDate": "2020-06-18",
                 "fileExtent": {
                     "bottomLeft": {
                         "latitude": 44.413646,
@@ -6484,8 +8334,8 @@
                         "longitude": -92.273914
                     }
                 },
-                "imageHeight": 12336,
-                "imageWidth": 15721,
+                "imageHeight": 12357,
+                "imageWidth": 17920,
                 "mapBounds": [
                     [
                         -100.98718906175073,
@@ -6572,15 +8422,55 @@
                         49.025905161590835
                     ]
                 ],
-                "maxZoom": 6,
-                "tileWidth": 256
+                "maxZoom": 5,
+                "mosaicFileExtent": {
+                    "bottomLeft": {
+                        "latitude": 44.413646,
+                        "longitude": -100.986912
+                    },
+                    "bottomRight": {
+                        "latitude": 44.413646,
+                        "longitude": -92.273914
+                    },
+                    "topLeft": {
+                        "latitude": 49.093636,
+                        "longitude": -100.986912
+                    },
+                    "topRight": {
+                        "latitude": 49.093636,
+                        "longitude": -92.273914
+                    }
+                },
+                "mosaicImageHeight": 12336,
+                "mosaicImageWidth": 15721,
+                "mosaicMaxZoom": 4,
+                "originalProjectionBounds": [
+                    -411337.18353406084,
+                    -260887.73320806032,
+                    347250.32583812205,
+                    262236.651706472
+                ],
+                "originalProjectionData": {
+                    "datum": "NAD83",
+                    "lat_0": 46.75,
+                    "lat_1": 46.66666666666666,
+                    "lat_2": 41.33333333333334,
+                    "lon_0": -97,
+                    "no_defs": true,
+                    "proj": "lcc",
+                    "units": "m",
+                    "x_0": 0,
+                    "y_0": 0
+                },
+                "tileWidth": 1024
             }
         }
     },
     "Washington": {
+        "type": "Sectional",
         "versions": {
             "107": {
-                "effectiveDate": "2020-07-01",
+                "effectiveDate": "2020-01-30",
                 "fileExtent": {
                     "bottomLeft": {
                         "latitude": 36.012281,
@@ -6599,8 +8489,8 @@
                         "longitude": -71.670304
                     }
                 },
-                "imageHeight": 11231,
-                "imageWidth": 15178,
+                "imageHeight": 12341,
+                "imageWidth": 16708,
                 "mapBounds": [
                     [
                         -78.95490206859677,
@@ -6683,15 +8573,55 @@
                         40.20945065555207
                     ]
                 ],
-                "maxZoom": 6,
-                "tileWidth": 256
+                "maxZoom": 5,
+                "mosaicFileExtent": {
+                    "bottomLeft": {
+                        "latitude": 36.012281,
+                        "longitude": -78.990834
+                    },
+                    "bottomRight": {
+                        "latitude": 36.012281,
+                        "longitude": -71.670304
+                    },
+                    "topLeft": {
+                        "latitude": 40.270383,
+                        "longitude": -78.990834
+                    },
+                    "topRight": {
+                        "latitude": 40.270383,
+                        "longitude": -71.670304
+                    }
+                },
+                "mosaicImageHeight": 11231,
+                "mosaicImageWidth": 15178,
+                "mosaicMaxZoom": 4,
+                "originalProjectionBounds": [
+                    -379219.09883205785,
+                    -287736.8118186181,
+                    328062.72618981526,
+                    234667.26204626347
+                ],
+                "originalProjectionData": {
+                    "datum": "NAD83",
+                    "lat_0": 38.16666666666666,
+                    "lat_1": 38.66666666666666,
+                    "lat_2": 33.33333333333334,
+                    "lon_0": -75.5,
+                    "no_defs": true,
+                    "proj": "lcc",
+                    "units": "m",
+                    "x_0": 0,
+                    "y_0": 0
+                },
+                "tileWidth": 1024
             }
         }
     },
     "Whitehorse": {
+        "type": "Sectional",
         "versions": {
             "60": {
-                "effectiveDate": "2020-07-01",
+                "effectiveDate": "2020-03-26",
                 "fileExtent": {
                     "bottomLeft": {
                         "latitude": 60.015174,
@@ -6710,8 +8640,8 @@
                         "longitude": -128.915802
                     }
                 },
-                "imageHeight": 11288,
-                "imageWidth": 14978,
+                "imageHeight": 12267,
+                "imageWidth": 16545,
                 "mapBounds": [
                     [
                         -140.90326397886716,
@@ -6766,15 +8696,55 @@
                         64.14591067189095
                     ]
                 ],
-                "maxZoom": 6,
-                "tileWidth": 256
+                "maxZoom": 5,
+                "mosaicFileExtent": {
+                    "bottomLeft": {
+                        "latitude": 60.015174,
+                        "longitude": -140.985053
+                    },
+                    "bottomRight": {
+                        "latitude": 60.015174,
+                        "longitude": -128.915802
+                    },
+                    "topLeft": {
+                        "latitude": 64.258304,
+                        "longitude": -140.985053
+                    },
+                    "topRight": {
+                        "latitude": 64.258304,
+                        "longitude": -128.915802
+                    }
+                },
+                "mosaicImageHeight": 11288,
+                "mosaicImageWidth": 14978,
+                "mosaicMaxZoom": 4,
+                "originalProjectionBounds": [
+                    -366006.6268923742,
+                    -285298.78188572184,
+                    334415.8609749601,
+                    234019.7288349784
+                ],
+                "originalProjectionData": {
+                    "datum": "NAD83",
+                    "lat_0": 62.16666666666666,
+                    "lat_1": 62.66666666666666,
+                    "lat_2": 57.33333333333334,
+                    "lon_0": -135.75,
+                    "no_defs": true,
+                    "proj": "lcc",
+                    "units": "m",
+                    "x_0": 0,
+                    "y_0": 0
+                },
+                "tileWidth": 1024
             }
         }
     },
     "Wichita": {
+        "type": "Sectional",
         "versions": {
             "104": {
-                "effectiveDate": "2020-07-01",
+                "effectiveDate": "2020-01-02",
                 "fileExtent": {
                     "bottomLeft": {
                         "latitude": 36.009787,
@@ -6793,8 +8763,8 @@
                         "longitude": -96.658997
                     }
                 },
-                "imageHeight": 11230,
-                "imageWidth": 15199,
+                "imageHeight": 12378,
+                "imageWidth": 16680,
                 "mapBounds": [
                     [
                         -103.9612501026876,
@@ -6865,8 +8835,47 @@
                         40.20364518310013
                     ]
                 ],
-                "maxZoom": 6,
-                "tileWidth": 256
+                "maxZoom": 5,
+                "mosaicFileExtent": {
+                    "bottomLeft": {
+                        "latitude": 36.009787,
+                        "longitude": -103.991402
+                    },
+                    "bottomRight": {
+                        "latitude": 36.009787,
+                        "longitude": -96.658997
+                    },
+                    "topLeft": {
+                        "latitude": 40.268646,
+                        "longitude": -103.991402
+                    },
+                    "topRight": {
+                        "latitude": 40.268646,
+                        "longitude": -96.658997
+                    }
+                },
+                "mosaicImageHeight": 11230,
+                "mosaicImageWidth": 15199,
+                "mosaicMaxZoom": 4,
+                "originalProjectionBounds": [
+                    -373121.8474741517,
+                    -268449.63436082366,
+                    332995.2945162517,
+                    255544.6273734014
+                ],
+                "originalProjectionData": {
+                    "datum": "NAD83",
+                    "lat_0": 38,
+                    "lat_1": 38.66666666666666,
+                    "lat_2": 33.33333333333334,
+                    "lon_0": -100.5333333333333,
+                    "no_defs": true,
+                    "proj": "lcc",
+                    "units": "m",
+                    "x_0": 0,
+                    "y_0": 0
+                },
+                "tileWidth": 1024
             }
         }
     }
