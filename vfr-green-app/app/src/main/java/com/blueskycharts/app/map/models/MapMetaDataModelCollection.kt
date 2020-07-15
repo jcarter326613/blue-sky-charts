@@ -5,24 +5,7 @@ import com.blueskycharts.app.coordinates.Point2d
 import java.util.*
 import kotlin.collections.HashMap
 
-data class MapMetaDataModelCollection (val maps: HashMap<String, MapMetaDataModel>) {
-
-
-    override fun equals(other: Any?): Boolean {
-        if (this === other) return true
-        if (javaClass != other?.javaClass) return false
-
-        other as MapMetaDataModelCollection
-
-        if (maps != other.maps) return false
-
-        return true
-    }
-
-    override fun hashCode(): Int {
-        return maps.hashCode()
-    }
-
+class MapMetaDataModelCollection (val maps: MutableMap<String, MapMetaDataModel>) {
     companion object {
         fun readFromJsonReader(reader: JsonReader): MapMetaDataModelCollection {
             val retVal = MapMetaDataModelCollection(HashMap())

@@ -15,15 +15,8 @@ import kotlin.math.sin
 class MapDataView(private val dataProvider: DataProvider, private val overlayType: OverlayTypes, private val map: Map) : SubMapView, DataReceiver {
     // Metadata
     private var dataAgeSeconds: Int? = null
-    override val fileExtentMercator: BoxWebMercator?
-        get() {
-            return CoordinateConversion.maxMercator
-        }
-
-    private val fileExtent2d: Box2d
-        get() {
-            return CoordinateConversion.convertBoxMercatorToBox2d(CoordinateConversion.maxMercator)
-        }
+    override var fileExtent: RectangularArea? = null
+        private set
 
     // Rendering
     private var isDisposed: Boolean = false
@@ -56,12 +49,13 @@ class MapDataView(private val dataProvider: DataProvider, private val overlayTyp
         itemFillPaint.style = Paint.Style.FILL
     }
 
-    override fun initialize(name: String, model: SubMapModel?): BoxWebMercator? {
+    override fun initialize(name: String, model: SubMapModel?): Box2d? {
         if ( this.overlayType == OverlayTypes.None ) {
             return null;
         }
 
-        return CoordinateConversion.maxMercator
+        return null
+        //return RectangularAreaWebMercator.maxMercator
     }
 
     override fun dispose() {
@@ -76,7 +70,7 @@ class MapDataView(private val dataProvider: DataProvider, private val overlayTyp
         return this.dataAgeSeconds;
     }
 
-    override fun receiveData(location: PointWebMercator, data: WeatherCondition, dataAgeSeconds: Int, immediate: Boolean, canvas: Canvas?, receiverData: Any?) {
+    override fun receiveData(location: PointGeo, data: WeatherCondition, dataAgeSeconds: Int, immediate: Boolean, canvas: Canvas?, receiverData: Any?) {
         if ( this.isDisposed ) {
             return
         }
@@ -92,7 +86,17 @@ class MapDataView(private val dataProvider: DataProvider, private val overlayTyp
         }
 
         // Figure out where the canvas should be translated to
-        val locationPercentage = receiverData.region.positionPercentageUpperLeft(location)
+        var locationPercentage: Point2d = when (receiverData.region) {
+            is RectangularAreaWebMercator -> {
+                receiverData.region.positionPercentageUpperLeft(location.convertToPointWebMercator())
+            }
+            is RectangularAreaLcc -> {
+                receiverData.region.positionPercentageUpperLeft(location.convertToPointLcc())
+            }
+            else -> {
+                return
+            }
+        }
         val drawLocationX = receiverData.destination.upperLeft.x + receiverData.destination.width * locationPercentage.x
         val drawLocationY = receiverData.destination.upperLeft.y + receiverData.destination.height * locationPercentage.y
 
@@ -350,24 +354,27 @@ class MapDataView(private val dataProvider: DataProvider, private val overlayTyp
         canvas.drawText(text, 0f, lineHeight / 2f, this.itemTextPaint)
     }
 
-    override fun render(canvas: Canvas, region: BoxWebMercator, destination: Box2d) {
+    override fun render(canvas: Canvas, region: Box2d, destination: Box2d) {
         if ( this.isDisposed ) {
             return
         }
 
-        val geoArea = CoordinateConversion.convertBoxMercatorToBoxGeo(region)
+        /*
+        val geoArea = region.getBoundingBoxGeo(RectangularArea.BoundingRules.Outside)
         val longitudeBuffer = geoArea.width * this.expectedBuffer.width() / destination.width
         val latitudeBuffer = longitudeBuffer * 0.6
 
         this.dataProvider.retrieveTile(geoArea, PointGeo(longitudeBuffer, latitudeBuffer),
             this.overlayType, this, canvas, data=RenderData(region, destination))
+
+         */
     }
 
     override fun moveOffscreen() {
     }
 
     private data class RenderData(
-        val region: BoxWebMercator,
+        val region: RectangularArea,
         val destination: Box2d
     )
 }

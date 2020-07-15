@@ -46,6 +46,7 @@ class BoxGeo(topLeft: PointGeo = PointGeo(), bottomRight: PointGeo = PointGeo(),
      * topLeft Longitude < bottomRight Longitude
      * @param o
      */
+    /*
     fun intersection(o: BoxGeo): BoxGeo? {
         val upperLeft = PointGeo();
         val lowerRight = PointGeo();
@@ -60,11 +61,5 @@ class BoxGeo(topLeft: PointGeo = PointGeo(), bottomRight: PointGeo = PointGeo(),
 
         return BoxGeo(upperLeft, lowerRight);
     }
-
-    fun getDimensions(): PointGeo {
-        return PointGeo(
-            this.bottomRight.longitude - this.topLeft.longitude,
-            this.topLeft.latitude - this.bottomRight.latitude
-        );
-    }
+     */
 }

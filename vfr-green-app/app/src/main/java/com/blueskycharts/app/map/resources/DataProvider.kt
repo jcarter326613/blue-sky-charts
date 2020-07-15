@@ -94,11 +94,10 @@ class DataProvider(val context: Context, map: Map) : CachedProvider(map, 700) {
         }
 
         // We need to create a new bucket
-        val areaDimensions = area.getDimensions()
-        val tlLongitude = areaTl.longitude - (areaDimensions.longitude * areaBucketMultiplier)
-        val tlLatitude = areaTl.latitude + (areaDimensions.latitude * areaBucketMultiplier)
-        val brLongitude = areaBr.longitude + (areaDimensions.longitude * areaBucketMultiplier)
-        val brLatitude = areaBr.latitude - (areaDimensions.latitude * areaBucketMultiplier)
+        val tlLongitude = areaTl.longitude - (area.width * areaBucketMultiplier)
+        val tlLatitude = areaTl.latitude + (area.height * areaBucketMultiplier)
+        val brLongitude = areaBr.longitude + (area.width * areaBucketMultiplier)
+        val brLatitude = areaBr.latitude - (area.height * areaBucketMultiplier)
         val bucket = BoxGeo(PointGeo(this.forceValidLongitude(tlLongitude), this.forceValidLatitude(tlLatitude)),
             PointGeo(this.forceValidLongitude(brLongitude), this.forceValidLatitude(brLatitude)));
         bucketOfKeys.push(bucket);

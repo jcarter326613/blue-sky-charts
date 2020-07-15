@@ -4,6 +4,12 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent">
 
+    <com.blueskycharts.app.assests.DiskCacheFactory
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:visibility="gone"
+        />
+
     <fragment
         android:id="@+id/navigableMap"
         android:name="com.blueskycharts.app.map.NavigableMapFragment"

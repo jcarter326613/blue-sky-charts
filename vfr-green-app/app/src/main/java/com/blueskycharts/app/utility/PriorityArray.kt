@@ -1,4 +1,4 @@
-package com.blueskycharts.app.map.utility
+package com.blueskycharts.app.utility
 
 import java.util.*
 import kotlin.collections.ArrayList

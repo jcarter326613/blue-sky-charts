@@ -1,5 +1,6 @@
 package com.blueskycharts.app.menu
 
+import android.content.Intent
 import android.os.Bundle
 import android.util.Log
 import android.view.LayoutInflater
@@ -10,6 +11,7 @@ import android.widget.ImageButton
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModelProvider
 import com.blueskycharts.app.R
+import com.blueskycharts.app.preferences.SetPreferencesActivity
 import com.blueskycharts.app.map.models.OverlayViewModel
 import com.blueskycharts.app.map.view.OverlayTypes
 
@@ -48,6 +50,11 @@ class MainMenuFragment() : Fragment() {
         val weatherButton = view?.findViewById<Button>(R.id.weather_button)
         weatherButton?.setOnClickListener {
             showOrToggleMenu(weatherMenu)
+        }
+
+        val preferencesButton = view?.findViewById<Button>(R.id.preferences)
+        preferencesButton?.setOnClickListener {
+            startActivity(Intent(context, SetPreferencesActivity::class.java))
         }
     }
 
