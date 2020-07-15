@@ -13,11 +13,16 @@ import { TileCache } from './tile-cache'
 
 export class TileQueue {
     private queue: Heap<TileDescription>
-    private changeSet: Record<string, ChangeSet> = {}
+    private changeSet: ChangeSet = new ChangeSet()
+    private changeSetDate: Date | undefined
+    private changeSetDateString: string | undefined
     private changeSetKeys: Record<string, Date> = {}
+    private changeSetFilterDate: Date
 
     public constructor (maps: Array<string>, metadata: Record<string, SectionVersion>, metadataManager: MetadataManager,
-        tileCache: TileCache, zoom: number) {
+        tileCache: TileCache, zoom: number, changeSetFilterDate: Date) {
+
+        this.changeSetFilterDate = changeSetFilterDate
 
         // Load all the configs for each map and determine the mosaic rectangular extents
         let extents = this.getExtents(maps, metadata)
@@ -89,50 +94,34 @@ export class TileQueue {
     }
 
     public getChangeSet(): Record<string, ChangeSet> {
-        return this.changeSet
+        if ( this.changeSetDateString !== undefined ) {
+            let retVal: Record<string, ChangeSet> = {}
+            retVal[this.changeSetDateString] = this.changeSet
+            return retVal
+        } else {
+            return {}
+        }
     }
 
     private addToChangeSet(zoom: number, x: number, y: number, effectiveDateString: string): void {
-        //Create a key from the x/y
-        let key = `${zoom}_${x}_${y}`
+        // Check the effective date
         let effectiveDate = this.convertStringToDate(effectiveDateString)
 
-        //Check if the tile was already added
-        if ( key in this.changeSetKeys ) {
-            let previousDate = this.changeSetKeys[key]
-            if ( effectiveDate <= previousDate ) {
-                return
-            }
-            let previousDateKey = `${previousDate.getFullYear()}-${previousDate.getMonth().toString().padStart(2, "0")}-${previousDate.getDate().toString().padStart(2, "0")}`
-            delete this.changeSetKeys[key]
-            let tileList = this.changeSet[previousDateKey].tiles
-            if ( tileList !== undefined ) {
-                if ( zoom in tileList && x in tileList[zoom] ) {
-                    for ( let i = 0; i < tileList[zoom][x].length; i++ ) {
-                        if ( y == tileList[zoom][x][i] ) {
-                            tileList[zoom][x] = tileList[zoom][x].splice(i, 1)
-                            if (tileList[zoom][x].length == 0) {
-                                delete tileList[zoom][x]
-                                if ( Object.keys(tileList[zoom]).length == 0 ) {
-                                    delete tileList[zoom]
-                                }
-                            }
-                            break
-                        }
-                    }
-                }
-            }
+        if ( this.changeSetFilterDate > effectiveDate ) {
+            return
+        }
+
+        if ( this.changeSetDate === undefined || this.changeSetDate < effectiveDate ) {
+            this.changeSetDate = effectiveDate
         }
 
         //Add the tile to the changeset with the specified effective date
+        let key = `${zoom}_${x}_${y}`
         this.changeSetKeys[key] = effectiveDate
-        if ( this.changeSet[effectiveDateString] === undefined ) {
-            this.changeSet[effectiveDateString] = new ChangeSet()
-        }
-        let lookup = this.changeSet[effectiveDateString].tiles
+        let lookup = this.changeSet.tiles
         if ( lookup === undefined ) {
             lookup = {}
-            this.changeSet[effectiveDateString].tiles = lookup
+            this.changeSet.tiles = lookup
         }
         if ( !(zoom in lookup) ) {
             lookup[zoom] = {}
@@ -144,7 +133,7 @@ export class TileQueue {
     }
 
     private convertStringToDate(s: string): Date {
-        return new Date(parseInt(s.substring(0, 4)), parseInt(s.substring(5,7)), parseInt(s.substring(8,10)))
+        return new Date(parseInt(s.substring(0, 4)), parseInt(s.substring(5,7)) - 1, parseInt(s.substring(8,10)))
     }
 
     private getExtents(subMaps: string[], subSectionMetadata: Record<string, SectionVersion>): BoxGeo {

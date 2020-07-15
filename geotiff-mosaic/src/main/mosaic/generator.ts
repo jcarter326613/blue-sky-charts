@@ -104,7 +104,7 @@ export class Generator {
 
                 // Create a lookup of all the tiles to generate and which sections are needed to create them
                 let tileCache = new TileCache()
-                let tileQueue = new TileQueue(imageConfiguration.subMaps, subSectionMetadata, metadataManager, tileCache, zoom)
+                let tileQueue = new TileQueue(imageConfiguration.subMaps, subSectionMetadata, metadataManager, tileCache, zoom, new Date())
 
                 // Update the changeset
                 let newChangeSet = tileQueue.getChangeSet()
@@ -176,15 +176,16 @@ export class Generator {
             }
 
             // Save the metadata for this new tile
-            if ( newSectionData.changeSet === undefined ) {
-                newSectionData.changeSet = new ChangeSet()
-            }
-            if ( Object.keys(changeSet).length != 1 ) {
+            if ( Object.keys(changeSet).length > 1 ) {
                 console.error("Major issues with changeset effective dates")
                 exit(1)
-            }
-            for ( let effectiveDate of Object.keys(changeSet) ) {
-                newSectionData.changeSet.tiles = changeSet[effectiveDate].tiles
+            } else if ( Object.keys(changeSet).length == 1 ) {
+                if ( newSectionData.changeSet === undefined ) {
+                    newSectionData.changeSet = new ChangeSet()
+                }
+                for ( let effectiveDate of Object.keys(changeSet) ) {
+                    newSectionData.changeSet.tiles = changeSet[effectiveDate].tiles
+                }
             }
 
             let versionList = new SectionVersionList()
