@@ -15,7 +15,7 @@ class RectangularAreaWebMercator(topLeftX: Double = 0.0, topLeftY: Double = 0.0,
 
     override fun convertToBox2d(): Box2d {
         val topLeft = Point2d(topLeft.x, maxMercator.topLeft.y - topLeft.y)
-        val bottomRight = Point2d(bottomRight.x, maxMercator.bottomRight.y - bottomRight.y)
+        val bottomRight = Point2d(bottomRight.x, maxMercator.topLeft.y - bottomRight.y)
         return Box2d(topLeft.x, topLeft.y, bottomRight.x, bottomRight.y)
     }
 

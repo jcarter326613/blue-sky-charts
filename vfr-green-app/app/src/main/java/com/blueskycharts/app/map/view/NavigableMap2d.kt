@@ -183,6 +183,7 @@ class NavigableMap2d(context: Context, attributes: AttributeSet) :
         // Add the world  VFR charts
         var firstMap = true
         var drawnBounds: Box2d? = null
+        var mercatorMap = false
         val mapViewList = LinkedList<SubMapPosition>()
         for (mapName in configuration.mapList) {
             val mapData = configuration.getCurrentVersion(mapName)
@@ -190,6 +191,8 @@ class NavigableMap2d(context: Context, attributes: AttributeSet) :
                 if ( firstMap ) {
                     this.tileProvider = TileProvider(context, this, configuration.baseUrl)
                     firstMap = false
+
+                    mercatorMap = mapData.projectionWebMercator?.extents != null
                 }
 
                 val tileProvider = this.tileProvider
@@ -203,7 +206,9 @@ class NavigableMap2d(context: Context, attributes: AttributeSet) :
             }
         }
 
-        //setupBackgroundShadow(configuration)
+        if ( mercatorMap ) {
+            setupBackgroundShadow(configuration)
+        }
         this.drawnBounds = drawnBounds
         this.mapViews = mapViewList
     }
