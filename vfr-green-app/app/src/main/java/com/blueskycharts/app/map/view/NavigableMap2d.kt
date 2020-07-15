@@ -361,7 +361,7 @@ class NavigableMap2d(context: Context, attributes: AttributeSet) :
     private fun getViewportDimensions(): Point2d {
         val drawnBounds = this.drawnBounds ?: return Point2d(0.0, 0.0)
 
-        return if ( this.width > this.height ) {
+        return if ( this.width < this.height ) {
             Point2d(drawnBounds.width * scale,
                 drawnBounds.width * scale * (this.height / this.width.toDouble()))
         } else {
