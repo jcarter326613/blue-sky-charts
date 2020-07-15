@@ -14,6 +14,7 @@ import com.blueskycharts.app.R
 import com.blueskycharts.app.preferences.SetPreferencesActivity
 import com.blueskycharts.app.map.models.OverlayViewModel
 import com.blueskycharts.app.map.view.OverlayTypes
+import com.blueskycharts.app.mapselection.MapSelectionActivity
 
 class MainMenuFragment() : Fragment() {
     private var overlayModel: OverlayViewModel? = null
@@ -50,6 +51,11 @@ class MainMenuFragment() : Fragment() {
         val weatherButton = view?.findViewById<Button>(R.id.weather_button)
         weatherButton?.setOnClickListener {
             showOrToggleMenu(weatherMenu)
+        }
+
+        val mapSelectionButton = view?.findViewById<Button>(R.id.map_selection_button)
+        mapSelectionButton?.setOnClickListener {
+            startActivity(Intent(context, MapSelectionActivity::class.java))
         }
 
         val preferencesButton = view?.findViewById<Button>(R.id.preferences)

@@ -34,6 +34,12 @@
             android:text="Weather" />
 
         <Button
+            android:id="@+id/map_selection_button"
+            android:layout_width="100dp"
+            android:layout_height="100dp"
+            android:text="Map" />
+
+        <Button
             android:id="@+id/preferences"
             android:layout_width="100dp"
             android:layout_height="100dp"

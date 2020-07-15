@@ -29,7 +29,7 @@ class Asset( val description: AssetDescription ) {
      */
     fun asStringArray(): Array<String>? {
         val bytes = this.bytes
-        if ( !errorLoading && bytes != null ) return bytes.toString().split("\n").toTypedArray()
+        if ( !errorLoading && bytes != null ) return String(bytes).split("\n").toTypedArray()
         return null
     }
 
