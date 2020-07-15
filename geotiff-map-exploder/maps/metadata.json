@@ -4010,15 +4010,6 @@
             }
         }
     },
-    "Greenbay": {
-        "type": "Sectional",
-        "versions": {
-            "100": {
-                "effectiveDate": "2020-05-21",
-                "tileWidth": 1024
-            }
-        }
-    },
     "Halifax": {
         "type": "Sectional",
         "versions": {
