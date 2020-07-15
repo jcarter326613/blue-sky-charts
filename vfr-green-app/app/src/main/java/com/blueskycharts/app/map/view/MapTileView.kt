@@ -20,8 +20,8 @@ class MapTileView(private val tileProvider: TileProvider, private val map: Map) 
     // Rendering
     private var isDisposed: Boolean = false
 
-    override fun initialize(name: String, model: SubMapModel?): Box2d? {
-        if (model?.imageHeight == null || model.imageWidth == null || model.tileWidth == null ||
+    fun initialize(name: String, model: SubMapModel): Box2d? {
+        if (model.imageHeight == null || model.imageWidth == null || model.tileWidth == null ||
             model.version == null || model.maxZoom == null)
             return null
 

@@ -9,14 +9,7 @@ class PointWebMercator(override var x: Double = 0.0, override var y: Double = 0.
         return PointWebMercator(x, y);
     }
 
-    /*
-    fun createBoxAround(size: PointWebMercator): RectangularBoxWebMercator {
-        return RectangularBoxWebMercator(this.x - (size.x / 2.0), this.y + (size.y / 2.0), this.x + (size.x / 2.0), this.y - (size.y / 2.0))
-    }
-
-     */
-
-    fun convertToPointGeo(): PointGeo {
+    override fun convertToPointGeo(): PointGeo {
         var longitude = x * 180.0 / 20037508.34
         var latitude = atan(exp(y * PI / 20037508.34)) * 360.0 / PI - 90.0
 

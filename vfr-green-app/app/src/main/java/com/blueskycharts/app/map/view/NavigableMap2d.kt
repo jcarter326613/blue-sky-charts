@@ -42,6 +42,7 @@ class NavigableMap2d(context: Context, attributes: AttributeSet) :
     private var scaleDriver: Float
     private val maxScaleDriver: Float = 12F
     private var drawnBounds: Box2d? = null
+    private var rectangularAreaBounds: RectangularArea? = null
 
     // Mouse event variables
     private var isDragging: Boolean
@@ -107,9 +108,10 @@ class NavigableMap2d(context: Context, attributes: AttributeSet) :
 
     fun setOverlayType(type: OverlayTypes): Boolean {
         var success: Boolean
-        if (type != OverlayTypes.None) {
+        val rectangularAreaBounds = this.rectangularAreaBounds
+        if (type != OverlayTypes.None && rectangularAreaBounds != null) {
             val dataView = MapDataView(this.dataProvider, type, this)
-            val extent = dataView.initialize("", null)
+            val extent = dataView.initialize(rectangularAreaBounds)
             if ( extent != null ) {
                 this.dataOverlayView = SubMapPosition(dataView, extent)
                 success = true;
@@ -183,6 +185,7 @@ class NavigableMap2d(context: Context, attributes: AttributeSet) :
         // Add the world  VFR charts
         var firstMap = true
         var drawnBounds: Box2d? = null
+        var rectangularAreaBounds: RectangularArea? = null
         var mercatorMap = false
         val mapViewList = LinkedList<SubMapPosition>()
         for (mapName in configuration.mapList) {
@@ -202,6 +205,14 @@ class NavigableMap2d(context: Context, attributes: AttributeSet) :
                     mapViewList.add(SubMapPosition(subMapView, fileExtent));
                     this.origin2d = fileExtent.upperLeft
                     drawnBounds = drawnBounds?.union(fileExtent) ?: fileExtent
+                    val rectangularAreaExtents = subMapView.fileExtent
+                    if ( rectangularAreaExtents != null ) {
+                        if (rectangularAreaBounds != null) {
+                            rectangularAreaBounds = rectangularAreaExtents.union(rectangularAreaBounds)
+                        } else {
+                            rectangularAreaBounds = rectangularAreaExtents
+                        }
+                    }
                 }
             }
         }
@@ -210,6 +221,7 @@ class NavigableMap2d(context: Context, attributes: AttributeSet) :
             setupBackgroundShadow(configuration)
         }
         this.drawnBounds = drawnBounds
+        this.rectangularAreaBounds = rectangularAreaBounds
         this.mapViews = mapViewList
     }
 

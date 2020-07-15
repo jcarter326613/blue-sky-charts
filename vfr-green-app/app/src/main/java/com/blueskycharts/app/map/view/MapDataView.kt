@@ -7,10 +7,7 @@ import com.blueskycharts.app.map.models.SubMapModel
 import com.blueskycharts.app.map.models.WeatherCondition
 import com.blueskycharts.app.map.resources.DataProvider
 import com.blueskycharts.app.map.resources.DataReceiver
-import kotlin.math.PI
-import kotlin.math.acos
-import kotlin.math.ceil
-import kotlin.math.sin
+import kotlin.math.*
 
 class MapDataView(private val dataProvider: DataProvider, private val overlayType: OverlayTypes, private val map: Map) : SubMapView, DataReceiver {
     // Metadata
@@ -49,13 +46,13 @@ class MapDataView(private val dataProvider: DataProvider, private val overlayTyp
         itemFillPaint.style = Paint.Style.FILL
     }
 
-    override fun initialize(name: String, model: SubMapModel?): Box2d? {
+    fun initialize(fileExtent: RectangularArea): Box2d? {
         if ( this.overlayType == OverlayTypes.None ) {
             return null;
         }
 
-        return null
-        //return RectangularAreaWebMercator.maxMercator
+        this.fileExtent = fileExtent
+        return fileExtent.convertToBox2d()
     }
 
     override fun dispose() {
@@ -113,7 +110,7 @@ class MapDataView(private val dataProvider: DataProvider, private val overlayTyp
             OverlayTypes.CloudCover -> this.renderCloudCover(data, canvas)
             else -> Log.e(null, "Request to render unknown type.")
         }
-        canvas.restoreToCount(restoreTo);
+        canvas.restoreToCount(restoreTo)
     }
 
     private fun renderCloudCover(data: WeatherCondition, canvas: Canvas) {
@@ -355,19 +352,21 @@ class MapDataView(private val dataProvider: DataProvider, private val overlayTyp
     }
 
     override fun render(canvas: Canvas, region: Box2d, destination: Box2d) {
-        if ( this.isDisposed ) {
+        val fileExtent = this.fileExtent
+        if ( this.isDisposed || fileExtent == null ) {
             return
         }
 
-        /*
-        val geoArea = region.getBoundingBoxGeo(RectangularArea.BoundingRules.Outside)
+        val extent2d = fileExtent.convertToBox2d()
+        val offsetPercentage = extent2d.overlapPercentageUpperLeft(region)
+        val rectangularAreaRegion = fileExtent.cropPercentageUpperLeft(offsetPercentage)
+        val geoArea = rectangularAreaRegion.getBoundingBoxGeo(RectangularArea.BoundingRules.Outside)
+
         val longitudeBuffer = geoArea.width * this.expectedBuffer.width() / destination.width
         val latitudeBuffer = longitudeBuffer * 0.6
 
         this.dataProvider.retrieveTile(geoArea, PointGeo(longitudeBuffer, latitudeBuffer),
-            this.overlayType, this, canvas, data=RenderData(region, destination))
-
-         */
+            this.overlayType, this, canvas, data=RenderData(rectangularAreaRegion, destination))
     }
 
     override fun moveOffscreen() {

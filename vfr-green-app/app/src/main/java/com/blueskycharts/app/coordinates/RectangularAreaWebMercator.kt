@@ -40,11 +40,25 @@ class RectangularAreaWebMercator(topLeftX: Double = 0.0, topLeftY: Double = 0.0,
         return newBox
     }
 
-    /*
-    fun clone(): RectangularAreaWebMercator {
-        return RectangularAreaWebMercator(topLeft.x, topLeft.y, bottomRight.x, bottomRight.y)
+    override fun union(o: RectangularArea): RectangularArea {
+        o as RectangularAreaWebMercator
+
+        return RectangularAreaWebMercator(
+            min(this.topLeft.x, o.topLeft.x),
+            max(this.topLeft.y, o.topLeft.y),
+            max(this.bottomRight.x, o.bottomRight.x),
+            min(this.bottomRight.y, o.bottomRight.y)
+        )
     }
-     */
+
+    override fun cropPercentageUpperLeft(o: Box2d): RectangularArea {
+        return RectangularAreaWebMercator(
+            this.topLeft.x + this.width * o.upperLeft.x,
+            this.topLeft.y - this.height * o.upperLeft.y,
+            this.topLeft.x + this.width * o.lowerRight.x,
+            this.topLeft.y - this.height * o.lowerRight.y
+        )
+    }
 
     /**
      * Returns how far along the height and width each corner of the parameter box is relative to the
@@ -66,8 +80,11 @@ class RectangularAreaWebMercator(topLeftX: Double = 0.0, topLeftY: Double = 0.0,
         return Point2d(x, y)
     }
 
-    override fun getBoundingBoxGeo(rules: RectangularArea.BoundingRules): BoxGeo {
-        throw Error("Not implemented")
+    override fun getBoundingBoxGeo(rules: BoundingRules): BoxGeo {
+        return BoxGeo(
+            topLeft.convertToPointGeo(),
+            bottomRight.convertToPointGeo()
+        )
     }
 
     companion object {

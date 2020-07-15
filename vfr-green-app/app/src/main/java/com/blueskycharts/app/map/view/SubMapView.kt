@@ -12,15 +12,6 @@ interface SubMapView {
     val fileExtent: RectangularArea?
 
     /**
-     * Initializes the view
-     * @param model
-     * @param name
-     * @returns A BoxGeo representing the full extent of the map.  undefined if this map should be discarded from view because of a
-     *  bad configuration.
-     */
-    fun initialize(name: String, model: SubMapModel?): Box2d?
-
-    /**
      * Returns the age of any data beign displayed and resets the age counter prior to rendering
      */
     fun resetRequestedInformationAgeRecord();

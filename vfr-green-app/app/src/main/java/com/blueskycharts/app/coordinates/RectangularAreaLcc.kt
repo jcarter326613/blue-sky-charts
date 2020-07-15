@@ -32,6 +32,28 @@ class RectangularAreaLcc(topLeftX: Double = 0.0, topLeftY: Double = 0.0, bottomR
         return newBox
     }
 
+    override fun union(o: RectangularArea): RectangularArea {
+        o as RectangularAreaLcc
+
+        return RectangularAreaLcc(
+            min(topLeft.x, o.topLeft.x),
+            min(topLeft.y, o.topLeft.y),
+            max(bottomRight.x, o.bottomRight.x),
+            max(bottomRight.y, o.bottomRight.y),
+            projectionDescription
+        )
+    }
+
+    override fun cropPercentageUpperLeft(o: Box2d): RectangularArea {
+        return RectangularAreaLcc(
+            this.topLeft.x + this.width * o.upperLeft.x,
+            this.topLeft.y + this.height * o.upperLeft.y,
+            this.topLeft.x + this.width * o.lowerRight.x,
+            this.topLeft.y + this.height * o.lowerRight.y,
+            projectionDescription
+        )
+    }
+
     override fun overlapPercentageUpperLeft(o: RectangularArea): Box2d {
         o as RectangularAreaLcc
         val topLeftX = (o.topLeft.x - this.topLeft.x) / this.width
@@ -49,6 +71,7 @@ class RectangularAreaLcc(topLeftX: Double = 0.0, topLeftY: Double = 0.0, bottomR
     }
 
     override fun getBoundingBoxGeo(rules: RectangularArea.BoundingRules): BoxGeo {
+        // TODO: need to find highest latitude at lon0.  Lowest is at one of the bottom corners
         throw Error("Not implemented")
     }
 }
