@@ -76,4 +76,13 @@ class Box2d(upperLeftX: Double = 0.0, upperLeftY: Double = 0.0, lowerRightX: Dou
 
         return newBox
     }
+
+    fun union(o: Box2d): Box2d {
+        return Box2d(
+            min(this.upperLeft.x, o.upperLeft.x),
+            min(this.upperLeft.y, o.upperLeft.y),
+            max(this.lowerRight.x, o.lowerRight.x),
+            max(this.lowerRight.y, o.lowerRight.y)
+        )
+    }
 }

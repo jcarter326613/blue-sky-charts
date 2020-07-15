@@ -32,29 +32,54 @@ class MapTileView(private val tileProvider: TileProvider, private val map: Map) 
         this.maxZoom = model.maxZoom
 
         // Handle the file extents
+        var fileExtent: RectangularArea? = null
         if (model.projectionWebMercator?.extents != null) {
             if ( model.projectionWebMercator.extents.left == null || model.projectionWebMercator.extents.top == null ||
                 model.projectionWebMercator.extents.right == null || model.projectionWebMercator.extents.bottom == null) {
                 return null
             }
 
-            val fileExtent = RectangularAreaWebMercator(
+            fileExtent = RectangularAreaWebMercator(
                 model.projectionWebMercator.extents.left,
                 model.projectionWebMercator.extents.top,
                 model.projectionWebMercator.extents.right,
                 model.projectionWebMercator.extents.bottom)
-            this.fileExtent = fileExtent
-
-            if (fileExtent.width > fileExtent.height)
-                this.tileHeight = round(this.tileWidth * fileExtent.height / fileExtent.width).toInt()
-            else
-                this.tileWidth = round(this.tileHeight * fileExtent.width / fileExtent.height).toInt()
-
-            return fileExtent.convertToBox2d()
         } else if (model.projectionLcc?.extents != null) {
-            return null
+            if ( model.projectionLcc.lat0 == null || model.projectionLcc.lat1 == null || model.projectionLcc.lat2 == null ||
+                model.projectionLcc.lon0 == null || model.projectionLcc.x0 == null || model.projectionLcc.y0 == null ||
+                model.projectionLcc.extents.left == null || model.projectionLcc.extents.top == null ||
+                model.projectionLcc.extents.right == null || model.projectionLcc.extents.bottom == null ) {
+                return null
+            }
+
+            val projectionDescription = ProjectionLccDescription(
+                lat0 = model.projectionLcc.lat0,
+                lat1 = model.projectionLcc.lat1,
+                lat2 = model.projectionLcc.lat2,
+                lon0 = model.projectionLcc.lon0,
+                x0 = model.projectionLcc.x0,
+                y0 = model.projectionLcc.y0
+            )
+            fileExtent = RectangularAreaLcc(
+                topLeftX = model.projectionLcc.extents.left,
+                topLeftY = model.projectionLcc.extents.top,
+                bottomRightX = model.projectionLcc.extents.right,
+                bottomRightY = model.projectionLcc.extents.bottom,
+                projectionDescription = projectionDescription
+            )
         }
-        return null
+
+        if ( fileExtent != null ) {
+            if (fileExtent.width > fileExtent.height)
+                this.tileHeight =
+                    round(this.tileWidth * fileExtent.height / fileExtent.width).toInt()
+            else
+                this.tileWidth =
+                    round(this.tileHeight * fileExtent.width / fileExtent.height).toInt()
+        }
+        this.fileExtent = fileExtent
+
+        return fileExtent?.convertToBox2d()
     }
 
     override fun dispose() {

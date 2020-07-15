@@ -46,6 +46,8 @@ class MapConfiguration(val data: MapMetaDataModelCollection, val baseUrl: String
         var latestActiveVersion: Date? = null
         var latestActiveVersionMap: SubMapModel? = null
         val now = Date()
+        //now.hours += TimeZone.getDefault().getOffset(now.time)
+        now.time = now.time - TimeZone.getDefault().getOffset(now.time)
         for (versionEntry in mapVersionCollection.versions) {
             val versionDate = convertVersionToDateTime(versionEntry.key)
             if ( versionDate != null && ( versionDate < now && (latestActiveVersion == null || versionDate > latestActiveVersion)) ) {

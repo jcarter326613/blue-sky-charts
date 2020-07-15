@@ -24,8 +24,8 @@ import kotlin.math.pow
 
 class NavigableMap2d(context: Context, attributes: AttributeSet) :
     Map(context, attributes) {
-    private val tileProvider: TileProvider
-    private val shadowTileProvider: TileProvider
+    private var tileProvider: TileProvider? = null
+    private var shadowTileProvider: TileProvider? = null
     private val dataProvider: DataProvider
     private val redrawTimer = Timer(false)
     private val itemTextPaint = Paint()
@@ -83,28 +83,25 @@ class NavigableMap2d(context: Context, attributes: AttributeSet) :
         textStrokePaint.strokeWidth = convertDipToPixels(1f)
 
         // Set all constant and derived defaults
-        this.tileProvider = TileProvider(context, this)
-        this.shadowTileProvider = ShadowProvider(context, this)
         this.dataProvider = DataProvider(context, this)
 
         if ( this.scaleDriver > this.maxScaleDriver ) {
             this.scaleDriver = this.maxScaleDriver;
         } else if (this.scaleDriver < 0) {
-            this.scaleDriver = 0.0F;
+            this.scaleDriver = 0.0F
         }
-        this.scale = 0.0;
-        this.updateScale();
+        this.scale = 0.0
+        this.updateScale()
 
-        this.mouseDownClient = Point2d();
-        this.mouseDownOrigin2d = Point2d();
+        this.mouseDownClient = Point2d()
+        this.mouseDownOrigin2d = Point2d()
 
-        this.isDragging = false;
-        this.pinchClientPoint1 = Point2d();
-        this.pinchClientPoint2 = Point2d();
-        this.pinchOriginalScale = 0.0;
+        this.isDragging = false
+        this.pinchClientPoint1 = Point2d()
+        this.pinchClientPoint2 = Point2d()
+        this.pinchOriginalScale = 0.0
 
         // Startup the map
-        //this.setupBackgroundShadow()
         this.retrieveConfiguration()
     }
 
@@ -134,7 +131,7 @@ class NavigableMap2d(context: Context, attributes: AttributeSet) :
     }
 
     private fun viewportChanged() {
-        this.tileProvider.clearQueue()
+        this.tileProvider?.clearQueue()
         this.dataProvider.clearQueue()
     }
 
@@ -144,6 +141,9 @@ class NavigableMap2d(context: Context, attributes: AttributeSet) :
 
     private fun setupBackgroundShadow(configuration: MapConfiguration) {
         // Only setup the background if the map config contains web mercator maps
+        val shadowTileProvider = ShadowProvider(context, this, configuration.baseUrl)
+        this.shadowTileProvider = shadowTileProvider
+
         val firstKey = configuration.data.maps.keys.firstOrNull()
         if ( firstKey != null ) {
             val firstConfig = configuration.data.maps[firstKey]
@@ -159,7 +159,7 @@ class NavigableMap2d(context: Context, attributes: AttributeSet) :
                         topLeftMercator.x, topLeftMercator.y, bottomRightMercator.x, bottomRightMercator.y
                     ))
 
-                    val worldShadowView = MapTileView(this.shadowTileProvider, this);
+                    val worldShadowView = MapTileView(shadowTileProvider, this);
                     val worldShadowMercatorExtents = RectangularAreaWebMercator.maxMercator
                     val shadowMapModel = SubMapModel(
                         tileWidth = 256,
@@ -181,15 +181,30 @@ class NavigableMap2d(context: Context, attributes: AttributeSet) :
 
     private fun initializeMapModel(configuration: MapConfiguration) {
         // Add the world  VFR charts
+        var firstMap = true
+        var drawnBounds: Box2d? = null
         val mapViewList = LinkedList<SubMapPosition>()
         for (mapName in configuration.mapList) {
             val mapData = configuration.getCurrentVersion(mapName)
             if ( mapData != null ) {
-                val subMapView = MapTileView(this.tileProvider, this)
-                val fileExtent = subMapView.initialize(mapName, mapData) ?: continue
-                mapViewList.add(SubMapPosition(subMapView, fileExtent));
+                if ( firstMap ) {
+                    this.tileProvider = TileProvider(context, this, configuration.baseUrl)
+                    firstMap = false
+                }
+
+                val tileProvider = this.tileProvider
+                if ( tileProvider != null ) {
+                    val subMapView = MapTileView(tileProvider, this)
+                    val fileExtent = subMapView.initialize(mapName, mapData) ?: continue
+                    mapViewList.add(SubMapPosition(subMapView, fileExtent));
+                    this.origin2d = fileExtent.upperLeft
+                    drawnBounds = drawnBounds?.union(fileExtent) ?: fileExtent
+                }
             }
         }
+
+        //setupBackgroundShadow(configuration)
+        this.drawnBounds = drawnBounds
         this.mapViews = mapViewList
     }
 

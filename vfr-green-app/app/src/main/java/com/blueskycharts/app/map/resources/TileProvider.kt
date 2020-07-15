@@ -11,9 +11,9 @@ import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
 import kotlin.math.floor
 
-open class TileProvider(val context: Context, map: Map) : CachedProvider(map, 0) {
+open class TileProvider(val context: Context, map: Map, private val mapRoot: String) : CachedProvider(map, 0) {
     val assetProvider
-        get() = TileAssetProvider.getInstance(Constants.serverRoot + Constants.serverWorldVfrMosaicSubDirectory)
+        get() = TileAssetProvider.getInstance(mapRoot)
 
     open fun retrieveTile(mapName: String, mapVersion: String, zoomLevel: Int, location: Point2d, tileDimensions: Point2d,
                      receiver: TileReceiver, data: Any?, canvas: Canvas ) {

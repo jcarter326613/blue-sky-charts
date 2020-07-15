@@ -3,7 +3,7 @@ package com.blueskycharts.app.coordinates
 import kotlin.math.max
 import kotlin.math.min
 
-class RectangularAreaLcc(topLeftX: Double = 0.0, topLeftY: Double = 0.0, bottomRightX: Double = 0.0, bottomRightY: Double = 0.0):
+class RectangularAreaLcc(topLeftX: Double = 0.0, topLeftY: Double = 0.0, bottomRightX: Double = 0.0, bottomRightY: Double = 0.0, val projectionDescription: ProjectionLccDescription):
     RectangularArea(PointLcc(topLeftX, topLeftY), PointLcc(bottomRightX, bottomRightY)) {
     override val width: Double
         get() = this.bottomRight.x - this.topLeft.x
@@ -21,7 +21,8 @@ class RectangularAreaLcc(topLeftX: Double = 0.0, topLeftY: Double = 0.0, bottomR
             max(topLeft.x, o.topLeft.x),
             max(topLeft.y, o.topLeft.y),
             min(bottomRight.x, o.bottomRight.x),
-            min(bottomRight.y, o.bottomRight.y)
+            min(bottomRight.y, o.bottomRight.y),
+            projectionDescription
         )
 
         if (newBox.bottomRight.x < newBox.topLeft.x || newBox.bottomRight.y < newBox.topLeft.y) {
