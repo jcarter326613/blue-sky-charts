@@ -10,6 +10,9 @@ import android.widget.ToggleButton
 import com.blueskycharts.app.R
 import com.blueskycharts.app.map.assetmanagement.MapPersistenceStatistics
 import com.blueskycharts.app.map.assetmanagement.TilePersistenceManager
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.launch
 
 /**
  * A simple [Fragment] subclass.
@@ -45,14 +48,28 @@ class PreferenceToggleFragment(private val mapGroup: Int, private val mapName: S
         val downloadSizeLabel = view.findViewById<TextView>(R.id.size_on_disk_label)
         TilePersistenceManager.instance.getMapStatistics(mapGroup, mapName) {
             it.addListener( object: MapPersistenceStatistics.Listener {
+                private var updateNeeded = false
+                private var percentageText: String = ""
+                private var sizeText: String = ""
+
                 override fun statisticsUpdated(totalFiles: Int, downloadedFiles: Int, downloadedSizeBytes: Int){
                     val percent = if (totalFiles == 0) {
                         100
                     } else {
                         (downloadedFiles * 100) / totalFiles
                     }
-                    downloadIndicatorLabel.text = "Downloading $percent% complete"
-                    downloadSizeLabel.text = "${downloadedSizeBytes / 1000000} M"
+                    percentageText = "Downloading $percent% complete"
+                    sizeText = "${downloadedSizeBytes / 1000000} M"
+                    if ( percentageText != downloadIndicatorLabel.text || sizeText != downloadSizeLabel.text ) {
+                        updateNeeded = true
+                        GlobalScope.launch(context = Dispatchers.Main) {
+                            if ( updateNeeded ) {
+                                updateNeeded = false
+                                downloadIndicatorLabel.text = percentageText
+                                downloadSizeLabel.text = sizeText
+                            }
+                        }
+                    }
                 }
             })
         }

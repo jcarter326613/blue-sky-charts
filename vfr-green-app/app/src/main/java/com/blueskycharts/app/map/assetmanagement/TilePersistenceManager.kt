@@ -5,11 +5,9 @@ import com.blueskycharts.app.assests.DiskCacheFactory
 import com.blueskycharts.app.map.configuration.Inventory
 import com.blueskycharts.app.map.configuration.MapConfiguration
 import com.blueskycharts.app.preferences.Preferences
-import kotlinx.coroutines.GlobalScope
-import kotlinx.coroutines.launch
+import kotlinx.coroutines.*
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
-import kotlinx.coroutines.yield
 import java.util.concurrent.atomic.AtomicInteger
 import kotlin.concurrent.thread
 import kotlin.math.pow
@@ -59,6 +57,9 @@ class TilePersistenceManager {
                     statisticsRecordsLoaded = true
                 }
                 enforceAllPreferences()
+                if ( requestVersion != runningVersion && !stopRunning ) {
+                    start()
+                }
             }
         }
     }
