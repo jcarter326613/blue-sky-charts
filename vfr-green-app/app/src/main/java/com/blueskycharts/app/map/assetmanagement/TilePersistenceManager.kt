@@ -1,6 +1,7 @@
 package com.blueskycharts.app.map.assetmanagement
 
 import com.blueskycharts.app.Constants
+import com.blueskycharts.app.assests.Asset
 import com.blueskycharts.app.assests.DiskCacheFactory
 import com.blueskycharts.app.map.configuration.Inventory
 import com.blueskycharts.app.map.configuration.MapConfiguration
@@ -68,27 +69,25 @@ class TilePersistenceManager {
         stopRunning = true
     }
 
-    fun getMapStatistics(groupId: Int, mapName: String, callback: (MapPersistenceStatistics) -> Unit) {
+    suspend fun getMapStatistics(groupId: Int, mapName: String): MapPersistenceStatistics {
         val lookupKey = getMapKey(groupId, mapName)
         val statistics = statisticsRecords[lookupKey]
         if ( statistics == null ) {
             // Need to add the statistics object to the dictionary
-            GlobalScope.launch {
-                val statisticsIn: MapPersistenceStatistics?
-                val statisticsNotNull: MapPersistenceStatistics
-                statisticsRecordsMutex.withLock {
-                    statisticsIn = statisticsRecords[lookupKey]
-                    if ( statisticsIn == null ) {
-                        statisticsNotNull = MapPersistenceStatistics(groupId, mapName, 0, 0, 0)
-                        statisticsRecords[lookupKey] = statisticsNotNull
-                    } else {
-                        statisticsNotNull = statisticsIn
-                    }
+            val statisticsIn: MapPersistenceStatistics?
+            val statisticsNotNull: MapPersistenceStatistics
+            statisticsRecordsMutex.withLock {
+                statisticsIn = statisticsRecords[lookupKey]
+                if ( statisticsIn == null ) {
+                    statisticsNotNull = MapPersistenceStatistics(groupId, mapName, 0, 0, 0)
+                    statisticsRecords[lookupKey] = statisticsNotNull
+                } else {
+                    statisticsNotNull = statisticsIn
                 }
-                callback(statisticsNotNull)
             }
+            return statisticsNotNull
         } else {
-            callback(statistics)
+            return statistics
         }
     }
 
@@ -118,18 +117,15 @@ class TilePersistenceManager {
                                     }
                                 }
                             }
-                            numThreadsToAwait.incrementAndGet()
-                            this@TilePersistenceManager.getMapStatistics(group.id, map) {
-                                val maxZoom = currentMapVersionMetadata?.maxZoom
-                                var totalTiles = 0
-                                if (maxZoom != null) {
-                                    for (zoom in maxZoom downTo 0) {
-                                        totalTiles += 2.0.pow(zoom).pow(2).toInt()
-                                    }
+                            val mapStatistics = this@TilePersistenceManager.getMapStatistics(group.id, map)
+                            val maxZoom = currentMapVersionMetadata?.maxZoom
+                            var totalTiles = 0
+                            if (maxZoom != null) {
+                                for (zoom in maxZoom downTo 0) {
+                                    totalTiles += 2.0.pow(zoom).pow(2).toInt()
                                 }
-                                it.setStatistics(totalTiles, filesLoaded, 0)
-                                numThreadsToAwait.decrementAndGet()
                             }
+                            mapStatistics.setStatistics(totalTiles, filesLoaded, 0)
                         }
                         numThreadsToAwait.decrementAndGet()
                     }
@@ -241,12 +237,17 @@ class TilePersistenceManager {
                             return
                         }
                         if ( !fileDownloadedOrAliased ) {
+                            var asset: Asset? = null
                             tileProvider.retrieveTile(name, currentMapVersion, z, x, y) {
-                                if ( !it.errorLoading ) {
-                                    getMapStatistics(mapsMetaData.groupId, name) { it2 ->
-                                        it2.downloadedFiles.increment()
-                                    }
-                                }
+                                asset = it
+                            }
+                            while (asset == null) {
+                                yield()
+                            }
+                            val assetStatic = asset
+                            if ( assetStatic != null && !assetStatic.errorLoading ) {
+                                val mapStatistics = getMapStatistics(mapsMetaData.groupId, name)
+                                mapStatistics.downloadedFiles.increment()
                             }
                         }
                     }

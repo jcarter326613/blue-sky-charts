@@ -30,25 +30,23 @@ class MapPersistenceStatistics(val groupId: Int, val mapName: String, totalFiles
         }
     }
 
-    fun setStatistics(totalFiles: Int, downloadedFiles: Int, downloadedSizeBytes: Int) {
+    suspend fun setStatistics(totalFiles: Int, downloadedFiles: Int, downloadedSizeBytes: Int) {
         this.totalFiles = LoudInt(this, totalFiles)
         this.downloadedFiles = LoudInt(this, downloadedFiles)
         this.downloadedSizeBytes = LoudInt(this, downloadedSizeBytes)
         fieldUpdated()
     }
 
-    private fun fieldUpdated() {
+    private suspend fun fieldUpdated() {
         broadcastNeeded = true
-        GlobalScope.launch {
-            broadcastMutex.withLock {
-                if (!broadcastNeeded) {
-                    return@launch
-                }
-                for (listener in listeners) {
-                    listener.statisticsUpdated(totalFiles.value, downloadedFiles.value, downloadedSizeBytes.value)
-                }
-                broadcastNeeded = false
+        broadcastMutex.withLock {
+            if (!broadcastNeeded) {
+                return
             }
+            for (listener in listeners) {
+                listener.statisticsUpdated(totalFiles.value, downloadedFiles.value, downloadedSizeBytes.value)
+            }
+            broadcastNeeded = false
         }
     }
 
@@ -63,7 +61,7 @@ class MapPersistenceStatistics(val groupId: Int, val mapName: String, totalFiles
                 return _value.get()
             }
 
-        fun increment() {
+        suspend fun increment() {
             _value.incrementAndGet()
             listener.fieldUpdated()
         }

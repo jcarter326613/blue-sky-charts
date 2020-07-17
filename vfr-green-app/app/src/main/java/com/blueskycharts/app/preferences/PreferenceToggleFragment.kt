@@ -46,13 +46,14 @@ class PreferenceToggleFragment(private val mapGroup: Int, private val mapName: S
         // Set up the downloaded file size indicator
         val downloadIndicatorLabel = view.findViewById<TextView>(R.id.download_complete_label)
         val downloadSizeLabel = view.findViewById<TextView>(R.id.size_on_disk_label)
-        TilePersistenceManager.instance.getMapStatistics(mapGroup, mapName) {
-            it.addListener( object: MapPersistenceStatistics.Listener {
+        GlobalScope.launch {
+            val statistics = TilePersistenceManager.instance.getMapStatistics(mapGroup, mapName)
+            statistics.addListener(object : MapPersistenceStatistics.Listener {
                 private var updateNeeded = false
                 private var percentageText: String = ""
                 private var sizeText: String = ""
 
-                override fun statisticsUpdated(totalFiles: Int, downloadedFiles: Int, downloadedSizeBytes: Int){
+                override fun statisticsUpdated(totalFiles: Int, downloadedFiles: Int, downloadedSizeBytes: Int) {
                     val percent = if (totalFiles == 0) {
                         100
                     } else {
@@ -60,10 +61,10 @@ class PreferenceToggleFragment(private val mapGroup: Int, private val mapName: S
                     }
                     percentageText = "Downloading $percent% complete"
                     sizeText = "${downloadedSizeBytes / 1000000} M"
-                    if ( percentageText != downloadIndicatorLabel.text || sizeText != downloadSizeLabel.text ) {
+                    if (percentageText != downloadIndicatorLabel.text || sizeText != downloadSizeLabel.text) {
                         updateNeeded = true
                         GlobalScope.launch(context = Dispatchers.Main) {
-                            if ( updateNeeded ) {
+                            if (updateNeeded) {
                                 updateNeeded = false
                                 downloadIndicatorLabel.text = percentageText
                                 downloadSizeLabel.text = sizeText

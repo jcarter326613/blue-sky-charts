@@ -18,7 +18,7 @@ class Preferences private constructor() {
 
     init {
         val preferencesAsset = Asset(preferencesAssetDescription)
-        if ( DiskCacheFactory.instance.retrieveAssetBytesNoAliasCheck(preferencesAsset) ) {
+        if ( DiskCacheFactory.instance.retrieveAssetBytes(preferencesAsset) ) {
             val array = preferencesAsset.asStringArray()
             if ( array != null ) {
                 for (line in array) {

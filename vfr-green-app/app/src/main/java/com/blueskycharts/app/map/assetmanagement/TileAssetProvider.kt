@@ -21,7 +21,7 @@ import java.net.URL
 class TileAssetProvider private constructor(private val group: Inventory.Group) {
     private val imageExtension = "jpg"
     private val manifestDescription: AssetDescription
-    private var manifest: PersistentFile<Manifest>? = null
+    private var manifest: PersistentFile<Manifest>
 
     private val assetProvider = AssetProvider()
 
@@ -29,67 +29,60 @@ class TileAssetProvider private constructor(private val group: Inventory.Group) 
         val manifestLocation = "tileAssetProvider/${group.id}/manifest"
         manifestDescription = LocalAssetDescription(manifestLocation, Volatility.Indefinite)
 
-        assetProvider.retrieveAsset(manifestDescription) {
-            manifest = PersistentFile(if ( it.errorLoading ) {
+        val asset = assetProvider.retrieveLocalAsset(manifestDescription)
+        manifest = PersistentFile(if (asset.errorLoading) {
+                Manifest()
+            } else {
+                val reader = asset.asJsonReader()
+                if (reader == null) {
                     Manifest()
                 } else {
-                    val reader = it.asJsonReader()
-                    if (reader == null) {
-                        Manifest()
-                    } else {
-                        Manifest.readFromJsonReader(reader)
-                    }
-                }, manifestDescription)
-        }
+                    Manifest.readFromJsonReader(reader)
+                }
+            }, manifestDescription)
     }
 
     fun retrieveTile(mapName: String, mapVersion: String, zoom: Int, x: Int, y: Int, callback: ((asset: Asset) -> Unit)) {
-        GlobalScope.launch {
-            // Make sure the manifest is loaded before requesting any tiles
-            var manifest: PersistentFile<Manifest>? = this@TileAssetProvider.manifest
-            while ( manifest == null ) {
-                yield()
-                manifest = this@TileAssetProvider.manifest
-            }
+        // Make sure the manifest is loaded before requesting any tiles
+        val manifest = this@TileAssetProvider.manifest
 
-            // Request the tile from the base class
-            val assetDescription = getTileFileDescription(mapName, mapVersion, zoom, x, y)
-            assetProvider.retrieveAsset(assetDescription) {
-                GlobalScope.launch {
-                    manifest.access { manifestContents ->
-                        // Make sure the file is added to the manifest
-                        var mapList = manifestContents.mapGroups[group.id]
-                        if (mapList == null) {
-                            mapList = Manifest.MapList()
-                            manifestContents.mapGroups[group.id] = mapList
-                        }
-                        var map = mapList.mapList[mapName]
-                        if (map == null) {
-                            map = Manifest.MapList.MapVersionList()
-                            mapList.mapList[mapName] = map
-                        }
-                        var version = map.versionList[mapVersion]
-                        if (version == null) {
-                            version = Manifest.MapList.MapVersionList.MapVersion()
-                            map.versionList[mapVersion] = version
-                        }
-                        var zoomMap = version.zoomMap[zoom]
-                        if (zoomMap == null) {
-                            zoomMap = mutableMapOf()
-                            version.zoomMap[zoom] = zoomMap
-                        }
-                        var xMap = zoomMap[x]
-                        if (xMap == null) {
-                            xMap = mutableSetOf()
-                            zoomMap[x] = xMap
-                        }
-                        return@access xMap.add(y)
+        // Request the tile from the base class
+        val assetDescription = getTileFileDescription(mapName, mapVersion, zoom, x, y)
+        assetProvider.retrieveAsset(assetDescription) {
+            GlobalScope.launch {
+                manifest.access { manifestContents ->
+                    // Make sure the file is added to the manifest
+                    var mapList = manifestContents.mapGroups[group.id]
+                    if (mapList == null) {
+                        mapList = Manifest.MapList()
+                        manifestContents.mapGroups[group.id] = mapList
                     }
+                    var map = mapList.mapList[mapName]
+                    if (map == null) {
+                        map = Manifest.MapList.MapVersionList()
+                        mapList.mapList[mapName] = map
+                    }
+                    var version = map.versionList[mapVersion]
+                    if (version == null) {
+                        version = Manifest.MapList.MapVersionList.MapVersion()
+                        map.versionList[mapVersion] = version
+                    }
+                    var zoomMap = version.zoomMap[zoom]
+                    if (zoomMap == null) {
+                        zoomMap = mutableMapOf()
+                        version.zoomMap[zoom] = zoomMap
+                    }
+                    var xMap = zoomMap[x]
+                    if (xMap == null) {
+                        xMap = mutableSetOf()
+                        zoomMap[x] = xMap
+                    }
+                    return@access xMap.add(y)
                 }
-
-                // Tell the caller their file has been loaded
-                callback(it)
             }
+
+            // Tell the caller their file has been loaded
+            callback(it)
         }
     }
 

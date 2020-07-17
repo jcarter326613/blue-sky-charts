@@ -12,21 +12,28 @@ import java.net.URL
  */
 open class AssetProvider() {
     open fun retrieveAsset(assetDescription: AssetDescription, callback: ((asset: Asset) -> Unit)) {
-        GlobalScope.launch {
-            try {
-                val newAsset = Asset(assetDescription)
-                if (DiskCacheFactory.instance.retrieveAssetBytes(newAsset)) {
-                    try {
-                        callback(newAsset)
-                    } catch (e: Throwable) {
-                        Log.e(null, "Unknown error in AssetProvider after retrieving an asset from disk successfully.")
-                    }
-                    return@launch
+        try {
+            val newAsset = Asset(assetDescription)
+            if (DiskCacheFactory.instance.retrieveAssetBytes(newAsset)) {
+                try {
+                    callback(newAsset)
+                } catch (e: Throwable) {
+                    Log.e(null, "Unknown error in AssetProvider after retrieving an asset from disk successfully.")
                 }
-            } catch (e: Throwable) {
-                Log.e(null, "Error processing file for local path ${assetDescription.localPath}")
+                return
             }
-            assetDescription.retrieveFromSource(callback)
+        } catch (e: Throwable) {
+            Log.e(null, "Error processing file for local path ${assetDescription.localPath}")
         }
+        assetDescription.retrieveFromSource(callback)
+    }
+
+    open fun retrieveLocalAsset(assetDescription: LocalAssetDescription): Asset {
+        val newAsset = Asset(assetDescription)
+        if (DiskCacheFactory.instance.retrieveAssetBytes(newAsset)) {
+            return newAsset
+        }
+        newAsset.errorLoading = true
+        return newAsset
     }
 }
