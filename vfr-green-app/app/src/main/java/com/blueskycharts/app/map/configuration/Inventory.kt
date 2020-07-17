@@ -14,14 +14,14 @@ class Inventory(val mapGroups: List<Group>) {
         }
     }
 
-    class Group(val id: Int, val humanName: String, private val urlRoot: String, private val displayAll: Boolean) {
+    class Group(val id: Int, val humanName: String, val urlRoot: String, val displayAll: Boolean) {
         fun getConfiguration(callback: (it: MapConfiguration?) -> Unit) {
             var mapConfigurationFile = URL("${urlRoot}/metadata.json")
             val assetProvider = AssetProvider()
             assetProvider.retrieveAsset(RemoteAssetDescription(mapConfigurationFile, Volatility.DayCache)) {
                 val reader = it.asJsonReader()
                 if ( reader != null ) {
-                    val mapPositions = MapConfiguration(MapMetaDataModelCollection.readFromJsonReader(reader), urlRoot, displayAll)
+                    val mapPositions = MapConfiguration(MapMetaDataModelCollection.readFromJsonReader(reader), urlRoot, displayAll, id)
                     callback(mapPositions)
                 } else {
                     callback(null)

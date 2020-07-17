@@ -15,6 +15,7 @@ import com.blueskycharts.app.map.configuration.MapConfiguration
 import com.blueskycharts.app.map.models.ExtentModel
 import com.blueskycharts.app.map.models.ProjectionLccModel
 import com.blueskycharts.app.map.models.ProjectionWebMercatorModel
+import com.blueskycharts.app.map.resources.TileProviderInterface
 import com.blueskycharts.app.preferences.Preferences
 import java.util.*
 import kotlin.concurrent.timerTask
@@ -25,7 +26,7 @@ import kotlin.math.pow
 class NavigableMap2d(context: Context, attributes: AttributeSet) :
     Map(context, attributes) {
     private var tileProvider: TileProvider? = null
-    private var shadowTileProvider: TileProvider? = null
+    private var shadowTileProvider: ShadowProvider? = null
     private val dataProvider: DataProvider
     private val redrawTimer = Timer(false)
     private val itemTextPaint = Paint()
@@ -143,7 +144,7 @@ class NavigableMap2d(context: Context, attributes: AttributeSet) :
 
     private fun setupBackgroundShadow(configuration: MapConfiguration) {
         // Only setup the background if the map config contains web mercator maps
-        val shadowTileProvider = ShadowProvider(context, this, configuration.baseUrl)
+        val shadowTileProvider = ShadowProvider(context)
         this.shadowTileProvider = shadowTileProvider
 
         val firstKey = configuration.data.maps.keys.firstOrNull()
@@ -181,7 +182,7 @@ class NavigableMap2d(context: Context, attributes: AttributeSet) :
         }
     }
 
-    private fun initializeMapModel(configuration: MapConfiguration) {
+    private fun initializeMapModel(group: Inventory.Group, configuration: MapConfiguration) {
         // Add the world  VFR charts
         var firstMap = true
         var drawnBounds: Box2d? = null
@@ -192,7 +193,7 @@ class NavigableMap2d(context: Context, attributes: AttributeSet) :
             val mapData = configuration.getCurrentVersion(mapName)
             if ( mapData != null ) {
                 if ( firstMap ) {
-                    this.tileProvider = TileProvider(context, this, configuration.baseUrl)
+                    this.tileProvider = TileProvider(context, this, group)
                     firstMap = false
 
                     mercatorMap = mapData.projectionWebMercator?.extents != null
@@ -240,9 +241,15 @@ class NavigableMap2d(context: Context, attributes: AttributeSet) :
                     return@getConfiguration
                 }
             }
-            this@NavigableMap2d.initializeMapModel(config)
+            this@NavigableMap2d.initializeMapModel(mapGroup, config)
             this@NavigableMap2d.postInvalidate()
         }
+    }
+
+    override fun onDetachedFromWindow() {
+        super.onDetachedFromWindow()
+        this.tileProvider?.clearQueue()
+        this.dataProvider.clearQueue()
     }
 
     override fun onDraw(canvas: Canvas?) {

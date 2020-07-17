@@ -6,16 +6,17 @@ import com.blueskycharts.app.Constants
 import com.blueskycharts.app.coordinates.Box2d
 import com.blueskycharts.app.coordinates.Point2d
 import com.blueskycharts.app.map.assetmanagement.TileAssetProvider
+import com.blueskycharts.app.map.configuration.Inventory
 import com.blueskycharts.app.map.view.Map
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
 import kotlin.math.floor
 
-open class TileProvider(val context: Context, map: Map, private val mapRoot: String) : CachedProvider(map, 0) {
+open class TileProvider(val context: Context, map: Map, private val group: Inventory.Group) : CachedProvider(map, 0), TileProviderInterface {
     val assetProvider
-        get() = TileAssetProvider.getInstance(mapRoot)
+        get() = TileAssetProvider.getInstance(group)
 
-    open fun retrieveTile(mapName: String, mapVersion: String, zoomLevel: Int, location: Point2d, tileDimensions: Point2d,
+    override fun retrieveTile(mapName: String, mapVersion: String, zoomLevel: Int, location: Point2d, tileDimensions: Point2d,
                      receiver: TileReceiver, data: Any?, canvas: Canvas ) {
         val key = this.createKey(mapName, zoomLevel, location);
         val tileRequest = this.getCachedItem(key);

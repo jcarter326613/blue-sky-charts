@@ -28,7 +28,7 @@ class SetPreferencesActivity : AppCompatActivity() {
                     // Add the toggles
                     val fragmentTransaction = supportFragmentManager.beginTransaction()
                     for (mapName in it.mapList) {
-                        val toggleFragment = PreferenceToggleFragment(mapName)
+                        val toggleFragment = PreferenceToggleFragment(it.groupId, mapName)
                         fragmentTransaction.add(R.id.set_preferences_layout, toggleFragment)
                     }
                     fragmentTransaction.commit()

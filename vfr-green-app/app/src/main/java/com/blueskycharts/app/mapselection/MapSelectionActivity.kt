@@ -49,8 +49,8 @@ class MapSelectionActivity : AppCompatActivity() {
                         val mapButton = Button(buttonLayout.context)
                         mapButton.text = group.text
                         mapButton.setOnClickListener {
-                            Preferences.instance.setPreference(Preferences.propertyNameDisplayedMapGroupId, group.id)
                             Preferences.instance.setPreference(Preferences.propertyNameDisplayedSubMapId, "")
+                            Preferences.instance.setPreference(Preferences.propertyNameDisplayedMapGroupId, group.id)
                         }
                         buttonLayout.addView(mapButton)
                     } else if (group.buttons != null) {
@@ -61,8 +61,8 @@ class MapSelectionActivity : AppCompatActivity() {
                             val mapButton = Button(buttonLayout.context)
                             mapButton.text = button.text
                             mapButton.setOnClickListener {
-                                Preferences.instance.setPreference(Preferences.propertyNameDisplayedMapGroupId, group.id)
                                 Preferences.instance.setPreference(Preferences.propertyNameDisplayedSubMapId, button.subMapId)
+                                Preferences.instance.setPreference(Preferences.propertyNameDisplayedMapGroupId, group.id)
                             }
                             buttonLayout.addView(mapButton)
                         }

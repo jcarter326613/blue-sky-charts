@@ -4,10 +4,11 @@ import android.graphics.*
 import com.blueskycharts.app.coordinates.*
 import com.blueskycharts.app.map.models.SubMapModel
 import com.blueskycharts.app.map.resources.TileProvider
+import com.blueskycharts.app.map.resources.TileProviderInterface
 import com.blueskycharts.app.map.resources.TileReceiver
 import kotlin.math.*
 
-class MapTileView(private val tileProvider: TileProvider, private val map: Map) : SubMapView, TileReceiver {
+class MapTileView(private val tileProvider: TileProviderInterface, private val map: Map) : SubMapView, TileReceiver {
     // Metadata
     override var fileExtent: RectangularArea? = null
     private var tileWidth: Int = 0

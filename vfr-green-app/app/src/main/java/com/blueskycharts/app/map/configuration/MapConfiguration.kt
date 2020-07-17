@@ -12,7 +12,7 @@ import java.util.*
  * Represents the configuration for an entire map
  * Allows convenience queries into a MapMetaDataModelCollection
  */
-class MapConfiguration(val data: MapMetaDataModelCollection, val baseUrl: String, val displayAll: Boolean) {
+class MapConfiguration(val data: MapMetaDataModelCollection, val baseUrl: String, val displayAll: Boolean, val groupId: Int) {
     private var _mapList: List<String>? = null
     val mapList: List<String>
         get() {
@@ -33,7 +33,7 @@ class MapConfiguration(val data: MapMetaDataModelCollection, val baseUrl: String
                 val mapData = data.maps[mapName]
                 if ( mapData != null ) {
                     val newData = MapMetaDataModelCollection(mutableMapOf(Pair(mapName, mapData)))
-                    return MapConfiguration(newData, baseUrl, displayAll)
+                    return MapConfiguration(newData, baseUrl, displayAll, groupId)
                 }
             }
         }

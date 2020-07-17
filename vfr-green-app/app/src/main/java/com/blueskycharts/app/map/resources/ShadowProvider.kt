@@ -7,9 +7,10 @@ import androidx.core.graphics.drawable.toBitmap
 import com.blueskycharts.app.R
 import com.blueskycharts.app.coordinates.Box2d
 import com.blueskycharts.app.coordinates.Point2d
+import com.blueskycharts.app.map.configuration.Inventory
 import com.blueskycharts.app.map.view.Map
 
-class ShadowProvider(context: Context, map: Map, mapRoot: String): TileProvider(context, map, mapRoot) {
+class ShadowProvider(val context: Context): TileProviderInterface {
     override fun retrieveTile(mapName: String, mapVersion: String, zoomLevel: Int, location: Point2d, tileDimensions: Point2d,
                      receiver: TileReceiver, data: Any?, canvas: Canvas ) {
         val image = ResourcesCompat.getDrawable(context.resources, R.drawable.world_shadow, null)

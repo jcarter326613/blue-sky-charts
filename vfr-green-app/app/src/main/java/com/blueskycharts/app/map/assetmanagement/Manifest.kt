@@ -5,7 +5,7 @@ import android.util.JsonWriter
 import com.blueskycharts.app.assests.PersistentFileContents
 import java.io.StringWriter
 
-data class Manifest(val mapGroups: MutableMap<String, MapList> = mutableMapOf()) : PersistentFileContents {
+data class Manifest(val mapGroups: MutableMap<Int, MapList> = mutableMapOf()) : PersistentFileContents {
     override val jsonString: String
         get() {
             val stringWriter = StringWriter()
@@ -19,7 +19,7 @@ data class Manifest(val mapGroups: MutableMap<String, MapList> = mutableMapOf())
         jsonWriter.name("mapGroups")
         jsonWriter.beginObject()
         for ( group in mapGroups ) {
-            jsonWriter.name(group.key)
+            jsonWriter.name(group.key.toString())
             group.value.write(jsonWriter)
         }
 
@@ -38,7 +38,7 @@ data class Manifest(val mapGroups: MutableMap<String, MapList> = mutableMapOf())
                         while ( reader.hasNext() ) {
                             val name = reader.nextName()
                             val value = MapList.readFromJsonReader(reader)
-                            retVal.mapGroups[name] = value
+                            retVal.mapGroups[name.toInt()] = value
                         }
                         reader.endObject()
                     }

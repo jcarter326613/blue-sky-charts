@@ -13,6 +13,8 @@ class Preferences private constructor() {
     private var version = 0
     private var writtenVersion = 0
     private val persistMutex = Mutex()
+    private val listeners = mutableListOf<Listener>()
+    private val listenerMutex = Mutex()
 
     init {
         val preferencesAsset = Asset(preferencesAssetDescription)
@@ -31,9 +33,34 @@ class Preferences private constructor() {
         }
     }
 
+    /**
+     * Adds a listener to receive notification of property updates. Guarantees a call to the new listener with every property after added.
+     */
+    fun addListener(newListener: Listener) {
+        GlobalScope.launch {
+            listenerMutex.withLock {
+                this@Preferences.listeners.add(newListener)
+            }
+            persistMutex.withLock {
+                for (preference in this@Preferences.preferences) {
+                    newListener.preferenceChanged(preference.key)
+                }
+            }
+        }
+    }
+
     fun setPreference(key: String, value: String) {
-        this.preferences[key] = value
-        persist()
+        GlobalScope.launch {
+            persistMutex.withLock {
+                this@Preferences.preferences[key] = value
+                persist()
+            }
+            listenerMutex.withLock {
+                for (listener in this@Preferences.listeners) {
+                    listener.preferenceChanged(key)
+                }
+            }
+        }
     }
 
     fun setPreference(key: Array<String>, value: String) {
@@ -107,17 +134,21 @@ class Preferences private constructor() {
         }
     }
 
+    interface Listener {
+        fun preferenceChanged(preferenceName: String)
+    }
+
     companion object {
         val instance: Preferences = Preferences()
 
         // Property constants
-        fun propertyTemplateMapProactiveDownload(mapName: String): String = "map.$mapName.proactiveDownload"
+        fun propertyTemplateMapProactiveDownload(mapGroup: Int, mapName: String): String = "map.$mapGroup.$mapName.proactiveDownload"
         val propertyNameDisplayedMapGroupId: String = "map.active.group"
         val propertyNameDisplayedSubMapId: String = "map.active.submap"
 
         // Default values
         const val defaultValueMapProactiveDownload = false
-        const val defaultValueDisplayedMapGroupId = 2 //1
-        const val defaultValueDisplayedSubMapId: String = "Albuquerque" //""
+        const val defaultValueDisplayedMapGroupId = 1
+        const val defaultValueDisplayedSubMapId: String = ""
     }
 }

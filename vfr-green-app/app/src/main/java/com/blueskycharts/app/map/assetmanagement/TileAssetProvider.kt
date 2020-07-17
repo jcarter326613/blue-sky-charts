@@ -2,6 +2,7 @@ package com.blueskycharts.app.map.assetmanagement
 
 import com.blueskycharts.app.Constants
 import com.blueskycharts.app.assests.*
+import com.blueskycharts.app.map.configuration.Inventory
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.sync.Mutex
@@ -15,8 +16,9 @@ import java.net.URL
  * TODO: Choose one of:
  *  Listens for deletion of files which are in the manifest and removes them
  *  Provides a method for deletion of files which are in the manifest and removes them
+ * Manages the expiration of non persisted tiles using the manifest which should contain last access info for each tile in a heap
  */
-class TileAssetProvider private constructor(private val mapRoot: String) {
+class TileAssetProvider private constructor(private val group: Inventory.Group) {
     private val imageExtension = "jpg"
     private val manifestDescription: AssetDescription
     private var manifest: PersistentFile<Manifest>? = null
@@ -24,7 +26,7 @@ class TileAssetProvider private constructor(private val mapRoot: String) {
     private val assetProvider = AssetProvider()
 
     init {
-        val manifestLocation = "tileAssetProvider/$mapRoot/manifest"
+        val manifestLocation = "tileAssetProvider/${group.id}/manifest"
         manifestDescription = LocalAssetDescription(manifestLocation, Volatility.Indefinite)
 
         assetProvider.retrieveAsset(manifestDescription) {
@@ -56,11 +58,10 @@ class TileAssetProvider private constructor(private val mapRoot: String) {
                 GlobalScope.launch {
                     manifest.access { manifestContents ->
                         // Make sure the file is added to the manifest
-                        val defaultMapGroup = Constants.worldVfrMosaicMapName
-                        var mapList = manifestContents.mapGroups[defaultMapGroup]
+                        var mapList = manifestContents.mapGroups[group.id]
                         if (mapList == null) {
                             mapList = Manifest.MapList()
-                            manifestContents.mapGroups[defaultMapGroup] = mapList
+                            manifestContents.mapGroups[group.id] = mapList
                         }
                         var map = mapList.mapList[mapName]
                         if (map == null) {
@@ -93,11 +94,11 @@ class TileAssetProvider private constructor(private val mapRoot: String) {
     }
 
     fun getTileFileDescription(mapName: String, mapVersion: String, zoom: Int, x: Int, y: Int): AssetDescription {
-        val tileUrl = "${mapRoot}/${mapName}/$mapVersion/$zoom/${x}_${y}.${imageExtension}"
+        val tileUrl = "${group.urlRoot}/${mapName}/$mapVersion/$zoom/${x}_${y}.${imageExtension}"
         return RemoteAssetDescription(URL(tileUrl), Volatility.Indefinite)
     }
 
-    suspend fun getManifest(mapGroup: String, map: String): Manifest.MapList.MapVersionList? {
+    suspend fun getManifest(mapGroupId: Int, map: String): Manifest.MapList.MapVersionList? {
         // Ensure the manifest is loaded
         var manifest: PersistentFile<Manifest>? = this@TileAssetProvider.manifest
         while ( manifest == null ) {
@@ -107,22 +108,23 @@ class TileAssetProvider private constructor(private val mapRoot: String) {
 
         var retVal: Manifest.MapList.MapVersionList? = null
         manifest.access {
-            retVal = it.mapGroups[mapGroup]?.mapList?.get(map)?.copy()
+            retVal = it.mapGroups[mapGroupId]?.mapList?.get(map)?.copy()
             return@access false
         }
         return retVal
     }
 
     companion object {
-        private var instances: MutableMap<String, TileAssetProvider> = mutableMapOf()
+        private var instances: MutableMap<Int, TileAssetProvider> = mutableMapOf()
 
-        fun getInstance(mapRoot: String): TileAssetProvider {
-            var instance = instances[mapRoot]
-            if ( instance == null ) {
-                instance = TileAssetProvider(mapRoot)
-                instances[mapRoot] = instance
+        init {
+            for ( group in Inventory.instance.mapGroups ) {
+                instances[group.id] = TileAssetProvider(group)
             }
-            return instance
+        }
+
+        fun getInstance(group: Inventory.Group): TileAssetProvider {
+            return instances[group.id]?: throw Error("Asset provider not created for group ${group.id}")
         }
     }
 }
