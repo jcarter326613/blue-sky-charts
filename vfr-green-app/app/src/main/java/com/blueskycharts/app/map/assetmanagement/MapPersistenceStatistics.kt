@@ -65,5 +65,10 @@ class MapPersistenceStatistics(val groupId: Int, val mapName: String, totalFiles
             _value.incrementAndGet()
             listener.fieldUpdated()
         }
+
+        suspend fun add(toAdd: Int) {
+            _value.addAndGet(toAdd)
+            listener.fieldUpdated()
+        }
     }
 }

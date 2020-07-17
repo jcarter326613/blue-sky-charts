@@ -101,13 +101,15 @@ class TilePersistenceManager {
                     val currentMapVersionMetadata = metadata.getCurrentVersion(map)
                     val zoomMap = manifest?.versionList?.get(currentMapVersionMetadata?.version)?.zoomMap
                     var filesLoaded = 0
+                    var fileSize = 0
                     if ( zoomMap != null ) {
                         for ( zPair in zoomMap ) {
                             val z = zPair.key
                             for ( xPair in zPair.value ) {
                                 val x = xPair.key
-                                for ( y in xPair.value ) {
+                                for ( yPair in xPair.value ) {
                                     filesLoaded++
+                                    fileSize += yPair.value
                                 }
                             }
                         }
@@ -120,7 +122,7 @@ class TilePersistenceManager {
                             totalTiles += 2.0.pow(zoom).pow(2).toInt()
                         }
                     }
-                    mapStatistics.setStatistics(totalTiles, filesLoaded, 0)
+                    mapStatistics.setStatistics(totalTiles, filesLoaded, fileSize)
                 }
             }
         }
@@ -231,6 +233,7 @@ class TilePersistenceManager {
                             if ( assetStatic != null && !assetStatic.errorLoading ) {
                                 val mapStatistics = getMapStatistics(mapsMetaData.groupId, name)
                                 mapStatistics.downloadedFiles.increment()
+                                mapStatistics.downloadedSizeBytes.add(assetStatic.numBytes)
                             }
                         }
                     }

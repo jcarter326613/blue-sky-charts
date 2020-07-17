@@ -10,6 +10,8 @@ import java.net.URL
 
 class Asset( val description: AssetDescription ) {
     var bytes: ByteArray? = null
+    val numBytes: Int
+        get() = bytes?.size ?: 0
     var errorLoading: Boolean = false
 
     fun asJsonReader(): JsonReader? {

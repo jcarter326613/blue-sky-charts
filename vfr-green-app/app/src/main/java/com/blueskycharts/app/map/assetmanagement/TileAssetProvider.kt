@@ -76,10 +76,16 @@ class TileAssetProvider private constructor(private val group: Inventory.Group) 
                         }
                         var xMap = zoomMap[x]
                         if (xMap == null) {
-                            xMap = mutableSetOf()
+                            xMap = mutableMapOf()
                             zoomMap[x] = xMap
                         }
-                        return@access xMap.add(y)
+                        val fileSize = xMap[y]
+                        val actualBytes = it.numBytes
+                        if (fileSize == null || actualBytes != fileSize) {
+                            xMap[y] = actualBytes
+                            return@access true
+                        }
+                        return@access false
                     }
                 }
 

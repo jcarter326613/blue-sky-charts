@@ -128,7 +128,9 @@ data class Manifest(val mapGroups: MutableMap<Int, MapList> = mutableMapOf()) : 
                 }
             }
 
-            data class MapVersion(val zoomMap: MutableMap<Int,MutableMap<Int, MutableSet<Int>>> = mutableMapOf()) {
+            data class MapVersion(
+                val zoomMap: MutableMap<Int,MutableMap<Int, MutableMap<Int, Int>>> = mutableMapOf() // z, x, y, fileSize
+            ) {
                 fun write(jsonWriter: JsonWriter) {
                     jsonWriter.beginObject()
                     jsonWriter.name("zoom")
@@ -140,11 +142,12 @@ data class Manifest(val mapGroups: MutableMap<Int, MapList> = mutableMapOf()) : 
                         jsonWriter.beginObject()
                         for ( x in z.value ) {
                             jsonWriter.name(x.key.toString())
-                            jsonWriter.beginArray()
+                            jsonWriter.beginObject()
                             for (y in x.value) {
-                                jsonWriter.value(y)
+                                jsonWriter.name(y.key.toString())
+                                jsonWriter.value(y.value)
                             }
-                            jsonWriter.endArray()
+                            jsonWriter.endObject()
                         }
                         jsonWriter.endObject()
                         jsonWriter.endObject()
@@ -167,17 +170,18 @@ data class Manifest(val mapGroups: MutableMap<Int, MapList> = mutableMapOf()) : 
                                         while ( reader.hasNext() ) {
                                             when ( reader.nextName() ) {
                                                 "x" -> {
-                                                    val xMap = mutableMapOf<Int, MutableSet<Int>>()
+                                                    val xMap = mutableMapOf<Int, MutableMap<Int,Int>>()
                                                     reader.beginObject()
                                                     while ( reader.hasNext() ) {
                                                         val xString = reader.nextName()
-                                                        val ySet = mutableSetOf<Int>()
-                                                        reader.beginArray()
+                                                        val ySet = mutableMapOf<Int, Int>()
+                                                        reader.beginObject()
                                                         while ( reader.hasNext() ) {
-                                                            ySet.add(reader.nextInt())
+                                                            val yString = reader.nextName()
+                                                            ySet[yString.toInt()] = reader.nextInt()
                                                         }
                                                         xMap[xString.toInt()] = ySet
-                                                        reader.endArray()
+                                                        reader.endObject()
                                                     }
                                                     reader.endObject()
                                                     retVal.zoomMap[zoom] = xMap
