@@ -46,7 +46,7 @@ class PreferenceToggleFragment(private val mapGroup: Int, private val mapName: S
         // Set up the downloaded file size indicator
         val downloadIndicatorLabel = view.findViewById<TextView>(R.id.download_complete_label)
         val downloadSizeLabel = view.findViewById<TextView>(R.id.size_on_disk_label)
-        GlobalScope.launch {
+        GlobalScope.launch {    //ok1
             val statistics = TilePersistenceManager.instance.getMapStatistics(mapGroup, mapName)
             statistics.addListener(object : MapPersistenceStatistics.Listener {
                 private var updateNeeded = false

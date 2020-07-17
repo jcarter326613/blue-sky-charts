@@ -31,7 +31,7 @@ open class TileProvider(val context: Context, map: Map, private val group: Inven
         } else {
             this.findTemporaryTile(mapName, zoomLevel, location, receiver, data, mapVersion, tileDimensions, canvas)
             incrementAwaitingQueueAddition()
-            GlobalScope.launch {
+            GlobalScope.launch {    //ok1
                 try {
                     val newTileRequest = this@TileProvider.getExistingRequest(key);
                     if (newTileRequest != null && !newTileRequest.inError) {
@@ -89,10 +89,8 @@ open class TileProvider(val context: Context, map: Map, private val group: Inven
                     return;
                 }
             } else if ( cachedRequest == null ) {
-                GlobalScope.launch {
-                    val newRequest = TileRequest(this@TileProvider, receiver, data, zoomLocation, tileDimensions, i, mapName, mapVersion)
-                    this@TileProvider.addRequestToQueue(key, newRequest);
-                }
+                val newRequest = TileRequest(this@TileProvider, receiver, data, zoomLocation, tileDimensions, i, mapName, mapVersion)
+                this@TileProvider.addRequestToQueue(key, newRequest)
             }
         }
     }

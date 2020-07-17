@@ -27,7 +27,7 @@ abstract class CachedProvider( private val map: Map, private val requestDelayMil
     }
 
     fun clearQueue() {
-        GlobalScope.launch {
+        GlobalScope.launch {    //ok1
             queueMutex.withLock {
                 this@CachedProvider.requestQueue.clear();
                 this@CachedProvider.requestQueueKeys = Hashtable();
@@ -83,7 +83,7 @@ abstract class CachedProvider( private val map: Map, private val requestDelayMil
             return
         }
         incrementAwaitingQueueAddition()
-        GlobalScope.launch {
+        GlobalScope.launch {    //ok1
             queueMutex.withLock {
                 try {
                     if (key in this@CachedProvider.requestQueueKeys.keys) {
@@ -117,7 +117,7 @@ abstract class CachedProvider( private val map: Map, private val requestDelayMil
         val now = Date();
         val timeToWait = this.requestDelayMilliseconds - (now.time - this.lastQueueAddition.time)
         if (timeToWait <= 0) {
-            GlobalScope.launch {
+            GlobalScope.launch {    //ok1
                 queueMutex.withLock {
                     while (this@CachedProvider.numActiveRequests.get() < maxActiveRequests && this@CachedProvider.requestQueue.size() > 0) {
                         val request = this@CachedProvider.requestQueue.pop()

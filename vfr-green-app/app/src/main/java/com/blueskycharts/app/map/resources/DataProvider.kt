@@ -36,7 +36,7 @@ class DataProvider(val context: Context, map: Map) : CachedProvider(map, 700) {
             tileRequestScoped.broadcastData(true, canvas)
         } else {
             incrementAwaitingQueueAddition()
-            GlobalScope.launch {
+            GlobalScope.launch {    //ok1
                 try {
                     val newTileRequest = this@DataProvider.getExistingRequest(key)
                     if (newTileRequest != null && !newTileRequest.inError) {

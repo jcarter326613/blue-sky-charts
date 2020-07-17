@@ -48,41 +48,46 @@ class TileAssetProvider private constructor(private val group: Inventory.Group) 
 
         // Request the tile from the base class
         val assetDescription = getTileFileDescription(mapName, mapVersion, zoom, x, y)
-        assetProvider.retrieveAsset(assetDescription) {
-            GlobalScope.launch {
-                manifest.access { manifestContents ->
-                    // Make sure the file is added to the manifest
-                    var mapList = manifestContents.mapGroups[group.id]
-                    if (mapList == null) {
-                        mapList = Manifest.MapList()
-                        manifestContents.mapGroups[group.id] = mapList
+        val localAsset = assetProvider.retrieveLocalAsset(assetDescription)
+        if ( localAsset.errorLoading ) {
+            assetProvider.retrieveAsset(assetDescription) {
+                GlobalScope.launch {    //ok1
+                    manifest.access { manifestContents ->
+                        // Make sure the file is added to the manifest
+                        var mapList = manifestContents.mapGroups[group.id]
+                        if (mapList == null) {
+                            mapList = Manifest.MapList()
+                            manifestContents.mapGroups[group.id] = mapList
+                        }
+                        var map = mapList.mapList[mapName]
+                        if (map == null) {
+                            map = Manifest.MapList.MapVersionList()
+                            mapList.mapList[mapName] = map
+                        }
+                        var version = map.versionList[mapVersion]
+                        if (version == null) {
+                            version = Manifest.MapList.MapVersionList.MapVersion()
+                            map.versionList[mapVersion] = version
+                        }
+                        var zoomMap = version.zoomMap[zoom]
+                        if (zoomMap == null) {
+                            zoomMap = mutableMapOf()
+                            version.zoomMap[zoom] = zoomMap
+                        }
+                        var xMap = zoomMap[x]
+                        if (xMap == null) {
+                            xMap = mutableSetOf()
+                            zoomMap[x] = xMap
+                        }
+                        return@access xMap.add(y)
                     }
-                    var map = mapList.mapList[mapName]
-                    if (map == null) {
-                        map = Manifest.MapList.MapVersionList()
-                        mapList.mapList[mapName] = map
-                    }
-                    var version = map.versionList[mapVersion]
-                    if (version == null) {
-                        version = Manifest.MapList.MapVersionList.MapVersion()
-                        map.versionList[mapVersion] = version
-                    }
-                    var zoomMap = version.zoomMap[zoom]
-                    if (zoomMap == null) {
-                        zoomMap = mutableMapOf()
-                        version.zoomMap[zoom] = zoomMap
-                    }
-                    var xMap = zoomMap[x]
-                    if (xMap == null) {
-                        xMap = mutableSetOf()
-                        zoomMap[x] = xMap
-                    }
-                    return@access xMap.add(y)
                 }
-            }
 
-            // Tell the caller their file has been loaded
-            callback(it)
+                // Tell the caller their file has been loaded
+                callback(it)
+            }
+        } else {
+            callback(localAsset)
         }
     }
 

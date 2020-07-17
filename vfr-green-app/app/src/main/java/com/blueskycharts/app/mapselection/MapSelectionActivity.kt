@@ -20,7 +20,7 @@ class MapSelectionActivity : AppCompatActivity() {
     }
 
     private fun displayMaps() {
-        GlobalScope.launch {
+        GlobalScope.launch {    //ok1
             // Get the group configurations
             val buttonGroups: Array<GroupDetails?> = Array(Inventory.instance.mapGroups.size) {null}
             for ( group in Inventory.instance.mapGroups ) {

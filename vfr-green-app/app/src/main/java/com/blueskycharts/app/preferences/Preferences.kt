@@ -37,7 +37,7 @@ class Preferences private constructor() {
      * Adds a listener to receive notification of property updates. Guarantees a call to the new listener with every property after added.
      */
     fun addListener(newListener: Listener) {
-        GlobalScope.launch {
+        GlobalScope.launch {    //ok1
             listenerMutex.withLock {
                 this@Preferences.listeners.add(newListener)
             }
@@ -50,7 +50,7 @@ class Preferences private constructor() {
     }
 
     fun setPreference(key: String, value: String) {
-        GlobalScope.launch {
+        GlobalScope.launch {    //ok1
             persistMutex.withLock {
                 this@Preferences.preferences[key] = value
                 persist()
@@ -107,7 +107,7 @@ class Preferences private constructor() {
 
     private fun persist() {
         version++
-        GlobalScope.launch {
+        GlobalScope.launch {    //ok1
             persistMutex.withLock {
                 if ( version > writtenVersion ) {
                     // Generate the file contents

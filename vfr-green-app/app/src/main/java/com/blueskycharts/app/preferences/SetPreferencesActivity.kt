@@ -17,7 +17,7 @@ class SetPreferencesActivity : AppCompatActivity() {
     }
 
     private fun displayPreferences() {
-        GlobalScope.launch {
+        GlobalScope.launch {    //ok1
             val configList = mutableListOf<MapConfiguration>()
             for (group in Inventory.instance.mapGroups) {
                 val config = group.getConfiguration()

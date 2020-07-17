@@ -13,14 +13,9 @@ import java.net.URL
 open class AssetProvider() {
     open fun retrieveAsset(assetDescription: AssetDescription, callback: ((asset: Asset) -> Unit)) {
         try {
-            val newAsset = Asset(assetDescription)
-            if (DiskCacheFactory.instance.retrieveAssetBytes(newAsset)) {
-                try {
-                    callback(newAsset)
-                } catch (e: Throwable) {
-                    Log.e(null, "Unknown error in AssetProvider after retrieving an asset from disk successfully.")
-                }
-                return
+            val newAsset = retrieveLocalAsset(assetDescription)
+            if (!newAsset.errorLoading) {
+                callback(newAsset)
             }
         } catch (e: Throwable) {
             Log.e(null, "Error processing file for local path ${assetDescription.localPath}")
@@ -28,7 +23,7 @@ open class AssetProvider() {
         assetDescription.retrieveFromSource(callback)
     }
 
-    open fun retrieveLocalAsset(assetDescription: LocalAssetDescription): Asset {
+    open fun retrieveLocalAsset(assetDescription: AssetDescription): Asset {
         val newAsset = Asset(assetDescription)
         if (DiskCacheFactory.instance.retrieveAssetBytes(newAsset)) {
             return newAsset
