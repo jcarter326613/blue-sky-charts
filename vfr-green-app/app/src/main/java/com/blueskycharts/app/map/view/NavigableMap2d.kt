@@ -17,6 +17,8 @@ import com.blueskycharts.app.map.models.ProjectionLccModel
 import com.blueskycharts.app.map.models.ProjectionWebMercatorModel
 import com.blueskycharts.app.map.resources.TileProviderInterface
 import com.blueskycharts.app.preferences.Preferences
+import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.launch
 import java.util.*
 import kotlin.concurrent.timerTask
 import kotlin.math.ceil
@@ -227,19 +229,16 @@ class NavigableMap2d(context: Context, attributes: AttributeSet) :
     }
 
     private fun retrieveConfiguration() {
-        val mapGroupId = Preferences.instance.getIntValue(Preferences.propertyNameDisplayedMapGroupId, Preferences.defaultValueDisplayedMapGroupId)
-        val mapGroup = Inventory.instance.findGroupById(mapGroupId)
-        mapGroup?.getConfiguration {
-            if (it == null) {
-                return@getConfiguration
-            }
-            var config = it
-            if (!it.displayAll) {
-                val subMapId = Preferences.instance.getStringValue(Preferences.propertyNameDisplayedSubMapId, Preferences.defaultValueDisplayedSubMapId)
-                config = config.filterForSubMap(subMapId)
-                if ( config == null ) {
-                    return@getConfiguration
-                }
+        GlobalScope.launch {    //ok1
+            val mapGroupId = Preferences.instance.getIntValue(Preferences.propertyNameDisplayedMapGroupId, Preferences.defaultValueDisplayedMapGroupId)
+            val mapGroup = Inventory.instance.findGroupById(mapGroupId)?: return@launch
+            var config = mapGroup.getConfiguration() ?: return@launch
+            if (!config.displayAll) {
+                val subMapId = Preferences.instance.getStringValue(
+                    Preferences.propertyNameDisplayedSubMapId,
+                    Preferences.defaultValueDisplayedSubMapId
+                )
+                config = config.filterForSubMap(subMapId) ?: return@launch
             }
             this@NavigableMap2d.initializeMapModel(mapGroup, config)
             this@NavigableMap2d.postInvalidate()

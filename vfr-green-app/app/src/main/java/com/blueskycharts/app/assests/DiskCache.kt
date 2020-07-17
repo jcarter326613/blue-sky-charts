@@ -58,7 +58,7 @@ final class DiskCache(private val context: Context) {
     }
 
     fun createAlias(existingObject: AssetDescription, newAlias: AssetDescription) {
-        GlobalScope.launch {
+        GlobalScope.launch {    //ok1
             aliasCollection.access {
                 // Get the paths out of the parameters
                 val existingLocation = existingObject.localPath

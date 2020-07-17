@@ -42,7 +42,7 @@ class TilePersistenceManager {
     fun start() {
         requestVersion++
         stopRunning = false
-        GlobalScope.launch {
+        GlobalScope.launch {    //ok1
             var iShouldRun: Boolean
 
             singleThreadMutex.withLock {
@@ -92,51 +92,37 @@ class TilePersistenceManager {
     }
 
     private suspend fun compileExistingStatistics() {
-        var numThreadsToAwait = AtomicInteger(0)
-
         for ( group in Inventory.instance.mapGroups ) {
             val assetProvider = TileAssetProvider.getInstance(group)
-            numThreadsToAwait.incrementAndGet()
-            group.getConfiguration { metadata ->
-                if (metadata != null) {
-                    numThreadsToAwait.incrementAndGet()
-                    GlobalScope.launch {
-                        for (map in metadata.mapList) {
-                            val manifest = assetProvider.getManifest(group.id, map)
-                            val currentMapVersionMetadata = metadata.getCurrentVersion(map)
-                            val zoomMap = manifest?.versionList?.get(currentMapVersionMetadata?.version)?.zoomMap
-                            var filesLoaded = 0
-                            if ( zoomMap != null ) {
-                                for ( zPair in zoomMap ) {
-                                    val z = zPair.key
-                                    for ( xPair in zPair.value ) {
-                                        val x = xPair.key
-                                        for ( y in xPair.value ) {
-                                            filesLoaded++
-                                        }
-                                    }
+            val metadata = group.getConfiguration()
+            if (metadata != null) {
+                for (map in metadata.mapList) {
+                    val manifest = assetProvider.getManifest(group.id, map)
+                    val currentMapVersionMetadata = metadata.getCurrentVersion(map)
+                    val zoomMap = manifest?.versionList?.get(currentMapVersionMetadata?.version)?.zoomMap
+                    var filesLoaded = 0
+                    if ( zoomMap != null ) {
+                        for ( zPair in zoomMap ) {
+                            val z = zPair.key
+                            for ( xPair in zPair.value ) {
+                                val x = xPair.key
+                                for ( y in xPair.value ) {
+                                    filesLoaded++
                                 }
                             }
-                            val mapStatistics = this@TilePersistenceManager.getMapStatistics(group.id, map)
-                            val maxZoom = currentMapVersionMetadata?.maxZoom
-                            var totalTiles = 0
-                            if (maxZoom != null) {
-                                for (zoom in maxZoom downTo 0) {
-                                    totalTiles += 2.0.pow(zoom).pow(2).toInt()
-                                }
-                            }
-                            mapStatistics.setStatistics(totalTiles, filesLoaded, 0)
                         }
-                        numThreadsToAwait.decrementAndGet()
                     }
+                    val mapStatistics = this@TilePersistenceManager.getMapStatistics(group.id, map)
+                    val maxZoom = currentMapVersionMetadata?.maxZoom
+                    var totalTiles = 0
+                    if (maxZoom != null) {
+                        for (zoom in maxZoom downTo 0) {
+                            totalTiles += 2.0.pow(zoom).pow(2).toInt()
+                        }
+                    }
+                    mapStatistics.setStatistics(totalTiles, filesLoaded, 0)
                 }
-                numThreadsToAwait.decrementAndGet()
             }
-        }
-
-        // Wait for them all to complete
-        while ( numThreadsToAwait.get() > 0 ) {
-            yield()
         }
     }
 
@@ -150,22 +136,19 @@ class TilePersistenceManager {
         val threadCount = Inventory.instance.mapGroups.size
         var completedThreads = 0
         for ( group in Inventory.instance.mapGroups ) {
-            group.getConfiguration {
-                if ( it != null ) {
-                    GlobalScope.launch {
-                        singleThreadMutex.withLock {
-                            try {
-                                if (!shouldStop) {
-                                    for (name in it.mapList) {
-                                        enforcePreferences(group, name, it)
-                                    }
-                                }
-                            } finally {
-                                completedThreads++
-                                if (completedThreads == threadCount) {
-                                    running = false
-                                }
+            val configuration = group.getConfiguration()
+            if ( configuration != null ) {
+                singleThreadMutex.withLock {
+                    try {
+                        if (!shouldStop) {
+                            for (name in configuration.mapList) {
+                                enforcePreferences(group, name, configuration)
                             }
+                        }
+                    } finally {
+                        completedThreads++
+                        if (completedThreads == threadCount) {
+                            running = false
                         }
                     }
                 }

@@ -7,18 +7,12 @@ import android.widget.LinearLayout
 import android.widget.TextView
 import com.blueskycharts.app.R
 import com.blueskycharts.app.map.configuration.Inventory
-import com.blueskycharts.app.preferences.PreferenceToggleFragment
 import com.blueskycharts.app.preferences.Preferences
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
-import kotlinx.coroutines.yield
-import java.util.concurrent.atomic.AtomicInteger
 
 class MapSelectionActivity : AppCompatActivity() {
-    private var numGroups = AtomicInteger(0)
-    private var buttonGroups: Array<GroupDetails?> = arrayOf()
-
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_map_selection)
@@ -26,22 +20,17 @@ class MapSelectionActivity : AppCompatActivity() {
     }
 
     private fun displayMaps() {
-        buttonGroups = Array(Inventory.instance.mapGroups.size) {null}
-        numGroups.set(Inventory.instance.mapGroups.size)
-        for ( group in Inventory.instance.mapGroups ) {
-            getGroupConfig(group)
-        }
-
-        //Wait for all the configurations to download
         GlobalScope.launch {
-            while (numGroups.get() > 0) {
-                yield()
+            // Get the group configurations
+            val buttonGroups: Array<GroupDetails?> = Array(Inventory.instance.mapGroups.size) {null}
+            for ( group in Inventory.instance.mapGroups ) {
+                buttonGroups[group.id - 1] = getGroupConfig(group)
             }
 
             // Switch back to the main thread
             GlobalScope.launch(context = Dispatchers.Main) {
-                var buttonLayout = findViewById<LinearLayout>(R.id.select_map_layout)
-                for ( group in this@MapSelectionActivity.buttonGroups ) {
+                val buttonLayout = findViewById<LinearLayout>(R.id.select_map_layout)
+                for ( group in buttonGroups ) {
                     if ( group == null ) {
                         continue
                     }
@@ -72,29 +61,26 @@ class MapSelectionActivity : AppCompatActivity() {
         }
     }
 
-    private fun getGroupConfig(group: Inventory.Group) {
-        group.getConfiguration {
-            // Check if the config failed to download
-            if ( it == null ) {
-                //TODO: post a message about how the preferences could not be loaded
-                numGroups.getAndDecrement()
-                return@getConfiguration
-            }
+    private suspend fun getGroupConfig(group: Inventory.Group): GroupDetails? {
+        val config = group.getConfiguration()
 
-            // Pull out the needed information to display a button
-            val displayGroupOnly = it.displayAll
-            val groupName = group.humanName
-            val newGroup = if (displayGroupOnly) {
-                GroupDetails(displayGroupOnly, groupName, group.id, null)
-            } else {
-                val buttonList = mutableListOf<ButtonDetails>()
-                for (map in it.mapList) {
-                    buttonList.add(ButtonDetails(map, map))
-                }
-                GroupDetails(displayGroupOnly, groupName, group.id, buttonList)
+        // Check if the config failed to download
+        if (config == null) {
+            //TODO: post a message about how the preferences could not be loaded
+            return null
+        }
+
+        // Pull out the needed information to display a button
+        val displayGroupOnly = config.displayAll
+        val groupName = group.humanName
+        return if (displayGroupOnly) {
+            GroupDetails(displayGroupOnly, groupName, group.id, null)
+        } else {
+            val buttonList = mutableListOf<ButtonDetails>()
+            for (map in config.mapList) {
+                buttonList.add(ButtonDetails(map, map))
             }
-            buttonGroups[group.id - 1] = newGroup
-            numGroups.getAndDecrement()
+            GroupDetails(displayGroupOnly, groupName, group.id, buttonList)
         }
     }
 

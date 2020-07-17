@@ -1,10 +1,12 @@
 package com.blueskycharts.app.map.configuration
 
 import com.blueskycharts.app.Constants
+import com.blueskycharts.app.assests.Asset
 import com.blueskycharts.app.assests.AssetProvider
 import com.blueskycharts.app.assests.RemoteAssetDescription
 import com.blueskycharts.app.assests.Volatility
 import com.blueskycharts.app.map.models.MapMetaDataModelCollection
+import kotlinx.coroutines.yield
 import java.net.URL
 
 class Inventory(val mapGroups: List<Group>) {
@@ -15,17 +17,32 @@ class Inventory(val mapGroups: List<Group>) {
     }
 
     class Group(val id: Int, val humanName: String, val urlRoot: String, val displayAll: Boolean) {
-        fun getConfiguration(callback: (it: MapConfiguration?) -> Unit) {
+        suspend fun getConfiguration(): MapConfiguration? {
             var mapConfigurationFile = URL("${urlRoot}/metadata.json")
             val assetProvider = AssetProvider()
+            var asset: Asset? = null
             assetProvider.retrieveAsset(RemoteAssetDescription(mapConfigurationFile, Volatility.DayCache)) {
-                val reader = it.asJsonReader()
-                if ( reader != null ) {
-                    val mapPositions = MapConfiguration(MapMetaDataModelCollection.readFromJsonReader(reader), urlRoot, displayAll, id)
-                    callback(mapPositions)
+                asset = it
+            }
+            while ( asset == null ) {
+                yield()
+            }
+            val assetStatic = asset?: return null
+            return if (!assetStatic.errorLoading) {
+                val reader = assetStatic.asJsonReader()
+                if (reader != null) {
+                    val mapPositions = MapConfiguration(
+                        MapMetaDataModelCollection.readFromJsonReader(reader),
+                        urlRoot,
+                        displayAll,
+                        id
+                    )
+                    mapPositions
                 } else {
-                    callback(null)
+                    null
                 }
+            } else {
+                null
             }
         }
     }

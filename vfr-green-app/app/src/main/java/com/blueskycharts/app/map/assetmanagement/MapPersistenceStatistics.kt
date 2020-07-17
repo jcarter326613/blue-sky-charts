@@ -22,7 +22,7 @@ class MapPersistenceStatistics(val groupId: Int, val mapName: String, totalFiles
      * Adds a listener and guarantees an updated broadcast of statistics
      */
     fun addListener(newListener: Listener) {
-        GlobalScope.launch {
+        GlobalScope.launch {    //ok1
             broadcastMutex.withLock {
                 listeners.add(newListener)
                 newListener.statisticsUpdated(totalFiles.value, downloadedFiles.value, downloadedSizeBytes.value)

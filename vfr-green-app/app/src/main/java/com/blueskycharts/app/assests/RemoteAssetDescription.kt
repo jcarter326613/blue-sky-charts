@@ -12,7 +12,7 @@ class RemoteAssetDescription(private val url: URL, volatility: Volatility, priva
 
     override fun retrieveFromSource(callback: ((asset: Asset) -> Unit))
     {
-        GlobalScope.launch {
+        GlobalScope.launch {    //ok1
             val asset = Asset(this@RemoteAssetDescription)
             try {
                 // Download the file to memory
