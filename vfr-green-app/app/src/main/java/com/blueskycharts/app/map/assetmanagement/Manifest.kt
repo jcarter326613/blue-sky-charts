@@ -3,18 +3,66 @@ package com.blueskycharts.app.map.assetmanagement
 import android.util.JsonReader
 import android.util.JsonWriter
 import com.blueskycharts.app.assests.PersistentFileContents
+import com.blueskycharts.app.preferences.Preferences
+import com.blueskycharts.app.utility.HashQueue
+import com.blueskycharts.app.utility.JsonSerializable
 import java.io.StringWriter
 
 data class Manifest(val mapGroups: MutableMap<Int, MapList> = mutableMapOf()) : PersistentFileContents {
-    override val jsonString: String
-        get() {
-            val stringWriter = StringWriter()
-            val jsonWriter = JsonWriter(stringWriter)
-            write(jsonWriter)
-            return stringWriter.toString()
-        }
+    private var touchOrder = HashQueue<FileDescription>()
 
-    private fun write(jsonWriter: JsonWriter) {
+    override suspend fun getJsonString(): String {
+        val stringWriter = StringWriter()
+        val jsonWriter = JsonWriter(stringWriter)
+        write(jsonWriter)
+        return stringWriter.toString()
+    }
+
+    suspend fun touchFile(groupId: Int, mapName: String, z: Int, x: Int, y: Int) {
+        val newDescription = FileDescription(groupId, mapName, z, x, y)
+        touchOrder.touch(newDescription)
+    }
+
+    suspend fun popOldestUnPersistedFile(): FileDescription? {
+        val iterator = touchOrder.reverseIterator()
+        try {
+            while (iterator.hasNext()) {
+                val item = iterator.next()
+                if (!Preferences.instance.getBooleanValue(
+                        Preferences.propertyTemplateMapProactiveDownload(
+                            item.groupId,
+                            item.mapName
+                        ), Preferences.defaultValueMapProactiveDownload
+                    )
+                ) {
+                    touchOrder.removeItem(iterator)
+                    return item
+                }
+            }
+        } finally {
+            touchOrder.freeIterator()
+        }
+        return null
+    }
+
+    data class FileDescription(val groupId: Int, val mapName: String, val z: Int, val x: Int, val y: Int) : JsonSerializable {
+        override suspend fun write(jsonWriter: JsonWriter) {
+            jsonWriter.beginObject()
+            jsonWriter.name("groupId")
+            jsonWriter.value(groupId)
+            jsonWriter.name("mapName")
+            jsonWriter.value(mapName)
+            jsonWriter.name("z")
+            jsonWriter.value(z)
+            jsonWriter.name("x")
+            jsonWriter.value(x)
+            jsonWriter.name("y")
+            jsonWriter.value(y)
+            jsonWriter.endObject()
+        }
+    }
+
+    private suspend fun write(jsonWriter: JsonWriter) {
         jsonWriter.beginObject()
         jsonWriter.name("mapGroups")
         jsonWriter.beginObject()
@@ -24,6 +72,9 @@ data class Manifest(val mapGroups: MutableMap<Int, MapList> = mutableMapOf()) : 
         }
 
         jsonWriter.endObject()
+
+        jsonWriter.name("touchOrder")
+        touchOrder.write(jsonWriter)
         jsonWriter.endObject()
     }
 
@@ -41,6 +92,43 @@ data class Manifest(val mapGroups: MutableMap<Int, MapList> = mutableMapOf()) : 
                             retVal.mapGroups[name.toInt()] = value
                         }
                         reader.endObject()
+                    }
+                    "touchOrder" -> {
+                        retVal.touchOrder = HashQueue.read(reader) {
+                            var groupId: Int? = null
+                            var mapName: String? = null
+                            var z: Int? = null
+                            var x: Int? = null
+                            var y: Int? = null
+
+                            it.beginObject()
+                            while (it.hasNext()) {
+                                when (it.nextName()) {
+                                    "groupId" -> {
+                                        groupId = reader.nextInt()
+                                    }
+                                    "mapName" -> {
+                                        mapName = reader.nextString()
+                                    }
+                                    "z" -> {
+                                        z = reader.nextInt()
+                                    }
+                                    "x" -> {
+                                        x = reader.nextInt()
+                                    }
+                                    "y" -> {
+                                        y = reader.nextInt()
+                                    }
+                                }
+                            }
+                            it.endObject()
+
+                            return@read if ( groupId != null && mapName != null && z != null && x != null && y != null ) {
+                                FileDescription(groupId, mapName, z, x, y)
+                            } else {
+                                null
+                            }
+                        }
                     }
                     else -> {
                         reader.skipValue()

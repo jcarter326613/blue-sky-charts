@@ -5,13 +5,12 @@ import android.util.JsonWriter
 import java.io.StringWriter
 
 class AliasCollection: PersistentFileContents {
-    override val jsonString: String
-        get() {
-            val stringWriter = StringWriter()
-            val jsonWriter = JsonWriter(stringWriter)
-            write(jsonWriter)
-            return stringWriter.toString()
-        }
+    override suspend fun getJsonString(): String {
+        val stringWriter = StringWriter()
+        val jsonWriter = JsonWriter(stringWriter)
+        write(jsonWriter)
+        return stringWriter.toString()
+    }
 
     private fun write(jsonWriter: JsonWriter) {
         jsonWriter.beginObject()

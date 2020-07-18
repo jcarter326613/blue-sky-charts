@@ -3,6 +3,7 @@ package com.blueskycharts.app.map.assetmanagement
 import com.blueskycharts.app.Constants
 import com.blueskycharts.app.assests.*
 import com.blueskycharts.app.map.configuration.Inventory
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.sync.Mutex
@@ -45,6 +46,15 @@ class TileAssetProvider private constructor(private val group: Inventory.Group) 
     fun retrieveTile(mapName: String, mapVersion: String, zoom: Int, x: Int, y: Int, callback: ((asset: Asset) -> Unit)) {
         // Make sure the manifest is loaded before requesting any tiles
         val manifest = this@TileAssetProvider.manifest
+
+        GlobalScope.launch(Dispatchers.IO) {
+            manifest.access {
+                GlobalScope.launch(Dispatchers.IO) {
+                    it.touchFile(group.id, mapName, zoom, x, y)
+                }
+                return@access true
+            }
+        }
 
         // Request the tile from the base class
         val assetDescription = getTileFileDescription(mapName, mapVersion, zoom, x, y)

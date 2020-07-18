@@ -1,5 +1,6 @@
 package com.blueskycharts.app.assests
 
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.sync.Mutex
@@ -34,14 +35,14 @@ class PersistentFile<T: PersistentFileContents>(private val contents: T, private
      * run once if those requests pile up faster than than the file can be written to disk
      */
     private fun serializeFile() {
-        GlobalScope.launch {    //ok1
+        GlobalScope.launch(Dispatchers.IO) {    //ok1
             serializeMutex.withLock {
                 if (fileVersion > writtenVersion) {
                     var versionToWrite: Int
                     val manifestAsset = Asset(fileDescription)
                     editMutex.withLock {
                         versionToWrite = fileVersion
-                        manifestAsset.bytes = contents.jsonString.toByteArray()
+                        manifestAsset.bytes = contents.getJsonString().toByteArray()
                     }
                     DiskCacheFactory.instance.writeAsset(manifestAsset)
                     writtenVersion = versionToWrite

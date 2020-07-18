@@ -2,11 +2,8 @@ package com.blueskycharts.app.assests
 
 import android.content.Context
 import android.util.Log
-import com.blueskycharts.app.map.assetmanagement.Manifest
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
-import kotlinx.coroutines.yield
-import java.io.File
 import java.io.FileInputStream
 
 /**
@@ -55,6 +52,10 @@ final class DiskCache(private val context: Context) {
         } catch ( e: Throwable ) {
             Log.e(null, e.message ?: "Error writing asset to disk ${asset.description.localPath}")
         }
+    }
+
+    fun deleteAsset(assetDescription: AssetDescription) {
+        //TODO: implement
     }
 
     fun createAlias(existingObject: AssetDescription, newAlias: AssetDescription) {

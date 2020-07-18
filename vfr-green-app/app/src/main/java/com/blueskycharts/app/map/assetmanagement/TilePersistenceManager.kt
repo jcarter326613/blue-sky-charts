@@ -57,6 +57,7 @@ class TilePersistenceManager {
                     compileExistingStatistics()
                     statisticsRecordsLoaded = true
                 }
+                cleanOldNonPersistedTiles()
                 enforceAllPreferences()
                 if ( requestVersion != runningVersion && !stopRunning ) {
                     start()
@@ -126,6 +127,12 @@ class TilePersistenceManager {
                 }
             }
         }
+    }
+
+    private fun cleanOldNonPersistedTiles() {
+        // Figure out how much space we are taking up from un persisted maps
+
+        // Start deleting files until we are down to our un-persisted cache limit
     }
 
     private suspend fun enforceAllPreferences() {
