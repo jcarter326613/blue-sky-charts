@@ -42,10 +42,11 @@ class NavigableMap2d(context: Context, attributes: AttributeSet) :
     private var dataOverlayView: SubMapPosition? = null
     private var origin2d: Point2d? = null
     private var scale: Double
-    private var scaleDriver: Float
+    private var scaleDriver: Float = 0F
     private val maxScaleDriver: Float = 12F
     private var drawnBounds: Box2d? = null
     private var rectangularAreaBounds: RectangularArea? = null
+    private var mapPositionPropertyName: String = ""
 
     // Mouse event variables
     private var isDragging: Boolean
@@ -58,8 +59,8 @@ class NavigableMap2d(context: Context, attributes: AttributeSet) :
     init {
         context.theme.obtainStyledAttributes(attributes, R.styleable.NavigableMap2d, 0, 0).apply {
             try {
-                scaleDriver = getFloat(R.styleable.NavigableMap2d_zoom, 4.25F);
                 /*
+                scaleDriver = getFloat(R.styleable.NavigableMap2d_zoom, 4.25F);
                 val originLongitude = getFloat(R.styleable.NavigableMap2d_originLongitude, -98.5795F)
                 val originLatitude = getFloat(R.styleable.NavigableMap2d_originLongitude, 39.8283F)
                 originMercator = CoordinateConversion.convertPointGeoToPointWebMercator(PointGeo(originLongitude.toDouble(), originLatitude.toDouble()));
@@ -206,23 +207,38 @@ class NavigableMap2d(context: Context, attributes: AttributeSet) :
                     val subMapView = MapTileView(tileProvider, this)
                     val fileExtent = subMapView.initialize(mapName, mapData) ?: continue
                     mapViewList.add(SubMapPosition(subMapView, fileExtent));
-                    this.origin2d = fileExtent.upperLeft
                     drawnBounds = drawnBounds?.union(fileExtent) ?: fileExtent
                     val rectangularAreaExtents = subMapView.fileExtent
                     if ( rectangularAreaExtents != null ) {
-                        if (rectangularAreaBounds != null) {
-                            rectangularAreaBounds = rectangularAreaExtents.union(rectangularAreaBounds)
+                        rectangularAreaBounds = if (rectangularAreaBounds != null) {
+                            rectangularAreaExtents.union(rectangularAreaBounds)
                         } else {
-                            rectangularAreaBounds = rectangularAreaExtents
+                            rectangularAreaExtents
                         }
                     }
                 }
             }
         }
 
+        if (drawnBounds != null) {
+            val tempOrigin = this.origin2d
+            if (tempOrigin == null ||
+                tempOrigin.x < drawnBounds.upperLeft.x || tempOrigin.y < drawnBounds.upperLeft.y ||
+                tempOrigin.x > drawnBounds.lowerRight.x || tempOrigin.y > drawnBounds.lowerRight.y
+            ) {
+                this.origin2d = Point2d(
+                    (drawnBounds.upperLeft.x + drawnBounds.lowerRight.x) / 2,
+                    (drawnBounds.upperLeft.y + drawnBounds.lowerRight.y) / 2
+                )
+                this.scaleDriver = 0F
+            }
+        }
+
         if ( mercatorMap ) {
             setupBackgroundShadow(configuration)
         }
+
+        this.updateScale()
         this.drawnBounds = drawnBounds
         this.rectangularAreaBounds = rectangularAreaBounds
         this.mapViews = mapViewList
@@ -239,7 +255,21 @@ class NavigableMap2d(context: Context, attributes: AttributeSet) :
                     Preferences.defaultValueDisplayedSubMapId
                 )
                 config = config.filterForSubMap(subMapId) ?: return@launch
+                this@NavigableMap2d.mapPositionPropertyName = Preferences.propertyTemplateMapPosition(config.groupId, subMapId)
+            } else {
+                this@NavigableMap2d.mapPositionPropertyName = Preferences.propertyTemplateMapPosition(config.groupId, "all")
             }
+            val mapPositionString = Preferences.instance.getStringValue(this@NavigableMap2d.mapPositionPropertyName, Preferences.defaultValueMapPosition)
+
+            this@NavigableMap2d.origin2d = null
+            if ( Preferences.defaultValueMapPosition != mapPositionString ) {
+                val parts = mapPositionString.split("|")
+                if (parts.size == 3) {
+                    this@NavigableMap2d.origin2d = Point2d(parts[1].toDouble(), parts[2].toDouble())
+                    this@NavigableMap2d.scaleDriver = parts[0].toFloat()
+                }
+            }
+            this@NavigableMap2d.updateScale()
             this@NavigableMap2d.initializeMapModel(mapGroup, config)
             this@NavigableMap2d.postInvalidate()
         }
@@ -448,6 +478,7 @@ class NavigableMap2d(context: Context, attributes: AttributeSet) :
                 this.scaleDriver = 0F;
             }
 
+            updatePositionRecord()
             this.updateScale()
             this.viewportChanged()
             this.requestRedraw()
@@ -491,6 +522,7 @@ class NavigableMap2d(context: Context, attributes: AttributeSet) :
                 Point2d(this.mouseDownOrigin2d.x - viewportDimensions.x * percentageClientTraverseX,
                     this.mouseDownOrigin2d.y - viewportDimensions.y * percentageClientTraverseY)
 
+            updatePositionRecord()
             this.viewportChanged()
             this.requestRedraw()
         }
@@ -498,5 +530,15 @@ class NavigableMap2d(context: Context, attributes: AttributeSet) :
 
     private fun mouseUpHelper() {
         isDragging = false
+    }
+
+    private fun updatePositionRecord() {
+        val origin = this.origin2d
+        if (origin != null) {
+            Preferences.instance.setPreference(
+                this.mapPositionPropertyName,
+                "${this.scaleDriver}|${origin.x}|${origin.y}"
+            )
+        }
     }
 }
