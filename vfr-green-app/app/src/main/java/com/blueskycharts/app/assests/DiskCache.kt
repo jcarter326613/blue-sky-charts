@@ -1,23 +1,55 @@
 package com.blueskycharts.app.assests
 
 import android.content.Context
+import android.os.Environment
 import android.util.Log
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.yield
 import java.io.File
 import java.io.FileInputStream
+import java.io.FileOutputStream
 
 /**
  * Handles manipulation of the on disk cache.
  * Performs all file system direct manipulation and IO
  */
 final class DiskCache(private val context: Context) {
+    var externalCheckFilePerformed = false
+    var externalCheckFileSuccess = false
+    val isExternalStorageWritable: Boolean
+        get() {
+            return if ( Environment.getExternalStorageState() == Environment.MEDIA_MOUNTED ) {
+                if ( externalCheckFilePerformed ) {
+                    externalCheckFileSuccess
+                } else {
+                    val externalDirectory = context.getExternalFilesDir(null)
+                    val file = File(externalDirectory, "writeTest")
+                    externalDirectory?.mkdirs()
+
+                    val outputStream = FileOutputStream(file)
+                    outputStream.write("1".toByteArray())
+                    outputStream.close()
+
+                    val inputStream = FileInputStream(file)
+                    val evidence = String(inputStream.readBytes())
+                    inputStream.close()
+
+                    externalCheckFilePerformed = true
+                    externalCheckFileSuccess = evidence == "1"
+                    externalCheckFileSuccess
+                }
+            } else {
+                false
+            }
+        }
+    val isExternalStorageReadable: Boolean
+        get() = Environment.getExternalStorageState() in setOf(Environment.MEDIA_MOUNTED, Environment.MEDIA_MOUNTED_READ_ONLY)
     private var aliasCollection: PersistentFile<AliasCollection>
 
     init {
         val aliasFileDescriptor =
-            LocalAssetDescription("disk_cache_aliases", Volatility.Indefinite)
+            LocalAssetDescription("disk_cache_aliases", Volatility.Indefinite, StorageLocation.Internal)
         val aliasAsset = Asset(aliasFileDescriptor)
         aliasCollection = if ( retrieveAssetBytes(aliasAsset) ) {
             val reader = aliasAsset.asJsonReader()
@@ -35,7 +67,16 @@ final class DiskCache(private val context: Context) {
     fun retrieveAssetBytes(asset: Asset): Boolean {
         var fileInput: FileInputStream? = null
         return try {
-            fileInput = context.openFileInput(getFilePathForAsset(asset))
+            fileInput = if ( asset.description.storageLocation == StorageLocation.External && isExternalStorageReadable ) {
+                val file = File(context.getExternalFilesDir(null), getFilePathForAsset(asset))
+                if (file.exists()) {
+                    file.inputStream()
+                } else {
+                    context.openFileInput(getFilePathForAsset(asset))
+                }
+            } else {
+                context.openFileInput(getFilePathForAsset(asset))
+            }
             asset.bytes = fileInput.readBytes()
             true
         } catch ( e: Throwable ) {
@@ -47,8 +88,21 @@ final class DiskCache(private val context: Context) {
 
     fun writeAsset(asset: Asset) {
         try {
+            val outputStream =
+                if ( asset.description.storageLocation == StorageLocation.External && isExternalStorageWritable ) {
+                    val externalDirectory = context.getExternalFilesDir(null)
+                    val file = File(externalDirectory, getFilePathForAsset(asset))
+                    if (!file.exists()) {
+                        externalDirectory?.mkdirs()
+                    } else {
+                        file.delete()
+                    }
+                    FileOutputStream(file)
+                } else {
+                    context.openFileOutput(getFilePathForAsset(asset), Context.MODE_PRIVATE);
+                }
+
             // Write the file to disk
-            val outputStream = context.openFileOutput(getFilePathForAsset(asset), Context.MODE_PRIVATE);
             outputStream.write(asset.bytes)
             outputStream.close()
         } catch ( e: Throwable ) {
@@ -56,8 +110,18 @@ final class DiskCache(private val context: Context) {
         }
     }
 
-    fun deleteAsset(assetDescription: AssetDescription) {
-        context.deleteFile(getFilePathForAsset(assetDescription))
+    fun deleteAsset(description: AssetDescription) {
+        try {
+            if (description.storageLocation == StorageLocation.External) {
+                val file = File(context.getExternalFilesDir(null), getFilePathForAsset(description))
+                if (file.exists()) {
+                    file.delete()
+                }
+            } else {
+                context.deleteFile(getFilePathForAsset(description))
+            }
+        } catch (e: Throwable) {
+        }
     }
 
     fun createAlias(existingObject: AssetDescription, newAlias: AssetDescription) {
@@ -96,12 +160,19 @@ final class DiskCache(private val context: Context) {
 
     fun getFileSize(description: AssetDescription): Long {
         return try {
-            context.getFileStreamPath(getFilePathForAsset(description)).length()
+            if ( description.storageLocation == StorageLocation.External ) {
+                val file = File(context.getExternalFilesDir(null), getFilePathForAsset(description))
+                file.length()
+            } else {
+                context.getFileStreamPath(getFilePathForAsset(description)).length()
+            }
         } catch (e: Throwable) {
             0
         }
     }
 
     private fun getFilePathForAsset(asset: Asset) = getFilePathForAsset(asset.description)
-    private fun getFilePathForAsset(description: AssetDescription) = description.localPath.replace("/", "-").replace(":", "_")
+    private fun getFilePathForAsset(description: AssetDescription): String {
+        return description.localPath.replace("/", "-").replace(":", "_")
+    }
 }

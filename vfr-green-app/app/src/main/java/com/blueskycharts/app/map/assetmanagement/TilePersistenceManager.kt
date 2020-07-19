@@ -1,5 +1,6 @@
 package com.blueskycharts.app.map.assetmanagement
 
+import android.util.Log
 import com.blueskycharts.app.Constants
 import com.blueskycharts.app.assests.Asset
 import com.blueskycharts.app.assests.DiskCacheFactory
@@ -96,15 +97,14 @@ class TilePersistenceManager {
 
     private suspend fun compileExistingStatistics() {
         for ( group in Inventory.instance.mapGroups ) {
-            val assetProvider = TileAssetProvider.getInstance(group)
             val metadata = group.getConfiguration()
             if (metadata != null) {
                 for (map in metadata.mapList) {
                     val manifest = TileAssetProvider.getReadOnlyManifest(group.id, map)
                     val currentMapVersionMetadata = metadata.getCurrentVersion(map)
                     val zoomMap = manifest?.versionList?.get(currentMapVersionMetadata?.version)?.zoomMap
-                    var filesLoaded = 0
-                    var fileSize = 0
+                    var filesLoaded: Long = 0
+                    var fileSize: Long = 0
                     if ( zoomMap != null ) {
                         for ( zPair in zoomMap ) {
                             for ( xPair in zPair.value ) {
@@ -117,7 +117,7 @@ class TilePersistenceManager {
                     }
                     val mapStatistics = this@TilePersistenceManager.getMapStatistics(group.id, map)
                     val maxZoom = currentMapVersionMetadata?.maxZoom
-                    var totalTiles = 0
+                    var totalTiles: Long = 0
                     if (maxZoom != null) {
                         for (zoom in maxZoom downTo 0) {
                             totalTiles += 2.0.pow(zoom).pow(2).toInt()
@@ -163,6 +163,7 @@ class TilePersistenceManager {
         val unPersistedMaxSpaceBytes = Preferences.instance.getIntValue(
             Preferences.propertyNameMaxUnPersistedTileDiskSpace, Preferences.defaultValueMaxUnPersistedTileDiskSpace
         )
+
         while (unPersistedMaxSpaceBytes < usedBytes) {
             val oldestFile = TileAssetProvider.popOldestUnPersistedManifestFile() ?: break
             val oldestFileGroup = Inventory.instance.findGroupById(oldestFile.groupId) ?: continue
@@ -179,7 +180,11 @@ class TilePersistenceManager {
                     oldestFile.y
                 )
                 if (firstLoop) {
-                    usedBytes -= DiskCacheFactory.instance.getFileSize(oldestFileDescriptor)
+                    val amountToDelete = DiskCacheFactory.instance.getFileSize(oldestFileDescriptor)
+                    usedBytes -= amountToDelete
+                    val statistics = this@TilePersistenceManager.getMapStatistics(oldestFile.groupId, oldestFile.mapName)
+                    statistics.downloadedFiles.decrement()
+                    statistics.downloadedSizeBytes.add(-amountToDelete)
                     firstLoop = false
                 }
                 DiskCacheFactory.instance.deleteAsset(oldestFileDescriptor)
@@ -225,7 +230,8 @@ class TilePersistenceManager {
             return
         }
 
-        if (Preferences.instance.getBooleanValue(Preferences.propertyTemplateMapProactiveDownload(mapsMetaData.groupId, name), Preferences.defaultValueMapProactiveDownload)) {
+        if (Preferences.instance.getBooleanValue(Preferences.propertyTemplateMapProactiveDownload(mapsMetaData.groupId, name), Preferences.defaultValueMapProactiveDownload) &&
+            DiskCacheFactory.instance.isExternalStorageWritable) {
             val currentMapVersion = metaData.version ?: return
 
             // Create a map of all tiles for the map so that we can start to the ones that have been identified as
@@ -292,7 +298,7 @@ class TilePersistenceManager {
                             if ( assetStatic != null && !assetStatic.errorLoading ) {
                                 val mapStatistics = getMapStatistics(mapsMetaData.groupId, name)
                                 mapStatistics.downloadedFiles.increment()
-                                mapStatistics.downloadedSizeBytes.add(assetStatic.numBytes)
+                                mapStatistics.downloadedSizeBytes.add(assetStatic.numBytes.toLong())
                             }
                         }
                     }

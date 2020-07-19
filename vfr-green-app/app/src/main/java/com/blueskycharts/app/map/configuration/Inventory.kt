@@ -1,10 +1,7 @@
 package com.blueskycharts.app.map.configuration
 
 import com.blueskycharts.app.Constants
-import com.blueskycharts.app.assests.Asset
-import com.blueskycharts.app.assests.AssetProvider
-import com.blueskycharts.app.assests.RemoteAssetDescription
-import com.blueskycharts.app.assests.Volatility
+import com.blueskycharts.app.assests.*
 import com.blueskycharts.app.map.models.MapMetaDataModelCollection
 import kotlinx.coroutines.yield
 import java.net.URL
@@ -21,7 +18,7 @@ class Inventory(val mapGroups: List<Group>) {
             var mapConfigurationFile = URL("${urlRoot}/metadata.json")
             val assetProvider = AssetProvider()
             var config: MapConfiguration? = null
-            assetProvider.retrieveAsset(RemoteAssetDescription(mapConfigurationFile, Volatility.DayCache)) {
+            assetProvider.retrieveAsset(RemoteAssetDescription(mapConfigurationFile, Volatility.DayCache, StorageLocation.Internal)) {
                 config = if (!it.errorLoading) {
                     val reader = it.asJsonReader()
                     if (reader != null) {

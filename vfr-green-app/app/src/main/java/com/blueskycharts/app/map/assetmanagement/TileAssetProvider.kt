@@ -3,6 +3,7 @@ package com.blueskycharts.app.map.assetmanagement
 import com.blueskycharts.app.Constants
 import com.blueskycharts.app.assests.*
 import com.blueskycharts.app.map.configuration.Inventory
+import com.blueskycharts.app.preferences.Preferences
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
@@ -84,7 +85,12 @@ class TileAssetProvider private constructor(private val group: Inventory.Group) 
 
     fun getTileFileDescription(mapName: String, mapVersion: String, zoom: Int, x: Int, y: Int): AssetDescription {
         val tileUrl = "${group.urlRoot}/${mapName}/$mapVersion/$zoom/${x}_${y}.${imageExtension}"
-        return RemoteAssetDescription(URL(tileUrl), Volatility.Indefinite)
+        val storage = if (Preferences.instance.getBooleanValue(Preferences.propertyNameStoreMapsExternally, Preferences.defaultValueStoreMapsExternally)) {
+            StorageLocation.External
+        } else {
+            StorageLocation.Internal
+        }
+        return RemoteAssetDescription(URL(tileUrl), Volatility.Indefinite, storage)
     }
 
     companion object {
@@ -99,7 +105,7 @@ class TileAssetProvider private constructor(private val group: Inventory.Group) 
             }
 
             val manifestLocation = "tileAssetProvider/manifest"
-            val manifestDescription = LocalAssetDescription(manifestLocation, Volatility.Indefinite)
+            val manifestDescription = LocalAssetDescription(manifestLocation, Volatility.Indefinite, StorageLocation.Internal)
             val asset = assetProvider.retrieveLocalAsset(manifestDescription)
             manifest = PersistentFile(if (asset.errorLoading) {
                 Manifest()

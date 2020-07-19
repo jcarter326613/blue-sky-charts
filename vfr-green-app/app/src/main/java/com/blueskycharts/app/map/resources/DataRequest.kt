@@ -8,6 +8,7 @@ import com.blueskycharts.app.coordinates.PointGeo
 import com.blueskycharts.app.map.models.WeatherConditionResponse
 import com.blueskycharts.app.map.view.OverlayTypes
 import com.blueskycharts.app.assests.RemoteAssetDescription
+import com.blueskycharts.app.assests.StorageLocation
 import com.blueskycharts.app.assests.Volatility
 import java.net.URL
 import kotlin.math.ceil
@@ -44,7 +45,7 @@ class DataRequest(private val provider: DataProvider, private var receiver: Data
 
         val provider = AssetProvider()
 
-        provider.retrieveAsset(RemoteAssetDescription(URL(url), Volatility.NeverCache, true)) {
+        provider.retrieveAsset(RemoteAssetDescription(URL(url), Volatility.NeverCache, StorageLocation.Internal, true)) {
             try {
                 if ( !it.errorLoading ) {
                     val conditionResponse = it.asJsonObject<WeatherConditionResponse>()

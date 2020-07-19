@@ -9,7 +9,7 @@ import kotlinx.coroutines.sync.withLock
 class Preferences private constructor() {
     // Private variables
     private val preferences: MutableMap<String, String> = mutableMapOf()
-    private val preferencesAssetDescription = LocalAssetDescription("global-preferences", Volatility.Indefinite)
+    private val preferencesAssetDescription = LocalAssetDescription("global-preferences", Volatility.Indefinite, StorageLocation.Internal)
     private var version = 0
     private var writtenVersion = 0
     private val persistMutex = Mutex()
@@ -146,11 +146,13 @@ class Preferences private constructor() {
         val propertyNameDisplayedMapGroupId: String = "map.active.group"
         val propertyNameDisplayedSubMapId: String = "map.active.submap"
         val propertyNameMaxUnPersistedTileDiskSpace: String = "map.cache.size"
+        val propertyNameStoreMapsExternally: String = "map.storage.external"
 
         // Default values
         const val defaultValueMapProactiveDownload = false
         const val defaultValueDisplayedMapGroupId = 1
         const val defaultValueDisplayedSubMapId: String = ""
-        const val defaultValueMaxUnPersistedTileDiskSpace = 50 * 1000 * 1000
+        const val defaultValueMaxUnPersistedTileDiskSpace = /*50*/ 1 * 1000 * 1000
+        const val defaultValueStoreMapsExternally = false
     }
 }

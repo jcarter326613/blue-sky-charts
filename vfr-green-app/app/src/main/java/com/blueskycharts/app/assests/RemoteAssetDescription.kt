@@ -6,7 +6,8 @@ import kotlinx.coroutines.launch
 import java.io.InputStream
 import java.net.URL
 
-class RemoteAssetDescription(private val url: URL, volatility: Volatility, private var requiresCors: Boolean = false) : AssetDescription(volatility) {
+class RemoteAssetDescription(private val url: URL, volatility: Volatility, storageLocation: StorageLocation, private var requiresCors: Boolean = false) :
+    AssetDescription(volatility, storageLocation) {
     override val localPath: String
         get() = "${url.host}/${url.path}/${url.query}"
 

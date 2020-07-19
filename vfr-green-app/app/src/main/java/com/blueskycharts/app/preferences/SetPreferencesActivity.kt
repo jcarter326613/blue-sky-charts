@@ -2,6 +2,7 @@ package com.blueskycharts.app.preferences
 
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
+import android.widget.ToggleButton
 import com.blueskycharts.app.R
 import com.blueskycharts.app.map.configuration.Inventory
 import com.blueskycharts.app.map.configuration.MapConfiguration
@@ -13,6 +14,15 @@ class SetPreferencesActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_set_preferences)
+
+        // Connect the internal/external toggle
+        val internalExternalToggleButton = findViewById<ToggleButton>(R.id.internalExternalToggleButton)
+        val externalSet = Preferences.instance.getBooleanValue(Preferences.propertyNameStoreMapsExternally, Preferences.defaultValueStoreMapsExternally)
+        internalExternalToggleButton.isChecked = externalSet
+        internalExternalToggleButton.setOnCheckedChangeListener { _, isChecked ->
+            Preferences.instance.setPreference(Preferences.propertyNameStoreMapsExternally, isChecked)
+        }
+
         displayPreferences()
     }
 

@@ -53,8 +53,8 @@ class PreferenceToggleFragment(private val mapGroup: Int, private val mapName: S
                 private var percentageText: String = ""
                 private var sizeText: String = ""
 
-                override fun statisticsUpdated(totalFiles: Int, downloadedFiles: Int, downloadedSizeBytes: Int) {
-                    val percent = if (totalFiles == 0) {
+                override fun statisticsUpdated(totalFiles: Long, downloadedFiles: Long, downloadedSizeBytes: Long) {
+                    val percent = if (totalFiles == 0L) {
                         100
                     } else {
                         (downloadedFiles * 100) / totalFiles

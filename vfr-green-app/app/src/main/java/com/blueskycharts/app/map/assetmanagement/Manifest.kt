@@ -99,12 +99,7 @@ data class Manifest(val mapGroups: MutableMap<Int, MapList> = mutableMapOf()) : 
         jsonWriter.endObject()
 
         jsonWriter.name("touchOrder")
-        try {
-            touchOrder.write(jsonWriter)
-        } catch (e: Throwable) {
-            val t0 = 0
-            val t1 = 1
-        }
+        touchOrder.write(jsonWriter)
         jsonWriter.endObject()
     }
 
