@@ -20,30 +20,29 @@ class Inventory(val mapGroups: List<Group>) {
         suspend fun getConfiguration(): MapConfiguration? {
             var mapConfigurationFile = URL("${urlRoot}/metadata.json")
             val assetProvider = AssetProvider()
-            var asset: Asset? = null
+            var config: MapConfiguration? = null
             assetProvider.retrieveAsset(RemoteAssetDescription(mapConfigurationFile, Volatility.DayCache)) {
-                asset = it
-            }
-            while ( asset == null ) {
-                yield()
-            }
-            val assetStatic = asset?: return null
-            return if (!assetStatic.errorLoading) {
-                val reader = assetStatic.asJsonReader()
-                if (reader != null) {
-                    val mapPositions = MapConfiguration(
-                        MapMetaDataModelCollection.readFromJsonReader(reader),
-                        urlRoot,
-                        displayAll,
-                        id
-                    )
-                    mapPositions
+                config = if (!it.errorLoading) {
+                    val reader = it.asJsonReader()
+                    if (reader != null) {
+                        val mapPositions = MapConfiguration(
+                            MapMetaDataModelCollection.readFromJsonReader(reader),
+                            urlRoot,
+                            displayAll,
+                            id
+                        )
+                        mapPositions
+                    } else {
+                        null
+                    }
                 } else {
                     null
                 }
-            } else {
-                null
             }
+            while ( config == null ) {
+                yield()
+            }
+            return config
         }
     }
 

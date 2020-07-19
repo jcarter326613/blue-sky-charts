@@ -43,13 +43,15 @@ class TilePersistenceManager {
         requestVersion++
         stopRunning = false
         GlobalScope.launch {    //ok1
-            var iShouldRun: Boolean
+            var iShouldRun: Boolean = !running && runningVersion != requestVersion
 
-            singleThreadMutex.withLock {
-                iShouldRun = !running && runningVersion != requestVersion
-                if (iShouldRun) {
-                    running = true
-                    runningVersion = requestVersion
+            if ( iShouldRun ) {
+                singleThreadMutex.withLock {
+                    iShouldRun = !running && runningVersion != requestVersion
+                    if (iShouldRun) {
+                        running = true
+                        runningVersion = requestVersion
+                    }
                 }
             }
             if (iShouldRun) {
@@ -98,16 +100,14 @@ class TilePersistenceManager {
             val metadata = group.getConfiguration()
             if (metadata != null) {
                 for (map in metadata.mapList) {
-                    val manifest = assetProvider.getManifest(group.id, map)
+                    val manifest = TileAssetProvider.getReadOnlyManifest(group.id, map)
                     val currentMapVersionMetadata = metadata.getCurrentVersion(map)
                     val zoomMap = manifest?.versionList?.get(currentMapVersionMetadata?.version)?.zoomMap
                     var filesLoaded = 0
                     var fileSize = 0
                     if ( zoomMap != null ) {
                         for ( zPair in zoomMap ) {
-                            val z = zPair.key
                             for ( xPair in zPair.value ) {
-                                val x = xPair.key
                                 for ( yPair in xPair.value ) {
                                     filesLoaded++
                                     fileSize += yPair.value
@@ -129,10 +129,62 @@ class TilePersistenceManager {
         }
     }
 
-    private fun cleanOldNonPersistedTiles() {
+    private suspend fun cleanOldNonPersistedTiles() {
         // Figure out how much space we are taking up from un persisted maps
+        var usedBytes: Long = 0
+        for (group in Inventory.instance.mapGroups) {
+            val groupTileProvider = TileAssetProvider.getInstance(group)
+            val configuration = group.getConfiguration() ?: continue
+            for (mapName in configuration.mapList) {
+                val proactiveDownload = Preferences.instance.getBooleanValue(
+                    Preferences.propertyTemplateMapProactiveDownload(group.id, mapName),
+                    Preferences.defaultValueMapProactiveDownload
+                )
+                if (!proactiveDownload) {
+                    // This is a non persistent map, so count the size of the files in the manifest
+                    val manifest = TileAssetProvider.getReadOnlyManifest(group.id, mapName) ?: continue
+                    for (version in manifest.versionList) {
+                        for (zoomMap in version.value.zoomMap) {
+                            for (xMap in zoomMap.value) {
+                                for (yMap in xMap.value) {
+                                    val tileDescription = groupTileProvider.getTileFileDescription(mapName, version.key, zoomMap.key, xMap.key, yMap.key)
+                                    if (!DiskCacheFactory.instance.isAlias(tileDescription)) {
+                                        usedBytes += yMap.value
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
 
         // Start deleting files until we are down to our un-persisted cache limit
+        val unPersistedMaxSpaceBytes = Preferences.instance.getIntValue(
+            Preferences.propertyNameMaxUnPersistedTileDiskSpace, Preferences.defaultValueMaxUnPersistedTileDiskSpace
+        )
+        while (unPersistedMaxSpaceBytes < usedBytes) {
+            val oldestFile = TileAssetProvider.popOldestUnPersistedManifestFile() ?: break
+            val oldestFileGroup = Inventory.instance.findGroupById(oldestFile.groupId) ?: continue
+            val tileProvider = TileAssetProvider.getInstance(oldestFileGroup)
+
+            val properManifest = TileAssetProvider.getReadOnlyManifest(oldestFile.groupId, oldestFile.mapName) ?: continue
+            var firstLoop = true
+            for ( version in properManifest.versionList.keys ) {
+                val oldestFileDescriptor = tileProvider.getTileFileDescription(
+                    oldestFile.mapName,
+                    version,
+                    oldestFile.z,
+                    oldestFile.x,
+                    oldestFile.y
+                )
+                if (firstLoop) {
+                    usedBytes -= DiskCacheFactory.instance.getFileSize(oldestFileDescriptor)
+                    firstLoop = false
+                }
+                DiskCacheFactory.instance.deleteAsset(oldestFileDescriptor)
+            }
+        }
     }
 
     private suspend fun enforceAllPreferences() {
@@ -179,7 +231,7 @@ class TilePersistenceManager {
             // Create a map of all tiles for the map so that we can start to the ones that have been identified as
             // cached or copied to the cache from local sources
             val tileProvider = TileAssetProvider.getInstance(group)
-            val manifest = tileProvider.getManifest(mapsMetaData.groupId, name)
+            val manifest = TileAssetProvider.getReadOnlyManifest(mapsMetaData.groupId, name)
 
             // For each file
             for ( z in 0..metaData.maxZoom ) {

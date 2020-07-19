@@ -4,6 +4,8 @@ import android.content.Context
 import android.util.Log
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.yield
+import java.io.File
 import java.io.FileInputStream
 
 /**
@@ -55,7 +57,7 @@ final class DiskCache(private val context: Context) {
     }
 
     fun deleteAsset(assetDescription: AssetDescription) {
-        //TODO: implement
+        context.deleteFile(getFilePathForAsset(assetDescription))
     }
 
     fun createAlias(existingObject: AssetDescription, newAlias: AssetDescription) {
@@ -83,5 +85,23 @@ final class DiskCache(private val context: Context) {
         }
     }
 
-    private fun getFilePathForAsset(asset: Asset) = asset.description.localPath.replace("/", "-").replace(":", "_")
+    suspend fun isAlias(description: AssetDescription): Boolean {
+        var response: Boolean? = null
+        aliasCollection.access {
+            response = description.localPath in it.aliasFiles
+            false
+        }
+        return response as Boolean
+    }
+
+    fun getFileSize(description: AssetDescription): Long {
+        return try {
+            context.getFileStreamPath(getFilePathForAsset(description)).length()
+        } catch (e: Throwable) {
+            0
+        }
+    }
+
+    private fun getFilePathForAsset(asset: Asset) = getFilePathForAsset(asset.description)
+    private fun getFilePathForAsset(description: AssetDescription) = description.localPath.replace("/", "-").replace(":", "_")
 }

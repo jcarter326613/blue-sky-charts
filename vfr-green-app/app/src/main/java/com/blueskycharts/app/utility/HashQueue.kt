@@ -48,6 +48,7 @@ class HashQueue<T: JsonSerializable> {
     }
 
     private fun removeItem(it: Item<T>) {
+        keys.remove(it.hashCode())
         it.previous?.next = it.next
         it.next?.previous = it.previous
 
@@ -69,6 +70,9 @@ class HashQueue<T: JsonSerializable> {
     }
 
     private suspend fun bringToFront(item: Item<T>) {
+        if (item == head) {
+            return
+        }
         movementMutex.withLock {
             if (tail == item) {
                 tail = item.previous
@@ -77,8 +81,8 @@ class HashQueue<T: JsonSerializable> {
             item.next?.previous = item.previous
 
             item.next = head
-            head = item
             item.next?.previous = item
+            head = item
         }
     }
 
@@ -96,6 +100,7 @@ class HashQueue<T: JsonSerializable> {
         if ( tail == null ) {
             tail = newItem
         }
+        keys[item.hashCode()] = newItem
     }
 
     private class ReverseIterator<T: JsonSerializable>(private var item: Item<T>?): Iterator<T> {
@@ -111,7 +116,7 @@ class HashQueue<T: JsonSerializable> {
         }
     }
 
-    private class Item<T>(val value: T) {
+    private data class Item<T>(val value: T) {
         var previous: Item<T>? = null
         var next: Item<T>? = null
     }

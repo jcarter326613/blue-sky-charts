@@ -20,38 +20,13 @@ import java.net.URL
  * Manages the expiration of non persisted tiles using the manifest which should contain last access info for each tile in a heap
  */
 class TileAssetProvider private constructor(private val group: Inventory.Group) {
-    private val imageExtension = "jpg"
-    private val manifestDescription: AssetDescription
-    private var manifest: PersistentFile<Manifest>
-
-    private val assetProvider = AssetProvider()
-
-    init {
-        val manifestLocation = "tileAssetProvider/${group.id}/manifest"
-        manifestDescription = LocalAssetDescription(manifestLocation, Volatility.Indefinite)
-
-        val asset = assetProvider.retrieveLocalAsset(manifestDescription)
-        manifest = PersistentFile(if (asset.errorLoading) {
-                Manifest()
-            } else {
-                val reader = asset.asJsonReader()
-                if (reader == null) {
-                    Manifest()
-                } else {
-                    Manifest.readFromJsonReader(reader)
-                }
-            }, manifestDescription)
-    }
-
     fun retrieveTile(mapName: String, mapVersion: String, zoom: Int, x: Int, y: Int, callback: ((asset: Asset) -> Unit)) {
         // Make sure the manifest is loaded before requesting any tiles
-        val manifest = this@TileAssetProvider.manifest
+        val manifest = manifest
 
         GlobalScope.launch(Dispatchers.IO) {
             manifest.access {
-                GlobalScope.launch(Dispatchers.IO) {
-                    it.touchFile(group.id, mapName, zoom, x, y)
-                }
+                it.touchFile(group.id, mapName, zoom, x, y)
                 return@access true
             }
         }
@@ -112,33 +87,52 @@ class TileAssetProvider private constructor(private val group: Inventory.Group) 
         return RemoteAssetDescription(URL(tileUrl), Volatility.Indefinite)
     }
 
-    suspend fun getManifest(mapGroupId: Int, map: String): Manifest.MapList.MapVersionList? {
-        // Ensure the manifest is loaded
-        var manifest: PersistentFile<Manifest>? = this@TileAssetProvider.manifest
-        while ( manifest == null ) {
-            yield()
-            manifest = this@TileAssetProvider.manifest
-        }
-
-        var retVal: Manifest.MapList.MapVersionList? = null
-        manifest.access {
-            retVal = it.mapGroups[mapGroupId]?.mapList?.get(map)?.copy()
-            return@access false
-        }
-        return retVal
-    }
-
     companion object {
         private var instances: MutableMap<Int, TileAssetProvider> = mutableMapOf()
+        private val manifest: PersistentFile<Manifest>
+        private const val imageExtension = "jpg"
+        private val assetProvider = AssetProvider()
 
         init {
             for ( group in Inventory.instance.mapGroups ) {
                 instances[group.id] = TileAssetProvider(group)
             }
+
+            val manifestLocation = "tileAssetProvider/manifest"
+            val manifestDescription = LocalAssetDescription(manifestLocation, Volatility.Indefinite)
+            val asset = assetProvider.retrieveLocalAsset(manifestDescription)
+            manifest = PersistentFile(if (asset.errorLoading) {
+                Manifest()
+            } else {
+                val reader = asset.asJsonReader()
+                if (reader == null) {
+                    Manifest()
+                } else {
+                    Manifest.readFromJsonReader(reader)
+                }
+            }, manifestDescription)
         }
 
         fun getInstance(group: Inventory.Group): TileAssetProvider {
             return instances[group.id]?: throw Error("Asset provider not created for group ${group.id}")
+        }
+
+        suspend fun getReadOnlyManifest(mapGroupId: Int, map: String): Manifest.MapList.MapVersionList? {
+            var retVal: Manifest.MapList.MapVersionList? = null
+            manifest.access {
+                retVal = it.mapGroups[mapGroupId]?.mapList?.get(map)?.copy()
+                return@access false
+            }
+            return retVal
+        }
+
+        suspend fun popOldestUnPersistedManifestFile(): Manifest.FileDescription? {
+            var oldest: Manifest.FileDescription? = null
+            manifest.access {
+                oldest = it.popOldestUnPersistedFile()
+                true
+            }
+            return oldest
         }
     }
 }

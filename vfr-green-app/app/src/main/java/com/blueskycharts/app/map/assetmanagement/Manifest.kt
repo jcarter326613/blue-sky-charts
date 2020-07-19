@@ -36,6 +36,29 @@ data class Manifest(val mapGroups: MutableMap<Int, MapList> = mutableMapOf()) : 
                     )
                 ) {
                     touchOrder.removeItem(iterator)
+                    val mapLocal = mapGroups[item.groupId]?.mapList?.get(item.mapName)
+                    item.versions = mapLocal?.versionList?.keys
+                    val allVersions = mapLocal?.versionList
+                    if ( allVersions != null ) {
+                        val versionsToDelete = mutableListOf<String>()
+                        for (version in allVersions) {
+                            val zoomMap = version.value.zoomMap[item.z]
+                            val xMap = zoomMap?.get(item.x)
+                            xMap?.remove(item.y)
+                            if (xMap != null && xMap.isEmpty()) {
+                                zoomMap.remove(item.x)
+                            }
+                            if (zoomMap != null && zoomMap.isEmpty()) {
+                                version.value.zoomMap.remove(item.z)
+                            }
+                            if (version.value.zoomMap.isEmpty()) {
+                                versionsToDelete.add(version.key)
+                            }
+                        }
+                        for (version in versionsToDelete) {
+                            allVersions.remove(version)
+                        }
+                    }
                     return item
                 }
             }
@@ -46,6 +69,8 @@ data class Manifest(val mapGroups: MutableMap<Int, MapList> = mutableMapOf()) : 
     }
 
     data class FileDescription(val groupId: Int, val mapName: String, val z: Int, val x: Int, val y: Int) : JsonSerializable {
+        var versions: Set<String>? = null
+
         override suspend fun write(jsonWriter: JsonWriter) {
             jsonWriter.beginObject()
             jsonWriter.name("groupId")
@@ -74,7 +99,12 @@ data class Manifest(val mapGroups: MutableMap<Int, MapList> = mutableMapOf()) : 
         jsonWriter.endObject()
 
         jsonWriter.name("touchOrder")
-        touchOrder.write(jsonWriter)
+        try {
+            touchOrder.write(jsonWriter)
+        } catch (e: Throwable) {
+            val t0 = 0
+            val t1 = 1
+        }
         jsonWriter.endObject()
     }
 

@@ -19,7 +19,7 @@ class PersistentFile<T: PersistentFileContents>(private val contents: T, private
      * Allows the caller to make a change to the wrapped object.  The callback must return true if a
      * change was made and false otherwise.
      */
-    suspend fun access(callback: ((it: T) -> Boolean) ) {
+    suspend fun access(callback: (suspend (it: T) -> Boolean) ) {
         val changeMade: Boolean
         editMutex.withLock {
             changeMade = callback(contents)
