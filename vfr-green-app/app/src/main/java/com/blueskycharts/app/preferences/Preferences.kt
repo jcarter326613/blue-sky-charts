@@ -152,7 +152,7 @@ class Preferences private constructor() {
         const val defaultValueMapProactiveDownload = false
         const val defaultValueDisplayedMapGroupId = 1
         const val defaultValueDisplayedSubMapId: String = ""
-        const val defaultValueMaxUnPersistedTileDiskSpace = /*50*/ 1 * 1000 * 1000
+        const val defaultValueMaxUnPersistedTileDiskSpace = 50 * 1000 * 1000
         const val defaultValueStoreMapsExternally = false
     }
 }
