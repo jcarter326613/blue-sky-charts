@@ -230,8 +230,8 @@ class TilePersistenceManager {
             return
         }
 
-        if (Preferences.instance.getBooleanValue(Preferences.propertyTemplateMapProactiveDownload(mapsMetaData.groupId, name), Preferences.defaultValueMapProactiveDownload) &&
-            DiskCacheFactory.instance.isExternalStorageWritable) {
+        if (Preferences.instance.getBooleanValue(Preferences.propertyTemplateMapProactiveDownload(mapsMetaData.groupId, name), Preferences.defaultValueMapProactiveDownload) /*&&
+            DiskCacheFactory.instance.isExternalStorageWritable this was wrong anyway.  idn't download for internal when that was a thing*/) {
             val currentMapVersion = metaData.version ?: return
 
             // Create a map of all tiles for the map so that we can start to the ones that have been identified as

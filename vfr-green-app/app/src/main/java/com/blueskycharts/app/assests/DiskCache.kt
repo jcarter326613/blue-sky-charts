@@ -9,6 +9,7 @@ import kotlinx.coroutines.yield
 import java.io.File
 import java.io.FileInputStream
 import java.io.FileOutputStream
+import java.util.*
 
 /**
  * Handles manipulation of the on disk cache.
@@ -19,6 +20,7 @@ final class DiskCache(private val context: Context) {
     var externalCheckFileSuccess = false
     val isExternalStorageWritable: Boolean
         get() {
+            return false /*
             return if ( Environment.getExternalStorageState() == Environment.MEDIA_MOUNTED ) {
                 if ( externalCheckFilePerformed ) {
                     externalCheckFileSuccess
@@ -37,14 +39,18 @@ final class DiskCache(private val context: Context) {
 
                     externalCheckFilePerformed = true
                     externalCheckFileSuccess = evidence == "1"
+                    file.delete()
                     externalCheckFileSuccess
                 }
             } else {
                 false
-            }
+            }*/
         }
     val isExternalStorageReadable: Boolean
-        get() = Environment.getExternalStorageState() in setOf(Environment.MEDIA_MOUNTED, Environment.MEDIA_MOUNTED_READ_ONLY)
+        get() {
+            return false
+            //return Environment.getExternalStorageState() in setOf(Environment.MEDIA_MOUNTED, Environment.MEDIA_MOUNTED_READ_ONLY)
+        }
     private var aliasCollection: PersistentFile<AliasCollection>
 
     init {
@@ -61,6 +67,28 @@ final class DiskCache(private val context: Context) {
             }
         } else {
             PersistentFile(AliasCollection(), aliasFileDescriptor)
+        }
+    }
+
+    fun isExpired(assetDescription: AssetDescription): Boolean {
+        when(assetDescription.volatility) {
+            Volatility.Indefinite -> return false
+            Volatility.NeverCache -> return true
+            Volatility.DayCache -> {
+                val now = Date()
+                val aDayAgo = now.time - (24 * 60 * 60 * 1000)
+                return try {
+                    if ( assetDescription.storageLocation == StorageLocation.External ) {
+                        val file = File(context.getExternalFilesDir(null), getFilePathForAsset(assetDescription))
+                        file.lastModified() < aDayAgo
+                    } else {
+                        context.getFileStreamPath(getFilePathForAsset(assetDescription)).lastModified() < aDayAgo
+                    }
+                } catch (e: Throwable) {
+                    true
+                }
+            }
+            else -> throw Error("Unrecognized volatility in isExpired")
         }
     }
 
@@ -99,7 +127,7 @@ final class DiskCache(private val context: Context) {
                     }
                     FileOutputStream(file)
                 } else {
-                    context.openFileOutput(getFilePathForAsset(asset), Context.MODE_PRIVATE);
+                    context.openFileOutput(getFilePathForAsset(asset), Context.MODE_PRIVATE)
                 }
 
             // Write the file to disk
