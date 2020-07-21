@@ -2,6 +2,7 @@
 export class Condition {
     public longitude: number;
     public latitude: number;
+    public issueTime: number;
     
     public ceiling: number | undefined;
     public visibility: number | undefined;
@@ -16,5 +17,6 @@ export class Condition {
     constructor() {
         this.longitude = 0;
         this.latitude = 0;
+        this.issueTime = 0;
     }
 }

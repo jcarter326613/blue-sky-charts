@@ -111,6 +111,7 @@ export class ConditionCompiler {
                     let condition = new Condition();
                     condition.latitude = info.latitude;
                     condition.longitude = info.longitude;
+                    condition.issueTime = info.issueTime;
                     if ( this.assigner(condition, info) ) {
                         this.returnConditionList.push(condition);
                         if ( this.returnOldestIssueDate === undefined || this.returnOldestIssueDate > info.issueTime ) {
