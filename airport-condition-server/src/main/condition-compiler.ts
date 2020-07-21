@@ -92,6 +92,7 @@ export class ConditionCompiler {
         if ( this.buffer === undefined || this.allConditions === undefined || this.assigner === undefined ) {
             return;
         }
+        let now = new Date()
         while ( !this.allConditions.isEmpty ) {
             let info = this.allConditions.pop();
             if ( info !== undefined && info.latitude !== undefined && info.longitude !== undefined && info.issueTime !== undefined ) {
@@ -111,7 +112,7 @@ export class ConditionCompiler {
                     let condition = new Condition();
                     condition.latitude = info.latitude;
                     condition.longitude = info.longitude;
-                    condition.issueTime = info.issueTime;
+                    condition.issueAgeSeconds = Math.ceil((now.getTime() - info.issueTime) / 1000)
                     if ( this.assigner(condition, info) ) {
                         this.returnConditionList.push(condition);
                         if ( this.returnOldestIssueDate === undefined || this.returnOldestIssueDate > info.issueTime ) {
