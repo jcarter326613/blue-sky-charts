@@ -10,7 +10,7 @@ import kotlin.math.*
 
 class MapDataView(private val dataProvider: DataProvider, private val overlayType: OverlayTypes, private val map: Map) : SubMapView, DataReceiver {
     // Metadata
-    private var dataAgeSeconds: Int? = null
+    private var dataAgeSeconds: Long? = null
     override var fileExtent: RectangularArea? = null
         private set
 
@@ -62,11 +62,11 @@ class MapDataView(private val dataProvider: DataProvider, private val overlayTyp
         this.dataAgeSeconds = null
     }
 
-    override fun getRequestedInformationAgeSeconds(): Int? {
+    override fun getRequestedInformationAgeSeconds(): Long? {
         return this.dataAgeSeconds;
     }
 
-    override fun receiveData(location: PointGeo, data: WeatherCondition, dataAgeSeconds: Int, immediate: Boolean, canvas: Canvas?, receiverData: Any?) {
+    override fun receiveData(location: PointGeo, data: WeatherCondition, dataAgeSeconds: Long, immediate: Boolean, canvas: Canvas?, receiverData: Any?) {
         if ( this.isDisposed ) {
             return
         }
@@ -74,11 +74,6 @@ class MapDataView(private val dataProvider: DataProvider, private val overlayTyp
         if ( !immediate || canvas == null || receiverData == null || receiverData !is RenderData) {
             this.map.requestRedraw()
             return
-        }
-
-        val das = this.dataAgeSeconds
-        if ( das == null || das < dataAgeSeconds ) {
-            this.dataAgeSeconds = dataAgeSeconds
         }
 
         // Figure out where the canvas should be translated to
@@ -92,6 +87,10 @@ class MapDataView(private val dataProvider: DataProvider, private val overlayTyp
             else -> {
                 return
             }
+        }
+        if (locationPercentage.x < 0 || locationPercentage.x > 1 || locationPercentage.y < 0 || locationPercentage.y > 1) {
+            //The data element is off screen, skip it
+            return
         }
         val drawLocationX = receiverData.destination.upperLeft.x + receiverData.destination.width * locationPercentage.x
         val drawLocationY = receiverData.destination.upperLeft.y + receiverData.destination.height * locationPercentage.y
@@ -110,6 +109,12 @@ class MapDataView(private val dataProvider: DataProvider, private val overlayTyp
             else -> Log.e(null, "Request to render unknown type.")
         }
         canvas.restoreToCount(restoreTo)
+
+        //Update the data age if needed
+        val das = this.dataAgeSeconds
+        if ( das == null || das < dataAgeSeconds ) {
+            this.dataAgeSeconds = dataAgeSeconds
+        }
     }
 
     private fun renderCloudCover(data: WeatherCondition, canvas: Canvas) {

@@ -7,5 +7,5 @@ import com.blueskycharts.app.map.models.WeatherCondition
 import com.blueskycharts.app.map.models.WeatherConditionResponse
 
 interface DataReceiver {
-    fun receiveData(location: PointGeo, data: WeatherCondition, dataAgeSeconds: Int, immediate: Boolean, canvas: Canvas?, receiverData: Any?)
+    fun receiveData(location: PointGeo, data: WeatherCondition, dataAgeSeconds: Long, immediate: Boolean, canvas: Canvas?, receiverData: Any?)
 }

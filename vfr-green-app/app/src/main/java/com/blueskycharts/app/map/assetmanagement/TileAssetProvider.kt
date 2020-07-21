@@ -79,7 +79,11 @@ class TileAssetProvider private constructor(private val group: Inventory.Group) 
                 callback(it)
             }
         } else {
-            callback(localAsset)
+            try {
+                callback(localAsset)
+            } catch (e: Throwable) {
+                assetProvider.retrieveAsset(assetDescription, callback)
+            }
         }
     }
 

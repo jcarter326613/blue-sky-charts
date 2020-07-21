@@ -344,17 +344,17 @@ class NavigableMap2d(context: Context, attributes: AttributeSet) :
                     canvas.restore()
 
                     // Trigger a refresh for when the information age needs to be updated
-                    val secondsToSleep =
+                    val secondsToSleep: Long =
                         when (informationAge) {
-                            60 -> 1
-                            0 -> 61
+                            60L -> 1
+                            0L -> 61
                             else -> (60 - (informationAge % 60)) + 1
                         }
 
                     val task: TimerTask = timerTask {
                         this@NavigableMap2d.requestRedraw()
                     }
-                    redrawTimer.schedule(task, secondsToSleep * 1000L)
+                    redrawTimer.schedule(task, secondsToSleep * 1000)
                 }
             }
         }
@@ -395,7 +395,7 @@ class NavigableMap2d(context: Context, attributes: AttributeSet) :
         canvas.restore()
     }
 
-    private fun getInformationAgeLabel(ageSeconds: Int): String {
+    private fun getInformationAgeLabel(ageSeconds: Long): String {
         if ( ageSeconds < 60 ) {
             return "Age 1 minute";
         }

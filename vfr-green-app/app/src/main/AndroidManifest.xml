@@ -20,7 +20,8 @@
             android:name=".preferences.SetPreferencesActivity"
             android:parentActivityName=".map.MapViewActivity" />
         <activity
-            android:name=".map.MapViewActivity" />
+            android:name=".map.MapViewActivity"
+            android:theme="@style/AppTheme.NoActionBar" />
         <activity
             android:name=".subscription.SubscriptionActivity"
             android:theme="@style/AppTheme.NoActionBar">

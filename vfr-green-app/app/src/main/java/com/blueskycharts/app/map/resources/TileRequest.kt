@@ -21,10 +21,11 @@ class TileRequest(private val provider: TileProvider, private var receiver: Tile
                     val success = bitmap.width > 1;
                     this@TileRequest.completeRequest(success);
                 } else {
-                    this@TileRequest.completeRequest(false);
+                    this@TileRequest.completeRequest(false)
                 }
             } catch (e: Throwable) {
-                this@TileRequest.completeRequest(false);
+                this@TileRequest.completeRequest(false)
+                throw e
             }
         }
     }

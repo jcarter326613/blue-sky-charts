@@ -48,7 +48,7 @@ class DataRequest(private val provider: DataProvider, private var receiver: Data
         provider.retrieveAsset(RemoteAssetDescription(URL(url), Volatility.NeverCache, StorageLocation.Internal, true)) {
             try {
                 if ( !it.errorLoading ) {
-                    val conditionResponse = it.asJsonObject<WeatherConditionResponse>()
+                    val conditionResponse = it.asJsonObject<WeatherConditionResponse>() //TODO: replace asJsonObject with asJsonReader
                     this@DataRequest.data = conditionResponse
                     this@DataRequest.timeReceived = System.currentTimeMillis()
                     if (conditionResponse != null) {
@@ -74,14 +74,13 @@ class DataRequest(private val provider: DataProvider, private var receiver: Data
         if ( data == null || oldestDataAgeAtRetrievalSeconds == null || dataConditions == null || receiver == null ) return
 
         val secondsSinceRequest = ceil((System.currentTimeMillis() - this.timeReceived) / 1000.0).toInt()
-        val dataAgeSeconds =  oldestDataAgeAtRetrievalSeconds + secondsSinceRequest
         for ( condition in dataConditions ) {
-            val longitude = condition.longitude
-            val latitude = condition.latitude
-            if (longitude == null || latitude == null) continue
+            val longitude = condition.longitude ?: continue
+            val latitude = condition.latitude ?: continue
+            val issueAgeSeconds = condition.issueAgeSeconds ?: continue
 
             val geoLocation = PointGeo(longitude.toDouble(), latitude.toDouble())
-            receiver.receiveData(geoLocation, condition, dataAgeSeconds, immediate, canvas, this.receiverData)
+            receiver.receiveData(geoLocation, condition, issueAgeSeconds + secondsSinceRequest, immediate, canvas, this.receiverData)
         }
     }
 

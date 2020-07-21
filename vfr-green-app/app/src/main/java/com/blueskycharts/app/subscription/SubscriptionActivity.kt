@@ -117,6 +117,7 @@ class SubscriptionActivity : AppCompatActivity() {
             val alertDialog = AlertDialog.Builder(this@SubscriptionActivity)
                 .setMessage("Please accept changes to the privacy policy.")
                 .setPositiveButton("I accept") { dialogInterface: DialogInterface, i: Int ->
+                    //TODO: Set preferences record for what date we accepted the policy on
                     if ( appUpdateNeeded ) {
                         showAppUpdateDialog()
                     }

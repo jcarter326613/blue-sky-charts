@@ -90,7 +90,7 @@ class MapTileView(private val tileProvider: TileProviderInterface, private val m
     override fun resetRequestedInformationAgeRecord() {
     }
 
-    override fun getRequestedInformationAgeSeconds(): Int? {
+    override fun getRequestedInformationAgeSeconds(): Long? {
         return null;
     }
 

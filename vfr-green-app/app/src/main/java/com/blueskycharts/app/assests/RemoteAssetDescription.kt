@@ -39,6 +39,8 @@ class RemoteAssetDescription(private val url: URL, volatility: Volatility, stora
                     callback(asset)
                 } catch ( e: Throwable ) {
                     Log.e(null, e.message ?: "Unknown error after successfully writing asset to disk after retrieval")
+                    asset.errorLoading = true
+                    callback(asset)
                 }
             } catch (e: Throwable) {
                 Log.e(null, e.message ?: "Error downloading file $url")
