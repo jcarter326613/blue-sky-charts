@@ -1,0 +1,7 @@
+#!/bin/bash
+set -e
+
+tsc --build --clean
+tsc --build
+./node_modules/serverless/bin/serverless.js deploy --verbose
+tsc --build --clean
