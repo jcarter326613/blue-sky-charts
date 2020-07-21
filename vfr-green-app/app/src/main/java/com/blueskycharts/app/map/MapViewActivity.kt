@@ -1,13 +1,16 @@
-package com.blueskycharts.app
+package com.blueskycharts.app.map
 
+import android.content.Intent
 import android.os.Bundle
 import androidx.appcompat.app.AppCompatActivity
+import com.blueskycharts.app.R
 import com.blueskycharts.app.map.assetmanagement.TilePersistenceManager
+import com.blueskycharts.app.mapselection.MapSelectionActivity
 
-class MainActivity : AppCompatActivity() {
+class MapViewActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        setContentView(R.layout.activity_main)
+        setContentView(R.layout.activity_map_view)
 
         TilePersistenceManager.instance
     }

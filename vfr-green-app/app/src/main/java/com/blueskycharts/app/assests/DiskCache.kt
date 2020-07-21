@@ -1,15 +1,13 @@
 package com.blueskycharts.app.assests
 
 import android.content.Context
-import android.os.Environment
-import android.util.Log
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
-import kotlinx.coroutines.yield
 import java.io.File
 import java.io.FileInputStream
 import java.io.FileOutputStream
 import java.util.*
+import com.blueskycharts.app.utility.Log
 
 /**
  * Handles manipulation of the on disk cache.

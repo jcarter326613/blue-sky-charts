@@ -2,7 +2,6 @@ package com.blueskycharts.app.menu
 
 import android.content.Intent
 import android.os.Bundle
-import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -15,6 +14,7 @@ import com.blueskycharts.app.preferences.SetPreferencesActivity
 import com.blueskycharts.app.map.models.OverlayViewModel
 import com.blueskycharts.app.map.view.OverlayTypes
 import com.blueskycharts.app.mapselection.MapSelectionActivity
+import com.blueskycharts.app.utility.Log
 
 class MainMenuFragment() : Fragment() {
     private var overlayModel: OverlayViewModel? = null

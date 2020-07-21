@@ -1,11 +1,6 @@
 package com.blueskycharts.app.assests
 
-import android.content.Context
-import android.util.Log
-import kotlinx.coroutines.GlobalScope
-import kotlinx.coroutines.launch
-import java.io.InputStream
-import java.net.URL
+import com.blueskycharts.app.utility.Log
 
 /**
  * Provides access to assets whether on disk or remotely stored

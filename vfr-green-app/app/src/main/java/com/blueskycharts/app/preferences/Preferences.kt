@@ -148,6 +148,7 @@ class Preferences private constructor() {
         val propertyNameDisplayedSubMapId: String = "map.active.submap"
         val propertyNameMaxUnPersistedTileDiskSpace: String = "map.cache.size"
         val propertyNameStoreMapsExternally: String = "map.storage.external"
+        val propertyNameAcceptedPrivacyVersion: String = "privacypolicy.accepted"
 
         // Default values
         const val defaultValueMapProactiveDownload = false
@@ -156,5 +157,6 @@ class Preferences private constructor() {
         const val defaultValueMaxUnPersistedTileDiskSpace = 50 * 1000 * 1000
         const val defaultValueStoreMapsExternally = false
         const val defaultValueMapPosition = ""
+        const val defaultValueAcceptedPrivacyVersion = ""
     }
 }

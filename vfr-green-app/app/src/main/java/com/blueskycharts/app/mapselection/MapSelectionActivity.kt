@@ -1,11 +1,13 @@
 package com.blueskycharts.app.mapselection
 
+import android.content.Intent
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.widget.Button
 import android.widget.LinearLayout
 import android.widget.TextView
 import com.blueskycharts.app.R
+import com.blueskycharts.app.map.MapViewActivity
 import com.blueskycharts.app.map.configuration.Inventory
 import com.blueskycharts.app.preferences.Preferences
 import kotlinx.coroutines.Dispatchers
@@ -16,6 +18,9 @@ class MapSelectionActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_map_selection)
+
+        // Make sure we're allowed to be here
+        //startActivity(Intent(this, MapViewActivity::class.java))
         displayMaps()
     }
 

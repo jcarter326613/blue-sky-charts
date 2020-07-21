@@ -15,12 +15,14 @@
         android:theme="@style/AppTheme">
         <activity
             android:name=".mapselection.MapSelectionActivity"
-            android:parentActivityName=".MainActivity" />
+            android:parentActivityName=".map.MapViewActivity" />
         <activity
             android:name=".preferences.SetPreferencesActivity"
-            android:parentActivityName=".MainActivity" />
+            android:parentActivityName=".map.MapViewActivity" />
         <activity
-            android:name=".MainActivity"
+            android:name=".map.MapViewActivity" />
+        <activity
+            android:name=".subscription.SubscriptionActivity"
             android:theme="@style/AppTheme.NoActionBar">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
@@ -28,5 +30,4 @@
             </intent-filter>
         </activity>
     </application>
-
 </manifest>

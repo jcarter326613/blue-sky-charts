@@ -1,12 +1,11 @@
 package com.blueskycharts.app.map.view
 
 import android.graphics.*
-import android.util.Log
 import com.blueskycharts.app.coordinates.*
-import com.blueskycharts.app.map.models.SubMapModel
 import com.blueskycharts.app.map.models.WeatherCondition
 import com.blueskycharts.app.map.resources.DataProvider
 import com.blueskycharts.app.map.resources.DataReceiver
+import com.blueskycharts.app.utility.Log
 import kotlin.math.*
 
 class MapDataView(private val dataProvider: DataProvider, private val overlayType: OverlayTypes, private val map: Map) : SubMapView, DataReceiver {

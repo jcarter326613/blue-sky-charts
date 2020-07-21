@@ -1,7 +1,6 @@
 package com.blueskycharts.app.map.resources
 
 import android.graphics.Canvas
-import android.util.Log
 import com.blueskycharts.app.assests.AssetProvider
 import com.blueskycharts.app.coordinates.BoxGeo
 import com.blueskycharts.app.coordinates.PointGeo
@@ -10,6 +9,7 @@ import com.blueskycharts.app.map.view.OverlayTypes
 import com.blueskycharts.app.assests.RemoteAssetDescription
 import com.blueskycharts.app.assests.StorageLocation
 import com.blueskycharts.app.assests.Volatility
+import com.blueskycharts.app.utility.Log
 import java.net.URL
 import kotlin.math.ceil
 

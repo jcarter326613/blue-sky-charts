@@ -26,6 +26,7 @@ android {
 
 dependencies {
     implementation fileTree(dir: "libs", include: ["*.jar"])
+    implementation 'com.android.billingclient:billing-ktx:3.0.0'
     implementation 'com.google.android:flexbox:2.0.1'
     implementation 'com.fasterxml.jackson.module:jackson-module-kotlin:2.11.0'
     implementation "org.jetbrains.kotlin:kotlin-stdlib:$kotlin_version"

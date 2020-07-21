@@ -1,18 +1,16 @@
 package com.blueskycharts.app.map
 
 import android.os.Bundle
-import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.widget.ImageButton
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProvider
 import com.blueskycharts.app.R
 import com.blueskycharts.app.map.models.OverlayViewModel
 import com.blueskycharts.app.map.view.NavigableMap2d
-import com.blueskycharts.app.map.view.OverlayTypes
+import com.blueskycharts.app.utility.Log
 
 class NavigableMapFragment: Fragment() {
 

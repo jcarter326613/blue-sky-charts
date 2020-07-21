@@ -1,10 +1,10 @@
 package com.blueskycharts.app.assests
 
-import android.util.Log
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
 import java.io.InputStream
 import java.net.URL
+import com.blueskycharts.app.utility.Log
 
 class RemoteAssetDescription(private val url: URL, volatility: Volatility, storageLocation: StorageLocation, private var requiresCors: Boolean = false) :
     AssetDescription(volatility, storageLocation) {
