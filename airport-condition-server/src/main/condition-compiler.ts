@@ -354,7 +354,7 @@ export class ConditionCompiler {
     }
 
     private assignValueWind(condition: Condition, info: AirportInformation): boolean {
-        if ( info.windDirection === undefined || info.windGust === undefined || info.windSpeed === undefined ) {
+        if ( info.windDirection === undefined || info.windSpeed === undefined ) {
             return false;
         }
         condition.windDirection = info.windDirection
