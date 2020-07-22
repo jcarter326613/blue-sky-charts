@@ -1,6 +1,8 @@
 package com.blueskycharts.app.map.view
 
 import android.graphics.*
+import android.util.Range
+import androidx.core.graphics.red
 import com.blueskycharts.app.coordinates.*
 import com.blueskycharts.app.map.models.WeatherCondition
 import com.blueskycharts.app.map.resources.DataProvider
@@ -12,7 +14,8 @@ class MapDataView(private val dataProvider: DataProvider, private val overlayTyp
     private val maxVfrElevation = 18000
 
     // Metadata
-    private var dataAgeSeconds: Long? = null
+    private var minDataAgeSeconds: Long? = null
+    private var maxDataAgeSeconds: Long? = null
     override var fileExtent: RectangularArea? = null
         private set
 
@@ -61,11 +64,14 @@ class MapDataView(private val dataProvider: DataProvider, private val overlayTyp
     }
 
     override fun resetRequestedInformationAgeRecord() {
-        this.dataAgeSeconds = null
+        this.minDataAgeSeconds = null
+        this.maxDataAgeSeconds = null
     }
 
-    override fun getRequestedInformationAgeSeconds(): Long? {
-        return this.dataAgeSeconds;
+    override fun getRequestedInformationAgeSeconds(): LongRange? {
+        val x1 = this.minDataAgeSeconds?: return null
+        val x2 = this.maxDataAgeSeconds?: return null
+        return x1..x2
     }
 
     override fun receiveData(location: PointGeo, data: WeatherCondition, dataAgeSeconds: Long, immediate: Boolean, canvas: Canvas?, receiverData: Any?) {
@@ -94,38 +100,60 @@ class MapDataView(private val dataProvider: DataProvider, private val overlayTyp
             //The data element is off screen, skip it
             return
         }
-        val drawLocationX = receiverData.destination.upperLeft.x + receiverData.destination.width * locationPercentage.x
-        val drawLocationY = receiverData.destination.upperLeft.y + receiverData.destination.height * locationPercentage.y
+
+        //Update the data age if needed
+        val x1 = this.minDataAgeSeconds
+        val x2 = this.maxDataAgeSeconds
+        if ( x1 == null || x1 > dataAgeSeconds ) {
+            this.minDataAgeSeconds = dataAgeSeconds
+        }
+        if ( x2 == null || x2 < dataAgeSeconds ) {
+            this.maxDataAgeSeconds = dataAgeSeconds
+        }
 
         // Draw the information on the screen
+        if ( receiverData.skipDraw ) {
+            return
+        }
+        val drawLocationX = receiverData.destination.upperLeft.x + receiverData.destination.width * locationPercentage.x
+        val drawLocationY = receiverData.destination.upperLeft.y + receiverData.destination.height * locationPercentage.y
         val restoreTo = canvas.save()
         canvas.translate(drawLocationX.toFloat(), drawLocationY.toFloat())
         when ( this.overlayType ) {
-            OverlayTypes.Ceiling -> this.renderCeiling(data, canvas)
-            OverlayTypes.Category -> this.renderCategory(data, canvas)
-            OverlayTypes.DewPointSpread -> this.renderDewpointSpread(data, canvas)
-            OverlayTypes.Temperature -> this.renderTemperature(data, canvas)
-            OverlayTypes.Visibility -> this.renderVisibility(data, canvas)
-            OverlayTypes.SurfaceWind -> this.renderWind(data, canvas)
-            OverlayTypes.CloudCover -> this.renderCloudCover(data, canvas)
+            OverlayTypes.Ceiling -> this.renderCeiling(data, dataAgeSeconds, canvas)
+            OverlayTypes.Category -> this.renderCategory(data, dataAgeSeconds, canvas)
+            OverlayTypes.DewPointSpread -> this.renderDewpointSpread(data, dataAgeSeconds, canvas)
+            OverlayTypes.Temperature -> this.renderTemperature(data, dataAgeSeconds, canvas)
+            OverlayTypes.Visibility -> this.renderVisibility(data, dataAgeSeconds, canvas)
+            OverlayTypes.SurfaceWind -> this.renderWind(data, dataAgeSeconds, canvas)
+            OverlayTypes.CloudCover -> this.renderCloudCover(data, dataAgeSeconds, canvas)
             else -> Log.e(null, "Request to render unknown type.")
         }
         canvas.restoreToCount(restoreTo)
-
-        //Update the data age if needed
-        val das = this.dataAgeSeconds
-        if ( das == null || das < dataAgeSeconds ) {
-            this.dataAgeSeconds = dataAgeSeconds
-        }
     }
 
-    private fun renderCloudCover(data: WeatherCondition, canvas: Canvas) {
+    private fun getColorForAge(ageSeconds: Long): Int? {
+        val minDataAgeSeconds = this.minDataAgeSeconds
+        val maxDataAgeSeconds = this.maxDataAgeSeconds
+        if (minDataAgeSeconds == null || maxDataAgeSeconds == null || maxDataAgeSeconds - minDataAgeSeconds <= maxNoRangeDisplayDiff) {
+            return null
+        }
+        val percentage = (ageSeconds - minDataAgeSeconds) / (maxDataAgeSeconds - minDataAgeSeconds).toDouble()
+        return Color.argb(
+            ceil(255 * percentage).toInt(),
+            oldInformationColorRed,
+            oldInformationColorGreen,
+            oldInformationColorBlue)
+    }
+
+    private fun renderCloudCover(data: WeatherCondition, dataAgeSeconds: Long, canvas: Canvas) {
         if ( data.cloudCover == null ) {
             return;
         }
 
         // Center the coordinates on the location the indicator should be
         val circleRadius = map.convertDipToPixels(20f)
+        val ageRadius = map.convertDipToPixels(20f + standardAgeBorderDp)
         var drawIndicator = false
         var drawX = false
         var angle = 0f
@@ -155,6 +183,22 @@ class MapDataView(private val dataProvider: DataProvider, private val overlayTyp
         }
 
         if ( drawIndicator ) {
+            val ageColor = getColorForAge(dataAgeSeconds)
+            if ( ageColor != null ) {
+                val oldColor = itemLightBackgroundPaint.color
+                itemLightBackgroundPaint.color = ageColor
+                canvas.drawArc(
+                    RectF(
+                        -ageRadius.toFloat(),
+                        -ageRadius.toFloat(),
+                        ageRadius.toFloat(),
+                        ageRadius.toFloat()
+                    ),
+                    0F, 360F, true, this.itemLightBackgroundPaint
+                )
+                itemLightBackgroundPaint.color = oldColor
+            }
+
             canvas.drawArc(
                 RectF(-circleRadius.toFloat(), -circleRadius.toFloat(), circleRadius.toFloat(), circleRadius.toFloat()),
                 0F, 360F, true, this.itemLightBackgroundPaint)
@@ -179,7 +223,7 @@ class MapDataView(private val dataProvider: DataProvider, private val overlayTyp
     /**
      * Graphic wind barb key: https://www.weather.gov/hfo/windbarbinfo.  We are not rounding to the nearest 5 here.  We are rounding up.
      */
-    private fun renderWind(data: WeatherCondition, canvas: Canvas) {
+    private fun renderWind(data: WeatherCondition, dataAgeSeconds: Long, canvas: Canvas) {
         val windSpeed = data.windSpeed
         val windDirection = data.windDirection
 
@@ -304,44 +348,71 @@ class MapDataView(private val dataProvider: DataProvider, private val overlayTyp
         }
     }
 
-    private fun renderCeiling(data: WeatherCondition, canvas: Canvas) {
+    private fun renderCeiling(data: WeatherCondition, dataAgeSeconds: Long, canvas: Canvas) {
         val ceiling = data.ceiling ?: return
         if (ceiling > maxVfrElevation) {
-            this.renderBoxText(">${(maxVfrElevation / 100).toString()}", canvas)
+            this.renderBoxText(">${(maxVfrElevation / 100).toString()}", dataAgeSeconds, canvas)
         } else {
-            this.renderBoxText((ceiling / 100).toString(), canvas)
+            this.renderBoxText((ceiling / 100).toString(), dataAgeSeconds, canvas)
         }
     }
 
-    private fun renderCategory(data: WeatherCondition, canvas: Canvas) {
+    private fun renderCategory(data: WeatherCondition, dataAgeSeconds: Long, canvas: Canvas) {
         val category = data.flightCategory ?: return
-        this.renderBoxText(category, canvas)
+        this.renderBoxText(category, dataAgeSeconds, canvas)
     }
 
-    private fun renderDewpointSpread(data: WeatherCondition, canvas: Canvas) {
+    private fun renderDewpointSpread(data: WeatherCondition, dataAgeSeconds: Long, canvas: Canvas) {
         val spread = data.dewpointSpreadCelcius ?: return
-        this.renderBoxText(spread.toString(), canvas)
+        this.renderBoxText(spread.toString(), dataAgeSeconds, canvas)
     }
 
-    private fun renderTemperature(data: WeatherCondition, canvas: Canvas) {
+    private fun renderTemperature(data: WeatherCondition, dataAgeSeconds: Long, canvas: Canvas) {
         val temp = data.temperatureCelcius ?: return
-        this.renderBoxText(temp.toString(), canvas)
+        this.renderBoxText(temp.toString(), dataAgeSeconds, canvas)
     }
 
-    private fun renderVisibility(data: WeatherCondition, canvas: Canvas) {
+    private fun renderVisibility(data: WeatherCondition, dataAgeSeconds: Long, canvas: Canvas) {
         val visibility = data.visibility ?: return
-        this.renderBoxText(visibility.toString(), canvas)
+        this.renderBoxText(visibility.toString(), dataAgeSeconds, canvas)
     }
 
-    private fun renderBoxText(text: String, canvas: Canvas) {
+    private fun renderBoxText(text: String, dataAgeSeconds: Long, canvas: Canvas) {
         val lineHeight = this.expectedBuffer.height()
         val textDimensions = this.itemTextPaint.measureText(text)
         val heightBuffer = map.convertDipToPixels(14f)
         val widthBuffer = map.convertDipToPixels(10f)
-        val cornerRadius = map.convertDipToPixels(6f)
-        //val textRect = Box2d(-textDimensions / 2.0, -lineHeight / 2.0, textDimensions / 2.0, lineHeight / 2.0)
         val boxRect = Box2d(-(textDimensions + widthBuffer) / 2.0, -(lineHeight + heightBuffer) / 2.0,
             (textDimensions + widthBuffer) / 2.0, (lineHeight + heightBuffer) / 2.0)
+
+        // Draw the age shadow
+        val ageColor = getColorForAge(dataAgeSeconds)
+        if (ageColor != null) {
+            val ageBorder = map.convertDipToPixels(standardAgeBorderDp)
+            val ageRect = Box2d(
+                boxRect.upperLeft.x - ageBorder,
+                boxRect.upperLeft.y - ageBorder,
+                boxRect.lowerRight.x + ageBorder,
+                boxRect.lowerRight.y + ageBorder)
+            val agePath = createPathForBox(ageRect)
+            val oldColor = itemLightBackgroundPaint.color
+            itemLightBackgroundPaint.color = ageColor
+            canvas.drawPath(agePath, itemLightBackgroundPaint)
+            itemLightBackgroundPaint.color = oldColor
+        }
+
+        // Draw the box
+        val path = createPathForBox(boxRect)
+        canvas.drawPath(path, this.itemLightBackgroundPaint)
+        canvas.drawPath(path, this.itemStrokePaint)
+
+        // Draw the text
+        canvas.drawText(text, 0f, lineHeight / 2f, this.itemTextPaint)
+    }
+
+    private fun createPathForBox(boxRect: Box2d): Path {
+        val cornerRadius = map.convertDipToPixels(6f)
+
         val path = Path()
         path.moveTo((boxRect.upperLeft.x + cornerRadius).toFloat(), boxRect.upperLeft.y.toFloat())
         path.lineTo((boxRect.lowerRight.x - cornerRadius).toFloat(), boxRect.upperLeft.y.toFloat())
@@ -356,10 +427,8 @@ class MapDataView(private val dataProvider: DataProvider, private val overlayTyp
         path.lineTo(boxRect.upperLeft.x.toFloat(), (boxRect.upperLeft.y + cornerRadius).toFloat())
         path.arcTo(RectF(boxRect.upperLeft.x.toFloat(), boxRect.upperLeft.y.toFloat(), (boxRect.upperLeft.x + 2 * cornerRadius).toFloat(), (boxRect.upperLeft.y + 2 * cornerRadius).toFloat()),
             180f, 90f)
-        canvas.drawPath(path, this.itemLightBackgroundPaint)
-        canvas.drawPath(path, this.itemStrokePaint)
 
-        canvas.drawText(text, 0f, lineHeight / 2f, this.itemTextPaint)
+        return path
     }
 
     override fun render(canvas: Canvas, region: Box2d, destination: Box2d) {
@@ -377,7 +446,9 @@ class MapDataView(private val dataProvider: DataProvider, private val overlayTyp
         val latitudeBuffer = longitudeBuffer * 0.6
 
         this.dataProvider.retrieveTile(geoArea, PointGeo(longitudeBuffer, latitudeBuffer),
-            this.overlayType, this, canvas, data=RenderData(rectangularAreaRegion, destination))
+            this.overlayType, this, canvas, data=RenderData(rectangularAreaRegion, destination, true))
+        this.dataProvider.retrieveTile(geoArea, PointGeo(longitudeBuffer, latitudeBuffer),
+            this.overlayType, this, canvas, data=RenderData(rectangularAreaRegion, destination, false))
     }
 
     override fun moveOffscreen() {
@@ -385,6 +456,17 @@ class MapDataView(private val dataProvider: DataProvider, private val overlayTyp
 
     private data class RenderData(
         val region: RectangularArea,
-        val destination: Box2d
+        val destination: Box2d,
+        val skipDraw: Boolean
     )
+
+    companion object {
+        val oldInformationColor
+            get() = Color.rgb(oldInformationColorRed, oldInformationColorGreen, oldInformationColorBlue)
+        private const val oldInformationColorRed = 100
+        private const val oldInformationColorGreen = 100
+        private const val oldInformationColorBlue = 255
+        private const val standardAgeBorderDp = 6f
+        const val maxNoRangeDisplayDiff = 5 * 60    /* 5 minutes */
+    }
 }

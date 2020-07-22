@@ -14,8 +14,8 @@ interface SubMapView {
     /**
      * Returns the age of any data beign displayed and resets the age counter prior to rendering
      */
-    fun resetRequestedInformationAgeRecord();
-    fun getRequestedInformationAgeSeconds(): Long?;
+    fun resetRequestedInformationAgeRecord()
+    fun getRequestedInformationAgeSeconds(): LongRange?
 
     /**
      * Draws or queues the drawing of this sub map.  The number of pixels to be drawn are the region width * height * scale

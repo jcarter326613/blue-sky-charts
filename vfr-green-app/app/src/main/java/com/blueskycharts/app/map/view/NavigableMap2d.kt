@@ -1,21 +1,29 @@
 package com.blueskycharts.app.map.view
 
 import android.content.Context
-import android.graphics.*
+import android.graphics.Canvas
+import android.graphics.Color
+import android.graphics.Paint
+import android.graphics.Rect
+import android.text.Spannable
+import android.text.SpannableString
+import android.text.SpannableStringBuilder
+import android.text.style.BackgroundColorSpan
+import android.text.style.CharacterStyle
+import android.text.style.ForegroundColorSpan
 import android.util.AttributeSet
 import android.view.MotionEvent
+import androidx.core.text.toSpannable
 import com.blueskycharts.app.R
 import com.blueskycharts.app.coordinates.*
 import com.blueskycharts.app.map.configuration.Inventory
+import com.blueskycharts.app.map.configuration.MapConfiguration
+import com.blueskycharts.app.map.models.ExtentModel
+import com.blueskycharts.app.map.models.ProjectionWebMercatorModel
 import com.blueskycharts.app.map.models.SubMapModel
 import com.blueskycharts.app.map.resources.DataProvider
 import com.blueskycharts.app.map.resources.ShadowProvider
 import com.blueskycharts.app.map.resources.TileProvider
-import com.blueskycharts.app.map.configuration.MapConfiguration
-import com.blueskycharts.app.map.models.ExtentModel
-import com.blueskycharts.app.map.models.ProjectionLccModel
-import com.blueskycharts.app.map.models.ProjectionWebMercatorModel
-import com.blueskycharts.app.map.resources.TileProviderInterface
 import com.blueskycharts.app.preferences.Preferences
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
@@ -24,6 +32,7 @@ import kotlin.concurrent.timerTask
 import kotlin.math.ceil
 import kotlin.math.log2
 import kotlin.math.pow
+
 
 class NavigableMap2d(context: Context, attributes: AttributeSet) :
     Map(context, attributes) {
@@ -75,7 +84,7 @@ class NavigableMap2d(context: Context, attributes: AttributeSet) :
         itemTextPaint.style = Paint.Style.FILL_AND_STROKE
         itemTextPaint.strokeWidth = convertDipToPixels(1f)
         itemTextPaint.textSize = convertDipToPixels(20f)
-        itemTextPaint.textAlign = Paint.Align.CENTER
+        itemTextPaint.textAlign = Paint.Align.LEFT
         val buffer = Rect()
         itemTextPaint.getTextBounds("00000", 0, 5, buffer)
         textHeight = buffer.height().toFloat()
@@ -332,7 +341,7 @@ class NavigableMap2d(context: Context, attributes: AttributeSet) :
             val dataOverlay = dataOverlayView.subMapView
             if (this.dataProvider.isLoading()) {
                 canvas.save()
-                this.renderInformationAgeBox("Loading weather data...", canvas)
+                this.renderInformationAgeBox(SpannableStringBuilder("Loading weather data..."), canvas)
                 canvas.restore()
             } else {
                 val informationAge = dataOverlay.getRequestedInformationAgeSeconds()
@@ -345,10 +354,10 @@ class NavigableMap2d(context: Context, attributes: AttributeSet) :
 
                     // Trigger a refresh for when the information age needs to be updated
                     val secondsToSleep: Long =
-                        when (informationAge) {
+                        when (informationAge.last) {
                             60L -> 1
                             0L -> 61
-                            else -> (60 - (informationAge % 60)) + 1
+                            else -> (60 - (informationAge.last % 60)) + 1
                         }
 
                     val task: TimerTask = timerTask {
@@ -377,9 +386,9 @@ class NavigableMap2d(context: Context, attributes: AttributeSet) :
         }
     }
 
-    private fun renderInformationAgeBox(informationAgeLabel: String, canvas: Canvas) {
+    private fun renderInformationAgeBox(informationAgeLabel: SpannableStringBuilder, canvas: Canvas) {
         val lineHeight = this.textHeight
-        val textDimensions = this.itemTextPaint.measureText(informationAgeLabel)
+        val textDimensions = this.itemTextPaint.measureText(informationAgeLabel.toString())
         val heightBuffer = this.convertDipToPixels(14f)
         val widthBuffer = this.convertDipToPixels(10f)
         val margin = this.convertDipToPixels(5f)
@@ -391,16 +400,61 @@ class NavigableMap2d(context: Context, attributes: AttributeSet) :
         canvas.translate(-boxRect.upperLeft.x.toFloat() + margin, -boxRect.upperLeft.y.toFloat() + margin)
         canvas.drawRect(boxRect.upperLeft.x.toFloat(), boxRect.upperLeft.y.toFloat(), boxRect.lowerRight.x.toFloat(), boxRect.lowerRight.y.toFloat(), this.textBackgroundPaint)
         canvas.drawRect(boxRect.upperLeft.x.toFloat(), boxRect.upperLeft.y.toFloat(), boxRect.lowerRight.x.toFloat(), boxRect.lowerRight.y.toFloat(), this.textStrokePaint)
-        canvas.drawText(informationAgeLabel, 0f, lineHeight / 2f, this.itemTextPaint)
+        canvas.translate(-textDimensions / 2F, lineHeight / 2f)
+        drawSpannableString(informationAgeLabel, canvas)
+        //canvas.drawText(informationAgeLabel, 0f, lineHeight / 2f, this.itemTextPaint)
         canvas.restore()
     }
 
-    private fun getInformationAgeLabel(ageSeconds: Long): String {
-        if ( ageSeconds < 60 ) {
-            return "Age 1 minute";
+    private fun drawSpannableString(spannableString: SpannableStringBuilder, canvas: Canvas) {
+        var next: Int
+        var xStart = 0f
+        var xEnd: Float
+        var i = 0
+        while (i < spannableString.length) {
+            // find the next span transition
+            next = spannableString.nextSpanTransition(i, spannableString.length, CharacterStyle::class.java)
+
+            // measure the length of the span
+            xEnd = xStart + this.itemTextPaint.measureText(spannableString, i, next)
+
+            // draw the highlight (background color) first
+            val bgSpans: Array<BackgroundColorSpan> = spannableString.getSpans(i, next, BackgroundColorSpan::class.java)
+            if (bgSpans.isNotEmpty()) {
+                val oldColor = this.textBackgroundPaint.color
+                this.textBackgroundPaint.color = bgSpans[0].backgroundColor
+                canvas.drawRect(xStart, this.itemTextPaint.fontMetrics.top, xEnd, this.itemTextPaint.fontMetrics.bottom, this.textBackgroundPaint )
+                this.textBackgroundPaint.color = oldColor
+            }
+
+            // draw the text with an optional foreground color
+            val fgSpans: Array<ForegroundColorSpan> = spannableString.getSpans(i, next, ForegroundColorSpan::class.java)
+            if (fgSpans.isNotEmpty()) {
+                val oldColor: Int = this.itemTextPaint.color
+                this.itemTextPaint.color = fgSpans[0].foregroundColor
+                canvas.drawText(spannableString.toString(), i, next, xStart, 0F, this.itemTextPaint)
+                this.itemTextPaint.color = oldColor
+            } else {
+                canvas.drawText(spannableString.toString(), i, next, xStart, 0F, this.itemTextPaint)
+            }
+            xStart = xEnd
+            i = next
         }
-        val displaySeconds = ceil(ageSeconds / 60.0).toInt()
-        return "Age $displaySeconds minutes"
+    }
+
+    private fun getInformationAgeLabel(ageSeconds: LongRange): SpannableStringBuilder {
+        if ( ageSeconds.last < 60 ) {
+            return SpannableStringBuilder("Age 1 minute")
+        }
+        if ( ageSeconds.last - ageSeconds.first <= MapDataView.maxNoRangeDisplayDiff ) {
+            return SpannableStringBuilder("Age ${ceil(ageSeconds.last / 60.0).toInt()} minutes")
+        }
+        val age1String = "${ceil(ageSeconds.first / 60.0).toInt()}"
+        val age2String = "${ceil(ageSeconds.last / 60.0).toInt()}"
+        val sb = SpannableStringBuilder("Age $age1String to $age2String minutes")
+        //sb.setSpan(ForegroundColorSpan(Color.rgb(255, 0, 0)), 8 + age1String.length, age1String.length + 8 + age2String.length, Spannable.SPAN_INCLUSIVE_INCLUSIVE)
+        sb.setSpan(BackgroundColorSpan(MapDataView.oldInformationColor), 8 + age1String.length, age1String.length + 8 + age2String.length, Spannable.SPAN_INCLUSIVE_INCLUSIVE)
+        return sb
     }
 
     /**
