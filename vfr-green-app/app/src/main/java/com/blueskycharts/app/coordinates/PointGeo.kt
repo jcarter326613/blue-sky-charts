@@ -1,9 +1,6 @@
 package com.blueskycharts.app.coordinates
 
-import kotlin.math.E
-import kotlin.math.PI
-import kotlin.math.log
-import kotlin.math.tan
+import kotlin.math.*
 
 data class PointGeo(var longitude: Double = 0.0, var latitude: Double = 0.0) {
     /**
@@ -31,8 +28,9 @@ data class PointGeo(var longitude: Double = 0.0, var latitude: Double = 0.0) {
         return newPoint
     }
 
-    fun convertToPointLcc(): PointLcc {
-        throw Error("Not implemented")
+    //https://github.com/vraida/Lambert-projection/blob/master/python_implementation/lib/lambert.py
+    fun convertToPointLcc(projection: ProjectionLccDescription): PointLcc {
+        return projection.createPointLcc(this)
     }
 
     companion object {

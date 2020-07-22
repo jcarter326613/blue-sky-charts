@@ -81,10 +81,17 @@ class RectangularAreaWebMercator(topLeftX: Double = 0.0, topLeftY: Double = 0.0,
     }
 
     override fun getBoundingBoxGeo(rules: BoundingRules): BoxGeo {
-        return BoxGeo(
-            topLeft.convertToPointGeo(),
-            bottomRight.convertToPointGeo()
-        )
+        when(rules) {
+            BoundingRules.Outside -> {
+                return BoxGeo(
+                    topLeft.convertToPointGeo(),
+                    bottomRight.convertToPointGeo()
+                )
+            }
+            else -> {
+                throw Error("Not implemented")
+            }
+        }
     }
 
     companion object {

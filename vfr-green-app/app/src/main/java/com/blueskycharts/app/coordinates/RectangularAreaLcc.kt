@@ -4,7 +4,7 @@ import kotlin.math.max
 import kotlin.math.min
 
 class RectangularAreaLcc(topLeftX: Double = 0.0, topLeftY: Double = 0.0, bottomRightX: Double = 0.0, bottomRightY: Double = 0.0, val projectionDescription: ProjectionLccDescription):
-    RectangularArea(PointLcc(topLeftX, topLeftY), PointLcc(bottomRightX, bottomRightY)) {
+    RectangularArea(PointLcc(topLeftX, topLeftY, projectionDescription), PointLcc(bottomRightX, bottomRightY, projectionDescription)) {
     override val width: Double
         get() = this.bottomRight.x - this.topLeft.x
     override val height: Double
@@ -72,6 +72,33 @@ class RectangularAreaLcc(topLeftX: Double = 0.0, topLeftY: Double = 0.0, bottomR
 
     override fun getBoundingBoxGeo(rules: RectangularArea.BoundingRules): BoxGeo {
         // TODO: need to find highest latitude at lon0.  Lowest is at one of the bottom corners
-        throw Error("Not implemented")
+        when(rules) {
+            BoundingRules.Outside -> {
+                // Figure out the max latitude
+                var topLeftGeo = topLeft.convertToPointGeo()
+                var bottomRightGeo = bottomRight.convertToPointGeo()
+
+                var lon0TopBorderPoint = PointLcc(
+                    topLeft.x + width * (projectionDescription.lon0 - topLeftGeo.longitude) / (bottomRightGeo.longitude - topLeftGeo.longitude),
+                    topLeft.y,
+                    projectionDescription
+                )
+
+                val maxLatitude = lon0TopBorderPoint.convertToPointGeo().latitude
+
+                // Figure out the min latitude
+                val bottomLeft = PointLcc(topLeft.x, bottomRight.y, projectionDescription)
+                val bottomLeftGeo = bottomLeft.convertToPointGeo()
+                val minLatitude = min(bottomLeftGeo.latitude, bottomRightGeo.latitude)
+
+                return BoxGeo(
+                    PointGeo(topLeftGeo.longitude, maxLatitude),
+                    PointGeo(bottomRightGeo.longitude, minLatitude)
+                )
+            }
+            else -> {
+                throw Error("Not implemented")
+            }
+        }
     }
 }
