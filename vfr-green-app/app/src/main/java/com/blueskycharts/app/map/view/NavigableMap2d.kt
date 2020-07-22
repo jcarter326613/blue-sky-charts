@@ -453,6 +453,7 @@ class NavigableMap2d(context: Context, attributes: AttributeSet) :
         val age2String = "${ceil(ageSeconds.last / 60.0).toInt()}"
         val sb = SpannableStringBuilder("Age $age1String to $age2String minutes")
         //sb.setSpan(ForegroundColorSpan(Color.rgb(255, 0, 0)), 8 + age1String.length, age1String.length + 8 + age2String.length, Spannable.SPAN_INCLUSIVE_INCLUSIVE)
+        sb.setSpan(BackgroundColorSpan(MapDataView.newInformationColor), 4, age1String.length + 4, Spannable.SPAN_INCLUSIVE_INCLUSIVE)
         sb.setSpan(BackgroundColorSpan(MapDataView.oldInformationColor), 8 + age1String.length, age1String.length + 8 + age2String.length, Spannable.SPAN_INCLUSIVE_INCLUSIVE)
         return sb
     }

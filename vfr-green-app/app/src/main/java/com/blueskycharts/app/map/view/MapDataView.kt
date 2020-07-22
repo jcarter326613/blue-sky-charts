@@ -139,11 +139,17 @@ class MapDataView(private val dataProvider: DataProvider, private val overlayTyp
             return null
         }
         val percentage = (ageSeconds - minDataAgeSeconds) / (maxDataAgeSeconds - minDataAgeSeconds).toDouble()
+        return Color.rgb(
+            ceil((newInformationColorRed - (newInformationColorRed - oldInformationColorRed) * percentage)).toInt(),
+            ceil((newInformationColorGreen - (newInformationColorGreen - oldInformationColorGreen) * percentage)).toInt(),
+            ceil((newInformationColorBlue - (newInformationColorBlue - oldInformationColorBlue) * percentage)).toInt())
+        /*
         return Color.argb(
             ceil(255 * percentage).toInt(),
             oldInformationColorRed,
             oldInformationColorGreen,
             oldInformationColorBlue)
+         */
     }
 
     private fun renderCloudCover(data: WeatherCondition, dataAgeSeconds: Long, canvas: Canvas) {
@@ -235,6 +241,18 @@ class MapDataView(private val dataProvider: DataProvider, private val overlayTyp
         val windCircleRadius = 20f
         if ( data.windDirection == "VRB" ) {
             var circleRadius = map.convertDipToPixels(windCircleRadius)
+
+            // Draw age shadow
+            val ageColor = getColorForAge(dataAgeSeconds)
+            if (ageColor != null) {
+                val shadowRadius = map.convertDipToPixels(standardAgeBorderDp) + circleRadius
+                val oldColor = this.itemLightBackgroundPaint.color
+                this.itemLightBackgroundPaint.color = ageColor
+                canvas.drawArc(RectF(-shadowRadius, -shadowRadius, shadowRadius, shadowRadius), 0f, 360f, true, this.itemLightBackgroundPaint)
+                this.itemLightBackgroundPaint.color = oldColor
+            }
+
+            // Draw the variable circle
             canvas.drawArc(RectF(-circleRadius, -circleRadius, circleRadius, circleRadius), 0f, 360f, true, this.itemDarkBackgroundPaint)
             circleRadius *= 2 / 3f
             canvas.drawArc(RectF(-circleRadius, -circleRadius, circleRadius, circleRadius), 0f, 360f, true, this.itemLightBackgroundPaint)
@@ -250,102 +268,135 @@ class MapDataView(private val dataProvider: DataProvider, private val overlayTyp
             }
 
             if ( speedToDraw > 0 ) {
-                // Figure out the configuration of wind barbs
-                var numShort = 0
-                var numLong = 0
-                var numPenants = 0
-                while ( speedToDraw > 45 ) {
-                    speedToDraw -= 50;
-                    numPenants++
-                }
-                while ( speedToDraw > 5 ) {
-                    speedToDraw -= 10;
-                    numLong++
-                }
-                if ( speedToDraw > 0 ) {
-                    numShort = 1
+                val oldColor = this.itemStrokePaint.color
+
+                val ageColor = getColorForAge(dataAgeSeconds)
+                if (ageColor != null) {
+                    val oldWidth = this.itemStrokePaint.strokeWidth
+                    this.itemStrokePaint.strokeWidth = map.convertDipToPixels(standardAgeBorderDp) * 2 + oldWidth
+                    this.itemStrokePaint.color = ageColor
+                    drawWindBarb(speedToDraw, windAngle, canvas, this.itemStrokePaint)
+                    this.itemStrokePaint.strokeWidth = oldWidth
                 }
 
-                // Figure out how tall the wind barb needs to be
-                val poleWidth = map.convertDipToPixels(4f)
-                val poleBallRadius = poleWidth
-                val barbWidth = poleWidth
-                val maxBarbLength = map.convertDipToPixels(20f)
-                val minBarbLength = maxBarbLength / 2.0
-                val penantWidth = maxBarbLength * 2 / 3.0
-                val barbAngleRadians = acos((penantWidth / 2.0) / maxBarbLength)
-                val penantDepth = sin(barbAngleRadians) * maxBarbLength;
-                val minPoleLength = map.convertDipToPixels(20f)
-                val minPoleTail = map.convertDipToPixels(6f)
-
-                val indicatorBlankSpaceHeight = barbWidth * (numShort + numLong + numPenants - 1)
-                val indicatorHeight = barbWidth * (numShort + numLong) + penantWidth * numPenants
-                var poleLength = indicatorBlankSpaceHeight + indicatorHeight + minPoleTail
-                if ( poleLength < minPoleLength ) {
-                    poleLength = minPoleLength.toDouble()
-                }
-
-                // Draw the pole
-                canvas.rotate(-90f)
-                canvas.rotate(windAngle)
-                canvas.translate((-poleLength / 2.0).toFloat(), 0f)
-                canvas.drawRect(0f, -poleWidth / 2, poleLength.toFloat(), poleWidth, this.itemDarkBackgroundPaint)
-                canvas.drawArc(RectF(-poleBallRadius, -poleBallRadius, poleBallRadius, poleBallRadius), 0f, 360f, true, this.itemDarkBackgroundPaint)
-
-                // If there is only one short barb, draw that at center
-                if ( numPenants == 0 && numLong == 0 && numShort == 1 ) {
-                    canvas.translate((poleLength / 2).toFloat(), 0f)
-                    canvas.save()
-                    canvas.rotate((barbAngleRadians * 360 / (2.0 * PI)).toFloat())
-                    canvas.drawRect(0f, -barbWidth / 2f, minBarbLength.toFloat(), barbWidth, this.itemDarkBackgroundPaint)
-                    canvas.restore()
-                } else {
-                    canvas.translate(poleLength.toFloat(), 0f)
-
-                    // Draw each penant
-                    var penantDrawn = false
-                    while ( numPenants > 0 ) {
-                        val path = Path()
-                        path.moveTo(0f,0f)
-                        path.lineTo((-penantWidth / 2.0).toFloat(), penantDepth.toFloat())
-                        path.lineTo(-penantWidth.toFloat(), 0f)
-                        canvas.drawPath(path, this.itemDarkBackgroundPaint)
-                        canvas.translate(-penantWidth.toFloat(), 0f)
-
-                        numPenants--
-                        penantDrawn = true;
-                    }
-                    if ( penantDrawn ) {
-                        canvas.translate(-barbWidth, 0f)
-                    }
-
-                    // Draw each long barb
-                    while ( numLong > 0 ) {
-                        canvas.save()
-                        canvas.rotate((barbAngleRadians * 360 / (2.0 * PI)).toFloat())
-                        canvas.drawRect(RectF(0f, 0f, maxBarbLength.toFloat(), barbWidth), this.itemDarkBackgroundPaint)
-                        canvas.restore()
-                        canvas.translate(-(barbWidth * 2), 0f)
-
-                        numLong--
-                    }
-
-                    // Draw the short barb
-                    if ( numShort > 0 ) {
-                        canvas.save()
-                        canvas.rotate((barbAngleRadians * 360 / (2.0 * PI)).toFloat())
-                        canvas.drawRect(RectF(0f, 0f, minBarbLength.toFloat(), barbWidth), this.itemDarkBackgroundPaint)
-                        canvas.restore()
-                    }
-                }
+                this.itemStrokePaint.color = Color.WHITE
+                drawWindBarb(speedToDraw, windAngle, canvas, this.itemStrokePaint)
+                this.itemStrokePaint.color = oldColor
+                drawWindBarb(speedToDraw, windAngle, canvas, this.itemDarkBackgroundPaint)
             } else {
-                // Draw no wind circle
                 var circleRadius = map.convertDipToPixels(windCircleRadius)
+
+                // Draw age shadow
+                val ageColor = getColorForAge(dataAgeSeconds)
+                if (ageColor != null) {
+                    val shadowRadius = map.convertDipToPixels(standardAgeBorderDp) + circleRadius
+                    val oldColor = this.itemLightBackgroundPaint.color
+                    this.itemLightBackgroundPaint.color = ageColor
+                    canvas.drawArc(RectF(-shadowRadius, -shadowRadius, shadowRadius, shadowRadius), 0f, 360f, true, this.itemLightBackgroundPaint)
+                    this.itemLightBackgroundPaint.color = oldColor
+                }
+
+                // Draw no wind circle
                 canvas.drawArc(RectF(-circleRadius, -circleRadius, circleRadius, circleRadius), 0f, 360f, true, this.itemDarkBackgroundPaint)
                 circleRadius *= 2 / 3f
                 canvas.drawArc(RectF(-circleRadius, -circleRadius, circleRadius, circleRadius), 0f, 360f, true, this.itemLightBackgroundPaint)
             }
         }
+    }
+
+    private fun drawWindBarb(speedToDrawIn: Float, windAngle: Float, canvas: Canvas, paint: Paint) {
+        var speedToDraw = speedToDrawIn
+        val restoreCount = canvas.save()
+
+        // Figure out the configuration of wind barbs
+        var numShort = 0
+        var numLong = 0
+        var numPenants = 0
+        while ( speedToDraw > 45 ) {
+            speedToDraw -= 50;
+            numPenants++
+        }
+        while ( speedToDraw > 5 ) {
+            speedToDraw -= 10;
+            numLong++
+        }
+        if ( speedToDraw > 0 ) {
+            numShort = 1
+        }
+
+        // Figure out how tall the wind barb needs to be
+        val poleWidth = map.convertDipToPixels(4f)
+        val poleBallRadius = poleWidth
+        val barbWidth = poleWidth
+        val maxBarbLength = map.convertDipToPixels(20f)
+        val minBarbLength = maxBarbLength / 2.0
+        val penantWidth = maxBarbLength * 2 / 3.0
+        val barbAngleRadians = acos((penantWidth / 2.0) / maxBarbLength)
+        val penantDepth = sin(barbAngleRadians) * maxBarbLength;
+        val minPoleLength = map.convertDipToPixels(20f)
+        val minPoleTail = map.convertDipToPixels(6f)
+
+        val indicatorBlankSpaceHeight = barbWidth * (numShort + numLong + numPenants - 1)
+        val indicatorHeight = barbWidth * (numShort + numLong) + penantWidth * numPenants
+        var poleLength = indicatorBlankSpaceHeight + indicatorHeight + minPoleTail
+        if ( poleLength < minPoleLength ) {
+            poleLength = minPoleLength.toDouble()
+        }
+
+        // Draw the pole
+        canvas.rotate(-90f)
+        canvas.rotate(windAngle)
+        canvas.translate((-poleLength / 2.0).toFloat(), 0f)
+        canvas.drawRect(0f, -poleWidth / 2, poleLength.toFloat(), poleWidth, paint)
+        canvas.drawArc(RectF(-poleBallRadius, -poleBallRadius, poleBallRadius, poleBallRadius), 0f, 360f, true, paint)
+
+        // If there is only one short barb, draw that at center
+        if ( numPenants == 0 && numLong == 0 && numShort == 1 ) {
+            canvas.translate((poleLength / 2).toFloat(), 0f)
+            canvas.save()
+            canvas.rotate((barbAngleRadians * 360 / (2.0 * PI)).toFloat())
+            canvas.drawRect(0f, -barbWidth / 2f, minBarbLength.toFloat(), barbWidth, paint)
+            canvas.restore()
+        } else {
+            canvas.translate(poleLength.toFloat(), 0f)
+
+            // Draw each penant
+            var penantDrawn = false
+            while ( numPenants > 0 ) {
+                val path = Path()
+                path.moveTo(0f,0f)
+                path.lineTo((-penantWidth / 2.0).toFloat(), penantDepth.toFloat())
+                path.lineTo(-penantWidth.toFloat(), 0f)
+                canvas.drawPath(path, paint)
+                canvas.translate(-penantWidth.toFloat(), 0f)
+
+                numPenants--
+                penantDrawn = true;
+            }
+            if ( penantDrawn ) {
+                canvas.translate(-barbWidth, 0f)
+            }
+
+            // Draw each long barb
+            while ( numLong > 0 ) {
+                canvas.save()
+                canvas.rotate((barbAngleRadians * 360 / (2.0 * PI)).toFloat())
+                canvas.drawRect(RectF(0f, 0f, maxBarbLength.toFloat(), barbWidth), paint)
+                canvas.restore()
+                canvas.translate(-(barbWidth * 2), 0f)
+
+                numLong--
+            }
+
+            // Draw the short barb
+            if ( numShort > 0 ) {
+                canvas.save()
+                canvas.rotate((barbAngleRadians * 360 / (2.0 * PI)).toFloat())
+                canvas.drawRect(RectF(0f, 0f, minBarbLength.toFloat(), barbWidth), paint)
+                canvas.restore()
+            }
+        }
+        canvas.restoreToCount(restoreCount)
     }
 
     private fun renderCeiling(data: WeatherCondition, dataAgeSeconds: Long, canvas: Canvas) {
@@ -463,9 +514,14 @@ class MapDataView(private val dataProvider: DataProvider, private val overlayTyp
     companion object {
         val oldInformationColor
             get() = Color.rgb(oldInformationColorRed, oldInformationColorGreen, oldInformationColorBlue)
+        val newInformationColor
+            get() = Color.rgb(newInformationColorRed, newInformationColorGreen, newInformationColorBlue)
         private const val oldInformationColorRed = 100
         private const val oldInformationColorGreen = 100
-        private const val oldInformationColorBlue = 255
+        private const val oldInformationColorBlue = 200
+        private const val newInformationColorRed = 200
+        private const val newInformationColorGreen = 200
+        private const val newInformationColorBlue = 255
         private const val standardAgeBorderDp = 6f
         const val maxNoRangeDisplayDiff = 5 * 60    /* 5 minutes */
     }
