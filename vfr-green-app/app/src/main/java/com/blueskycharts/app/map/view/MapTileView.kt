@@ -63,9 +63,10 @@ class MapTileView(private val tileProvider: TileProviderInterface, private val m
             )
             fileExtent = RectangularAreaLcc(
                 topLeftX = model.projectionLcc.extents.left,
-                topLeftY = model.projectionLcc.extents.top,
+                topLeftY = -model.projectionLcc.extents.bottom,     //This switch is from https://gdal.org/user/raster_data_model.html "Affine GeoTransformation"
+                                                                    //"The (GT(0),GT(3)) position is the top left corner of the top left pixel of the raster."
                 bottomRightX = model.projectionLcc.extents.right,
-                bottomRightY = model.projectionLcc.extents.bottom,
+                bottomRightY = -model.projectionLcc.extents.top,
                 projectionDescription = projectionDescription
             )
         }

@@ -66,7 +66,7 @@ class MapDataView(private val dataProvider: DataProvider, private val overlayTyp
         return this.dataAgeSeconds;
     }
 
-    override fun receiveData(location2: PointGeo, data: WeatherCondition, dataAgeSeconds: Long, immediate: Boolean, canvas: Canvas?, receiverData: Any?) {
+    override fun receiveData(location: PointGeo, data: WeatherCondition, dataAgeSeconds: Long, immediate: Boolean, canvas: Canvas?, receiverData: Any?) {
         if ( this.isDisposed ) {
             return
         }
@@ -77,8 +77,6 @@ class MapDataView(private val dataProvider: DataProvider, private val overlayTyp
         }
 
         // Figure out where the canvas should be translated to
-        //var location = PointGeo(-105.0, 36.0)
-        var location = location2
         var locationPercentage: Point2d = when (receiverData.region) {
             is RectangularAreaWebMercator -> {
                 receiverData.region.positionPercentageUpperLeft(location.convertToPointWebMercator())
