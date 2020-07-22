@@ -9,6 +9,8 @@ import com.blueskycharts.app.utility.Log
 import kotlin.math.*
 
 class MapDataView(private val dataProvider: DataProvider, private val overlayType: OverlayTypes, private val map: Map) : SubMapView, DataReceiver {
+    private val maxVfrElevation = 18000
+
     // Metadata
     private var dataAgeSeconds: Long? = null
     override var fileExtent: RectangularArea? = null
@@ -186,8 +188,9 @@ class MapDataView(private val dataProvider: DataProvider, private val overlayTyp
         }
 
         // If the wind is variable, draw that.
+        val windCircleRadius = 20f
         if ( data.windDirection == "VRB" ) {
-            var circleRadius = map.convertDipToPixels(20f)
+            var circleRadius = map.convertDipToPixels(windCircleRadius)
             canvas.drawArc(RectF(-circleRadius, -circleRadius, circleRadius, circleRadius), 0f, 360f, true, this.itemDarkBackgroundPaint)
             circleRadius *= 2 / 3f
             canvas.drawArc(RectF(-circleRadius, -circleRadius, circleRadius, circleRadius), 0f, 360f, true, this.itemLightBackgroundPaint)
@@ -293,17 +296,21 @@ class MapDataView(private val dataProvider: DataProvider, private val overlayTyp
                 }
             } else {
                 // Draw no wind circle
-                var circleRadius = map.convertDipToPixels(50f)
+                var circleRadius = map.convertDipToPixels(windCircleRadius)
                 canvas.drawArc(RectF(-circleRadius, -circleRadius, circleRadius, circleRadius), 0f, 360f, true, this.itemDarkBackgroundPaint)
                 circleRadius *= 2 / 3f
-                canvas.drawArc(RectF(-circleRadius, -circleRadius, circleRadius, circleRadius), 0f, 360f, true, this.itemDarkBackgroundPaint)
+                canvas.drawArc(RectF(-circleRadius, -circleRadius, circleRadius, circleRadius), 0f, 360f, true, this.itemLightBackgroundPaint)
             }
         }
     }
 
     private fun renderCeiling(data: WeatherCondition, canvas: Canvas) {
         val ceiling = data.ceiling ?: return
-        this.renderBoxText((ceiling / 100).toString(), canvas)
+        if (ceiling > maxVfrElevation) {
+            this.renderBoxText(">${(maxVfrElevation / 100).toString()}", canvas)
+        } else {
+            this.renderBoxText((ceiling / 100).toString(), canvas)
+        }
     }
 
     private fun renderCategory(data: WeatherCondition, canvas: Canvas) {
