@@ -8,6 +8,7 @@ import { MultiGrid } from './multi-grid'
 export class MetarFileLoader extends AddsFileLoader {
     private static readonly url: string = "https://www.aviationweather.gov/adds/dataserver_current/current/metars.cache.xml.gz";
     private layerConfiguration: LayerConfiguration;
+    private unlimitedCeilingValue = 1000000000
 
     constructor() {
         super(MetarFileLoader.url);
@@ -56,9 +57,13 @@ export class MetarFileLoader extends AddsFileLoader {
                                 }
                             } else if ( condition.skyCover == "OVX" && metar.vert_vis_ft !== undefined ) {
                                 metarObj["ceiling"] = metar.vert_vis_ft
+                            } else {
+                                if ( metarObj["ceiling"] === undefined || metarObj["ceiling"] > this.unlimitedCeilingValue ) {
+                                    metarObj["ceiling"] = this.unlimitedCeilingValue
+                                }
                             }
 
-                            if ( this.isValidSkyCoverIndicator(condition.skyCover) && condition.skyCover != "CLR" && (
+                            if ( this.isValidSkyCoverIndicator(condition.skyCover) && (
                                     metarObj["cloudCover"] === undefined || 
                                     this.skyCoverCompare(metarObj["cloudCover"], condition.skyCover) < 0 )) {
                                 metarObj["cloudCover"] = condition.skyCover
@@ -180,6 +185,11 @@ export class MetarFileLoader extends AddsFileLoader {
             );
             if (!Number.isNaN(newSkyCondition.elevation)) {
                 skyConditionList.push(newSkyCondition);
+            } else if (rawObj["@_sky_cover"] == "CLR") {
+                skyConditionList.push(new SkyCondition(
+                    rawObj["@_sky_cover"],
+                    this.unlimitedCeilingValue
+                ))
             }
         }
 
