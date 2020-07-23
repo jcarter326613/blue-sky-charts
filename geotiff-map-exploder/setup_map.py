@@ -16,6 +16,7 @@ import zipfile
 from define_crops import define_crops
 from os import path
 from pyproj import Proj, transform
+from copy import deepcopy
 
 TILE_WIDTH = 1024
 
@@ -137,6 +138,8 @@ if "versions" not in map_inventory[mi_lookup]:
     map_inventory[mi_lookup]["versions"] = {}
 if str(version) not in map_inventory[mi_lookup]["versions"]:
     map_inventory[mi_lookup]["versions"][str(version)] = {}
+    if str(version-1) in map_inventory[mi_lookup]["versions"]:
+        map_inventory[mi_lookup]["versions"][str(version)]["mapBounds"] = deepcopy(map_inventory[mi_lookup]["versions"][str(version-1)]["mapBounds"])
 map_version_metadata = map_inventory[mi_lookup]["versions"][str(version)]
 map_version_metadata["tileWidth"] = TILE_WIDTH
 mi.write_inventory_metadata(map_inventory)
