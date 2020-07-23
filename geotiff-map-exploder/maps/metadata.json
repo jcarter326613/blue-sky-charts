@@ -7681,6 +7681,36 @@
             }
         }
     },
+    "Minneapolis-St_Paul_terminal": {
+        "type": "TerminalArea",
+        "versions": {
+            "94": {
+                "effectiveDate": "2020-06-18",
+                "imageHeight": 6151,
+                "imageWidth": 10696,
+                "maxZoom": 4,
+                "originalProjectionBounds": [
+                    -82460.62919304549,
+                    -62750.95266153668,
+                    143949.01733984103,
+                    67454.59494704074
+                ],
+                "originalProjectionData": {
+                    "datum": "NAD83",
+                    "lat_0": 44.88333333333333,
+                    "lat_1": 45,
+                    "lat_2": 33,
+                    "lon_0": -93.41666666666667,
+                    "no_defs": true,
+                    "proj": "lcc",
+                    "units": "m",
+                    "x_0": 0,
+                    "y_0": 0
+                },
+                "tileWidth": 1024
+            }
+        }
+    },
     "Montreal": {
         "type": "Sectional",
         "versions": {
@@ -7979,6 +8009,36 @@
             }
         }
     },
+    "New_Orleans_terminal": {
+        "type": "TerminalArea",
+        "versions": {
+            "91": {
+                "effectiveDate": "2020-05-21",
+                "imageHeight": 6098,
+                "imageWidth": 10513,
+                "maxZoom": 4,
+                "originalProjectionBounds": [
+                    -127826.66252476054,
+                    -60362.06971948058,
+                    94693.7340873863,
+                    68699.7603155646
+                ],
+                "originalProjectionData": {
+                    "datum": "NAD83",
+                    "lat_0": 30.06666666666667,
+                    "lat_1": 45,
+                    "lat_2": 33,
+                    "lon_0": -90.3,
+                    "no_defs": true,
+                    "proj": "lcc",
+                    "units": "m",
+                    "x_0": 0,
+                    "y_0": 0
+                },
+                "tileWidth": 1024
+            }
+        }
+    },
     "New_York": {
         "type": "Sectional",
         "versions": {
@@ -8108,6 +8168,36 @@
                     "lat_1": 46.66666666666666,
                     "lat_2": 41.33333333333334,
                     "lon_0": -72.96666666666667,
+                    "no_defs": true,
+                    "proj": "lcc",
+                    "units": "m",
+                    "x_0": 0,
+                    "y_0": 0
+                },
+                "tileWidth": 1024
+            }
+        }
+    },
+    "New_York_terminal": {
+        "type": "TerminalArea",
+        "versions": {
+            "99": {
+                "effectiveDate": "2020-04-23",
+                "imageHeight": 6222,
+                "imageWidth": 12027,
+                "maxZoom": 4,
+                "originalProjectionBounds": [
+                    -140061.82136113202,
+                    -61675.56316491356,
+                    114517.29881435691,
+                    70020.85805447362
+                ],
+                "originalProjectionData": {
+                    "datum": "NAD83",
+                    "lat_0": 40.74166666666667,
+                    "lat_1": 45,
+                    "lat_2": 33,
+                    "lon_0": -74,
                     "no_defs": true,
                     "proj": "lcc",
                     "units": "m",
@@ -8994,6 +9084,36 @@
                     "lat_1": 70.66666666666667,
                     "lat_2": 65.33333333333333,
                     "lon_0": -149,
+                    "no_defs": true,
+                    "proj": "lcc",
+                    "units": "m",
+                    "x_0": 0,
+                    "y_0": 0
+                },
+                "tileWidth": 1024
+            }
+        }
+    },
+    "Puerto_Rico-VI_terminal": {
+        "type": "TerminalArea",
+        "versions": {
+            "46": {
+                "effectiveDate": "2019-10-10",
+                "imageHeight": 6195,
+                "imageWidth": 17871,
+                "maxZoom": 5,
+                "originalProjectionBounds": [
+                    -185624.6518103494,
+                    -64530.792480079064,
+                    192677.27075275136,
+                    66600.24077403695
+                ],
+                "originalProjectionData": {
+                    "datum": "NAD83",
+                    "lat_0": 18.2,
+                    "lat_1": 20,
+                    "lat_2": 7,
+                    "lon_0": -66.05,
                     "no_defs": true,
                     "proj": "lcc",
                     "units": "m",
