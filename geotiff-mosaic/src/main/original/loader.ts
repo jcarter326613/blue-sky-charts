@@ -208,8 +208,6 @@ export class Loader {
                 projectionLcc.extents.right = originalExtents[2]
                 projectionLcc.extents.bottom = originalExtents[3]
             }
-
-            break
         }
 
         //Write out the new metadata file
