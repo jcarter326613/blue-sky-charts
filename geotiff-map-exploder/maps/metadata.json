@@ -9271,6 +9271,36 @@
             }
         }
     },
+    "Salt_Lake_City_terminal": {
+        "type": "TerminalArea",
+        "versions": {
+            "62": {
+                "effectiveDate": "2020-03-26",
+                "imageHeight": 7619,
+                "imageWidth": 10489,
+                "maxZoom": 4,
+                "originalProjectionBounds": [
+                    -98221.25386549553,
+                    -74268.14518654089,
+                    123826.33349640734,
+                    87009.56639217942
+                ],
+                "originalProjectionData": {
+                    "datum": "NAD83",
+                    "lat_0": 40.76666666666667,
+                    "lat_1": 45,
+                    "lat_2": 33,
+                    "lon_0": -112.1333333333333,
+                    "no_defs": true,
+                    "proj": "lcc",
+                    "units": "m",
+                    "x_0": 0,
+                    "y_0": 0
+                },
+                "tileWidth": 1024
+            }
+        }
+    },
     "San_Antonio": {
         "type": "Sectional",
         "versions": {
@@ -9388,6 +9418,36 @@
                     "lat_1": 30.66666666666667,
                     "lat_2": 25.33333333333333,
                     "lon_0": -100,
+                    "no_defs": true,
+                    "proj": "lcc",
+                    "units": "m",
+                    "x_0": 0,
+                    "y_0": 0
+                },
+                "tileWidth": 1024
+            }
+        }
+    },
+    "San_Diego_terminal": {
+        "type": "TerminalArea",
+        "versions": {
+            "80": {
+                "effectiveDate": "2020-06-18",
+                "imageHeight": 6175,
+                "imageWidth": 12103,
+                "maxZoom": 4,
+                "originalProjectionBounds": [
+                    -173352.14617429028,
+                    -58895.893244538995,
+                    82845.29235810184,
+                    71811.79875288405
+                ],
+                "originalProjectionData": {
+                    "datum": "NAD83",
+                    "lat_0": 33,
+                    "lat_1": 45,
+                    "lat_2": 33,
+                    "lon_0": -117.1666666666667,
                     "no_defs": true,
                     "proj": "lcc",
                     "units": "m",
@@ -9531,6 +9591,36 @@
                     "lat_1": 38.66666666666666,
                     "lat_2": 33.33333333333334,
                     "lon_0": -121.4166666666667,
+                    "no_defs": true,
+                    "proj": "lcc",
+                    "units": "m",
+                    "x_0": 0,
+                    "y_0": 0
+                },
+                "tileWidth": 1024
+            }
+        }
+    },
+    "San_Francisco_terminal": {
+        "type": "TerminalArea",
+        "versions": {
+            "96": {
+                "effectiveDate": "2020-02-27",
+                "imageHeight": 7265,
+                "imageWidth": 10493,
+                "maxZoom": 4,
+                "originalProjectionBounds": [
+                    -144541.36432226023,
+                    -80805.86427401348,
+                    77585.03780072223,
+                    72991.0416679812
+                ],
+                "originalProjectionData": {
+                    "datum": "NAD83",
+                    "lat_0": 37.6,
+                    "lat_1": 45,
+                    "lat_2": 33,
+                    "lon_0": -122.25,
                     "no_defs": true,
                     "proj": "lcc",
                     "units": "m",
@@ -10110,6 +10200,36 @@
                     "lat_1": 38.66666666666666,
                     "lat_2": 33.33333333333334,
                     "lon_0": -87.5,
+                    "no_defs": true,
+                    "proj": "lcc",
+                    "units": "m",
+                    "x_0": 0,
+                    "y_0": 0
+                },
+                "tileWidth": 1024
+            }
+        }
+    },
+    "St_Louis_terminal": {
+        "type": "TerminalArea",
+        "versions": {
+            "94": {
+                "effectiveDate": "2020-06-18",
+                "imageHeight": 6329,
+                "imageWidth": 9141,
+                "maxZoom": 4,
+                "originalProjectionBounds": [
+                    -96905.96102289172,
+                    -62940.83564157864,
+                    96590.61242698936,
+                    71030.34008078692
+                ],
+                "originalProjectionData": {
+                    "datum": "NAD83",
+                    "lat_0": 38.68472,
+                    "lat_1": 45,
+                    "lat_2": 33,
+                    "lon_0": -90.33333333333333,
                     "no_defs": true,
                     "proj": "lcc",
                     "units": "m",
