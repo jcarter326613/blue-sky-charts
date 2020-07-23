@@ -157,9 +157,18 @@ mi.write_inventory_metadata(map_inventory)
 
 # Download the zip file and extract it
 if map_type == "terminal":
-    zip_url = "https://aeronav.faa.gov/content/aeronav/tac_files/{}_TAC_{}.zip".format(map_name, version)
-    zip_file = "maps/{}_TAC_{}.zip".format(map_name, version)
-    tif_file_root = "{} TAC {}.tif".format(map_name, version)
+    if map_name == "Anchorage" or map_name == "Fairbanks":
+        zip_url = "https://aeronav.faa.gov/content/aeronav/tac_files/Anchorage-Fairbanks_TAC_{}.zip".format(version)
+        zip_file = "maps/{}_TAC_{}.zip".format("Anchorage-Fairbanks", version)
+        tif_file_root = "{} TAC {}.tif".format(map_name, version)
+    elif map_name == "Denver" or map_name == "Colorado_Springs":
+        zip_url = "https://aeronav.faa.gov/content/aeronav/tac_files/Denver_TAC_{}.zip".format(version)
+        zip_file = "maps/{}_TAC_{}.zip".format("Denver", version)
+        tif_file_root = "{} TAC {}.tif".format(map_name.replace("_", " "), version)
+    else:
+        zip_url = "https://aeronav.faa.gov/content/aeronav/tac_files/{}_TAC_{}.zip".format(map_name, version)
+        zip_file = "maps/{}_TAC_{}.zip".format(map_name, version)
+        tif_file_root = "{} TAC {}.tif".format(map_name.replace("_", " "), version)
     tif_file = "maps/{}".format("{}_TAC_{}.tif".format(mi_lookup, version))
 else:
     zip_url = "https://aeronav.faa.gov/content/aeronav/sectional_files/{}_{}.zip".format(map_name, version)

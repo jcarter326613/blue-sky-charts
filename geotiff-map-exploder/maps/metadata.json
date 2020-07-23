@@ -605,6 +605,36 @@
             }
         }
     },
+    "Anchorage_terminal": {
+        "type": "TerminalArea",
+        "versions": {
+            "85": {
+                "effectiveDate": "2020-05-21",
+                "imageHeight": 6067,
+                "imageWidth": 13546,
+                "maxZoom": 4,
+                "originalProjectionBounds": [
+                    -138380.85282160895,
+                    -64412.89502132268,
+                    148382.6063354073,
+                    64016.13193747595
+                ],
+                "originalProjectionData": {
+                    "datum": "NAD83",
+                    "lat_0": 61.11666666666667,
+                    "lat_1": 62.66666666666666,
+                    "lat_2": 57.33333333333334,
+                    "lon_0": -150.5,
+                    "no_defs": true,
+                    "proj": "lcc",
+                    "units": "m",
+                    "x_0": 0,
+                    "y_0": 0
+                },
+                "tileWidth": 1024
+            }
+        }
+    },
     "Atlanta": {
         "type": "Sectional",
         "versions": {
@@ -760,6 +790,36 @@
                     "lat_1": 45,
                     "lat_2": 33,
                     "lon_0": -84.33333333333333,
+                    "no_defs": true,
+                    "proj": "lcc",
+                    "units": "m",
+                    "x_0": 0,
+                    "y_0": 0
+                },
+                "tileWidth": 1024
+            }
+        }
+    },
+    "Baltimore-Washington_terminal": {
+        "type": "TerminalArea",
+        "versions": {
+            "101": {
+                "effectiveDate": "2020-07-16",
+                "imageHeight": 8829,
+                "imageWidth": 12077,
+                "maxZoom": 4,
+                "originalProjectionBounds": [
+                    -144206.213473708,
+                    -93399.27075438455,
+                    111442.91090029557,
+                    93489.71235862465
+                ],
+                "originalProjectionData": {
+                    "datum": "NAD83",
+                    "lat_0": 38.99166666666667,
+                    "lat_1": 45,
+                    "lat_2": 33,
+                    "lon_0": -77.05,
                     "no_defs": true,
                     "proj": "lcc",
                     "units": "m",
@@ -3291,6 +3351,36 @@
             }
         }
     },
+    "Colorado_Springs_terminal": {
+        "type": "TerminalArea",
+        "versions": {
+            "94": {
+                "effectiveDate": "2020-07-16",
+                "imageHeight": 8603,
+                "imageWidth": 11710,
+                "maxZoom": 4,
+                "originalProjectionBounds": [
+                    -154741.02763518723,
+                    -101314.94079841688,
+                    93142.86238259805,
+                    80796.5812996375
+                ],
+                "originalProjectionData": {
+                    "datum": "NAD83",
+                    "lat_0": 38.55,
+                    "lat_1": 45,
+                    "lat_2": 33,
+                    "lon_0": -104.5,
+                    "no_defs": true,
+                    "proj": "lcc",
+                    "units": "m",
+                    "x_0": 0,
+                    "y_0": 0
+                },
+                "tileWidth": 1024
+            }
+        }
+    },
     "Dallas-Ft_Worth": {
         "type": "Sectional",
         "versions": {
@@ -3419,6 +3509,27 @@
         "versions": {
             "95": {
                 "effectiveDate": "2020-02-27",
+                "imageHeight": 8738,
+                "imageWidth": 12011,
+                "maxZoom": 4,
+                "originalProjectionBounds": [
+                    -142804.06241115273,
+                    -92922.05734985153,
+                    111431.17622270514,
+                    92031.40136171383
+                ],
+                "originalProjectionData": {
+                    "datum": "NAD83",
+                    "lat_0": 32.86666666666667,
+                    "lat_1": 45,
+                    "lat_2": 33,
+                    "lon_0": -97.05,
+                    "no_defs": true,
+                    "proj": "lcc",
+                    "units": "m",
+                    "x_0": 0,
+                    "y_0": 0
+                },
                 "tileWidth": 1024
             }
         }
@@ -3815,6 +3926,36 @@
                     "lat_1": 38.66666666666666,
                     "lat_2": 33.33333333333334,
                     "lon_0": -107.5,
+                    "no_defs": true,
+                    "proj": "lcc",
+                    "units": "m",
+                    "x_0": 0,
+                    "y_0": 0
+                },
+                "tileWidth": 1024
+            }
+        }
+    },
+    "Denver_terminal": {
+        "type": "TerminalArea",
+        "versions": {
+            "94": {
+                "effectiveDate": "2020-07-16",
+                "imageHeight": 8704,
+                "imageWidth": 9027,
+                "maxZoom": 4,
+                "originalProjectionBounds": [
+                    -94658.07552685658,
+                    -105245.69724310562,
+                    96416.90868190731,
+                    79000.84859860834
+                ],
+                "originalProjectionData": {
+                    "datum": "NAD83",
+                    "lat_0": 39.91666666666666,
+                    "lat_1": 45,
+                    "lat_2": 33,
+                    "lon_0": -104.85,
                     "no_defs": true,
                     "proj": "lcc",
                     "units": "m",
@@ -4677,6 +4818,36 @@
                     "lat_1": 70.66666666666667,
                     "lat_2": 65.33333333333333,
                     "lon_0": -151.5,
+                    "no_defs": true,
+                    "proj": "lcc",
+                    "units": "m",
+                    "x_0": 0,
+                    "y_0": 0
+                },
+                "tileWidth": 1024
+            }
+        }
+    },
+    "Fairbanks_terminal": {
+        "type": "TerminalArea",
+        "versions": {
+            "85": {
+                "effectiveDate": "2020-05-21",
+                "imageHeight": 6092,
+                "imageWidth": 11259,
+                "maxZoom": 4,
+                "originalProjectionBounds": [
+                    -148292.8344117274,
+                    -66199.2219706384,
+                    90068.12147684532,
+                    62767.97251679554
+                ],
+                "originalProjectionData": {
+                    "datum": "NAD83",
+                    "lat_0": 64.70833333333333,
+                    "lat_1": 65,
+                    "lat_2": 64.5,
+                    "lon_0": -147.6,
                     "no_defs": true,
                     "proj": "lcc",
                     "units": "m",
