@@ -1,0 +1,28 @@
+{
+  "Atlanta_terminal": {
+    "versions": {
+      "2020-07-23T17-11-16": {
+        "effectiveDate": "2020-02-27",
+        "imageHeight": 7641,
+        "imageWidth": 9035,
+        "maxZoom": 4,
+        "projectionLcc": {
+          "extents": {
+            "bottom": 85051.36969566518,
+            "left": -121993.31924295505,
+            "right": 69240.58407213549,
+            "top": -76679.81981434069
+          },
+          "lat0": 33.65,
+          "lat1": 45,
+          "lat2": 33,
+          "lon0": -84.33333333333333,
+          "x0": 0,
+          "y0": 0
+        },
+        "tileWidth": 1024,
+        "version": "2020-07-23T17-11-16"
+      }
+    }
+  }
+}

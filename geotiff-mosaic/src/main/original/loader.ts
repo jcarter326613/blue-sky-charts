@@ -6,13 +6,27 @@ import { ProjectionExtents } from '../models/projection-extents'
 import { SectionVersion } from '../models/section-version'
 import { SectionVersionList } from '../models/section-version-list'
 import { exit } from 'process'
+import { MapType } from './map-type'
 
 export class Loader {
     private OUTPUT_DIRECTORY = "./output"
     private PEVIOUS_UPLOADS_FILE = "./data/previous_uploads.json"
     private SUBSECTION_META_FILE = "../geotiff-map-exploder/maps/metadata.json"
+    private TERMINAL_METADATA_FILE = "./data/terminal_metadata.json"
     private SECTIONAL_METADATA_FILE = "./data/sectional_metadata.json"
-    private SECTIONAL_METADATA_FILE_OUTPUT = "./output/metadata.json"
+    private METADATA_FILE_OUTPUT = "./output/metadata.json"
+
+    private type: MapType
+
+    constructor(type: MapType) {
+        this.type = type
+
+        execSync(`cp ../geotiff-map-exploder/maps/metadata.json ./maps`)
+        if ( existsSync("./maps/cache") ) {
+            execSync(`rm -rf ./maps/cache`)
+        }
+        execSync(`mkdir ./maps/cache`)
+    }
 
     public syncChangedMaps(): void {
         // Clean the output directory
@@ -24,7 +38,19 @@ export class Loader {
         // Load the previous metadata file
         let outputMetadata: Record<string, SectionVersionList>
         try {
-            let rawdata = readFileSync(this.SECTIONAL_METADATA_FILE)
+            let pathToRead: string
+            switch(this.type) {
+                case MapType.Sectional:
+                    pathToRead = this.SECTIONAL_METADATA_FILE
+                    break
+                case MapType.Terminal:
+                    pathToRead = this.TERMINAL_METADATA_FILE
+                    break
+                default:
+                    console.error("Bad map type")
+                    exit(1)
+            }
+            let rawdata = readFileSync(pathToRead)
             outputMetadata = JSON.parse(rawdata.toString())
         } catch (error) {
             outputMetadata = {}
@@ -49,7 +75,7 @@ export class Loader {
         let neededMapVersions: Record<string, Array<string>> = {}
         for (let map of Object.keys(subSectionVersions)) {
             let mapValue = subSectionVersions[map]
-            if ( mapValue.versions != null ) {
+            if ( mapValue.versions != null && (this.type != MapType.Terminal || mapValue.type == "TerminalArea") ) {
                 for (let version of Object.keys(mapValue.versions)) {
                     if (configuration.maps === undefined || version !in configuration.maps[map]) {
                         if (!(map in neededMapVersions)) {
@@ -62,24 +88,37 @@ export class Loader {
         }
 
         //For each version,
+        let mapTypeAbbreviation: string
+        let mapTypeLong: string
+        if ( this.type == MapType.Sectional ) {
+            mapTypeAbbreviation = "SEC"
+            mapTypeLong = "sectional"
+        } else if ( this.type == MapType.Terminal ) {
+            mapTypeAbbreviation = "TAC"
+            mapTypeLong = "terminal"
+        } else {
+            console.error("Bad map type")
+            exit(1)
+        }
+
         let outputVersionId = (new Date()).toISOString().replace(/\..+/, "").replace(":", "-").replace(":", "-")
         for ( let mapName of Object.keys(neededMapVersions) ) {
             if ( !(mapName in outputMetadata) ) {
                 outputMetadata[mapName] = new SectionVersionList()
                 outputMetadata[mapName].versions = {}
-            }
+            } 
             if ( outputMetadata[mapName].versions === undefined ) {
                 outputMetadata[mapName].versions = {}
             }
             let versionList = neededMapVersions[mapName]
             for ( let version of versionList ) {
                 //Ensure png present
-                let pngFilePath = `./maps/${mapName}_SEC_${version}.tif`
+                let pngFilePath = `./maps/${mapName}_${mapTypeAbbreviation}_${version}.tif`
                 if ( !existsSync(pngFilePath) ) {
-                    let pngGeoFilePath = `../geotiff-map-exploder/maps/${mapName}_SEC_${version}.tif`
+                    let pngGeoFilePath = `../geotiff-map-exploder/maps/${mapName}_${mapTypeAbbreviation}_${version}.tif`
                     if ( !existsSync(pngGeoFilePath) ) {
                         console.log(`Setting up map ${mapName} version ${version}`)
-                        execSync(`python3 ../geotiff-map-exploder/setup_map.py -use-defaults ${mapName} ${version} sectional`)
+                        execSync(`python3 ../geotiff-map-exploder/setup_map.py -use-defaults ${mapName} ${version} ${mapTypeLong}`)
                     } else {
                         execSync(`cp ${pngGeoFilePath} ./maps/`)
                     }
@@ -90,7 +129,7 @@ export class Loader {
                 if ( existsSync("./maps/tiles") ) {
                     execSync("rm -rf ./maps/tiles")
                 }
-                execSync(`python3 ../geotiff-map-exploder/explode_maps.py ${mapName} ${version} relative sectional`)
+                execSync(`python3 ../geotiff-map-exploder/explode_maps.py ${mapName} ${version} relative ${mapTypeLong}`)
 
                 //Prep the output directory
                 let mapOutputDirectory = `${this.OUTPUT_DIRECTORY}/${mapName}`
@@ -99,7 +138,7 @@ export class Loader {
                 mkdirSync(mapOutputDirectory)
 
                 //Convert all the artifacts to jpg files
-                let tileMapDirectory = `./maps/tiles/${mapName}_SEC_${version}`
+                let tileMapDirectory = `./maps/tiles/${mapName}_${mapTypeAbbreviation}_${version}`
                 let zoomDirectories = readdirSync(tileMapDirectory)
                 for ( let zoomDirectory of zoomDirectories ) {
                     let fillZoomDirectory = `${mapOutputDirectory}/${zoomDirectory}`
@@ -170,7 +209,17 @@ export class Loader {
 
         //Write out the new metadata file
         let rawOutputdata = JSON.stringify(outputMetadata)
-        writeFileSync(this.SECTIONAL_METADATA_FILE_OUTPUT, rawOutputdata)
-        writeFileSync(this.SECTIONAL_METADATA_FILE, rawOutputdata)
+        writeFileSync(this.METADATA_FILE_OUTPUT, rawOutputdata)
+        switch(this.type) {
+            case MapType.Sectional:
+                writeFileSync(this.SECTIONAL_METADATA_FILE, rawOutputdata)
+                break
+            case MapType.Terminal:
+                writeFileSync(this.TERMINAL_METADATA_FILE, rawOutputdata)
+                break
+            default:
+                console.error("Bad map type")
+                exit(1)
+        }
     }
 }

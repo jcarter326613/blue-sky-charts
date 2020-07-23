@@ -32,11 +32,11 @@
         {
             "type": "node",
             "request": "launch",
-            "name": "Launch Original",
+            "name": "Launch Sectional",
             "skipFiles": [
                 "<node_internals>/**"
             ],
-            "program": "${workspaceFolder}/src/test/original.js",
+            "program": "${workspaceFolder}/src/test/sectional.js",
             "outFiles": [
                 "${workspaceFolder}/**/*.js"
             ],
@@ -45,11 +45,36 @@
         {
             "type": "node",
             "request": "launch",
-            "name": "Launch Original no compile",
+            "name": "Launch Sectional no compile",
             "skipFiles": [
                 "<node_internals>/**"
             ],
-            "program": "${workspaceFolder}/src/test/original.js",
+            "program": "${workspaceFolder}/src/test/sectional.js",
+            "outFiles": [
+                "${workspaceFolder}/**/*.js"
+            ]
+        },
+        {
+            "type": "node",
+            "request": "launch",
+            "name": "Launch Terminal",
+            "skipFiles": [
+                "<node_internals>/**"
+            ],
+            "program": "${workspaceFolder}/src/test/terminal.js",
+            "outFiles": [
+                "${workspaceFolder}/**/*.js"
+            ],
+            "preLaunchTask": "tsc: build - tsconfig.json"
+        },
+        {
+            "type": "node",
+            "request": "launch",
+            "name": "Launch Terminal no compile",
+            "skipFiles": [
+                "<node_internals>/**"
+            ],
+            "program": "${workspaceFolder}/src/test/terminal.js",
             "outFiles": [
                 "${workspaceFolder}/**/*.js"
             ]

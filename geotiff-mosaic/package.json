@@ -8,7 +8,8 @@
   },
   "scripts": {
     "generate_mosaic": "node src/test/mosaic.js",
-    "generate_original": "node src/test/original.js"
+    "generate_sectional": "node src/test/sectional.js",
+    "generate_terminal": "node src/test/terminal.js"
   },
   "repository": {
     "type": "git",
