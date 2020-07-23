@@ -103,12 +103,17 @@ export class Loader {
 
         let outputVersionId = (new Date()).toISOString().replace(/\..+/, "").replace(":", "-").replace(":", "-")
         for ( let mapName of Object.keys(neededMapVersions) ) {
+            let outputMapName = mapName
+            if ( this.type == MapType.Terminal ) {
+                outputMapName = mapName.substring(0, mapName.length - "_terminal".length)
+            }
+
             if ( !(mapName in outputMetadata) ) {
-                outputMetadata[mapName] = new SectionVersionList()
-                outputMetadata[mapName].versions = {}
+                outputMetadata[outputMapName] = new SectionVersionList()
+                outputMetadata[outputMapName].versions = {}
             } 
-            if ( outputMetadata[mapName].versions === undefined ) {
-                outputMetadata[mapName].versions = {}
+            if ( outputMetadata[outputMapName].versions === undefined ) {
+                outputMetadata[outputMapName].versions = {}
             }
             let versionList = neededMapVersions[mapName]
             for ( let version of versionList ) {
@@ -132,7 +137,7 @@ export class Loader {
                 execSync(`python3 ../geotiff-map-exploder/explode_maps.py ${mapName} ${version} relative ${mapTypeLong}`)
 
                 //Prep the output directory
-                let mapOutputDirectory = `${this.OUTPUT_DIRECTORY}/${mapName}`
+                let mapOutputDirectory = `${this.OUTPUT_DIRECTORY}/${outputMapName}`
                 mkdirSync(mapOutputDirectory)
                 mapOutputDirectory = `${mapOutputDirectory}/${outputVersionId}`
                 mkdirSync(mapOutputDirectory)
@@ -153,7 +158,7 @@ export class Loader {
                 }
 
                 //Update the metadata output file
-                let outputVersions = outputMetadata[mapName].versions
+                let outputVersions = outputMetadata[outputMapName].versions
                 let inputVerions = subSectionVersions[mapName].versions
                 if (outputVersions === undefined || inputVerions === undefined) {
                     console.error("Broken code")

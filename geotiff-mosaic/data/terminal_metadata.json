@@ -1,7 +1,7 @@
 {
-  "Atlanta_terminal": {
+  "Atlanta": {
     "versions": {
-      "2020-07-23T17-11-16": {
+      "2020-07-23T17-34-57": {
         "effectiveDate": "2020-02-27",
         "imageHeight": 7641,
         "imageWidth": 9035,
@@ -21,7 +21,7 @@
           "y0": 0
         },
         "tileWidth": 1024,
-        "version": "2020-07-23T17-11-16"
+        "version": "2020-07-23T17-34-57"
       }
     }
   }
