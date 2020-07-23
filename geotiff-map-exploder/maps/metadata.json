@@ -8710,6 +8710,36 @@
             }
         }
     },
+    "Orlando_terminal": {
+        "type": "TerminalArea",
+        "versions": {
+            "60": {
+                "effectiveDate": "2020-01-30",
+                "imageHeight": 7806,
+                "imageWidth": 11839,
+                "maxZoom": 4,
+                "originalProjectionBounds": [
+                    -167942.70795320044,
+                    -78673.06233612378,
+                    82655.33175297844,
+                    86564.81138458382
+                ],
+                "originalProjectionData": {
+                    "datum": "NAD83",
+                    "lat_0": 28.5,
+                    "lat_1": 45,
+                    "lat_2": 33,
+                    "lon_0": -80.96666666666667,
+                    "no_defs": true,
+                    "proj": "lcc",
+                    "units": "m",
+                    "x_0": 0,
+                    "y_0": 0
+                },
+                "tileWidth": 1024
+            }
+        }
+    },
     "Philadelphia_terminal": {
         "type": "TerminalArea",
         "versions": {
@@ -10230,6 +10260,36 @@
                     "lat_1": 45,
                     "lat_2": 33,
                     "lon_0": -90.33333333333333,
+                    "no_defs": true,
+                    "proj": "lcc",
+                    "units": "m",
+                    "x_0": 0,
+                    "y_0": 0
+                },
+                "tileWidth": 1024
+            }
+        }
+    },
+    "Tampa_terminal": {
+        "type": "TerminalArea",
+        "versions": {
+            "60": {
+                "effectiveDate": "2020-01-30",
+                "imageHeight": 7747,
+                "imageWidth": 8995,
+                "maxZoom": 4,
+                "originalProjectionBounds": [
+                    -79830.07549635421,
+                    -81238.10380595144,
+                    110578.0446977555,
+                    82770.10324534315
+                ],
+                "originalProjectionData": {
+                    "datum": "NAD83",
+                    "lat_0": 27.95,
+                    "lat_1": 45,
+                    "lat_2": 33,
+                    "lon_0": -82.61666666666666,
                     "no_defs": true,
                     "proj": "lcc",
                     "units": "m",

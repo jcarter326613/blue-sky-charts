@@ -165,6 +165,10 @@ if map_type == "terminal":
         zip_url = "https://aeronav.faa.gov/content/aeronav/tac_files/Denver_TAC_{}.zip".format(version)
         zip_file = "maps/{}_TAC_{}.zip".format("Denver", version)
         tif_file_root = "{} TAC {}.tif".format(map_name.replace("_", " "), version)
+    elif map_name == "Tampa" or map_name == "Orlando":
+        zip_url = "https://aeronav.faa.gov/content/aeronav/tac_files/Tampa-Orlando_TAC_{}.zip".format(version)
+        zip_file = "maps/{}_TAC_{}.zip".format("Tampa-Orlando", version)
+        tif_file_root = "{} TAC {}.tif".format(map_name, version)
     else:
         zip_url = "https://aeronav.faa.gov/content/aeronav/tac_files/{}_TAC_{}.zip".format(map_name, version)
         zip_file = "maps/{}_TAC_{}.zip".format(map_name, version)
