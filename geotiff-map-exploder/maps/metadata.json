@@ -6041,6 +6041,27 @@
         "versions": {
             "91": {
                 "effectiveDate": "2020-05-21",
+                "imageHeight": 7662,
+                "imageWidth": 11054,
+                "maxZoom": 4,
+                "originalProjectionBounds": [
+                    -110334.52652367248,
+                    -77046.67291042085,
+                    123655.66022840934,
+                    85146.60133479013
+                ],
+                "originalProjectionData": {
+                    "datum": "NAD83",
+                    "lat_0": 39.36666666666667,
+                    "lat_1": 45,
+                    "lat_2": 33,
+                    "lon_0": -95,
+                    "no_defs": true,
+                    "proj": "lcc",
+                    "units": "m",
+                    "x_0": 0,
+                    "y_0": 0
+                },
                 "tileWidth": 1024
             }
         }
@@ -6780,6 +6801,36 @@
             }
         }
     },
+    "Las_Vegas_terminal": {
+        "type": "TerminalArea",
+        "versions": {
+            "92": {
+                "effectiveDate": "2020-02-27",
+                "imageHeight": 6251,
+                "imageWidth": 10565,
+                "maxZoom": 4,
+                "originalProjectionBounds": [
+                    -113388.24739871225,
+                    -66136.36978034367,
+                    110244.04021045622,
+                    66178.38819299446
+                ],
+                "originalProjectionData": {
+                    "datum": "NAD83",
+                    "lat_0": 36.25,
+                    "lat_1": 45,
+                    "lat_2": 33,
+                    "lon_0": -115.0833333333333,
+                    "no_defs": true,
+                    "proj": "lcc",
+                    "units": "m",
+                    "x_0": 0,
+                    "y_0": 0
+                },
+                "tileWidth": 1024
+            }
+        }
+    },
     "Los_Angeles": {
         "type": "Sectional",
         "versions": {
@@ -6949,6 +7000,36 @@
                     "lat_1": 38.66666666666666,
                     "lat_2": 33.33333333333334,
                     "lon_0": -118.4666666666667,
+                    "no_defs": true,
+                    "proj": "lcc",
+                    "units": "m",
+                    "x_0": 0,
+                    "y_0": 0
+                },
+                "tileWidth": 1024
+            }
+        }
+    },
+    "Los_Angeles_terminal": {
+        "type": "TerminalArea",
+        "versions": {
+            "81": {
+                "effectiveDate": "2020-06-18",
+                "imageHeight": 6040,
+                "imageWidth": 16501,
+                "maxZoom": 5,
+                "originalProjectionBounds": [
+                    -204289.26746380434,
+                    -64079.08005141358,
+                    145003.1630547135,
+                    63773.71440542021
+                ],
+                "originalProjectionData": {
+                    "datum": "NAD83",
+                    "lat_0": 33.96666666666667,
+                    "lat_1": 45,
+                    "lat_2": 33,
+                    "lon_0": -118,
                     "no_defs": true,
                     "proj": "lcc",
                     "units": "m",
