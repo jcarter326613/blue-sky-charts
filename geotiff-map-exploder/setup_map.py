@@ -159,8 +159,8 @@ mi.write_inventory_metadata(map_inventory)
 if map_type == "terminal":
     zip_url = "https://aeronav.faa.gov/content/aeronav/tac_files/{}_TAC_{}.zip".format(map_name, version)
     zip_file = "maps/{}_TAC_{}.zip".format(map_name, version)
-    tif_file_root = "{}_TAC_{}.tif".format(map_name, version)
-    tif_file = "maps/{}".format(tif_file_root)
+    tif_file_root = "{} TAC {}.tif".format(map_name, version)
+    tif_file = "maps/{}".format(tif_file_root.replace(" ", "_"))
 else:
     zip_url = "https://aeronav.faa.gov/content/aeronav/sectional_files/{}_{}.zip".format(map_name, version)
     zip_file = "maps/{}_{}.zip".format(map_name, version)
