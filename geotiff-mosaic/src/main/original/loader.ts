@@ -75,13 +75,20 @@ export class Loader {
         let neededMapVersions: Record<string, Array<string>> = {}
         for (let map of Object.keys(subSectionVersions)) {
             let mapValue = subSectionVersions[map]
-            if ( mapValue.versions != null && (this.type != MapType.Terminal || mapValue.type == "TerminalArea") ) {
+            if ( mapValue.versions != null && 
+                (
+                    (this.type == MapType.Sectional && (mapValue.type === undefined || mapValue.type == "Sectional")) ||
+                    (this.type == MapType.Terminal && mapValue.type == "TerminalArea") 
+                )) {
                 for (let version of Object.keys(mapValue.versions)) {
                     if (configuration.maps === undefined || version !in configuration.maps[map]) {
                         if (!(map in neededMapVersions)) {
                             neededMapVersions[map] = []
+                            neededMapVersions[map].push(version)
+                        } else if (parseInt(neededMapVersions[map][0]) < parseInt(version)) {
+                            neededMapVersions[map] = []
+                            neededMapVersions[map].push(version)
                         }
-                        neededMapVersions[map].push(version)
                     }
                 }
             }
