@@ -79,22 +79,22 @@ def explode_maps(map_name, version, location_name, zoom_restriction, type):
         max_zoom = map_definition["mosaicMaxZoom"]
         image_path = "maps/{}_SEC_{}_WEB_CROPPED.tif".format(map_name, version)
         image_cache_folder = "maps/tiles/{}_SEC_{}".format(map_name, version)
-    else:
+    elif type == "sectional":
         max_zoom = map_definition["maxZoom"]
         image_path = "maps/{}_SEC_{}.tif".format(map_name, version)
         image_cache_folder = "maps/tiles/{}_SEC_{}".format(map_name, version)
+    elif type == "terminal":
+        max_zoom = map_definition["maxZoom"]
+        image_path = "maps/{}_TAC_{}.tif".format(map_name, version)
+        image_cache_folder = "maps/tiles/{}_TAC_{}".format(map_name, version)
+    else:
+        print("Missing tile width for map " + map_name)
+        exit()
     if os.path.exists("maps/tiles"):
         os.system("rm -rf maps/tiles")
     os.makedirs(image_cache_folder)
     png_image_path = gdal_util.convert_tiff_to_png(image_path)
     explode_map(map_name, map_definition, image_cache_folder, png_image_path, tile_width, max_zoom, zoom_restriction)
-
-    #if location_name == "local":
-    #    if not os.path.exists("../vfr-green-site/static/maps/world-vfr/sectional"):
-    #        os.makedirs("../vfr-green-site/static/maps/world-vfr/sectional")
-    #    os.system("mv {} ../vfr-green-site/static/maps/world-vfr/sectional".format(image_cache_folder))
-    #elif location_name == "remote":
-    #    os.system("aws s3 sync ./maps/tiles s3://blueskycharts.com/maps/world-vfr/sectional")
 
 if len(sys.argv) not in [5,6]:
     print("Usage python3 explode_maps.py <mapname> <version> <local|remote|relative> <type> (<zoom_restriction>)")

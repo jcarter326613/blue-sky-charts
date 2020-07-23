@@ -160,7 +160,7 @@ if map_type == "terminal":
     zip_url = "https://aeronav.faa.gov/content/aeronav/tac_files/{}_TAC_{}.zip".format(map_name, version)
     zip_file = "maps/{}_TAC_{}.zip".format(map_name, version)
     tif_file_root = "{} TAC {}.tif".format(map_name, version)
-    tif_file = "maps/{}".format(tif_file_root.replace(" ", "_"))
+    tif_file = "maps/{}".format("{}_TAC_{}.tif".format(mi_lookup, version))
 else:
     zip_url = "https://aeronav.faa.gov/content/aeronav/sectional_files/{}_{}.zip".format(map_name, version)
     zip_file = "maps/{}_{}.zip".format(map_name, version)
@@ -186,7 +186,6 @@ with rasterio.open(tif_file) as src:
     map_version_metadata["maxZoom"] = math.ceil(math.log2(src.width / TILE_WIDTH))
 
     mi.write_inventory_metadata(map_inventory)
-web_tiff_path = gdal_util.convert_tiff_to_web_mercator(tif_file)
 
 # Create the web mercator image
 if map_type == "sectional":
