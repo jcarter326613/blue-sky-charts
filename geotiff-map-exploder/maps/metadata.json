@@ -1356,6 +1356,36 @@
             }
         }
     },
+    "Boston_terminal": {
+        "type": "TerminalArea",
+        "versions": {
+            "96": {
+                "effectiveDate": "2020-04-23",
+                "imageHeight": 8969,
+                "imageWidth": 12478,
+                "maxZoom": 4,
+                "originalProjectionBounds": [
+                    -97278.48893543372,
+                    -91888.4371764194,
+                    166854.29815813183,
+                    97974.12863179817
+                ],
+                "originalProjectionData": {
+                    "datum": "NAD83",
+                    "lat_0": 42.05,
+                    "lat_1": 45,
+                    "lat_2": 33,
+                    "lon_0": -71.1,
+                    "no_defs": true,
+                    "proj": "lcc",
+                    "units": "m",
+                    "x_0": 0,
+                    "y_0": 0
+                },
+                "tileWidth": 1024
+            }
+        }
+    },
     "Brownsville": {
         "type": "Sectional",
         "versions": {
@@ -2027,6 +2057,36 @@
                     "lat_1": 38.66666666666666,
                     "lat_2": 33.33333333333334,
                     "lon_0": -78.75,
+                    "no_defs": true,
+                    "proj": "lcc",
+                    "units": "m",
+                    "x_0": 0,
+                    "y_0": 0
+                },
+                "tileWidth": 1024
+            }
+        }
+    },
+    "Charlotte_terminal": {
+        "type": "TerminalArea",
+        "versions": {
+            "63": {
+                "effectiveDate": "2020-07-16",
+                "imageHeight": 7544,
+                "imageWidth": 9019,
+                "maxZoom": 4,
+                "originalProjectionBounds": [
+                    -103006.20838898515,
+                    -75800.79132962736,
+                    87895.09751749785,
+                    83878.38228118609
+                ],
+                "originalProjectionData": {
+                    "datum": "NAD83",
+                    "lat_0": 35.24167,
+                    "lat_1": 45,
+                    "lat_2": 33,
+                    "lon_0": -81.05,
                     "no_defs": true,
                     "proj": "lcc",
                     "units": "m",
@@ -2799,6 +2859,36 @@
             }
         }
     },
+    "Chicago_terminal": {
+        "type": "TerminalArea",
+        "versions": {
+            "100": {
+                "effectiveDate": "2020-04-23",
+                "imageHeight": 6068,
+                "imageWidth": 9015,
+                "maxZoom": 4,
+                "originalProjectionBounds": [
+                    -96298.09921987416,
+                    -68401.50799725228,
+                    94543.96104944526,
+                    60050.753815860524
+                ],
+                "originalProjectionData": {
+                    "datum": "NAD83",
+                    "lat_0": 42.05,
+                    "lat_1": 45,
+                    "lat_2": 33,
+                    "lon_0": -88,
+                    "no_defs": true,
+                    "proj": "lcc",
+                    "units": "m",
+                    "x_0": 0,
+                    "y_0": 0
+                },
+                "tileWidth": 1024
+            }
+        }
+    },
     "Cincinnati": {
         "type": "Sectional",
         "versions": {
@@ -2952,6 +3042,66 @@
                     "lat_1": 38.66666666666666,
                     "lat_2": 33.33333333333334,
                     "lon_0": -81.53333333333333,
+                    "no_defs": true,
+                    "proj": "lcc",
+                    "units": "m",
+                    "x_0": 0,
+                    "y_0": 0
+                },
+                "tileWidth": 1024
+            }
+        }
+    },
+    "Cincinnati_terminal": {
+        "type": "TerminalArea",
+        "versions": {
+            "43": {
+                "effectiveDate": "2020-06-18",
+                "imageHeight": 8784,
+                "imageWidth": 9019,
+                "maxZoom": 4,
+                "originalProjectionBounds": [
+                    -78744.17059628671,
+                    22072.291172088037,
+                    112159.48244848876,
+                    207997.42631706802
+                ],
+                "originalProjectionData": {
+                    "datum": "NAD83",
+                    "lat_0": 38.25,
+                    "lat_1": 45,
+                    "lat_2": 33,
+                    "lon_0": -85,
+                    "no_defs": true,
+                    "proj": "lcc",
+                    "units": "m",
+                    "x_0": 0,
+                    "y_0": 0
+                },
+                "tileWidth": 1024
+            }
+        }
+    },
+    "Cleveland_terminal": {
+        "type": "TerminalArea",
+        "versions": {
+            "93": {
+                "effectiveDate": "2020-03-26",
+                "imageHeight": 6234,
+                "imageWidth": 9605,
+                "maxZoom": 4,
+                "originalProjectionBounds": [
+                    -85082.1267361569,
+                    -62452.6719081543,
+                    118241.53034308626,
+                    69504.28301694346
+                ],
+                "originalProjectionData": {
+                    "datum": "NAD83",
+                    "lat_0": 41.38333333333333,
+                    "lat_1": 45,
+                    "lat_2": 33,
+                    "lon_0": -82,
                     "no_defs": true,
                     "proj": "lcc",
                     "units": "m",
@@ -3260,6 +3410,15 @@
                     "x_0": 0,
                     "y_0": 0
                 },
+                "tileWidth": 1024
+            }
+        }
+    },
+    "Dallas-Ft_Worth_terminal": {
+        "type": "TerminalArea",
+        "versions": {
+            "95": {
+                "effectiveDate": "2020-02-27",
                 "tileWidth": 1024
             }
         }
@@ -3787,6 +3946,36 @@
                     "lat_1": 46.66666666666666,
                     "lat_2": 41.33333333333334,
                     "lon_0": -81,
+                    "no_defs": true,
+                    "proj": "lcc",
+                    "units": "m",
+                    "x_0": 0,
+                    "y_0": 0
+                },
+                "tileWidth": 1024
+            }
+        }
+    },
+    "Detroit_terminal": {
+        "type": "TerminalArea",
+        "versions": {
+            "93": {
+                "effectiveDate": "2020-03-26",
+                "imageHeight": 7502,
+                "imageWidth": 10503,
+                "maxZoom": 4,
+                "originalProjectionBounds": [
+                    -136063.90376216962,
+                    -89551.91229094796,
+                    86241.06923510929,
+                    69229.98468031311
+                ],
+                "originalProjectionData": {
+                    "datum": "NAD83",
+                    "lat_0": 42.25,
+                    "lat_1": 45,
+                    "lat_2": 33,
+                    "lon_0": -83.41666666666667,
                     "no_defs": true,
                     "proj": "lcc",
                     "units": "m",
@@ -5213,6 +5402,36 @@
             }
         }
     },
+    "Houston_terminal": {
+        "type": "TerminalArea",
+        "versions": {
+            "93": {
+                "effectiveDate": "2020-02-27",
+                "imageHeight": 8140,
+                "imageWidth": 9067,
+                "maxZoom": 4,
+                "originalProjectionBounds": [
+                    -102850.82793856502,
+                    -82653.0242469744,
+                    89085.27887670774,
+                    89653.63861736718
+                ],
+                "originalProjectionData": {
+                    "datum": "NAD83",
+                    "lat_0": 29.8,
+                    "lat_1": 45,
+                    "lat_2": 33,
+                    "lon_0": -95.41666666666667,
+                    "no_defs": true,
+                    "proj": "lcc",
+                    "units": "m",
+                    "x_0": 0,
+                    "y_0": 0
+                },
+                "tileWidth": 1024
+            }
+        }
+    },
     "Jacksonville": {
         "type": "Sectional",
         "versions": {
@@ -5642,6 +5861,15 @@
                     "x_0": 0,
                     "y_0": 0
                 },
+                "tileWidth": 1024
+            }
+        }
+    },
+    "Kansas_City_terminal": {
+        "type": "TerminalArea",
+        "versions": {
+            "91": {
+                "effectiveDate": "2020-05-21",
                 "tileWidth": 1024
             }
         }
@@ -7002,6 +7230,36 @@
             }
         }
     },
+    "Memphis_terminal": {
+        "type": "TerminalArea",
+        "versions": {
+            "62": {
+                "effectiveDate": "2020-03-26",
+                "imageHeight": 7597,
+                "imageWidth": 11132,
+                "maxZoom": 4,
+                "originalProjectionBounds": [
+                    -110361.99680736757,
+                    -77860.04942478969,
+                    125262.24971929271,
+                    82955.55471533314
+                ],
+                "originalProjectionData": {
+                    "datum": "NAD83",
+                    "lat_0": 35.06666666666667,
+                    "lat_1": 45,
+                    "lat_2": 33,
+                    "lon_0": -90.03333333333333,
+                    "no_defs": true,
+                    "proj": "lcc",
+                    "units": "m",
+                    "x_0": 0,
+                    "y_0": 0
+                },
+                "tileWidth": 1024
+            }
+        }
+    },
     "Miami": {
         "type": "Sectional",
         "versions": {
@@ -7131,6 +7389,36 @@
                     "lat_1": 30.66666666666667,
                     "lat_2": 25.33333333333333,
                     "lon_0": -79.91666666666667,
+                    "no_defs": true,
+                    "proj": "lcc",
+                    "units": "m",
+                    "x_0": 0,
+                    "y_0": 0
+                },
+                "tileWidth": 1024
+            }
+        }
+    },
+    "Miami_terminal": {
+        "type": "TerminalArea",
+        "versions": {
+            "95": {
+                "effectiveDate": "2020-01-30",
+                "imageHeight": 8984,
+                "imageWidth": 10552,
+                "maxZoom": 4,
+                "originalProjectionBounds": [
+                    -141048.17614269396,
+                    -96557.98218115186,
+                    82328.92701032138,
+                    93638.85618121809
+                ],
+                "originalProjectionData": {
+                    "datum": "NAD83",
+                    "lat_0": 25.95,
+                    "lat_1": 45,
+                    "lat_2": 33,
+                    "lon_0": -80.11666666666666,
                     "no_defs": true,
                     "proj": "lcc",
                     "units": "m",
@@ -8080,6 +8368,36 @@
             }
         }
     },
+    "Philadelphia_terminal": {
+        "type": "TerminalArea",
+        "versions": {
+            "92": {
+                "effectiveDate": "2020-07-16",
+                "imageHeight": 8515,
+                "imageWidth": 10203,
+                "maxZoom": 4,
+                "originalProjectionBounds": [
+                    -80634.01197089997,
+                    -109362.71419937606,
+                    135357.82308039156,
+                    70884.1537174196
+                ],
+                "originalProjectionData": {
+                    "datum": "NAD83",
+                    "lat_0": 39.98333333333333,
+                    "lat_1": 45,
+                    "lat_2": 33,
+                    "lon_0": -75.46666666666667,
+                    "no_defs": true,
+                    "proj": "lcc",
+                    "units": "m",
+                    "x_0": 0,
+                    "y_0": 0
+                },
+                "tileWidth": 1024
+            }
+        }
+    },
     "Phoenix": {
         "type": "Sectional",
         "versions": {
@@ -8217,6 +8535,66 @@
                     "lat_1": 38.66666666666666,
                     "lat_2": 33.33333333333334,
                     "lon_0": -112.55,
+                    "no_defs": true,
+                    "proj": "lcc",
+                    "units": "m",
+                    "x_0": 0,
+                    "y_0": 0
+                },
+                "tileWidth": 1024
+            }
+        }
+    },
+    "Phoenix_terminal": {
+        "type": "TerminalArea",
+        "versions": {
+            "62": {
+                "effectiveDate": "2020-04-23",
+                "imageHeight": 7548,
+                "imageWidth": 10518,
+                "maxZoom": 4,
+                "originalProjectionBounds": [
+                    -144825.23578900876,
+                    -74975.06627892274,
+                    77826.74438600303,
+                    84805.24774608763
+                ],
+                "originalProjectionData": {
+                    "datum": "NAD83",
+                    "lat_0": 33.43333333333333,
+                    "lat_1": 45,
+                    "lat_2": 33,
+                    "lon_0": -112,
+                    "no_defs": true,
+                    "proj": "lcc",
+                    "units": "m",
+                    "x_0": 0,
+                    "y_0": 0
+                },
+                "tileWidth": 1024
+            }
+        }
+    },
+    "Pittsburgh_terminal": {
+        "type": "TerminalArea",
+        "versions": {
+            "93": {
+                "effectiveDate": "2020-03-26",
+                "imageHeight": 6136,
+                "imageWidth": 9554,
+                "maxZoom": 4,
+                "originalProjectionBounds": [
+                    -90068.51554307344,
+                    -60890.54575249815,
+                    112159.64180765356,
+                    68979.83988940946
+                ],
+                "originalProjectionData": {
+                    "datum": "NAD83",
+                    "lat_0": 40.48333333333333,
+                    "lat_1": 45,
+                    "lat_2": 33,
+                    "lon_0": -80.3,
                     "no_defs": true,
                     "proj": "lcc",
                     "units": "m",
@@ -8972,6 +9350,36 @@
                     "lat_1": 46.66666666666666,
                     "lat_2": 41.33333333333334,
                     "lon_0": -121,
+                    "no_defs": true,
+                    "proj": "lcc",
+                    "units": "m",
+                    "x_0": 0,
+                    "y_0": 0
+                },
+                "tileWidth": 1024
+            }
+        }
+    },
+    "Seattle_terminal": {
+        "type": "TerminalArea",
+        "versions": {
+            "94": {
+                "effectiveDate": "2020-05-21",
+                "imageHeight": 7708,
+                "imageWidth": 9208,
+                "maxZoom": 4,
+                "originalProjectionBounds": [
+                    -90281.18654785413,
+                    -79174.85189064877,
+                    104616.50633060533,
+                    83969.99775725635
+                ],
+                "originalProjectionData": {
+                    "datum": "NAD83",
+                    "lat_0": 47.41666666666666,
+                    "lat_1": 45,
+                    "lat_2": 33,
+                    "lon_0": -122.4666666666667,
                     "no_defs": true,
                     "proj": "lcc",
                     "units": "m",
