@@ -26,8 +26,10 @@ import com.blueskycharts.app.map.resources.ShadowProvider
 import com.blueskycharts.app.map.resources.TileProvider
 import com.blueskycharts.app.preferences.Preferences
 import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import java.util.*
+import java.util.concurrent.atomic.AtomicBoolean
 import kotlin.concurrent.timerTask
 import kotlin.math.ceil
 import kotlin.math.log2
@@ -44,6 +46,7 @@ class NavigableMap2d(context: Context, attributes: AttributeSet) :
     private val textHeight: Float
     private val textBackgroundPaint = Paint()
     private val textStrokePaint = Paint()
+    private val positionUpdatePending = AtomicBoolean(false)
 
     // Map state variables
     private var mapBackground: SubMapPosition? = null
@@ -588,12 +591,18 @@ class NavigableMap2d(context: Context, attributes: AttributeSet) :
     }
 
     private fun updatePositionRecord() {
-        val origin = this.origin2d
-        if (origin != null) {
-            Preferences.instance.setPreference(
-                this.mapPositionPropertyName,
-                "${this.scaleDriver}|${origin.x}|${origin.y}"
-            )
+        if (this.origin2d != null) {
+            if (!positionUpdatePending.getAndSet(true)) {
+                GlobalScope.launch {
+                    delay(2000L /*2 seconds*/)
+                    positionUpdatePending.set(false)
+                    val origin = this@NavigableMap2d.origin2d ?: return@launch
+                    Preferences.instance.setPreference(
+                        this@NavigableMap2d.mapPositionPropertyName,
+                        "${this@NavigableMap2d.scaleDriver}|${origin.x}|${origin.y}"
+                    )
+                }
+            }
         }
     }
 }

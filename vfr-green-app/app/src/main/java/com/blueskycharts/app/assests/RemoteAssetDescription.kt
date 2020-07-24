@@ -6,12 +6,19 @@ import java.io.InputStream
 import java.net.URL
 import com.blueskycharts.app.utility.Log
 
-class RemoteAssetDescription(private val url: URL, volatility: Volatility, storageLocation: StorageLocation, private var requiresCors: Boolean = false) :
+class RemoteAssetDescription(private val url: URL, volatility: Volatility, storageLocation: StorageLocation, private val requiresCors: Boolean = false, private val isFolder: Boolean = false) :
     AssetDescription(volatility, storageLocation) {
     override val localPath: String
-        get() = "${url.host}/${url.path}/${url.query}"
+        get() {
+            return if (isFolder) {
+                "${url.host}${url.path}/"
+            } else {
+                "${url.host}${url.path}/${url.query}"
+            }
+        }
+    override val hasDiskFriendlyLocalPath: Boolean = false
 
-    override fun retrieveFromSource(callback: ((asset: Asset) -> Unit))
+    fun retrieveFromSource(callback: ((asset: Asset) -> Unit))
     {
         GlobalScope.launch {    //ok1
             val asset = Asset(this@RemoteAssetDescription)

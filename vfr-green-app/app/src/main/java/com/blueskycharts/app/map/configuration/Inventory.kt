@@ -44,14 +44,16 @@ class Inventory(val mapGroups: List<Group>) {
     }
 
     companion object {
+        val topLevelMapUrl = "https://blueskycharts.com/maps"
+
         private var _instance: Inventory? = null
         val instance: Inventory
             get() {
                 if ( _instance == null ) {
                     val groups = mutableListOf<Group>()
-                    val worldVfrInventoryGroup = Group(1, "World VFR", "https://blueskycharts.com/maps/world-vfr-mosaic", true)
-                    val usSectionalVfrGroup = Group(2, "VFR Sectional", "https://blueskycharts.com/maps/vfr-sectional", false)
-                    val usTerminalVfrGroup = Group(3, "VFR Terminal", "https://blueskycharts.com/maps/vfr-terminal", false)
+                    val worldVfrInventoryGroup = Group(1, "World VFR", "$topLevelMapUrl/world-vfr-mosaic", true)
+                    val usSectionalVfrGroup = Group(2, "VFR Sectional", "$topLevelMapUrl/vfr-sectional", false)
+                    val usTerminalVfrGroup = Group(3, "VFR Terminal", "$topLevelMapUrl/vfr-terminal", false)
                     groups.add(worldVfrInventoryGroup)
                     groups.add(usSectionalVfrGroup)
                     groups.add(usTerminalVfrGroup)

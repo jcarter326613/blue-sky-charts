@@ -44,29 +44,20 @@ class PreferenceToggleFragment(private val mapGroup: Int, private val mapName: S
 
         // Set up the download progress indicator
         // Set up the downloaded file size indicator
-        val downloadIndicatorLabel = view.findViewById<TextView>(R.id.download_complete_label)
         val downloadSizeLabel = view.findViewById<TextView>(R.id.size_on_disk_label)
-        GlobalScope.launch {    //ok1
+        GlobalScope.launch {
             val statistics = TilePersistenceManager.instance.getMapStatistics(mapGroup, mapName)
             statistics.addListener(object : MapPersistenceStatistics.Listener {
                 private var updateNeeded = false
-                private var percentageText: String = ""
                 private var sizeText: String = ""
 
-                override fun statisticsUpdated(totalFiles: Long, downloadedFiles: Long, downloadedSizeBytes: Long) {
-                    val percent = if (totalFiles == 0L) {
-                        100
-                    } else {
-                        (downloadedFiles * 100) / totalFiles
-                    }
-                    percentageText = "Downloading $percent% complete"
+                override fun statisticsUpdated(downloadedSizeBytes: Long) {
                     sizeText = "${downloadedSizeBytes / 1000000} M"
-                    if (percentageText != downloadIndicatorLabel.text || sizeText != downloadSizeLabel.text) {
+                    if (sizeText != downloadSizeLabel.text) {
                         updateNeeded = true
                         GlobalScope.launch(context = Dispatchers.Main) {
                             if (updateNeeded) {
                                 updateNeeded = false
-                                downloadIndicatorLabel.text = percentageText
                                 downloadSizeLabel.text = sizeText
                             }
                         }

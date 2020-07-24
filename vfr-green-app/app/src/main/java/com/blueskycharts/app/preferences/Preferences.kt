@@ -142,7 +142,8 @@ class Preferences private constructor() {
         val instance: Preferences = Preferences()
 
         // Property constants
-        fun propertyTemplateMapProactiveDownload(mapGroup: Int, mapName: String): String = "map.$mapGroup.$mapName.proactiveDownload"
+        val propertyTemplatePrefixProactiveDownload = "map.proactiveDownload."
+        fun propertyTemplateMapProactiveDownload(mapGroup: Int, mapName: String): String = "$propertyTemplatePrefixProactiveDownload$mapGroup.$mapName"
         fun propertyTemplateMapPosition(mapGroup: Int, mapName: String): String = "map.$mapGroup.$mapName.position"
         val propertyNameDisplayedMapGroupId: String = "map.active.group"
         val propertyNameDisplayedSubMapId: String = "map.active.submap"

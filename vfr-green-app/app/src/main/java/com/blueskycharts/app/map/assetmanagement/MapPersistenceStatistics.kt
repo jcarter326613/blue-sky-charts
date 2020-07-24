@@ -7,12 +7,8 @@ import kotlinx.coroutines.sync.withLock
 import java.util.concurrent.atomic.AtomicInteger
 import java.util.concurrent.atomic.AtomicLong
 
-class MapPersistenceStatistics(val groupId: Int, val mapName: String, totalFiles: Long, downloadedFiles: Long, downloadedSizeBytes: Long) {
-    var totalFiles = LoudLong(this, totalFiles)
-        private set
-    var downloadedFiles = LoudLong(this, downloadedFiles)
-        private set
-    var downloadedSizeBytes = LoudLong(this, downloadedSizeBytes)
+class MapPersistenceStatistics(val groupId: Int, val mapName: String, downloadedSizeBytes: Long) {
+    var downloadedSizeBytes: Long = downloadedSizeBytes
         private set
 
     private val listeners = mutableListOf<Listener>()
@@ -26,19 +22,13 @@ class MapPersistenceStatistics(val groupId: Int, val mapName: String, totalFiles
         GlobalScope.launch {    //ok1
             broadcastMutex.withLock {
                 listeners.add(newListener)
-                newListener.statisticsUpdated(totalFiles.value, downloadedFiles.value, downloadedSizeBytes.value)
+                newListener.statisticsUpdated(downloadedSizeBytes)
             }
         }
     }
 
-    suspend fun setStatistics(totalFiles: Long, downloadedFiles: Long, downloadedSizeBytes: Long) {
-        if ( totalFiles < downloadedFiles ) {
-            this.downloadedFiles = LoudLong(this, totalFiles)
-        } else {
-            this.downloadedFiles = LoudLong(this, downloadedFiles)
-        }
-        this.totalFiles = LoudLong(this, totalFiles)
-        this.downloadedSizeBytes = LoudLong(this, downloadedSizeBytes)
+    suspend fun setStatistics(downloadedSizeBytes: Long) {
+        this.downloadedSizeBytes = downloadedSizeBytes
         fieldUpdated()
     }
 
@@ -49,46 +39,13 @@ class MapPersistenceStatistics(val groupId: Int, val mapName: String, totalFiles
                 return
             }
             for (listener in listeners) {
-                var downloadedFiles = this.downloadedFiles.value
-                if (downloadedFiles > totalFiles.value) {
-                    downloadedFiles = totalFiles.value
-                }
-                listener.statisticsUpdated(totalFiles.value, downloadedFiles, downloadedSizeBytes.value)
+                listener.statisticsUpdated(downloadedSizeBytes)
             }
             broadcastNeeded = false
         }
     }
 
     interface Listener {
-        fun statisticsUpdated(totalFiles: Long, downloadedFiles: Long, downloadedSizeBytes: Long)
-    }
-
-    class LoudLong(private val listener: MapPersistenceStatistics, initialValue: Long) {
-        private val _value = AtomicLong(initialValue)
-        val value: Long
-            get() {
-                return _value.get()
-            }
-
-        suspend fun increment() {
-            _value.incrementAndGet()
-            listener.fieldUpdated()
-        }
-
-        suspend fun decrement() {
-            _value.decrementAndGet()
-            if (_value.get() < 0) {
-                _value.set(0)
-            }
-            listener.fieldUpdated()
-        }
-
-        suspend fun add(toAdd: Long) {
-            _value.addAndGet(toAdd)
-            if (_value.get() < 0) {
-                _value.set(0)
-            }
-            listener.fieldUpdated()
-        }
+        fun statisticsUpdated(downloadedSizeBytes: Long)
     }
 }

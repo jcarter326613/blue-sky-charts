@@ -22,62 +22,11 @@ import java.net.URL
  */
 class TileAssetProvider private constructor(private val group: Inventory.Group) {
     fun retrieveTile(mapName: String, mapVersion: String, zoom: Int, x: Int, y: Int, callback: ((asset: Asset) -> Unit)) {
-        // Make sure the manifest is loaded before requesting any tiles
-        val manifest = manifest
-
-        GlobalScope.launch(Dispatchers.IO) {
-            manifest.access {
-                it.touchFile(group.id, mapName, zoom, x, y)
-                return@access true
-            }
-        }
-
         // Request the tile from the base class
         val assetDescription = getTileFileDescription(mapName, mapVersion, zoom, x, y)
         val localAsset = assetProvider.retrieveLocalAsset(assetDescription)
         if ( localAsset.errorLoading ) {
-            assetProvider.retrieveAsset(assetDescription) {
-                GlobalScope.launch {    //ok1
-                    manifest.access { manifestContents ->
-                        // Make sure the file is added to the manifest
-                        var mapList = manifestContents.mapGroups[group.id]
-                        if (mapList == null) {
-                            mapList = Manifest.MapList()
-                            manifestContents.mapGroups[group.id] = mapList
-                        }
-                        var map = mapList.mapList[mapName]
-                        if (map == null) {
-                            map = Manifest.MapList.MapVersionList()
-                            mapList.mapList[mapName] = map
-                        }
-                        var version = map.versionList[mapVersion]
-                        if (version == null) {
-                            version = Manifest.MapList.MapVersionList.MapVersion()
-                            map.versionList[mapVersion] = version
-                        }
-                        var zoomMap = version.zoomMap[zoom]
-                        if (zoomMap == null) {
-                            zoomMap = mutableMapOf()
-                            version.zoomMap[zoom] = zoomMap
-                        }
-                        var xMap = zoomMap[x]
-                        if (xMap == null) {
-                            xMap = mutableMapOf()
-                            zoomMap[x] = xMap
-                        }
-                        val fileSize = xMap[y]
-                        val actualBytes = it.numBytes
-                        if (fileSize == null || actualBytes != fileSize) {
-                            xMap[y] = actualBytes
-                            return@access true
-                        }
-                        return@access false
-                    }
-                }
-
-                // Tell the caller their file has been loaded
-                callback(it)
-            }
+            assetProvider.retrieveAsset(assetDescription, callback)
         } else {
             try {
                 callback(localAsset)
@@ -87,7 +36,7 @@ class TileAssetProvider private constructor(private val group: Inventory.Group) 
         }
     }
 
-    fun getTileFileDescription(mapName: String, mapVersion: String, zoom: Int, x: Int, y: Int): AssetDescription {
+    fun getTileFileDescription(mapName: String, mapVersion: String, zoom: Int, x: Int, y: Int): RemoteAssetDescription {
         val tileUrl = "${group.urlRoot}/${mapName}/$mapVersion/$zoom/${x}_${y}.${imageExtension}"
         val storage = if (Preferences.instance.getBooleanValue(Preferences.propertyNameStoreMapsExternally, Preferences.defaultValueStoreMapsExternally)) {
             StorageLocation.External
@@ -97,9 +46,18 @@ class TileAssetProvider private constructor(private val group: Inventory.Group) 
         return RemoteAssetDescription(URL(tileUrl), Volatility.Indefinite, storage)
     }
 
+    fun getMapAssetDescriptionContainer(mapName: String): AssetDescription {
+        val tileUrl = "${group.urlRoot}/${mapName}"
+        val storage = if (Preferences.instance.getBooleanValue(Preferences.propertyNameStoreMapsExternally, Preferences.defaultValueStoreMapsExternally)) {
+            StorageLocation.External
+        } else {
+            StorageLocation.Internal
+        }
+        return RemoteAssetDescription(URL(tileUrl), Volatility.Indefinite, storage, requiresCors = false, isFolder = true)
+    }
+
     companion object {
         private var instances: MutableMap<Int, TileAssetProvider> = mutableMapOf()
-        private val manifest: PersistentFile<Manifest>
         private const val imageExtension = "jpg"
         private val assetProvider = AssetProvider()
 
@@ -107,42 +65,24 @@ class TileAssetProvider private constructor(private val group: Inventory.Group) 
             for ( group in Inventory.instance.mapGroups ) {
                 instances[group.id] = TileAssetProvider(group)
             }
-
-            val manifestLocation = "tileAssetProvider/manifest"
-            val manifestDescription = LocalAssetDescription(manifestLocation, Volatility.Indefinite, StorageLocation.Internal)
-            val asset = assetProvider.retrieveLocalAsset(manifestDescription)
-            manifest = PersistentFile(if (asset.errorLoading) {
-                Manifest()
-            } else {
-                val reader = asset.asJsonReader()
-                if (reader == null) {
-                    Manifest()
-                } else {
-                    Manifest.readFromJsonReader(reader)
-                }
-            }, manifestDescription)
         }
 
         fun getInstance(group: Inventory.Group): TileAssetProvider {
-            return instances[group.id]?: throw Error("Asset provider not created for group ${group.id}")
+            return getInstance(group.id)
         }
 
-        suspend fun getReadOnlyManifest(mapGroupId: Int, map: String): Manifest.MapList.MapVersionList? {
-            var retVal: Manifest.MapList.MapVersionList? = null
-            manifest.access {
-                retVal = it.mapGroups[mapGroupId]?.mapList?.get(map)?.copy()
-                return@access false
-            }
-            return retVal
+        fun getInstance(groupId: Int): TileAssetProvider {
+            return instances[groupId]?: throw Error("Asset provider not created for group ${groupId}")
         }
 
-        suspend fun popOldestUnPersistedManifestFile(): Manifest.FileDescription? {
-            var oldest: Manifest.FileDescription? = null
-            manifest.access {
-                oldest = it.popOldestUnPersistedFile()
-                true
+        fun getMapAssetDescriptionContainer(): AssetDescription {
+            val tileUrl = Inventory.topLevelMapUrl
+            val storage = if (Preferences.instance.getBooleanValue(Preferences.propertyNameStoreMapsExternally, Preferences.defaultValueStoreMapsExternally)) {
+                StorageLocation.External
+            } else {
+                StorageLocation.Internal
             }
-            return oldest
+            return RemoteAssetDescription(URL(tileUrl), Volatility.Indefinite, storage, requiresCors = false, isFolder = true)
         }
     }
 }

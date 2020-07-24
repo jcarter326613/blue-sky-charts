@@ -3,15 +3,19 @@ package com.blueskycharts.app.map.assetmanagement
 import android.util.Log
 import com.blueskycharts.app.Constants
 import com.blueskycharts.app.assests.Asset
+import com.blueskycharts.app.assests.AssetDescription
 import com.blueskycharts.app.assests.DiskCacheFactory
+import com.blueskycharts.app.assests.DiskCacheListener
 import com.blueskycharts.app.map.configuration.Inventory
 import com.blueskycharts.app.map.configuration.MapConfiguration
 import com.blueskycharts.app.preferences.Preferences
 import kotlinx.coroutines.*
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
+import java.util.concurrent.atomic.AtomicBoolean
 import java.util.concurrent.atomic.AtomicInteger
 import kotlin.concurrent.thread
+import kotlin.concurrent.timer
 import kotlin.math.pow
 
 /**
@@ -22,20 +26,24 @@ class TilePersistenceManager {
     private var running = false
     private var runningVersion = 0
     private var requestVersion = 0
+    private var firstRun = true
     private var stopRunning = false
     private var singleThreadMutex = Mutex()
     private val shouldStop: Boolean
         get() = stopRunning || runningVersion != requestVersion
 
     private val statisticsRecords = mutableMapOf<String, MapPersistenceStatistics>()     //Key is groupid-mapname
-    private var statisticsRecordsLoaded = false
     private var statisticsRecordsMutex = Mutex()
+
+    private var manifestUpdateStartTimerWaiting = AtomicBoolean(false)
 
     init {
         start()
         Preferences.instance.addListener(object: Preferences.Listener {
             override fun preferenceChanged(preferenceName: String) {
-                start()
+                if (preferenceName.startsWith(Preferences.propertyTemplatePrefixProactiveDownload)) {
+                    start()
+                }
             }
         })
     }
@@ -56,9 +64,9 @@ class TilePersistenceManager {
                 }
             }
             if (iShouldRun) {
-                if (!statisticsRecordsLoaded) {
-                    compileExistingStatistics()
-                    statisticsRecordsLoaded = true
+                if (firstRun) {
+                    addManifestChangeListeners()
+                    firstRun = false
                 }
                 cleanOldNonPersistedTiles()
                 enforceAllPreferences()
@@ -73,6 +81,28 @@ class TilePersistenceManager {
         stopRunning = true
     }
 
+    private suspend fun addManifestChangeListeners() {
+        for (group in Inventory.instance.mapGroups) {
+            val config = group.getConfiguration() ?: continue
+            for (map in config.mapList) {
+                val mapStatistics = getMapStatistics(group.id, map)
+                mapStatistics.addListener(object: MapPersistenceStatistics.Listener {
+                    override fun statisticsUpdated(downloadedSizeBytes: Long) {
+                        //Set a future time to restart so we're not constantly starting and restarting the persistence process
+                        if (!this@TilePersistenceManager.manifestUpdateStartTimerWaiting.getAndSet(true)) {
+                            GlobalScope.launch {
+                                delay(10000L /*10 seconds*/)
+                                if (this@TilePersistenceManager.manifestUpdateStartTimerWaiting.getAndSet(false)) {
+                                    this@TilePersistenceManager.start()
+                                }
+                            }
+                        }
+                    }
+                })
+            }
+        }
+    }
+
     suspend fun getMapStatistics(groupId: Int, mapName: String): MapPersistenceStatistics {
         val lookupKey = getMapKey(groupId, mapName)
         val statistics = statisticsRecords[lookupKey]
@@ -83,7 +113,22 @@ class TilePersistenceManager {
             statisticsRecordsMutex.withLock {
                 statisticsIn = statisticsRecords[lookupKey]
                 if ( statisticsIn == null ) {
-                    statisticsNotNull = MapPersistenceStatistics(groupId, mapName, 0, 0, 0)
+                    statisticsNotNull = MapPersistenceStatistics(groupId, mapName, 0)
+                    var statisticsSet = false
+
+                    val assetProvider = TileAssetProvider.getInstance(groupId)
+                    DiskCacheFactory.instance.addListener(assetProvider.getMapAssetDescriptionContainer(mapName), object:DiskCacheListener {
+                        override suspend fun totalSizeChanged(totalSize: Long) {
+                            statisticsNotNull.setStatistics(totalSize)
+                            statisticsSet = true
+                        }
+                    })
+
+                    // Wait for the statistics to get set since this is a suspend func that expects the value to be set on return
+                    while(!statisticsSet) {
+                        yield()
+                    }
+
                     statisticsRecords[lookupKey] = statisticsNotNull
                 } else {
                     statisticsNotNull = statisticsIn
@@ -95,45 +140,12 @@ class TilePersistenceManager {
         }
     }
 
-    private suspend fun compileExistingStatistics() {
-        for ( group in Inventory.instance.mapGroups ) {
-            val metadata = group.getConfiguration()
-            if (metadata != null) {
-                for (map in metadata.mapList) {
-                    val manifest = TileAssetProvider.getReadOnlyManifest(group.id, map)
-                    val currentMapVersionMetadata = metadata.getCurrentVersion(map)
-                    val zoomMap = manifest?.versionList?.get(currentMapVersionMetadata?.version)?.zoomMap
-                    var filesLoaded: Long = 0
-                    var fileSize: Long = 0
-                    if ( zoomMap != null ) {
-                        for ( zPair in zoomMap ) {
-                            for ( xPair in zPair.value ) {
-                                for ( yPair in xPair.value ) {
-                                    filesLoaded++
-                                    fileSize += yPair.value
-                                }
-                            }
-                        }
-                    }
-                    val mapStatistics = this@TilePersistenceManager.getMapStatistics(group.id, map)
-                    val maxZoom = currentMapVersionMetadata?.maxZoom
-                    var totalTiles: Long = 0
-                    if (maxZoom != null) {
-                        for (zoom in maxZoom downTo 0) {
-                            totalTiles += 2.0.pow(zoom).pow(2).toInt()
-                        }
-                    }
-                    mapStatistics.setStatistics(totalTiles, filesLoaded, fileSize)
-                }
-            }
-        }
-    }
-
     private suspend fun cleanOldNonPersistedTiles() {
         // Figure out how much space we are taking up from un persisted maps
         var usedBytes: Long = 0
+        val unPersistedFileRootList = mutableListOf<AssetDescription>()
         for (group in Inventory.instance.mapGroups) {
-            val groupTileProvider = TileAssetProvider.getInstance(group)
+            val assetProvider = TileAssetProvider.getInstance(group.id)
             val configuration = group.getConfiguration() ?: continue
             for (mapName in configuration.mapList) {
                 val proactiveDownload = Preferences.instance.getBooleanValue(
@@ -141,20 +153,10 @@ class TilePersistenceManager {
                     Preferences.defaultValueMapProactiveDownload
                 )
                 if (!proactiveDownload) {
-                    // This is a non persistent map, so count the size of the files in the manifest
-                    val manifest = TileAssetProvider.getReadOnlyManifest(group.id, mapName) ?: continue
-                    for (version in manifest.versionList) {
-                        for (zoomMap in version.value.zoomMap) {
-                            for (xMap in zoomMap.value) {
-                                for (yMap in xMap.value) {
-                                    val tileDescription = groupTileProvider.getTileFileDescription(mapName, version.key, zoomMap.key, xMap.key, yMap.key)
-                                    if (!DiskCacheFactory.instance.isAlias(tileDescription)) {
-                                        usedBytes += yMap.value
-                                    }
-                                }
-                            }
-                        }
-                    }
+                    val mapStatistics = getMapStatistics(group.id, mapName)
+                    usedBytes += mapStatistics.downloadedSizeBytes
+                } else {
+                    unPersistedFileRootList.add(assetProvider.getMapAssetDescriptionContainer(mapName))
                 }
             }
         }
@@ -164,31 +166,13 @@ class TilePersistenceManager {
             Preferences.propertyNameMaxUnPersistedTileDiskSpace, Preferences.defaultValueMaxUnPersistedTileDiskSpace
         )
 
+        val topLevelContainer = TileAssetProvider.getMapAssetDescriptionContainer()
         while (unPersistedMaxSpaceBytes < usedBytes) {
-            val oldestFile = TileAssetProvider.popOldestUnPersistedManifestFile() ?: break
-            val oldestFileGroup = Inventory.instance.findGroupById(oldestFile.groupId) ?: continue
-            val tileProvider = TileAssetProvider.getInstance(oldestFileGroup)
-
-            val properManifest = TileAssetProvider.getReadOnlyManifest(oldestFile.groupId, oldestFile.mapName) ?: continue
-            var firstLoop = true
-            for ( version in properManifest.versionList.keys ) {
-                val oldestFileDescriptor = tileProvider.getTileFileDescription(
-                    oldestFile.mapName,
-                    version,
-                    oldestFile.z,
-                    oldestFile.x,
-                    oldestFile.y
-                )
-                if (firstLoop) {
-                    val amountToDelete = DiskCacheFactory.instance.getFileSize(oldestFileDescriptor)
-                    usedBytes -= amountToDelete
-                    val statistics = this@TilePersistenceManager.getMapStatistics(oldestFile.groupId, oldestFile.mapName)
-                    statistics.downloadedFiles.decrement()
-                    statistics.downloadedSizeBytes.add(-amountToDelete)
-                    firstLoop = false
-                }
-                DiskCacheFactory.instance.deleteAsset(oldestFileDescriptor)
-            }
+            val oldestFile = DiskCacheFactory.instance.getOldest(topLevelContainer, unPersistedFileRootList) ?: break
+            val size = oldestFile.size
+            DiskCacheFactory.instance.deleteAsset(oldestFile)       //TODO: revisit this when we get aliases working.  If we delete an alias or rename a file to another alias,
+                                                                    // we'll be either not reporting the right size change or updating the mod date on the rename
+            usedBytes -= size
         }
     }
 
@@ -230,14 +214,12 @@ class TilePersistenceManager {
             return
         }
 
-        if (Preferences.instance.getBooleanValue(Preferences.propertyTemplateMapProactiveDownload(mapsMetaData.groupId, name), Preferences.defaultValueMapProactiveDownload) /*&&
-            DiskCacheFactory.instance.isExternalStorageWritable this was wrong anyway.  idn't download for internal when that was a thing*/) {
+        if (Preferences.instance.getBooleanValue(Preferences.propertyTemplateMapProactiveDownload(mapsMetaData.groupId, name), Preferences.defaultValueMapProactiveDownload)) {
             val currentMapVersion = metaData.version ?: return
 
             // Create a map of all tiles for the map so that we can start to the ones that have been identified as
             // cached or copied to the cache from local sources
             val tileProvider = TileAssetProvider.getInstance(group)
-            val manifest = TileAssetProvider.getReadOnlyManifest(mapsMetaData.groupId, name)
 
             // For each file
             for ( z in 0..metaData.maxZoom ) {
@@ -249,7 +231,7 @@ class TilePersistenceManager {
 
                         // Check if we already have the file
                         val targetFileDescription = tileProvider.getTileFileDescription(name, currentMapVersion, z, x, y)
-                        val hasTile = manifest?.versionList?.get(currentMapVersion)?.zoomMap?.get(z)?.get(x)?.contains(y) ?: false
+                        val hasTile = DiskCacheFactory.instance.exists(targetFileDescription)
                         if ( hasTile ) {
                             continue
                         }
@@ -262,10 +244,10 @@ class TilePersistenceManager {
                                 return
                             }
                             // Check if the manifest has the needed file
-                            val fileProof = manifest?.versionList?.get(version)?.zoomMap?.get(z)?.get(x)?.contains(y)
-                            if ( fileProof != null && fileProof ) {
+                            val existingFileDescription = tileProvider.getTileFileDescription(name, version, z, x, y)
+                            val hasAliasTile = DiskCacheFactory.instance.exists(existingFileDescription)
+                            if (hasAliasTile) {
                                 // If it does and this isn't the current version, create an alias to the current version
-                                val existingFileDescription = tileProvider.getTileFileDescription(name, version, z, x, y)
                                 DiskCacheFactory.instance.createAlias(existingFileDescription, targetFileDescription)
                                 fileDownloadedOrAliased = true
                                 break
@@ -287,18 +269,12 @@ class TilePersistenceManager {
                             return
                         }
                         if ( !fileDownloadedOrAliased ) {
-                            var asset: Asset? = null
+                            var throttleBoolean = false
                             tileProvider.retrieveTile(name, currentMapVersion, z, x, y) {
-                                asset = it
+                                throttleBoolean = true
                             }
-                            while (asset == null) {
+                            while (!throttleBoolean) {
                                 yield()
-                            }
-                            val assetStatic = asset
-                            if ( assetStatic != null && !assetStatic.errorLoading ) {
-                                val mapStatistics = getMapStatistics(mapsMetaData.groupId, name)
-                                mapStatistics.downloadedFiles.increment()
-                                mapStatistics.downloadedSizeBytes.add(assetStatic.numBytes.toLong())
                             }
                         }
                     }

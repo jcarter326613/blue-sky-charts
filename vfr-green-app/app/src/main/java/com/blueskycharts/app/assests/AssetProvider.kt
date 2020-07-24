@@ -6,7 +6,7 @@ import com.blueskycharts.app.utility.Log
  * Provides access to assets whether on disk or remotely stored
  */
 open class AssetProvider() {
-    open fun retrieveAsset(assetDescription: AssetDescription, callback: ((asset: Asset) -> Unit)) {
+    open fun retrieveAsset(assetDescription: RemoteAssetDescription, callback: ((asset: Asset) -> Unit)) {
         if (DiskCacheFactory.instance.isExpired(assetDescription)) {
             assetDescription.retrieveFromSource {
                 if (!it.errorLoading) {
