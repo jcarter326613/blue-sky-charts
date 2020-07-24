@@ -1,7 +1,33 @@
 {
+  "Anchorage": {
+    "versions": {
+      "2020-07-24T14-28-03": {
+        "effectiveDate": "2020-05-21",
+        "imageHeight": 6067,
+        "imageWidth": 13546,
+        "maxZoom": 4,
+        "projectionLcc": {
+          "extents": {
+            "bottom": 64016.13193747595,
+            "left": -138380.85282160895,
+            "right": 148382.6063354073,
+            "top": -64412.89502132268
+          },
+          "lat0": 61.11666666666667,
+          "lat1": 62.66666666666666,
+          "lat2": 57.33333333333334,
+          "lon0": -150.5,
+          "x0": 0,
+          "y0": 0
+        },
+        "tileWidth": 1024,
+        "version": "2020-07-24T14-28-03"
+      }
+    }
+  },
   "Atlanta": {
     "versions": {
-      "2020-07-23T17-34-57": {
+      "2020-07-24T14-28-03": {
         "effectiveDate": "2020-02-27",
         "imageHeight": 7641,
         "imageWidth": 9035,
@@ -21,7 +47,813 @@
           "y0": 0
         },
         "tileWidth": 1024,
-        "version": "2020-07-23T17-34-57"
+        "version": "2020-07-24T14-28-03"
+      }
+    }
+  },
+  "Baltimore-Washington": {
+    "versions": {
+      "2020-07-24T14-28-03": {
+        "effectiveDate": "2020-07-16",
+        "imageHeight": 8829,
+        "imageWidth": 12077,
+        "maxZoom": 4,
+        "projectionLcc": {
+          "extents": {
+            "bottom": 93489.71235862465,
+            "left": -144206.213473708,
+            "right": 111442.91090029557,
+            "top": -93399.27075438455
+          },
+          "lat0": 38.99166666666667,
+          "lat1": 45,
+          "lat2": 33,
+          "lon0": -77.05,
+          "x0": 0,
+          "y0": 0
+        },
+        "tileWidth": 1024,
+        "version": "2020-07-24T14-28-03"
+      }
+    }
+  },
+  "Boston": {
+    "versions": {
+      "2020-07-24T14-28-03": {
+        "effectiveDate": "2020-04-23",
+        "imageHeight": 8969,
+        "imageWidth": 12478,
+        "maxZoom": 4,
+        "projectionLcc": {
+          "extents": {
+            "bottom": 97974.12863179817,
+            "left": -97278.48893543372,
+            "right": 166854.29815813183,
+            "top": -91888.4371764194
+          },
+          "lat0": 42.05,
+          "lat1": 45,
+          "lat2": 33,
+          "lon0": -71.1,
+          "x0": 0,
+          "y0": 0
+        },
+        "tileWidth": 1024,
+        "version": "2020-07-24T14-28-03"
+      }
+    }
+  },
+  "Charlotte": {
+    "versions": {
+      "2020-07-24T14-28-03": {
+        "effectiveDate": "2020-07-16",
+        "imageHeight": 7544,
+        "imageWidth": 9019,
+        "maxZoom": 4,
+        "projectionLcc": {
+          "extents": {
+            "bottom": 83878.38228118609,
+            "left": -103006.20838898515,
+            "right": 87895.09751749785,
+            "top": -75800.79132962736
+          },
+          "lat0": 35.24167,
+          "lat1": 45,
+          "lat2": 33,
+          "lon0": -81.05,
+          "x0": 0,
+          "y0": 0
+        },
+        "tileWidth": 1024,
+        "version": "2020-07-24T14-28-03"
+      }
+    }
+  },
+  "Chicago": {
+    "versions": {
+      "2020-07-24T14-28-03": {
+        "effectiveDate": "2020-04-23",
+        "imageHeight": 6068,
+        "imageWidth": 9015,
+        "maxZoom": 4,
+        "projectionLcc": {
+          "extents": {
+            "bottom": 60050.753815860524,
+            "left": -96298.09921987416,
+            "right": 94543.96104944526,
+            "top": -68401.50799725228
+          },
+          "lat0": 42.05,
+          "lat1": 45,
+          "lat2": 33,
+          "lon0": -88,
+          "x0": 0,
+          "y0": 0
+        },
+        "tileWidth": 1024,
+        "version": "2020-07-24T14-28-03"
+      }
+    }
+  },
+  "Cincinnati": {
+    "versions": {
+      "2020-07-24T14-28-03": {
+        "effectiveDate": "2020-06-18",
+        "imageHeight": 8784,
+        "imageWidth": 9019,
+        "maxZoom": 4,
+        "projectionLcc": {
+          "extents": {
+            "bottom": 207997.42631706802,
+            "left": -78744.17059628671,
+            "right": 112159.48244848876,
+            "top": 22072.291172088037
+          },
+          "lat0": 38.25,
+          "lat1": 45,
+          "lat2": 33,
+          "lon0": -85,
+          "x0": 0,
+          "y0": 0
+        },
+        "tileWidth": 1024,
+        "version": "2020-07-24T14-28-03"
+      }
+    }
+  },
+  "Cleveland": {
+    "versions": {
+      "2020-07-24T14-28-03": {
+        "effectiveDate": "2020-03-26",
+        "imageHeight": 6234,
+        "imageWidth": 9605,
+        "maxZoom": 4,
+        "projectionLcc": {
+          "extents": {
+            "bottom": 69504.28301694346,
+            "left": -85082.1267361569,
+            "right": 118241.53034308626,
+            "top": -62452.6719081543
+          },
+          "lat0": 41.38333333333333,
+          "lat1": 45,
+          "lat2": 33,
+          "lon0": -82,
+          "x0": 0,
+          "y0": 0
+        },
+        "tileWidth": 1024,
+        "version": "2020-07-24T14-28-03"
+      }
+    }
+  },
+  "Colorado_Springs": {
+    "versions": {
+      "2020-07-24T14-28-03": {
+        "effectiveDate": "2020-07-16",
+        "imageHeight": 8603,
+        "imageWidth": 11710,
+        "maxZoom": 4,
+        "projectionLcc": {
+          "extents": {
+            "bottom": 80796.5812996375,
+            "left": -154741.02763518723,
+            "right": 93142.86238259805,
+            "top": -101314.94079841688
+          },
+          "lat0": 38.55,
+          "lat1": 45,
+          "lat2": 33,
+          "lon0": -104.5,
+          "x0": 0,
+          "y0": 0
+        },
+        "tileWidth": 1024,
+        "version": "2020-07-24T14-28-03"
+      }
+    }
+  },
+  "Dallas-Ft_Worth": {
+    "versions": {
+      "2020-07-24T14-28-03": {
+        "effectiveDate": "2020-02-27",
+        "imageHeight": 8738,
+        "imageWidth": 12011,
+        "maxZoom": 4,
+        "projectionLcc": {
+          "extents": {
+            "bottom": 92031.40136171383,
+            "left": -142804.06241115273,
+            "right": 111431.17622270514,
+            "top": -92922.05734985153
+          },
+          "lat0": 32.86666666666667,
+          "lat1": 45,
+          "lat2": 33,
+          "lon0": -97.05,
+          "x0": 0,
+          "y0": 0
+        },
+        "tileWidth": 1024,
+        "version": "2020-07-24T14-28-03"
+      }
+    }
+  },
+  "Denver": {
+    "versions": {
+      "2020-07-24T14-28-03": {
+        "effectiveDate": "2020-07-16",
+        "imageHeight": 8704,
+        "imageWidth": 9027,
+        "maxZoom": 4,
+        "projectionLcc": {
+          "extents": {
+            "bottom": 79000.84859860834,
+            "left": -94658.07552685658,
+            "right": 96416.90868190731,
+            "top": -105245.69724310562
+          },
+          "lat0": 39.91666666666666,
+          "lat1": 45,
+          "lat2": 33,
+          "lon0": -104.85,
+          "x0": 0,
+          "y0": 0
+        },
+        "tileWidth": 1024,
+        "version": "2020-07-24T14-28-03"
+      }
+    }
+  },
+  "Detroit": {
+    "versions": {
+      "2020-07-24T14-28-03": {
+        "effectiveDate": "2020-03-26",
+        "imageHeight": 7502,
+        "imageWidth": 10503,
+        "maxZoom": 4,
+        "projectionLcc": {
+          "extents": {
+            "bottom": 69229.98468031311,
+            "left": -136063.90376216962,
+            "right": 86241.06923510929,
+            "top": -89551.91229094796
+          },
+          "lat0": 42.25,
+          "lat1": 45,
+          "lat2": 33,
+          "lon0": -83.41666666666667,
+          "x0": 0,
+          "y0": 0
+        },
+        "tileWidth": 1024,
+        "version": "2020-07-24T14-28-03"
+      }
+    }
+  },
+  "Fairbanks": {
+    "versions": {
+      "2020-07-24T14-28-03": {
+        "effectiveDate": "2020-05-21",
+        "imageHeight": 6092,
+        "imageWidth": 11259,
+        "maxZoom": 4,
+        "projectionLcc": {
+          "extents": {
+            "bottom": 62767.97251679554,
+            "left": -148292.8344117274,
+            "right": 90068.12147684532,
+            "top": -66199.2219706384
+          },
+          "lat0": 64.70833333333333,
+          "lat1": 65,
+          "lat2": 64.5,
+          "lon0": -147.6,
+          "x0": 0,
+          "y0": 0
+        },
+        "tileWidth": 1024,
+        "version": "2020-07-24T14-28-03"
+      }
+    }
+  },
+  "Houston": {
+    "versions": {
+      "2020-07-24T14-28-03": {
+        "effectiveDate": "2020-02-27",
+        "imageHeight": 8140,
+        "imageWidth": 9067,
+        "maxZoom": 4,
+        "projectionLcc": {
+          "extents": {
+            "bottom": 89653.63861736718,
+            "left": -102850.82793856502,
+            "right": 89085.27887670774,
+            "top": -82653.0242469744
+          },
+          "lat0": 29.8,
+          "lat1": 45,
+          "lat2": 33,
+          "lon0": -95.41666666666667,
+          "x0": 0,
+          "y0": 0
+        },
+        "tileWidth": 1024,
+        "version": "2020-07-24T14-28-03"
+      }
+    }
+  },
+  "Kansas_City": {
+    "versions": {
+      "2020-07-24T14-28-03": {
+        "effectiveDate": "2020-05-21",
+        "imageHeight": 7662,
+        "imageWidth": 11054,
+        "maxZoom": 4,
+        "projectionLcc": {
+          "extents": {
+            "bottom": 85146.60133479013,
+            "left": -110334.52652367248,
+            "right": 123655.66022840934,
+            "top": -77046.67291042085
+          },
+          "lat0": 39.36666666666667,
+          "lat1": 45,
+          "lat2": 33,
+          "lon0": -95,
+          "x0": 0,
+          "y0": 0
+        },
+        "tileWidth": 1024,
+        "version": "2020-07-24T14-28-03"
+      }
+    }
+  },
+  "Las_Vegas": {
+    "versions": {
+      "2020-07-24T14-28-03": {
+        "effectiveDate": "2020-02-27",
+        "imageHeight": 6251,
+        "imageWidth": 10565,
+        "maxZoom": 4,
+        "projectionLcc": {
+          "extents": {
+            "bottom": 66178.38819299446,
+            "left": -113388.24739871225,
+            "right": 110244.04021045622,
+            "top": -66136.36978034367
+          },
+          "lat0": 36.25,
+          "lat1": 45,
+          "lat2": 33,
+          "lon0": -115.0833333333333,
+          "x0": 0,
+          "y0": 0
+        },
+        "tileWidth": 1024,
+        "version": "2020-07-24T14-28-03"
+      }
+    }
+  },
+  "Los_Angeles": {
+    "versions": {
+      "2020-07-24T14-28-03": {
+        "effectiveDate": "2020-06-18",
+        "imageHeight": 6040,
+        "imageWidth": 16501,
+        "maxZoom": 5,
+        "projectionLcc": {
+          "extents": {
+            "bottom": 63773.71440542021,
+            "left": -204289.26746380434,
+            "right": 145003.1630547135,
+            "top": -64079.08005141358
+          },
+          "lat0": 33.96666666666667,
+          "lat1": 45,
+          "lat2": 33,
+          "lon0": -118,
+          "x0": 0,
+          "y0": 0
+        },
+        "tileWidth": 1024,
+        "version": "2020-07-24T14-28-03"
+      }
+    }
+  },
+  "Memphis": {
+    "versions": {
+      "2020-07-24T14-28-03": {
+        "effectiveDate": "2020-03-26",
+        "imageHeight": 7597,
+        "imageWidth": 11132,
+        "maxZoom": 4,
+        "projectionLcc": {
+          "extents": {
+            "bottom": 82955.55471533314,
+            "left": -110361.99680736757,
+            "right": 125262.24971929271,
+            "top": -77860.04942478969
+          },
+          "lat0": 35.06666666666667,
+          "lat1": 45,
+          "lat2": 33,
+          "lon0": -90.03333333333333,
+          "x0": 0,
+          "y0": 0
+        },
+        "tileWidth": 1024,
+        "version": "2020-07-24T14-28-03"
+      }
+    }
+  },
+  "Miami": {
+    "versions": {
+      "2020-07-24T14-28-03": {
+        "effectiveDate": "2020-01-30",
+        "imageHeight": 8984,
+        "imageWidth": 10552,
+        "maxZoom": 4,
+        "projectionLcc": {
+          "extents": {
+            "bottom": 93638.85618121809,
+            "left": -141048.17614269396,
+            "right": 82328.92701032138,
+            "top": -96557.98218115186
+          },
+          "lat0": 25.95,
+          "lat1": 45,
+          "lat2": 33,
+          "lon0": -80.11666666666666,
+          "x0": 0,
+          "y0": 0
+        },
+        "tileWidth": 1024,
+        "version": "2020-07-24T14-28-03"
+      }
+    }
+  },
+  "Minneapolis-St_Paul": {
+    "versions": {
+      "2020-07-24T14-28-03": {
+        "effectiveDate": "2020-06-18",
+        "imageHeight": 6151,
+        "imageWidth": 10696,
+        "maxZoom": 4,
+        "projectionLcc": {
+          "extents": {
+            "bottom": 67454.59494704074,
+            "left": -82460.62919304549,
+            "right": 143949.01733984103,
+            "top": -62750.95266153668
+          },
+          "lat0": 44.88333333333333,
+          "lat1": 45,
+          "lat2": 33,
+          "lon0": -93.41666666666667,
+          "x0": 0,
+          "y0": 0
+        },
+        "tileWidth": 1024,
+        "version": "2020-07-24T14-28-03"
+      }
+    }
+  },
+  "New_Orleans": {
+    "versions": {
+      "2020-07-24T14-28-03": {
+        "effectiveDate": "2020-05-21",
+        "imageHeight": 6098,
+        "imageWidth": 10513,
+        "maxZoom": 4,
+        "projectionLcc": {
+          "extents": {
+            "bottom": 68699.7603155646,
+            "left": -127826.66252476054,
+            "right": 94693.7340873863,
+            "top": -60362.06971948058
+          },
+          "lat0": 30.06666666666667,
+          "lat1": 45,
+          "lat2": 33,
+          "lon0": -90.3,
+          "x0": 0,
+          "y0": 0
+        },
+        "tileWidth": 1024,
+        "version": "2020-07-24T14-28-03"
+      }
+    }
+  },
+  "New_York": {
+    "versions": {
+      "2020-07-24T14-28-03": {
+        "effectiveDate": "2020-04-23",
+        "imageHeight": 6222,
+        "imageWidth": 12027,
+        "maxZoom": 4,
+        "projectionLcc": {
+          "extents": {
+            "bottom": 70020.85805447362,
+            "left": -140061.82136113202,
+            "right": 114517.29881435691,
+            "top": -61675.56316491356
+          },
+          "lat0": 40.74166666666667,
+          "lat1": 45,
+          "lat2": 33,
+          "lon0": -74,
+          "x0": 0,
+          "y0": 0
+        },
+        "tileWidth": 1024,
+        "version": "2020-07-24T14-28-03"
+      }
+    }
+  },
+  "Orlando": {
+    "versions": {
+      "2020-07-24T14-28-03": {
+        "effectiveDate": "2020-01-30",
+        "imageHeight": 7806,
+        "imageWidth": 11839,
+        "maxZoom": 4,
+        "projectionLcc": {
+          "extents": {
+            "bottom": 86564.81138458382,
+            "left": -167942.70795320044,
+            "right": 82655.33175297844,
+            "top": -78673.06233612378
+          },
+          "lat0": 28.5,
+          "lat1": 45,
+          "lat2": 33,
+          "lon0": -80.96666666666667,
+          "x0": 0,
+          "y0": 0
+        },
+        "tileWidth": 1024,
+        "version": "2020-07-24T14-28-03"
+      }
+    }
+  },
+  "Philadelphia": {
+    "versions": {
+      "2020-07-24T14-28-03": {
+        "effectiveDate": "2020-07-16",
+        "imageHeight": 8515,
+        "imageWidth": 10203,
+        "maxZoom": 4,
+        "projectionLcc": {
+          "extents": {
+            "bottom": 70884.1537174196,
+            "left": -80634.01197089997,
+            "right": 135357.82308039156,
+            "top": -109362.71419937606
+          },
+          "lat0": 39.98333333333333,
+          "lat1": 45,
+          "lat2": 33,
+          "lon0": -75.46666666666667,
+          "x0": 0,
+          "y0": 0
+        },
+        "tileWidth": 1024,
+        "version": "2020-07-24T14-28-03"
+      }
+    }
+  },
+  "Phoenix": {
+    "versions": {
+      "2020-07-24T14-28-03": {
+        "effectiveDate": "2020-04-23",
+        "imageHeight": 7548,
+        "imageWidth": 10518,
+        "maxZoom": 4,
+        "projectionLcc": {
+          "extents": {
+            "bottom": 84805.24774608763,
+            "left": -144825.23578900876,
+            "right": 77826.74438600303,
+            "top": -74975.06627892274
+          },
+          "lat0": 33.43333333333333,
+          "lat1": 45,
+          "lat2": 33,
+          "lon0": -112,
+          "x0": 0,
+          "y0": 0
+        },
+        "tileWidth": 1024,
+        "version": "2020-07-24T14-28-03"
+      }
+    }
+  },
+  "Pittsburgh": {
+    "versions": {
+      "2020-07-24T14-28-03": {
+        "effectiveDate": "2020-03-26",
+        "imageHeight": 6136,
+        "imageWidth": 9554,
+        "maxZoom": 4,
+        "projectionLcc": {
+          "extents": {
+            "bottom": 68979.83988940946,
+            "left": -90068.51554307344,
+            "right": 112159.64180765356,
+            "top": -60890.54575249815
+          },
+          "lat0": 40.48333333333333,
+          "lat1": 45,
+          "lat2": 33,
+          "lon0": -80.3,
+          "x0": 0,
+          "y0": 0
+        },
+        "tileWidth": 1024,
+        "version": "2020-07-24T14-28-03"
+      }
+    }
+  },
+  "Puerto_Rico-VI": {
+    "versions": {
+      "2020-07-24T14-28-03": {
+        "effectiveDate": "2019-10-10",
+        "imageHeight": 6195,
+        "imageWidth": 17871,
+        "maxZoom": 5,
+        "projectionLcc": {
+          "extents": {
+            "bottom": 66600.24077403695,
+            "left": -185624.6518103494,
+            "right": 192677.27075275136,
+            "top": -64530.792480079064
+          },
+          "lat0": 18.2,
+          "lat1": 20,
+          "lat2": 7,
+          "lon0": -66.05,
+          "x0": 0,
+          "y0": 0
+        },
+        "tileWidth": 1024,
+        "version": "2020-07-24T14-28-03"
+      }
+    }
+  },
+  "Salt_Lake_City": {
+    "versions": {
+      "2020-07-24T14-28-03": {
+        "effectiveDate": "2020-03-26",
+        "imageHeight": 7619,
+        "imageWidth": 10489,
+        "maxZoom": 4,
+        "projectionLcc": {
+          "extents": {
+            "bottom": 87009.56639217942,
+            "left": -98221.25386549553,
+            "right": 123826.33349640734,
+            "top": -74268.14518654089
+          },
+          "lat0": 40.76666666666667,
+          "lat1": 45,
+          "lat2": 33,
+          "lon0": -112.1333333333333,
+          "x0": 0,
+          "y0": 0
+        },
+        "tileWidth": 1024,
+        "version": "2020-07-24T14-28-03"
+      }
+    }
+  },
+  "San_Diego": {
+    "versions": {
+      "2020-07-24T14-28-03": {
+        "effectiveDate": "2020-06-18",
+        "imageHeight": 6175,
+        "imageWidth": 12103,
+        "maxZoom": 4,
+        "projectionLcc": {
+          "extents": {
+            "bottom": 71811.79875288405,
+            "left": -173352.14617429028,
+            "right": 82845.29235810184,
+            "top": -58895.893244538995
+          },
+          "lat0": 33,
+          "lat1": 45,
+          "lat2": 33,
+          "lon0": -117.1666666666667,
+          "x0": 0,
+          "y0": 0
+        },
+        "tileWidth": 1024,
+        "version": "2020-07-24T14-28-03"
+      }
+    }
+  },
+  "San_Francisco": {
+    "versions": {
+      "2020-07-24T14-28-03": {
+        "effectiveDate": "2020-02-27",
+        "imageHeight": 7265,
+        "imageWidth": 10493,
+        "maxZoom": 4,
+        "projectionLcc": {
+          "extents": {
+            "bottom": 72991.0416679812,
+            "left": -144541.36432226023,
+            "right": 77585.03780072223,
+            "top": -80805.86427401348
+          },
+          "lat0": 37.6,
+          "lat1": 45,
+          "lat2": 33,
+          "lon0": -122.25,
+          "x0": 0,
+          "y0": 0
+        },
+        "tileWidth": 1024,
+        "version": "2020-07-24T14-28-03"
+      }
+    }
+  },
+  "Seattle": {
+    "versions": {
+      "2020-07-24T14-28-03": {
+        "effectiveDate": "2020-05-21",
+        "imageHeight": 7708,
+        "imageWidth": 9208,
+        "maxZoom": 4,
+        "projectionLcc": {
+          "extents": {
+            "bottom": 83969.99775725635,
+            "left": -90281.18654785413,
+            "right": 104616.50633060533,
+            "top": -79174.85189064877
+          },
+          "lat0": 47.41666666666666,
+          "lat1": 45,
+          "lat2": 33,
+          "lon0": -122.4666666666667,
+          "x0": 0,
+          "y0": 0
+        },
+        "tileWidth": 1024,
+        "version": "2020-07-24T14-28-03"
+      }
+    }
+  },
+  "St_Louis": {
+    "versions": {
+      "2020-07-24T14-28-03": {
+        "effectiveDate": "2020-06-18",
+        "imageHeight": 6329,
+        "imageWidth": 9141,
+        "maxZoom": 4,
+        "projectionLcc": {
+          "extents": {
+            "bottom": 71030.34008078692,
+            "left": -96905.96102289172,
+            "right": 96590.61242698936,
+            "top": -62940.83564157864
+          },
+          "lat0": 38.68472,
+          "lat1": 45,
+          "lat2": 33,
+          "lon0": -90.33333333333333,
+          "x0": 0,
+          "y0": 0
+        },
+        "tileWidth": 1024,
+        "version": "2020-07-24T14-28-03"
+      }
+    }
+  },
+  "Tampa": {
+    "versions": {
+      "2020-07-24T14-28-03": {
+        "effectiveDate": "2020-01-30",
+        "imageHeight": 7747,
+        "imageWidth": 8995,
+        "maxZoom": 4,
+        "projectionLcc": {
+          "extents": {
+            "bottom": 82770.10324534315,
+            "left": -79830.07549635421,
+            "right": 110578.0446977555,
+            "top": -81238.10380595144
+          },
+          "lat0": 27.95,
+          "lat1": 45,
+          "lat2": 33,
+          "lon0": -82.61666666666666,
+          "x0": 0,
+          "y0": 0
+        },
+        "tileWidth": 1024,
+        "version": "2020-07-24T14-28-03"
       }
     }
   }

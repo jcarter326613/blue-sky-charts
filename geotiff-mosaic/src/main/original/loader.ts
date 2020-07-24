@@ -130,7 +130,7 @@ export class Loader {
                     let pngGeoFilePath = `../geotiff-map-exploder/maps/${mapName}_${mapTypeAbbreviation}_${version}.tif`
                     if ( !existsSync(pngGeoFilePath) ) {
                         console.log(`Setting up map ${mapName} version ${version}`)
-                        execSync(`python3 ../geotiff-map-exploder/setup_map.py -use-defaults ${mapName} ${version} ${mapTypeLong}`)
+                        execSync(`python3 ../geotiff-map-exploder/setup_map.py -use-defaults ${outputMapName} ${version} ${mapTypeLong}`)
                     } else {
                         execSync(`cp ${pngGeoFilePath} ./maps/`)
                     }
