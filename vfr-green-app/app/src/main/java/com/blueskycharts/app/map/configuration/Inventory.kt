@@ -51,8 +51,10 @@ class Inventory(val mapGroups: List<Group>) {
                     val groups = mutableListOf<Group>()
                     val worldVfrInventoryGroup = Group(1, "World VFR", "https://blueskycharts.com/maps/world-vfr-mosaic", true)
                     val usSectionalVfrGroup = Group(2, "VFR Sectional", "https://blueskycharts.com/maps/vfr-sectional", false)
+                    val usTerminalVfrGroup = Group(3, "VFR Terminal", "https://blueskycharts.com/maps/vfr-terminal", false)
                     groups.add(worldVfrInventoryGroup)
                     groups.add(usSectionalVfrGroup)
+                    groups.add(usTerminalVfrGroup)
                     _instance = Inventory(groups)
                 }
                 return _instance!!
