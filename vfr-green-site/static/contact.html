@@ -3,6 +3,15 @@
         <title>Contact Us</title>
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
         <link rel="stylesheet" href="style/main.css">
+        <script async src="https://www.googletagmanager.com/gtag/js?id=UA-169192300-1"></script>
+        <script>
+            if ( window.location.host != "localhost:3000" ) {
+                window.dataLayer = window.dataLayer || [];
+                function gtag(){dataLayer.push(arguments);}
+                gtag('js', new Date());
+                gtag('config', 'UA-169192300-1');
+            }
+        </script>
         <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
         <style>
             .header {
@@ -55,11 +64,48 @@
         </style>
         <script>
             $(document).ready(() => {
-                $(".sendMessage").click((e) => {
-                    e.preventDefault();
-                    e.stopPropagation();
-                    alert("Your message has been received.  Someone will respond as soon as possible.  Thank you or contacting us.")
-                    window.location.href = "/";
+                $(".sendMessage").click((event) => {
+                    event.preventDefault();
+                    event.stopPropagation();
+
+                    let name = $("#name").val();
+                    let email = $("#email").val();
+                    let message = $("#message").val();
+                    name = encodeURIComponent(name.trim());
+                    email = encodeURIComponent(email.trim());
+                    message = message.trim();
+                    if ( name.length == 0 ) {
+                        alert("Name is a required field");
+                        return;
+                    }
+                    if ( email.length == 0 ) {
+                        alert("Email is a required field");
+                        return;
+                    }
+                    if ( message.length == 0 ) {
+                        alert("Message is a required field");
+                        return;
+                    }
+
+                    let e = "muddypawcloudtechnology";
+                    let ma = "@";
+                    let i = "gmail";
+                    let l = "com";
+                    let url = `https://api.blueskycharts.com/support/submitSupportRequest?name=${name}&email=${email}`;
+                    $.ajax({
+                        url: url,
+                        type: "POST",
+                        dataType: "text",
+                        crossDomain: true,
+                        cache: false,
+                        data: message,
+                        success: (data) => {
+                            alert("Your message has been received.  Someone will respond as soon as possible.  Thank you or contacting us.")
+                            window.location.href = "/";
+                        },
+                        error: (response) => {
+                            alert(`We could not send your message.  Please try again or send your message to ${e}${ma}${i}.${l}.`);
+                        }});
                 })
             });
         </script>
@@ -97,8 +143,6 @@
         <div class="footer">
             <div>
                 <a href="/">Home</a><br />
-                <a href="/chart">View The Charts</a><br />
-                <!--<a href="">User Guide</a><br />-->
                 <a href="">Contact Us</a>
             </div>
             <div>
