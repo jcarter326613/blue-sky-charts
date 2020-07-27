@@ -74,9 +74,10 @@ class DataProvider(val context: Context, map: Map) : CachedProvider(map, 700) {
             incrementAwaitingQueueAddition()
             GlobalScope.launch {
                 try {
-                    val newTileRequest = this@DataProvider.getExistingRequest(key) as DataRequest
+                    val newTileRequest = this@DataProvider.getExistingRequest(key)
                     if (newTileRequest != null && !newTileRequest.inError &&
                         !(newTileRequest.loaded && newTileRequest.expired)) {
+                        newTileRequest as DataRequest
                         newTileRequest.setReceiver(receiver, data)
                         if (newTileRequest.loaded) {
                             newTileRequest.broadcastData(false, canvas)
