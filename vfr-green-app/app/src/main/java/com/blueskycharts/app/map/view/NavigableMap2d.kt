@@ -416,7 +416,7 @@ class NavigableMap2d(context: Context, attributes: AttributeSet) :
             itemTextPaint.color = oldColor
             itemTextPaint.setShadowLayer(0f, 0f, 0f, Color.argb(255, 255, 255, 255))
             drawSpannableString(str, canvas, itemTextPaint)
-            
+
             canvas.translate(0F, lineHeight + lineSpace)
         }
         canvas.restore()

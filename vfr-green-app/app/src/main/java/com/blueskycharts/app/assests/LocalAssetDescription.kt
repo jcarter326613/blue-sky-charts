@@ -7,4 +7,5 @@ open class LocalAssetDescription( private val path: String, volatility: Volatili
     override val localPath: String
         get() = path
     override val hasDiskFriendlyLocalPath: Boolean = false
+    override val readActsAsModification: Boolean = false
 }

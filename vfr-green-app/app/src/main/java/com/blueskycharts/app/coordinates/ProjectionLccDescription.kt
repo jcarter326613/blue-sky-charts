@@ -24,7 +24,7 @@ class ProjectionLccDescription(
     init {
         // Calculate some stuff     (semi-major and minor axis https://gisgeography.com/geodetic-datums-nad27-nad83-wgs84/)
         a = 6378137.0 // Semi-major axis of NAD83 based on GRS80 ellipsoid
-        val b = 6356752.3 // Semi-minor axis of NAD83 based on GRS80 ellipsoid
+        //val b = 6356752.3 // Semi-minor axis of NAD83 based on GRS80 ellipsoid
         val f_inv = 298.2572221010042 //a / (a - b)
         val f = 1 / f_inv
         ecc = sqrt(f * (2 - f))

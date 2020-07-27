@@ -43,7 +43,10 @@ class TileAssetProvider private constructor(private val group: Inventory.Group) 
         } else {
             StorageLocation.Internal
         }
-        return RemoteAssetDescription(URL(tileUrl), Volatility.Indefinite, storage)
+        val description = RemoteAssetDescription(URL(tileUrl), Volatility.Indefinite, storage)
+        description.readActsAsModification = true
+        description.allowExpired = true
+        return description
     }
 
     fun getMapAssetDescriptionContainer(mapName: String): AssetDescription {

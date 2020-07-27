@@ -2,6 +2,7 @@ package com.blueskycharts.app.map.resources
 
 import android.content.Context
 import android.graphics.Canvas
+import com.blueskycharts.app.assests.DiskCacheFactory
 import com.blueskycharts.app.coordinates.BoxGeo
 import com.blueskycharts.app.coordinates.PointGeo
 import com.blueskycharts.app.map.view.Map
@@ -21,7 +22,36 @@ class DataProvider(val context: Context, map: Map) : CachedProvider(map, 700) {
     private val usedBuckets: HashMap<OverlayTypes, HashMap<String, LinkedList<BoxGeo>>> = HashMap()  //<overlay_type, <resolution as string, box geos>>
 
     init {
-        for ( type in OverlayTypes.values() ) this.usedBuckets[type] = HashMap()
+        for ( type in OverlayTypes.values() ) {
+            this.usedBuckets[type] = HashMap()
+        }
+
+        // Preload disk cached data
+        GlobalScope.launch {
+            val localFiles = DiskCacheFactory.instance.getAssetDescriptionsIn(DataRequest.endpointDescriptor)
+            for (file in localFiles) {
+                // If the data is expired, delete it
+                if (DiskCacheFactory.instance.isExpired(file)) {
+                    DiskCacheFactory.instance.deleteAsset(file)
+                    continue
+                }
+
+                // Figure out what bucket the data belongs to
+                val newDataRequest = DataRequest.createFromFileDescriptor(file, this@DataProvider) ?: continue
+                val key = getCacheKey(newDataRequest.area, newDataRequest.resolution, newDataRequest.type)
+                addDataToCache(key, newDataRequest)
+                val resolutionKey = getResolutionKey(newDataRequest.resolution)
+                val typeMap = usedBuckets[newDataRequest.type]
+                if (typeMap != null) {
+                    var listOfBuckets = typeMap[resolutionKey]
+                    if (listOfBuckets == null) {
+                        listOfBuckets = LinkedList()
+                        typeMap[resolutionKey] = listOfBuckets
+                    }
+                    listOfBuckets.add(newDataRequest.area)
+                }
+            }
+        }
     }
 
     fun retrieveTile(area: BoxGeo, resolution: PointGeo, type: OverlayTypes, receiver: DataReceiver, canvas: Canvas, data: Any?) {
@@ -29,21 +59,27 @@ class DataProvider(val context: Context, map: Map) : CachedProvider(map, 700) {
         val areaBucket = this.createAreaBucket(area, resolutionBucket, type)
         val key = this.getCacheKey(areaBucket, resolutionBucket, type)
         val tileRequest = this.getCachedItem(key)
+        var addNewRequest = true
 
         if ( tileRequest != null && tileRequest.loaded ) {
-            val tileRequestScoped = tileRequest as DataRequest
-            tileRequestScoped.setReceiver(receiver, data)
-            tileRequestScoped.broadcastData(true, canvas)
-        } else {
+            tileRequest as DataRequest
+            tileRequest.setReceiver(receiver, data)
+            tileRequest.broadcastData(true, canvas)
+            if ( !tileRequest.expired ) {
+                addNewRequest = false
+            }
+        }
+
+        if (addNewRequest) {
             incrementAwaitingQueueAddition()
-            GlobalScope.launch {    //ok1
+            GlobalScope.launch {
                 try {
-                    val newTileRequest = this@DataProvider.getExistingRequest(key)
-                    if (newTileRequest != null && !newTileRequest.inError) {
-                        val tileRequestScoped = newTileRequest as DataRequest
-                        tileRequestScoped.setReceiver(receiver, data)
-                        if (tileRequestScoped.loaded) {
-                            tileRequestScoped.broadcastData(false, canvas)
+                    val newTileRequest = this@DataProvider.getExistingRequest(key) as DataRequest
+                    if (newTileRequest != null && !newTileRequest.inError &&
+                        !(newTileRequest.loaded && newTileRequest.expired)) {
+                        newTileRequest.setReceiver(receiver, data)
+                        if (newTileRequest.loaded) {
+                            newTileRequest.broadcastData(false, canvas)
                         }
                     } else {
                         val newRequest = DataRequest(

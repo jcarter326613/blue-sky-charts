@@ -15,6 +15,7 @@ import kotlinx.coroutines.sync.withLock
  * Handles manipulation of the on disk cache.
  * Performs all file system direct manipulation and IO
  */
+@Suppress("REDUNDANT_ELSE_IN_WHEN")
 final class DiskCache(private val context: Context) {
     // External storage stuff
     var externalCheckFilePerformed = false
@@ -78,24 +79,35 @@ final class DiskCache(private val context: Context) {
     }
 
     fun isExpired(assetDescription: AssetDescription): Boolean {
-        when(assetDescription.volatility) {
+        if ( assetDescription.forceExpireDiskCache ) {
+            return true
+        }
+
+        // Get the max age of the asset
+        val maxAge: Int = when(assetDescription.volatility) {
             Volatility.Indefinite -> return false
             Volatility.NeverCache -> return true
+            Volatility.HourCache -> {
+                60 * 60 * 1000
+            }
             Volatility.DayCache -> {
-                val now = Date()
-                val aDayAgo = now.time - (24 * 60 * 60 * 1000)
-                return try {
-                    if ( assetDescription.storageLocation == StorageLocation.External ) {
-                        val file = File(context.getExternalFilesDir(null), getFilePathForAsset(assetDescription))
-                        file.lastModified() < aDayAgo
-                    } else {
-                        context.getFileStreamPath(getFilePathForAsset(assetDescription)).lastModified() < aDayAgo
-                    }
-                } catch (e: Throwable) {
-                    true
-                }
+                24 * 60 * 60 * 1000
             }
             else -> throw Error("Unrecognized volatility in isExpired")
+        }
+
+        // Figure out whether it's expired based on the
+        val now = Date()
+        val aDayAgo = now.time - maxAge
+        return try {
+            val file: File = if ( assetDescription.storageLocation == StorageLocation.External ) {
+                File(context.getExternalFilesDir(null), getFilePathForAsset(assetDescription))
+            } else {
+                context.getFileStreamPath(getFilePathForAsset(assetDescription))
+            }
+            file.lastModified() < aDayAgo
+        } catch (e: Throwable) {
+            true
         }
     }
 
@@ -105,10 +117,16 @@ final class DiskCache(private val context: Context) {
     }
 
     fun retrieveAssetBytes(asset: Asset): Boolean {
+        if (!asset.description.allowExpired && isExpired(asset.description)) {
+            return false
+        }
+
         var fileInput: FileInputStream? = null
         try {
             val file = getFile(asset.description) ?: return false
-            file.setLastModified(Date().time)
+            if (asset.description.readActsAsModification ) {
+                file.setLastModified(Date().time)
+            }
             fileInput = file.inputStream()
             asset.bytes = fileInput.readBytes()
             return true
@@ -254,7 +272,7 @@ final class DiskCache(private val context: Context) {
         return oldestCandidate
     }
 
-    private suspend fun getAssetDescriptionsIn(description: AssetDescription): Collection<DiskAssetDescription> {
+    suspend fun getAssetDescriptionsIn(description: AssetDescription): Collection<DiskAssetDescription> {
         val pathStart = getFilePathForAsset(description)
         val retList = mutableListOf<DiskAssetDescription>()
         val fileList = context.filesDir.listFiles { _: File?, s: String? ->

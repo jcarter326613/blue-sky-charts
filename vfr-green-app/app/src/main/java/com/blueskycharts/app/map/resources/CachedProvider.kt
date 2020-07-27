@@ -78,7 +78,14 @@ abstract class CachedProvider( private val map: Map, private val requestDelayMil
         numAwaitingQueueAddition.getAndDecrement()
     }
 
+    protected suspend fun addDataToCache(key: String, request: CachedProviderRequest) {
+        queueMutex.withLock {
+            cache[key] = request
+        }
+    }
+
     protected fun addRequestToQueue(key: String, request: CachedProviderRequest) {
+        //make it so a loaded request adds to the cache if it's receive date is newer than what's there or there's nothing there.
         if (key in this.requestQueueKeys) {
             return
         }
@@ -92,7 +99,7 @@ abstract class CachedProvider( private val map: Map, private val requestDelayMil
                     try {
                         if (this@CachedProvider.cache.containsKey(key)) {
                             val cacheItem: CachedProviderRequest? = this@CachedProvider.cache[key]
-                            if (cacheItem != null && !cacheItem.inError) {
+                            if (cacheItem != null && !cacheItem.inError && !(cacheItem.loaded && cacheItem.expired)) {
                                 return@launch
                             }
                         }
@@ -117,7 +124,7 @@ abstract class CachedProvider( private val map: Map, private val requestDelayMil
         val now = Date();
         val timeToWait = this.requestDelayMilliseconds - (now.time - this.lastQueueAddition.time)
         if (timeToWait <= 0) {
-            GlobalScope.launch {    //ok1
+            GlobalScope.launch {
                 queueMutex.withLock {
                     while (this@CachedProvider.numActiveRequests.get() < maxActiveRequests && this@CachedProvider.requestQueue.size() > 0) {
                         val request = this@CachedProvider.requestQueue.pop()

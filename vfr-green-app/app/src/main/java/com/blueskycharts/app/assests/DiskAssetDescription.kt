@@ -6,6 +6,7 @@ class DiskAssetDescription(private val file: File): AssetDescription(Volatility.
     override val localPath: String
         get() = file.name
     override val hasDiskFriendlyLocalPath: Boolean = true
+    override val readActsAsModification: Boolean = false
     val size: Long
         get() = file.length()
     val modDate: Long

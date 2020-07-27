@@ -17,6 +17,7 @@ class RemoteAssetDescription(private val url: URL, volatility: Volatility, stora
             }
         }
     override val hasDiskFriendlyLocalPath: Boolean = false
+    override var readActsAsModification: Boolean = false
 
     fun retrieveFromSource(callback: ((asset: Asset) -> Unit))
     {
@@ -33,11 +34,15 @@ class RemoteAssetDescription(private val url: URL, volatility: Volatility, stora
 
                 // Write the file to disk
                 when (volatility) {
+                    Volatility.HourCache,
                     Volatility.DayCache,
                     Volatility.Indefinite -> {
                         DiskCacheFactory.instance.writeAsset(asset)
                     }
+                    Volatility.NeverCache -> {
+                    }
                     else -> {
+                        throw Error("Volatility not recognized")
                     }
                 }
 
