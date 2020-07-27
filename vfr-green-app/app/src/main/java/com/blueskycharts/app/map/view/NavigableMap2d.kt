@@ -410,10 +410,13 @@ class NavigableMap2d(context: Context, attributes: AttributeSet) :
             val oldColor = itemTextPaint.color
             itemTextPaint.strokeWidth *= 4
             itemTextPaint.color = Color.WHITE
+            itemTextPaint.setShadowLayer(20f, 0f, 0f, Color.argb(255, 255, 255, 255))
             drawSpannableString(str, canvas, itemTextPaint)
             itemTextPaint.strokeWidth = oldWidth
             itemTextPaint.color = oldColor
+            itemTextPaint.setShadowLayer(0f, 0f, 0f, Color.argb(255, 255, 255, 255))
             drawSpannableString(str, canvas, itemTextPaint)
+            
             canvas.translate(0F, lineHeight + lineSpace)
         }
         canvas.restore()
