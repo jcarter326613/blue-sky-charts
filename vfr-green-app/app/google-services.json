@@ -1,0 +1,40 @@
+{
+  "project_info": {
+    "project_number": "431593086084",
+    "firebase_url": "https://blue-sky-charts.firebaseio.com",
+    "project_id": "blue-sky-charts",
+    "storage_bucket": "blue-sky-charts.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:431593086084:android:1c7f5b4360158d0325b6d1",
+        "android_client_info": {
+          "package_name": "com.blueskycharts.app"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "431593086084-qaghaidtu19kofbok7mcc5qk98ro6r4f.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBMhXe3Lb91TGgYeDT1BLljkFMdCLu8arc"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "431593086084-qaghaidtu19kofbok7mcc5qk98ro6r4f.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

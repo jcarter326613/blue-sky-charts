@@ -6,6 +6,7 @@ import java.io.InputStream
 import java.net.URL
 import com.blueskycharts.app.utility.Log
 
+@Suppress("REDUNDANT_ELSE_IN_WHEN")
 class RemoteAssetDescription(private val url: URL, volatility: Volatility, storageLocation: StorageLocation, private val requiresCors: Boolean = false, private val isFolder: Boolean = false) :
     AssetDescription(volatility, storageLocation) {
     override val localPath: String
