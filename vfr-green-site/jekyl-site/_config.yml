@@ -1,0 +1,24 @@
+# Site settings
+title: Blue Sky Charts
+description: > 
+  A mobile app used to view FAA VFR charts with weather overlays.  Allows you to download charts onto your device for offline viewing.
+baseurl: "/" # the subpath of your site, e.g. /blog/
+url: "https://blueskycharts.com" # the base hostname & protocol for your site
+author: Copyright &copy; 2020 - Muddy Paw Cloud Technology LLC
+lang: en_US
+
+# Build settings
+safe: true # always trues on github-pages, disables _plugins/
+markdown: kramdown
+sass:
+  indentWidth: 4
+  style: compressed
+  precision: 10
+plugins:
+  - jekyll-sitemap
+  - jekyll-seo-tag
+exclude:
+  - Gemfile
+  - Gemfile.lock
+  - build-in-docker.sh
+  - README.md

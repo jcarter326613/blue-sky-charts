@@ -1,0 +1,21 @@
+---
+---
+
+@charset "UTF-8";
+
+.footer {
+    display: flex;
+    flex-direction: row;
+    justify-content: center;
+    padding: 50px 0px;
+    color: rgb(220,220,220);
+}
+.footer > div {
+    width: 50%;
+    padding: 0px 10px;
+    text-align: left;
+}
+.footer > div:first-child {
+    text-align: right;
+    border-right: 1px solid rgb(220,220,220);
+}
