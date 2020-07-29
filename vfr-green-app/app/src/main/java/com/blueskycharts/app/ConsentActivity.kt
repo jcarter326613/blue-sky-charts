@@ -35,7 +35,6 @@ class ConsentActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_consent)
-
         lookupVersionCompliance()
     }
 
@@ -82,8 +81,6 @@ class ConsentActivity : AppCompatActivity() {
                 yield()
             }
 
-            appUpdateNeeded = true
-            policyUpdateNeeded = true
             if (appUpdateNeeded) {
                 showAppUpdateDialog(policyUpdateNeeded)
             } else {
