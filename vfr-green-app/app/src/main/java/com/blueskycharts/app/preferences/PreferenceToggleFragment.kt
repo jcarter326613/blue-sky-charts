@@ -1,5 +1,7 @@
 package com.blueskycharts.app.preferences
 
+import android.content.Context
+import android.net.ConnectivityManager
 import android.os.Bundle
 import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
@@ -44,9 +46,10 @@ class PreferenceToggleFragment(private val mapGroup: Int, private val mapName: S
 
         // Set up the download progress indicator
         // Set up the downloaded file size indicator
+        val tilePersistenceManager = TilePersistenceManager.getInstance(this.context?.getSystemService(Context.CONNECTIVITY_SERVICE) as ConnectivityManager)
         val downloadSizeLabel = view.findViewById<TextView>(R.id.size_on_disk_label)
         GlobalScope.launch {
-            val statistics = TilePersistenceManager.instance.getMapStatistics(mapGroup, mapName)
+            val statistics = tilePersistenceManager.getMapStatistics(mapGroup, mapName)
             statistics.addListener(object : MapPersistenceStatistics.Listener {
                 private var updateNeeded = false
                 private var sizeText: String = ""

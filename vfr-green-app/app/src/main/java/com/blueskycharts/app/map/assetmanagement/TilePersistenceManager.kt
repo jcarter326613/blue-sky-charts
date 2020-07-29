@@ -1,5 +1,6 @@
 package com.blueskycharts.app.map.assetmanagement
 
+import android.net.ConnectivityManager
 import android.util.Log
 import com.blueskycharts.app.Constants
 import com.blueskycharts.app.assests.Asset
@@ -22,7 +23,7 @@ import kotlin.math.pow
  * Performs background updates of the local cache by comparing the desired state to the current state
  * and issuing the necessary commands to the asset namespace to make changes
  */
-class TilePersistenceManager {
+class TilePersistenceManager(private val connectivityManager: ConnectivityManager) {
     private var running = false
     private var runningVersion = 0
     private var requestVersion = 0
@@ -36,6 +37,13 @@ class TilePersistenceManager {
     private var statisticsRecordsMutex = Mutex()
 
     private var manifestUpdateStartTimerWaiting = AtomicBoolean(false)
+
+    private val onWifi: Boolean
+        get() {
+            connectivityManager.networkPreference = ConnectivityManager.TYPE_WIFI
+            val networkInfo = connectivityManager.getNetworkInfo(ConnectivityManager.TYPE_WIFI)
+            return (networkInfo?.isConnected ?: false) && !connectivityManager.isActiveNetworkMetered
+        }
 
     init {
         start()
@@ -268,7 +276,7 @@ class TilePersistenceManager {
                         if ( shouldStop ) {
                             return
                         }
-                        if ( !fileDownloadedOrAliased ) {
+                        if ( !fileDownloadedOrAliased && onWifi ) {
                             var throttleBoolean = false
                             tileProvider.retrieveTile(name, currentMapVersion, z, x, y) {
                                 throttleBoolean = true
@@ -284,6 +292,15 @@ class TilePersistenceManager {
     }
 
     companion object {
-        val instance = TilePersistenceManager()
+        private var instance: TilePersistenceManager? = null
+
+        fun getInstance(cm: ConnectivityManager): TilePersistenceManager {
+            var i = instance
+            if (i == null) {
+                i = TilePersistenceManager(cm)
+                instance = i
+            }
+            return i
+        }
     }
 }

@@ -2,6 +2,8 @@ package com.blueskycharts.app.map
 
 import android.R.attr.name
 import android.R.id
+import android.content.Context
+import android.net.ConnectivityManager
 import android.os.Bundle
 import androidx.appcompat.app.AppCompatActivity
 import com.blueskycharts.app.R
@@ -14,6 +16,6 @@ class MapViewActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_map_view)
 
-        TilePersistenceManager.instance
+        TilePersistenceManager.getInstance(getSystemService(Context.CONNECTIVITY_SERVICE) as ConnectivityManager)
     }
 }
