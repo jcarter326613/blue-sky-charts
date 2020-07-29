@@ -1,10 +1,7 @@
 package com.blueskycharts.app.map.view
 
 import android.content.Context
-import android.graphics.Canvas
-import android.graphics.Color
-import android.graphics.Paint
-import android.graphics.Rect
+import android.graphics.*
 import android.location.Location
 import android.text.Spannable
 import android.text.SpannableString
@@ -48,6 +45,11 @@ class NavigableMap2d(context: Context, attributes: AttributeSet) :
     private val textHeight: Float
     private val textBackgroundPaint = Paint()
     private val textStrokePaint = Paint()
+    private val currentLocationCenterPaint = Paint()
+    private val currentLocationEdgePaint = Paint()
+    private val currentLocationBorderPaint = Paint()
+    private val currentLocationCenterRect: RectF
+    private val currentLocationEdgeRect: RectF
     private val positionUpdatePending = AtomicBoolean(false)
 
     // Map state variables
@@ -115,6 +117,21 @@ class NavigableMap2d(context: Context, attributes: AttributeSet) :
         textStrokePaint.color = Color.BLACK
         textStrokePaint.style = Paint.Style.STROKE
         textStrokePaint.strokeWidth = convertDipToPixels(1f)
+
+        currentLocationCenterPaint.color = Color.BLUE
+        currentLocationCenterPaint.style = Paint.Style.FILL
+        currentLocationCenterPaint.strokeWidth = convertDipToPixels(6f)
+
+        currentLocationEdgePaint.color = Color.WHITE
+        currentLocationEdgePaint.style = Paint.Style.FILL
+        currentLocationEdgePaint.strokeWidth = convertDipToPixels(2f) + currentLocationCenterPaint.strokeWidth
+
+        currentLocationBorderPaint.color = Color.BLACK
+        currentLocationBorderPaint.style = Paint.Style.STROKE
+        currentLocationBorderPaint.strokeWidth = convertDipToPixels(1f)
+
+        currentLocationCenterRect = RectF(-currentLocationCenterPaint.strokeWidth, -currentLocationCenterPaint.strokeWidth, currentLocationCenterPaint.strokeWidth, currentLocationCenterPaint.strokeWidth)
+        currentLocationEdgeRect = RectF(-currentLocationEdgePaint.strokeWidth, -currentLocationEdgePaint.strokeWidth, currentLocationEdgePaint.strokeWidth, currentLocationEdgePaint.strokeWidth)
 
         // Set all constant and derived defaults
         this.dataProvider = DataProvider(context, this)
@@ -373,9 +390,11 @@ class NavigableMap2d(context: Context, attributes: AttributeSet) :
             canvas.restore()
         }
 
-        canvas.restoreToCount(originCenterRestoreCount)
+        // Draw the current location
+        this.drawCurrentLocation(viewportMercator, canvas)
 
         // Draw the date indicating the oldest data displayed
+        canvas.restoreToCount(originCenterRestoreCount)
         if ( dataOverlayView != null) {
             val dataOverlay = dataOverlayView.subMapView
             if (this.dataProvider.isLoading()) {
@@ -406,6 +425,23 @@ class NavigableMap2d(context: Context, attributes: AttributeSet) :
                 }
             }
         }
+    }
+
+    private fun drawCurrentLocation(viewport: Box2d, canvas: Canvas) {
+        val currentLocation = this.currentLocation2d ?: return
+        val origin2d = this.origin2d ?: return
+
+        val saveCount = canvas.save()
+
+        val percentageX = (currentLocation.x - origin2d.x) / viewport.width
+        val percentageY = (currentLocation.y - origin2d.y) / viewport.height
+        canvas.translate((width * percentageX).toFloat(), (height * percentageY).toFloat())
+
+        canvas.drawArc(currentLocationEdgeRect, 0f, 360f, true, this.currentLocationEdgePaint)
+        canvas.drawArc(currentLocationEdgeRect, 0f, 360f, true, this.currentLocationBorderPaint)
+        canvas.drawArc(currentLocationCenterRect, 0f, 360f, true, this.currentLocationCenterPaint)
+
+        canvas.restoreToCount(saveCount)
     }
 
     private fun drawSubMap(submap: SubMapPosition, viewport2d: Box2d, canvas: Canvas) {
