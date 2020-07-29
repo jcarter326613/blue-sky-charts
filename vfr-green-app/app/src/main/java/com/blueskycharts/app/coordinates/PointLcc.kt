@@ -7,4 +7,8 @@ class PointLcc(override var x: Double = 0.0, override var y: Double = 0.0, val p
     override fun convertToPointGeo(): PointGeo {
         return projection.createPointGeo(this)
     }
+
+    override fun convertToPoint2d(): Point2d {
+        return Point2d(x, y)
+    }
 }

@@ -58,6 +58,13 @@ class Box2d(upperLeftX: Double = 0.0, upperLeftY: Double = 0.0, lowerRightX: Dou
         return Box2d(topLeftX, topLeftY, bottomRightX, bottomRightY)
     }
 
+    fun contains(o: Point2d): Boolean {
+        return o.x >= this.upperLeft.x &&
+                o.x <= this.lowerRight.x &&
+                o.y >= this.upperLeft.y &&
+                o.y <= this.lowerRight.y
+    }
+
     /**
      * Returns the intersection of the two boxes.  An real number range is allowed.
      * @param o

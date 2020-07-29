@@ -27,4 +27,8 @@ class PointWebMercator(override var x: Double = 0.0, override var y: Double = 0.
 
         return PointGeo(longitude, latitude)
     }
+
+    override fun convertToPoint2d(): Point2d {
+        return RectangularAreaWebMercator.convertPointWebMercatorToPoint2d(this)
+    }
 }

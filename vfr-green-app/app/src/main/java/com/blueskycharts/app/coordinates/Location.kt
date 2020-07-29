@@ -5,4 +5,5 @@ interface Location {
     val y: Double
 
     fun convertToPointGeo(): PointGeo
+    fun convertToPoint2d(): Point2d
 }

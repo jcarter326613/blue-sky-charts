@@ -108,5 +108,9 @@ class RectangularAreaWebMercator(topLeftX: Double = 0.0, topLeftY: Double = 0.0,
 
                 return _maxMercator!!
             }
+
+        fun convertPointWebMercatorToPoint2d(i: PointWebMercator): Point2d {
+            return Point2d(i.x, RectangularAreaWebMercator.maxMercator.topLeft.y - i.y)
+        }
     }
 }

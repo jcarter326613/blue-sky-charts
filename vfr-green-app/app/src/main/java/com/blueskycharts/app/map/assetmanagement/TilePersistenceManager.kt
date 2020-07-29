@@ -23,6 +23,7 @@ import kotlin.math.pow
  * Performs background updates of the local cache by comparing the desired state to the current state
  * and issuing the necessary commands to the asset namespace to make changes
  */
+@Suppress("DEPRECATION")
 class TilePersistenceManager(private val connectivityManager: ConnectivityManager) {
     private var running = false
     private var runningVersion = 0

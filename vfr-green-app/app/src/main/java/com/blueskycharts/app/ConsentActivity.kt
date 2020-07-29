@@ -112,10 +112,10 @@ class ConsentActivity : AppCompatActivity() {
             var updatePressed = false
             val alertDialog = AlertDialog.Builder(this@ConsentActivity)
                 .setMessage("The application must be updated from the Google Play Store.  Some features may not work until an update is completed.")
-                .setPositiveButton("Update Now") { dialogInterface: DialogInterface, i: Int ->
+                .setPositiveButton("Update Now") { _: DialogInterface, _: Int ->
                     updatePressed = true
                 }
-                .setNegativeButton("Later") { dialogInterface: DialogInterface, i: Int ->
+                .setNegativeButton("Later") { _: DialogInterface, _: Int ->
                 }
                 .create()
             alertDialog.show()

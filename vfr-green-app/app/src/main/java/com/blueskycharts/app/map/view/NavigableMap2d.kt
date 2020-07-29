@@ -5,6 +5,7 @@ import android.graphics.Canvas
 import android.graphics.Color
 import android.graphics.Paint
 import android.graphics.Rect
+import android.location.Location
 import android.text.Spannable
 import android.text.SpannableString
 import android.text.SpannableStringBuilder
@@ -25,6 +26,7 @@ import com.blueskycharts.app.map.resources.DataProvider
 import com.blueskycharts.app.map.resources.ShadowProvider
 import com.blueskycharts.app.map.resources.TileProvider
 import com.blueskycharts.app.preferences.Preferences
+import com.blueskycharts.app.utility.Log
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
@@ -53,6 +55,21 @@ class NavigableMap2d(context: Context, attributes: AttributeSet) :
     private var mapViews: LinkedList<SubMapPosition>? = null
     private var dataOverlayView: SubMapPosition? = null
     private var origin2d: Point2d? = null
+        get() {
+            if (trackCurrentLocation) {
+                val currentLocation2d = this.currentLocation2d ?: return field
+                val rectangularAreaBounds = this.rectangularAreaBounds ?: return field
+                return if (rectangularAreaBounds.convertToBox2d().contains(currentLocation2d)) {
+                    currentLocation2d
+                } else {
+                    field
+                }
+            } else {
+                return field
+            }
+        }
+    private var currentLocation2d: Point2d? = null
+    private var trackCurrentLocation: Boolean = true
     private var scale: Double
     private var scaleDriver: Float = 0F
     private val maxScaleDriver: Float = 12F
@@ -120,6 +137,25 @@ class NavigableMap2d(context: Context, attributes: AttributeSet) :
 
         // Startup the map
         this.retrieveConfiguration()
+    }
+
+    fun updateCurrentLocation(location: Location) {
+        val loc = PointGeo(longitude = location.longitude, latitude = location.latitude)
+        when (val rectangularAreaBounds = this.rectangularAreaBounds) {
+            is RectangularAreaLcc -> {
+                this.currentLocation2d = loc.convertToPointLcc(rectangularAreaBounds.projectionDescription).convertToPoint2d()
+                this.requestRedraw()
+            }
+            is RectangularAreaWebMercator -> {
+                this.currentLocation2d = loc.convertToPointWebMercator().convertToPoint2d()
+                this.requestRedraw()
+            }
+            null -> {
+            }
+            else -> {
+                Log.error(null, "Unknown rectangular area type encountered when trying to move map to current location")
+            }
+        }
     }
 
     fun setOverlayType(type: OverlayTypes): Boolean {
@@ -584,6 +620,7 @@ class NavigableMap2d(context: Context, attributes: AttributeSet) :
 
     private fun mouseMoveHelper(offsetX: Float, offsetY: Float) {
         if (this.isDragging) {
+            this.trackCurrentLocation = false
             val xDifference = offsetX - this.mouseDownClient.x
             val yDifference = offsetY - this.mouseDownClient.y
             val viewport = this.calculateViewport()?: return
