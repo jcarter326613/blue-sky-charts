@@ -150,6 +150,8 @@ class Preferences private constructor() {
         val propertyNameMaxUnPersistedTileDiskSpace: String = "map.cache.size"
         val propertyNameStoreMapsExternally: String = "map.storage.external"
         val propertyNameAcceptedPrivacyVersion: String = "privacypolicy.accepted"
+        val propertyNameAllowFirebaseLogging: String = "privacypolicy.firebase.logging"
+        val propertyNameAllowFirebaseCrashalytics: String = "privacypolicy.firebase.crashalytics"
 
         // Default values
         const val defaultValueMapProactiveDownload = false
@@ -159,5 +161,7 @@ class Preferences private constructor() {
         const val defaultValueStoreMapsExternally = false
         const val defaultValueMapPosition = ""
         const val defaultValueAcceptedPrivacyVersion = ""
+        const val defaultValueAllowFirebaseLogging = false
+        const val defaultValueAllowFirebaseCrashalytics = false
     }
 }

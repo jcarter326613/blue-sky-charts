@@ -24,11 +24,22 @@
             android:theme="@style/AppTheme.NoActionBar" />
         <activity
             android:name=".subscription.SubscriptionActivity"
+            android:theme="@style/AppTheme.NoActionBar" />
+        <activity
+            android:name=".ConsentActivity"
             android:theme="@style/AppTheme.NoActionBar">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
+
+        <meta-data
+            android:name="firebase_analytics_collection_enabled"
+            android:value="false" />
+        <meta-data
+            android:name="firebase_crashlytics_collection_enabled"
+            android:value="false" />
     </application>
+
 </manifest>

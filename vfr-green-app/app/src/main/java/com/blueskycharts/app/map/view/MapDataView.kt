@@ -1,8 +1,6 @@
 package com.blueskycharts.app.map.view
 
 import android.graphics.*
-import android.util.Range
-import androidx.core.graphics.red
 import com.blueskycharts.app.coordinates.*
 import com.blueskycharts.app.map.models.WeatherCondition
 import com.blueskycharts.app.map.resources.DataProvider
@@ -127,7 +125,7 @@ class MapDataView(private val dataProvider: DataProvider, private val overlayTyp
             OverlayTypes.Visibility -> this.renderVisibility(data, dataAgeSeconds, canvas)
             OverlayTypes.SurfaceWind -> this.renderWind(data, dataAgeSeconds, canvas)
             OverlayTypes.CloudCover -> this.renderCloudCover(data, dataAgeSeconds, canvas)
-            else -> Log.e(null, "Request to render unknown type.")
+            else -> Log.error(null, "Request to render unknown type.")
         }
         canvas.restoreToCount(restoreTo)
     }

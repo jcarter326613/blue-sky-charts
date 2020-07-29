@@ -165,7 +165,7 @@ class DataRequest(private val provider: DataProvider, private var receiver: Data
                 OverlayTypes.Visibility -> "visibility"
                 OverlayTypes.SurfaceWind -> "wind"
                 else -> {
-                    Log.e(null, "Invalid overlay type")
+                    Log.error(null, "Invalid overlay type")
                     ""
                 }
             }

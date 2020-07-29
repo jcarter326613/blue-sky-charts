@@ -42,7 +42,7 @@ class MainMenuFragment() : Fragment() {
             setupMainMenuHandlers()
             setupWeatherHandlers()
         } else {
-            Log.e(null, "Loaded view without activity.  Can not connect view model.")
+            Log.error(null, "Loaded view without activity.  Can not connect view model.")
         }
     }
 

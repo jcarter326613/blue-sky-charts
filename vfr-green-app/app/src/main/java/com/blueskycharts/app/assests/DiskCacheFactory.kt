@@ -20,5 +20,7 @@ class DiskCacheFactory(context: Context? = null, attributes: AttributeSet? = nul
             get() {
                 return _instance ?: throw Error("Error trying to access disk cache instance prior to initialization")
             }
+        val ready: Boolean
+            get() = _instance != null
     }
 }

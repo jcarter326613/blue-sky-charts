@@ -24,7 +24,7 @@ open class AssetProvider() {
                     return
                 }
             } catch (e: Throwable) {
-                Log.e(null, "Error processing file for local path ${assetDescription.localPath}")
+                Log.error(null, "Error processing file for local path ${assetDescription.localPath}")
             }
             assetDescription.retrieveFromSource(callback)
         }

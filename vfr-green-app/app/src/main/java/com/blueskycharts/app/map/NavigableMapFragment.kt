@@ -30,7 +30,7 @@ class NavigableMapFragment: Fragment() {
                 mapView.setOverlayType(it)
             })
         } else {
-            Log.e(null, "Loaded view without activity.  Can not connect view model.")
+            Log.error(null, "Loaded view without activity.  Can not connect view model.")
         }
     }
 }

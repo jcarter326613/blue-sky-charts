@@ -5,7 +5,6 @@ import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
 import java.io.File
 import java.io.FileInputStream
-import java.io.FileOutputStream
 import java.util.*
 import com.blueskycharts.app.utility.Log
 import kotlinx.coroutines.sync.Mutex
@@ -163,7 +162,7 @@ final class DiskCache(private val context: Context) {
                 }
             }
         } catch ( e: Throwable ) {
-            Log.e(null, e.message ?: "Error writing asset to disk ${asset.description.localPath}")
+            Log.error(null, e.message ?: "Error writing asset to disk ${asset.description.localPath}")
         }
     }
 
@@ -294,7 +293,7 @@ final class DiskCache(private val context: Context) {
                         try {
                             externalDirectory.mkdirs()
                         } catch (e: Throwable) {
-                            Log.e(null, "Could not create external directory ${externalDirectory.absolutePath}")
+                            Log.error(null, "Could not create external directory ${externalDirectory.absolutePath}")
                         }
                     }
                     return File(externalDirectory, getFilePathForAsset(description))
