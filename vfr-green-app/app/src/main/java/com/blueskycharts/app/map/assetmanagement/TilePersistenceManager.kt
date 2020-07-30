@@ -152,7 +152,7 @@ class TilePersistenceManager(private val connectivityManager: ConnectivityManage
     private suspend fun cleanOldNonPersistedTiles() {
         // Figure out how much space we are taking up from un persisted maps
         var usedBytes: Long = 0
-        val unPersistedFileRootList = mutableListOf<AssetDescription>()
+        val persistedFileRootList = mutableListOf<AssetDescription>()
         for (group in Inventory.instance.mapGroups) {
             val assetProvider = TileAssetProvider.getInstance(group.id)
             val configuration = group.getConfiguration() ?: continue
@@ -165,23 +165,30 @@ class TilePersistenceManager(private val connectivityManager: ConnectivityManage
                     val mapStatistics = getMapStatistics(group.id, mapName)
                     usedBytes += mapStatistics.downloadedSizeBytes
                 } else {
-                    unPersistedFileRootList.add(assetProvider.getMapAssetDescriptionContainer(mapName))
+                    persistedFileRootList.add(assetProvider.getMapAssetDescriptionContainer(mapName))
                 }
             }
         }
 
         // Start deleting files until we are down to our un-persisted cache limit
-        val unPersistedMaxSpaceBytes = Preferences.instance.getIntValue(
-            Preferences.propertyNameMaxUnPersistedTileDiskSpace, Preferences.defaultValueMaxUnPersistedTileDiskSpace
-        )
+        val unPersistedMaxSpaceBytes = if (Preferences.instance.getBooleanValue(Preferences.propertyNameRequestClearCache, Preferences.defaultValueRequestClearCache)) {
+            0
+        } else {
+            Preferences.instance.getIntValue(
+                Preferences.propertyNameMaxUnPersistedTileDiskSpace, Preferences.defaultValueMaxUnPersistedTileDiskSpace
+            )
+        }
 
         val topLevelContainer = TileAssetProvider.getMapAssetDescriptionContainer()
         while (unPersistedMaxSpaceBytes < usedBytes) {
-            val oldestFile = DiskCacheFactory.instance.getOldest(topLevelContainer, unPersistedFileRootList) ?: break
+            val oldestFile = DiskCacheFactory.instance.getOldest(topLevelContainer, persistedFileRootList) ?: break
             val size = oldestFile.size
             DiskCacheFactory.instance.deleteAsset(oldestFile)       //TODO: revisit this when we get aliases working.  If we delete an alias or rename a file to another alias,
                                                                     // we'll be either not reporting the right size change or updating the mod date on the rename
             usedBytes -= size
+        }
+        if (Preferences.instance.getBooleanValue(Preferences.propertyNameRequestClearCache, Preferences.defaultValueRequestClearCache)) {
+            Preferences.instance.setPreference(Preferences.propertyNameRequestClearCache, false)
         }
     }
 
@@ -295,9 +302,12 @@ class TilePersistenceManager(private val connectivityManager: ConnectivityManage
     companion object {
         private var instance: TilePersistenceManager? = null
 
-        fun getInstance(cm: ConnectivityManager): TilePersistenceManager {
+        fun getInstance(cm: ConnectivityManager?): TilePersistenceManager {
             var i = instance
             if (i == null) {
+                if (cm == null) {
+                    throw Error("Can not instantiate TilePersistenceManager with null Connectivity Manager")
+                }
                 i = TilePersistenceManager(cm)
                 instance = i
             }

@@ -152,6 +152,7 @@ class Preferences private constructor() {
         val propertyNameAcceptedPrivacyVersion: String = "privacypolicy.accepted"
         val propertyNameAllowFirebaseLogging: String = "privacypolicy.firebase.logging"
         val propertyNameAllowFirebaseCrashalytics: String = "privacypolicy.firebase.crashalytics"
+        val propertyNameRequestClearCache: String = "map.cache.clear"
 
         // Default values
         const val defaultValueMapProactiveDownload = false
@@ -163,5 +164,6 @@ class Preferences private constructor() {
         const val defaultValueAcceptedPrivacyVersion = ""
         const val defaultValueAllowFirebaseLogging = false
         const val defaultValueAllowFirebaseCrashalytics = false
+        const val defaultValueRequestClearCache = false
     }
 }

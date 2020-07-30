@@ -3,8 +3,12 @@ package com.blueskycharts.app.preferences
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.os.Environment
+import android.provider.Settings
+import android.widget.Button
 import android.widget.ToggleButton
 import com.blueskycharts.app.R
+import com.blueskycharts.app.assests.DiskCacheFactory
+import com.blueskycharts.app.map.assetmanagement.TilePersistenceManager
 import com.blueskycharts.app.map.configuration.Inventory
 import com.blueskycharts.app.map.configuration.MapConfiguration
 import kotlinx.coroutines.Dispatchers
@@ -16,22 +20,11 @@ class SetPreferencesActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_set_preferences)
 
-        // Connect the internal/external toggle
-        /*  This feature is too difficult for now.  Lets just assume external if it's writable
-        val internalExternalToggleButton =
-            findViewById<ToggleButton>(R.id.internalExternalToggleButton)
-        val externalSet = Preferences.instance.getBooleanValue(
-            Preferences.propertyNameStoreMapsExternally,
-            Preferences.defaultValueStoreMapsExternally
-        )
-        internalExternalToggleButton.isChecked = externalSet
-        internalExternalToggleButton.setOnCheckedChangeListener { _, isChecked ->
-            Preferences.instance.setPreference(
-                Preferences.propertyNameStoreMapsExternally,
-                isChecked
-            )
+        val clearCacheButton = findViewById<Button>(R.id.clearCacheButton)
+        clearCacheButton?.setOnClickListener {
+            Preferences.instance.setPreference(Preferences.propertyNameRequestClearCache, true)
+            TilePersistenceManager.getInstance(null).start()
         }
-         */
 
         displayPreferences()
     }
