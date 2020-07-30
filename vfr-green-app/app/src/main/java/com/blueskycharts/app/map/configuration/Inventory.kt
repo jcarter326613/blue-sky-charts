@@ -18,7 +18,9 @@ class Inventory(val mapGroups: List<Group>) {
             var mapConfigurationFile = URL("${urlRoot}/metadata.json")
             val assetProvider = AssetProvider()
             var config: MapConfiguration? = null
-            assetProvider.retrieveAsset(RemoteAssetDescription(mapConfigurationFile, Volatility.DayCache, StorageLocation.Internal)) {
+            val assetDescription = RemoteAssetDescription(mapConfigurationFile, Volatility.DayCache, StorageLocation.Internal)
+            assetDescription.allowExpired = true
+            assetProvider.retrieveAsset(assetDescription) {
                 config = if (!it.errorLoading) {
                     val reader = it.asJsonReader()
                     if (reader != null) {
