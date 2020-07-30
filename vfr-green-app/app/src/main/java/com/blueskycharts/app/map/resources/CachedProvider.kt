@@ -10,20 +10,30 @@ import java.util.*
 import java.util.concurrent.atomic.AtomicInteger
 import kotlin.concurrent.timerTask
 
-abstract class CachedProvider( private val map: Map, private val requestDelayMilliseconds: Int = 0 ) {
+abstract class CachedProvider( private val map: Map, private val requestDelayMilliseconds: Int = 0, private val consecutiveErrorThreshold: Int = 5 ) {
     private val maxActiveRequests = 2
-    private val cache = Hashtable<String, CachedProviderRequest>(); //Need to add ageoff, causing memory leak
+    private val cache = Hashtable<String, CachedProviderRequest>() //Need to add ageoff, causing memory leak
     private var numActiveRequests = AtomicInteger(0)
     private var numAwaitingQueueAddition = AtomicInteger(0)
-    private val requestQueue: PriorityArray<Pair<String, CachedProviderRequest>> = PriorityArray();
-    private var requestQueueKeys = Hashtable<String, Int>();    //key, priority
-    private var lastQueueAddition = Date();
-    private var processQueuePending = false;
-    private val processQueueTimer = Timer(false);
+    private val requestQueue: PriorityArray<Pair<String, CachedProviderRequest>> = PriorityArray()
+    private var requestQueueKeys = Hashtable<String, Int>()    //key, priority
+    private var lastQueueAddition = Date()
+    private var processQueuePending = false
+    private val processQueueTimer = Timer(false)
     private val queueMutex: Mutex = Mutex()
+
+    // Disconnect hammer prevention
+    private var consecutiveErrors = AtomicInteger(0)
+    private var lastProcessQueue = Date()
+    val timeSinceLastRequest: Long
+        get() = Date().time - lastProcessQueue.time
 
     fun isLoading(): Boolean {
         return this.numActiveRequests.get() > 0 || this.requestQueue.size() > 0 || numAwaitingQueueAddition.get() > 0
+    }
+
+    fun isWaitingForErrors():  Boolean {
+        return consecutiveErrors.get() >= consecutiveErrorThreshold
     }
 
     fun clearQueue() {
@@ -36,10 +46,15 @@ abstract class CachedProvider( private val map: Map, private val requestDelayMil
     }
 
     fun getCachedItem(key: String) :CachedProviderRequest? {
-        return try {
-            this.cache[key]
+        try {
+            val item = this.cache[key] ?: return null
+            return if (item.inError) {
+                null
+            } else {
+                item
+            }
         } catch ( e: Throwable ) {
-            null
+            return null
         }
     }
 
@@ -64,10 +79,19 @@ abstract class CachedProvider( private val map: Map, private val requestDelayMil
     /**
      * Only to be called by CachedProviderRequest class to signify a downoad has completed.
      */
-    fun completeRequest() {
+    fun completeRequest(isSuccess: Boolean) {
+        if (isSuccess) {
+            consecutiveErrors.set(0)
+        } else {
+            if (consecutiveErrors.get() <= consecutiveErrorThreshold) {
+                consecutiveErrors.incrementAndGet()
+            }
+        }
         this.numActiveRequests.getAndDecrement();
         this.processQueue();
-        this.map.requestRedraw()
+        if (isSuccess) {
+            this.map.requestRedraw()
+        }
     }
 
     protected fun incrementAwaitingQueueAddition() {
@@ -126,13 +150,14 @@ abstract class CachedProvider( private val map: Map, private val requestDelayMil
         if (timeToWait <= 0) {
             GlobalScope.launch {
                 queueMutex.withLock {
+                    lastProcessQueue = now
                     while (this@CachedProvider.numActiveRequests.get() < maxActiveRequests && this@CachedProvider.requestQueue.size() > 0) {
                         val request = this@CachedProvider.requestQueue.pop()
                         if (request != null) {
-                            this@CachedProvider.numActiveRequests.getAndIncrement();
-                            this@CachedProvider.cache[request.first] = request.second;
-                            request.second.sendRequest();
-                            this@CachedProvider.requestQueueKeys.remove(request.first);
+                            this@CachedProvider.numActiveRequests.getAndIncrement()
+                            this@CachedProvider.cache[request.first] = request.second
+                            request.second.sendRequest()
+                            this@CachedProvider.requestQueueKeys.remove(request.first)
                         }
                     }
                 }

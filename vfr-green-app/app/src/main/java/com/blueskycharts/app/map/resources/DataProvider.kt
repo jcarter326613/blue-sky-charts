@@ -17,9 +17,10 @@ import kotlin.math.ceil
 import kotlin.math.log2
 import kotlin.math.pow
 
-class DataProvider(val context: Context, map: Map) : CachedProvider(map, 700) {
+class DataProvider(val context: Context, map: Map) : CachedProvider(map, 700, 1) {
     private val areaBucketMultiplier = 2
     private val usedBuckets: HashMap<OverlayTypes, HashMap<String, LinkedList<BoxGeo>>> = HashMap()  //<overlay_type, <resolution as string, box geos>>
+    private val timeBufferForErrors = 3 * 1000 // 3 seconds
 
     init {
         for ( type in OverlayTypes.values() ) {
@@ -65,7 +66,7 @@ class DataProvider(val context: Context, map: Map) : CachedProvider(map, 700) {
             tileRequest as DataRequest
             tileRequest.setReceiver(receiver, data)
             tileRequest.broadcastData(true, canvas)
-            if ( !tileRequest.expired ) {
+            if ( !tileRequest.expired || (this.isWaitingForErrors() && timeSinceLastRequest < timeBufferForErrors) ) {
                 addNewRequest = false
             }
         }
@@ -83,7 +84,7 @@ class DataProvider(val context: Context, map: Map) : CachedProvider(map, 700) {
                             newTileRequest.broadcastData(false, canvas)
                         }
                     } else {
-                        val newRequest = DataRequest(
+                        val newRequest = newTileRequest ?: DataRequest(
                             this@DataProvider,
                             receiver,
                             areaBucket,

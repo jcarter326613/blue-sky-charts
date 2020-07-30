@@ -19,10 +19,12 @@ abstract class CachedProviderRequest( private val provider: CachedProvider, val 
     var inError: Boolean = false
         set(value) {
             if ( value ) {
-                field = true;
-                loaded = false;
+                if (!loaded) {
+                    field = true
+                    loaded = false
+                }
             } else {
-                field = false;
+                field = false
             }
         }
 
@@ -34,8 +36,8 @@ abstract class CachedProviderRequest( private val provider: CachedProvider, val 
     abstract fun broadcastData(immediate: Boolean, canvas: Canvas?)
 
     protected fun completeRequest(isSuccess: Boolean) {
-        this.provider.completeRequest()
-        if ( isSuccess ) {
+        this.provider.completeRequest(isSuccess)
+        if ( isSuccess || loaded ) {
             this.loaded = true
             this.broadcastData(false, null);
         } else {

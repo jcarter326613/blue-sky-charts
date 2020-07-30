@@ -397,33 +397,36 @@ class NavigableMap2d(context: Context, attributes: AttributeSet) :
         canvas.restoreToCount(originCenterRestoreCount)
         if ( dataOverlayView != null) {
             val dataOverlay = dataOverlayView.subMapView
-            if (this.dataProvider.isLoading()) {
-                canvas.save()
-                this.renderInformationAgeBox(listOf(SpannableString("Loading weather data...")), canvas)
-                canvas.restore()
-            } else {
+            val restoreCount = canvas.save()
+
+            if (this.dataProvider.isWaitingForErrors()) {
                 val informationAge = dataOverlay.getRequestedInformationAgeSeconds()
                 if (informationAge != null) {
-                    // Draw the information age
-                    canvas.save()
                     val informationAgeLabel = this.getInformationAgeLabel(informationAge)
                     this.renderInformationAgeBox(informationAgeLabel, canvas)
-                    canvas.restore()
-
-                    // Trigger a refresh for when the information age needs to be updated
-                    val secondsToSleep: Long =
-                        when (informationAge.last) {
-                            60L -> 1
-                            0L -> 61
-                            else -> (60 - (informationAge.last % 60)) + 1
-                        }
-
-                    val task: TimerTask = timerTask {
-                        this@NavigableMap2d.requestRedraw()
+                } else {
+                    this.renderInformationAgeBox(
+                        listOf(
+                            SpannableString("Information stale")
+                        ), canvas
+                    )
+                }
+            } else {
+                if (this.dataProvider.isLoading()) {
+                    this.renderInformationAgeBox(
+                        listOf(SpannableString("Loading weather data...")),
+                        canvas
+                    )
+                } else {
+                    val informationAge = dataOverlay.getRequestedInformationAgeSeconds()
+                    if (informationAge != null) {
+                        val informationAgeLabel = this.getInformationAgeLabel(informationAge)
+                        this.renderInformationAgeBox(informationAgeLabel, canvas)
                     }
-                    redrawTimer.schedule(task, secondsToSleep * 1000)
                 }
             }
+
+            canvas.restoreToCount(restoreCount)
         }
     }
 
@@ -531,22 +534,41 @@ class NavigableMap2d(context: Context, attributes: AttributeSet) :
     }
 
     private fun getInformationAgeLabel(ageSeconds: LongRange): List<SpannableString> {
+        val sb1: SpannableString
+        val sb2: SpannableString
+
         if ( ageSeconds.last < 60 ) {
-            return listOf(SpannableString("Issued 1"), SpannableString("minute ago"))
+            sb1 = SpannableString("Issued 1")
+            sb2 = SpannableString("minute ago")
+        } else if ( ageSeconds.last - ageSeconds.first <= MapDataView.maxNoRangeDisplayDiff ) {
+            sb1 = SpannableString("Issued ${ceil(ageSeconds.last / 60.0).toInt()}")
+            sb2 = SpannableString("minutes ago")
+        } else {
+            val age1String = " ${ceil(ageSeconds.first / 60.0).toInt()} "
+            val age2String = " ${ceil(ageSeconds.last / 60.0).toInt()} "
+            val wordIssued = "Issued "
+            val wordTo = " to "
+            sb1 = SpannableString("$wordIssued$age1String$wordTo$age2String")
+            sb2 = SpannableString("minutes ago")
+            sb1.setSpan(
+                BackgroundColorSpan(MapDataView.newInformationColor),
+                wordIssued.length,
+                age1String.length + wordIssued.length,
+                Spannable.SPAN_INCLUSIVE_INCLUSIVE
+            )  //For text coloring change BackgroundColorSpan to ForegroudColorSpan
+            sb1.setSpan(
+                BackgroundColorSpan(MapDataView.oldInformationColor),
+                wordIssued.length + age1String.length + wordTo.length,
+                wordIssued.length + age1String.length + wordTo.length + age2String.length,
+                Spannable.SPAN_INCLUSIVE_INCLUSIVE
+            )
         }
-        if ( ageSeconds.last - ageSeconds.first <= MapDataView.maxNoRangeDisplayDiff ) {
-            return listOf(SpannableString("Issued ${ceil(ageSeconds.last / 60.0).toInt()}"), SpannableString("minutes ago"))
+
+        return if (dataProvider.isWaitingForErrors()) {
+            listOf(sb1, sb2, SpannableString("Information stale"))
+        } else {
+            listOf(sb1, sb2)
         }
-        val age1String = " ${ceil(ageSeconds.first / 60.0).toInt()} "
-        val age2String = " ${ceil(ageSeconds.last / 60.0).toInt()} "
-        val wordIssued = "Issued "
-        val wordTo = " to "
-        val sb1 = SpannableString("$wordIssued$age1String$wordTo$age2String")
-        val sb2 = SpannableString("minutes ago")
-        sb1.setSpan(BackgroundColorSpan(MapDataView.newInformationColor), wordIssued.length, age1String.length + wordIssued.length, Spannable.SPAN_INCLUSIVE_INCLUSIVE)  //For text coloring change BackgroundColorSpan to ForegroudColorSpan
-        sb1.setSpan(BackgroundColorSpan(MapDataView.oldInformationColor), wordIssued.length + age1String.length + wordTo.length,
-            wordIssued.length + age1String.length + wordTo.length + age2String.length, Spannable.SPAN_INCLUSIVE_INCLUSIVE)
-        return listOf(sb1, sb2)
     }
 
     /**
