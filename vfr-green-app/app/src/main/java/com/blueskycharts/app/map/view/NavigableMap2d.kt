@@ -341,9 +341,10 @@ class NavigableMap2d(context: Context, attributes: AttributeSet) :
     }
 
     override fun onDetachedFromWindow() {
-        super.onDetachedFromWindow()
         this.tileProvider?.clearQueue()
         this.dataProvider.clearQueue()
+
+        super.onDetachedFromWindow()
     }
 
     override fun onDraw(canvas: Canvas?) {

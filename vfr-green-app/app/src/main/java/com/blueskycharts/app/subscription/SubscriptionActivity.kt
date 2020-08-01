@@ -44,7 +44,7 @@ class SubscriptionActivity : AppCompatActivity() {
             .enablePendingPurchases()
             .build()
 
-        val isSubscriptionPurchased = billingClient.queryPurchases("the sku").responseCode == Purchase.PurchaseState.PURCHASED
+        val isSubscriptionPurchased = billingClient.queryPurchases("basic.annual").responseCode == Purchase.PurchaseState.PURCHASED
 
         billingClient.startConnection(object : BillingClientStateListener {
             override fun onBillingSetupFinished(billingResult: BillingResult) {
