@@ -9,10 +9,13 @@ import com.blueskycharts.app.assests.DiskCacheFactory
 import com.blueskycharts.app.assests.DiskCacheListener
 import com.blueskycharts.app.map.configuration.Inventory
 import com.blueskycharts.app.map.configuration.MapConfiguration
+import com.blueskycharts.app.map.resources.DataProvider
+import com.blueskycharts.app.map.resources.DataRequest
 import com.blueskycharts.app.preferences.Preferences
 import kotlinx.coroutines.*
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
+import java.util.*
 import java.util.concurrent.atomic.AtomicBoolean
 import java.util.concurrent.atomic.AtomicInteger
 import kotlin.concurrent.thread
@@ -33,6 +36,7 @@ class TilePersistenceManager(private val connectivityManager: ConnectivityManage
     private var singleThreadMutex = Mutex()
     private val shouldStop: Boolean
         get() = stopRunning || runningVersion != requestVersion
+    private val maxDataFileAgeMilliseconds = 120 * 60 * 1000    //120 minutes (2 hours)
 
     private val statisticsRecords = mutableMapOf<String, MapPersistenceStatistics>()     //Key is groupid-mapname
     private var statisticsRecordsMutex = Mutex()
@@ -78,6 +82,7 @@ class TilePersistenceManager(private val connectivityManager: ConnectivityManage
                     firstRun = false
                 }
                 cleanOldNonPersistedTiles()
+                cleanOldDataFiles()
                 enforceAllPreferences()
                 if ( requestVersion != runningVersion && !stopRunning ) {
                     start()
@@ -189,6 +194,17 @@ class TilePersistenceManager(private val connectivityManager: ConnectivityManage
         }
         if (Preferences.instance.getBooleanValue(Preferences.propertyNameRequestClearCache, Preferences.defaultValueRequestClearCache)) {
             Preferences.instance.setPreference(Preferences.propertyNameRequestClearCache, false)
+        }
+    }
+
+    private suspend fun cleanOldDataFiles() {
+        // Start deleting files until we are down to our un-persisted cache limit
+        val topLevelContainer = DataRequest.endpointDescriptor
+        var oldestFile = DiskCacheFactory.instance.getOldest(topLevelContainer, listOf())
+        val now = Date().time
+        while (oldestFile != null && now - oldestFile.modDate > maxDataFileAgeMilliseconds) {
+            DiskCacheFactory.instance.deleteAsset(oldestFile)
+            oldestFile = DiskCacheFactory.instance.getOldest(topLevelContainer, listOf())
         }
     }
 
