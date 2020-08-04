@@ -16,7 +16,9 @@ import com.blueskycharts.app.assests.RemoteAssetDescription
 import com.blueskycharts.app.assests.StorageLocation
 import com.blueskycharts.app.assests.Volatility
 import com.blueskycharts.app.map.MapViewActivity
+import com.blueskycharts.app.mapselection.MapSelectionActivity
 import com.blueskycharts.app.preferences.Preferences
+import com.blueskycharts.app.preferences.SetPreferencesActivity
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch

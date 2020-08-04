@@ -21,6 +21,7 @@ import java.util.concurrent.atomic.AtomicBoolean
 open class SubscriptionChecker(private val redirectOnPurchaseMade: Boolean, private val redirectOnNotPurchased: Boolean): AppCompatActivity(), BillingClientStateListener, PurchasesUpdatedListener {
     private var billingClient: BillingClient? = null
     private var subscriptionVerified = AtomicBoolean(false)
+    private val skuBasicAnnual = "basic.annual"
     var subscriptionStatus: SubscriptionStatus = SubscriptionStatus.Unknown
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -60,12 +61,12 @@ open class SubscriptionChecker(private val redirectOnPurchaseMade: Boolean, priv
             //Billing client is not null
             var purchaseSku: SkuDetails? = null
             val params = SkuDetailsParams.newBuilder()
-            params.setSkusList(listOf("basic.annual")).setType(BillingClient.SkuType.SUBS)
+            params.setSkusList(listOf(skuBasicAnnual)).setType(BillingClient.SkuType.SUBS)
             val details = billingClient.querySkuDetails(params.build())
             val skuDetailsList = details.skuDetailsList
             if (skuDetailsList != null) {
                 for (skuDetail in skuDetailsList) {
-                    if (skuDetail.sku == "basic.annual") {
+                    if (skuDetail.sku == skuBasicAnnual) {
                         purchaseSku = skuDetail
                     }
                 }
@@ -120,7 +121,7 @@ open class SubscriptionChecker(private val redirectOnPurchaseMade: Boolean, priv
                 val purchaseList = queryResults.purchasesList
                 if (purchaseList != null) {
                     for (purchase in purchaseList) {
-                        if (purchase.sku == "basic.annual" && purchase.purchaseState == Purchase.PurchaseState.PURCHASED) {
+                        if (purchase.sku == skuBasicAnnual && purchase.purchaseState == Purchase.PurchaseState.PURCHASED) {
                             isSubscriptionPurchased = true
                         }
                     }

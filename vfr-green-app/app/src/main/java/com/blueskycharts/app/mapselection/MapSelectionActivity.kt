@@ -10,11 +10,12 @@ import com.blueskycharts.app.R
 import com.blueskycharts.app.map.MapViewActivity
 import com.blueskycharts.app.map.configuration.Inventory
 import com.blueskycharts.app.preferences.Preferences
+import com.blueskycharts.app.subscription.SubscriptionChecker
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
 
-class MapSelectionActivity : AppCompatActivity() {
+class MapSelectionActivity : SubscriptionChecker(false, true) {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_map_selection)

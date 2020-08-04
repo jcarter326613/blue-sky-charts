@@ -11,11 +11,12 @@ import com.blueskycharts.app.assests.DiskCacheFactory
 import com.blueskycharts.app.map.assetmanagement.TilePersistenceManager
 import com.blueskycharts.app.map.configuration.Inventory
 import com.blueskycharts.app.map.configuration.MapConfiguration
+import com.blueskycharts.app.subscription.SubscriptionChecker
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
 
-class SetPreferencesActivity : AppCompatActivity() {
+class SetPreferencesActivity : SubscriptionChecker(false, true) {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_set_preferences)
