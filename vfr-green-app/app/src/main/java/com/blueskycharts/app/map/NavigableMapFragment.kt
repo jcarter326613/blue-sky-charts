@@ -4,6 +4,7 @@ import android.Manifest
 import android.app.AlertDialog
 import android.content.IntentSender
 import android.content.pm.PackageManager
+import android.location.Location
 import android.os.Bundle
 import android.os.Looper
 import android.view.LayoutInflater
@@ -26,6 +27,8 @@ class NavigableMapFragment: Fragment() {
     private val requestCode: Int = com.blueskycharts.app.Constants.geoLocationRequestCode
     var mapView: NavigableMap2d? = null
         private set
+    private var fusedLocationClient: FusedLocationProviderClient? = null
+    private var locationUpdatesCallback: LocationUpdatesCallback? = null
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
         return inflater.inflate(R.layout.fragment_navigable_map, container, false)
@@ -37,7 +40,9 @@ class NavigableMapFragment: Fragment() {
         val activity = this.activity
         if ( activity != null ) {
             val overlayModel = ViewModelProvider(activity).get(OverlayViewModel::class.java)
-            mapView = view.findViewById<NavigableMap2d>(R.id.navigableMap2d)
+            val mapView = view.findViewById<NavigableMap2d>(R.id.navigableMap2d)
+            this.mapView = mapView
+            locationUpdatesCallback = LocationUpdatesCallback(mapView)
 
             overlayModel.getOverlayType().observe(viewLifecycleOwner, Observer {
                 mapView?.setOverlayType(it)
@@ -50,29 +55,6 @@ class NavigableMapFragment: Fragment() {
     override fun onResume() {
         super.onResume()
 
-        requestLocationPermissions()
-    }
-
-    override fun onRequestPermissionsResult(requestCode: Int, permissions: Array<String>, grantResults: IntArray) {
-        val context = this.context ?: return
-        when (requestCode) {
-            this.requestCode -> {
-                // If request is cancelled, the result arrays are empty.
-                if ((grantResults.isNotEmpty() && grantResults[0] == PackageManager.PERMISSION_GRANTED)) {
-                    getLocation()
-                } else {
-                    val alertDialog = AlertDialog.Builder(context)
-                        .setMessage("We have detected that location services permissions were denied for this app.  Your location will not be displayed on the map.")
-                        .create()
-                    alertDialog.show()
-                }
-            }
-            else -> {
-            }
-        }
-    }
-
-    private fun requestLocationPermissions() {
         val context = this.context
         val activity = this.activity
         if (context == null || activity == null ) {
@@ -81,7 +63,9 @@ class NavigableMapFragment: Fragment() {
 
         when (ContextCompat.checkSelfPermission(context, Manifest.permission.ACCESS_FINE_LOCATION)) {
             PackageManager.PERMISSION_GRANTED -> {
+                this.fusedLocationClient = LocationServices.getFusedLocationProviderClient(activity)
                 getLocation()
+                setupLocationUpdates()
             }
             else -> {
                 if (ActivityCompat.shouldShowRequestPermissionRationale(activity, Manifest.permission.ACCESS_FINE_LOCATION)) {
@@ -99,17 +83,20 @@ class NavigableMapFragment: Fragment() {
         }
     }
 
+    override fun onPause() {
+        super.onPause()
+        this.fusedLocationClient?.removeLocationUpdates(locationUpdatesCallback)
+    }
+
     private fun getLocation() {
         // Get the current location
         val activity = this.activity ?: return
-        val fusedLocationClient = LocationServices.getFusedLocationProviderClient(activity)
         try {
-            fusedLocationClient.lastLocation.addOnSuccessListener { location ->
+            fusedLocationClient?.lastLocation?.addOnSuccessListener { location ->
                 if (location == null) {
                     return@addOnSuccessListener
                 }
                 mapView?.updateCurrentLocation(location)
-                setupLocationUpdates()
             }
         } catch (e: SecurityException) {
         }
@@ -127,18 +114,10 @@ class NavigableMapFragment: Fragment() {
             val client: SettingsClient = LocationServices.getSettingsClient(activity)
             val task: Task<LocationSettingsResponse> = client.checkLocationSettings(builder.build())
                 .addOnSuccessListener {
-                    val fusedLocationClient = LocationServices.getFusedLocationProviderClient(activity)
                     try {
-                        fusedLocationClient.requestLocationUpdates(
+                        fusedLocationClient?.requestLocationUpdates(
                             locationRequest,
-                            object: LocationCallback() {
-                                override fun onLocationResult(p0: LocationResult?) {
-                                    super.onLocationResult(p0)
-                                    p0?.lastLocation?.let { location ->
-                                        mapView?.updateCurrentLocation(location)
-                                    }
-                                }
-                            },
+                            locationUpdatesCallback,
                             Looper.getMainLooper()
                         )
                     } catch (e: SecurityException) {
@@ -157,6 +136,15 @@ class NavigableMapFragment: Fragment() {
                         }
                     }
                 }
+        }
+    }
+
+    private class LocationUpdatesCallback(val mapView: NavigableMap2d) : LocationCallback() {
+        override fun onLocationResult(p0: LocationResult?) {
+            super.onLocationResult(p0)
+            p0?.lastLocation?.let { location ->
+                mapView?.updateCurrentLocation(location)
+            }
         }
     }
 }
