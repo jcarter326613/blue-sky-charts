@@ -177,6 +177,8 @@ class NavigableMap2d(context: Context, attributes: AttributeSet) :
     }
 
     fun setOverlayType(type: OverlayTypes): Boolean {
+        Log.overlaySelection(type)
+
         var success: Boolean
         val rectangularAreaBounds = this.rectangularAreaBounds
         if (type != OverlayTypes.None && rectangularAreaBounds != null) {

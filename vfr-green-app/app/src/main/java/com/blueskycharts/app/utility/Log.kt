@@ -2,6 +2,7 @@ package com.blueskycharts.app.utility
 
 import android.content.Context
 import android.os.Bundle
+import com.blueskycharts.app.map.view.OverlayTypes
 import com.blueskycharts.app.preferences.Preferences
 import com.google.firebase.analytics.FirebaseAnalytics
 import com.google.firebase.analytics.ktx.logEvent
@@ -45,6 +46,15 @@ class Log {
                 firebaseAnalytics?.logEvent(FirebaseAnalytics.Event.SELECT_CONTENT) {
                     param(FirebaseAnalytics.Param.CONTENT_TYPE, "map")
                     param(FirebaseAnalytics.Param.ITEM_ID, "map.$mapName")
+                }
+            }
+        }
+
+        fun overlaySelection(type: OverlayTypes) {
+            if (firebaseAnalyticsConsentGiven) {
+                firebaseAnalytics?.logEvent(FirebaseAnalytics.Event.SELECT_CONTENT) {
+                    param(FirebaseAnalytics.Param.CONTENT_TYPE, "overlay")
+                    param(FirebaseAnalytics.Param.ITEM_ID, "overlay.${type}")
                 }
             }
         }
