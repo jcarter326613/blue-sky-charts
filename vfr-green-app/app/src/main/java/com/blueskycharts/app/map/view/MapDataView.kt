@@ -157,7 +157,7 @@ class MapDataView(private val dataProvider: DataProvider, private val overlayTyp
 
         // Center the coordinates on the location the indicator should be
         val circleRadius = map.convertDipToPixels(20f)
-        val ageRadius = map.convertDipToPixels(20f + standardAgeBorderDp)
+        val ageRadius = map.convertDipToPixels(20f + cloudCoverBorderDp)
         var drawIndicator = false
         var drawX = false
         var angle = 0f
@@ -521,6 +521,7 @@ class MapDataView(private val dataProvider: DataProvider, private val overlayTyp
         private const val newInformationColorGreen = 200
         private const val newInformationColorBlue = 255
         private const val standardAgeBorderDp = 6f
+        private const val cloudCoverBorderDp = 8f
         const val maxNoRangeDisplayDiff = 5 * 60    /* 5 minutes */
     }
 }
