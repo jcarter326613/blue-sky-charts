@@ -101,22 +101,20 @@ open class SubscriptionChecker(private val redirectOnPurchaseMade: Boolean, priv
             return
         }
 
+        var isSubscriptionPurchased = false
         if (billingClient.isFeatureSupported(BillingClient.FeatureType.SUBSCRIPTIONS).responseCode != BillingClient.BillingResponseCode.OK) {
             // Notify that they need to update their google play store application because subscriptions are not supported on their install
-            val alertDialog = AlertDialog.Builder(this)
-                .setMessage("Your version of Google Play Store does not support subscriptions.  Please update before proceeding.")
-                .setPositiveButton("Update") { _: DialogInterface, _: Int ->
-                }
-                .create()
-            alertDialog.show()
-            alertDialog.setOnDismissListener {
-                val uri: Uri = Uri.parse("https://play.google.com/store/apps/details?id=com.android.vending")
-                val intent = Intent(Intent.ACTION_VIEW, uri)
-                startActivity(intent)
+            if (!redirectOnNotPurchased) {
+                val alertDialog = AlertDialog.Builder(this)
+                    .setMessage("Your version of Google Play Store does not support subscriptions.  Please update before proceeding.")
+                    .setPositiveButton("Ok") { _: DialogInterface, _: Int ->
+                    }
+                    .create()
+                alertDialog.show()
             }
+            isSubscriptionPurchased = false
         } else {
             // Check if the user already has a subscription
-            var isSubscriptionPurchased = false
             val queryResults = billingClient.queryPurchases(BillingClient.SkuType.SUBS)
             if (queryResults.responseCode == BillingClient.BillingResponseCode.OK) {
                 val purchaseList = queryResults.purchasesList
@@ -128,15 +126,15 @@ open class SubscriptionChecker(private val redirectOnPurchaseMade: Boolean, priv
                     }
                 }
             }
+        }
 
-            if (!isSubscriptionPurchased) {
-                subscriptionStatus = SubscriptionStatus.NotActive
-                if (redirectOnNotPurchased) {
-                    startActivity(Intent(this, SubscriptionActivity::class.java))
-                }
-            } else {
-                subscriptionStatus = SubscriptionStatus.Active
+        if (!isSubscriptionPurchased) {
+            subscriptionStatus = SubscriptionStatus.NotActive
+            if (redirectOnNotPurchased) {
+                startActivity(Intent(this, SubscriptionActivity::class.java))
             }
+        } else {
+            subscriptionStatus = SubscriptionStatus.Active
         }
     }
 
