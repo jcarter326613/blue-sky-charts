@@ -15,12 +15,28 @@ import com.blueskycharts.app.map.MapViewActivity
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.yield
+import java.util.concurrent.atomic.AtomicBoolean
 
-class SubscriptionChecker(private val redirectOnPurchaseMade): AppCompatActivity(), BillingClientStateListener, PurchasesUpdatedListener {
+open class SubscriptionChecker(private val redirectOnPurchaseMade: Boolean, private val redirectOnNotPurchased: Boolean): AppCompatActivity(), BillingClientStateListener, PurchasesUpdatedListener {
     private var billingClient: BillingClient? = null
+    private var subscriptionVerified = AtomicBoolean(false)
+    var subscriptionStatus: SubscriptionStatus = SubscriptionStatus.Unknown
+
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+        setupBillingClient()
+    }
 
     override fun onCreate(savedInstanceState: Bundle?, persistentState: PersistableBundle?) {
         super.onCreate(savedInstanceState, persistentState)
+        setupBillingClient()
+    }
+
+    private fun setupBillingClient() {
+        if (billingClient != null) {
+            return
+        }
         billingClient = BillingClient.newBuilder(this)
             .setListener(this)
             .enablePendingPurchases()
@@ -30,7 +46,98 @@ class SubscriptionChecker(private val redirectOnPurchaseMade): AppCompatActivity
 
     override fun onResume() {
         super.onResume()
-        do query purchases
+        verifySubscription()
+    }
+
+    fun sendCustomerToOrderFlow() {
+        GlobalScope.launch {
+            var billingClient = this@SubscriptionChecker.billingClient
+            while (billingClient == null) {
+                yield()
+                billingClient = this@SubscriptionChecker.billingClient
+            }
+
+            //Billing client is not null
+            var purchaseSku: SkuDetails? = null
+            val params = SkuDetailsParams.newBuilder()
+            params.setSkusList(listOf("basic.annual")).setType(BillingClient.SkuType.SUBS)
+            val details = billingClient.querySkuDetails(params.build())
+            val skuDetailsList = details.skuDetailsList
+            if (skuDetailsList != null) {
+                for (skuDetail in skuDetailsList) {
+                    if (skuDetail.sku == "basic.annual") {
+                        purchaseSku = skuDetail
+                    }
+                }
+            }
+
+            if (purchaseSku != null) {
+                val flowParams = BillingFlowParams.newBuilder()
+                    .setSkuDetails(purchaseSku)
+                    .build()
+                val responseCode = billingClient.launchBillingFlow(this@SubscriptionChecker, flowParams).responseCode
+                if (responseCode != BillingClient.BillingResponseCode.OK) {
+                    purchaseSku = null
+                }
+            }
+
+            if (purchaseSku == null) {
+                val alertDialog = AlertDialog.Builder(this@SubscriptionChecker)
+                    .setMessage("There was a problem placing your purchase. Please try again.  If a second attempt does not work, please try updating this app.")
+                    .setPositiveButton("Ok") { _: DialogInterface, _: Int ->
+                    }
+                    .create()
+                alertDialog.show()
+            }
+        }
+    }
+
+    private fun verifySubscription() {
+        val billingClient = this.billingClient?: return
+        if (!billingClient.isReady) {
+            return
+        }
+        if (subscriptionVerified.getAndSet(true)) {
+            return
+        }
+
+        if (billingClient.isFeatureSupported(BillingClient.FeatureType.SUBSCRIPTIONS).responseCode != BillingClient.BillingResponseCode.OK) {
+            // Notify that they need to update their google play store application because subscriptions are not supported on their install
+            val alertDialog = AlertDialog.Builder(this)
+                .setMessage("Your version of Google Play Store does not support subscriptions.  Please update before proceeding.")
+                .setPositiveButton("Update") { _: DialogInterface, _: Int ->
+                }
+                .create()
+            alertDialog.show()
+            alertDialog.setOnDismissListener {
+                val uri: Uri = Uri.parse("https://play.google.com/store/apps/details?id=com.android.vending")
+                val intent = Intent(Intent.ACTION_VIEW, uri)
+                startActivity(intent)
+            }
+        } else {
+            // Check if the user already has a subscription
+            var isSubscriptionPurchased = false
+            val queryResults = billingClient.queryPurchases(BillingClient.SkuType.SUBS)
+            if (queryResults.responseCode == BillingClient.BillingResponseCode.OK) {
+                val purchaseList = queryResults.purchasesList
+                if (purchaseList != null) {
+                    for (purchase in purchaseList) {
+                        if (purchase.sku == "basic.annual" && purchase.purchaseState == Purchase.PurchaseState.PURCHASED) {
+                            isSubscriptionPurchased = true
+                        }
+                    }
+                }
+            }
+
+            if (!isSubscriptionPurchased) {
+                subscriptionStatus = SubscriptionStatus.NotActive
+                if (redirectOnNotPurchased) {
+                    startActivity(Intent(this, SubscriptionActivity::class.java))
+                }
+            } else {
+                subscriptionStatus = SubscriptionStatus.Active
+            }
+        }
     }
 
     override fun onPurchasesUpdated(billingResult: BillingResult, purchases: MutableList<Purchase>?) {
@@ -81,42 +188,13 @@ class SubscriptionChecker(private val redirectOnPurchaseMade): AppCompatActivity
 
     override fun onBillingSetupFinished(billingResult: BillingResult) {
         if (billingResult.responseCode ==  BillingClient.BillingResponseCode.OK) {
-            // The BillingClient is ready. You can query purchases here.
-            if (billingClient.isFeatureSupported(BillingClient.FeatureType.SUBSCRIPTIONS).responseCode != BillingClient.BillingResponseCode.OK) {
-                // Notify that they need to update their google play store application because subscriptions are not supported on their install
-            } else {
-                // Check if the user already has a subscription
-                val queryResults = billingClient.queryPurchases(BillingClient.SkuType.SUBS)
-                val isSubscriptionPurchased = queryResults.responseCode == Purchase.PurchaseState.PURCHASED
-
-                GlobalScope.launch {
-                    val params = SkuDetailsParams.newBuilder()
-                    params.setSkusList(listOf("basic.annual")).setType(BillingClient.SkuType.SUBS)
-                    val details = billingClient.querySkuDetails(params.build())
-                    val skuDetailsList = details.skuDetailsList
-                    if (skuDetailsList != null) {
-                        for (skuDetail in skuDetailsList) {
-                            val freeTrialPeriod = skuDetail.freeTrialPeriod
-                            val queryResults2 = billingClient.queryPurchases(BillingClient.SkuType.SUBS)
-                            val isSubscriptionPurchased2 = queryResults2.responseCode == Purchase.PurchaseState.PURCHASED
-
-                            var t0 = 3
-                            t0 = 1
-                        }
-                    }
-
-                    var t0 = 0
-                    t0 = 2
-                }
-            }
+            verifySubscription()
         }
     }
 
     override fun onBillingServiceDisconnected() {
-        // Try to restart the connection on the next request to
-        // Google Play by calling the startConnection() method.
         GlobalScope.launch(Dispatchers.IO) {
-            billingClient.startConnection(this@SubscriptionChecker)
+            billingClient?.startConnection(this@SubscriptionChecker)
         }
     }
 }

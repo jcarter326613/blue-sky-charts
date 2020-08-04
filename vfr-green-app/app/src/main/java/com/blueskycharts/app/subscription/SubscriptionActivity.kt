@@ -22,8 +22,7 @@ import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
 import java.net.URL
 
-class SubscriptionActivity : AppCompatActivity() {
-
+class SubscriptionActivity : SubscriptionChecker(true, false)  {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_subscription)
@@ -33,35 +32,9 @@ class SubscriptionActivity : AppCompatActivity() {
             startActivity(Intent(this, MapViewActivity::class.java))
         }
 
-        // Setup billing api stuff
-        val purchaseUpdateListener =
-            PurchasesUpdatedListener { billingResult, purchases ->
-                // To be implemented in a later section.
-            }
-
-        var billingClient = BillingClient.newBuilder(this)
-            .setListener(purchaseUpdateListener)
-            .enablePendingPurchases()
-            .build()
-
-        val isSubscriptionPurchased = billingClient.queryPurchases("basic.annual").responseCode == Purchase.PurchaseState.PURCHASED
-
-        billingClient.startConnection(object : BillingClientStateListener {
-            override fun onBillingSetupFinished(billingResult: BillingResult) {
-                if (billingResult.responseCode ==  BillingClient.BillingResponseCode.OK) {
-                    // The BillingClient is ready. You can query purchases here.
-                    if (billingClient.isFeatureSupported(BillingClient.FeatureType.SUBSCRIPTIONS).responseCode != BillingClient.BillingResponseCode.OK) {
-                        // Notify that they need to update their google play store application because subscriptions are not supported on their install
-                    } else {
-                        // Check if the user already has a subscription
-                    }
-                }
-            }
-            override fun onBillingServiceDisconnected() {
-                // Try to restart the connection on the next request to
-                // Google Play by calling the startConnection() method.
-            }
-        })
+        val addSubscriptionButton = findViewById<Button>(R.id.add_subscription_button)
+        addSubscriptionButton.setOnClickListener {
+            sendCustomerToOrderFlow()
+        }
     }
-
 }

@@ -14,7 +14,9 @@ import com.blueskycharts.app.assests.*
 import com.blueskycharts.app.map.MapViewActivity
 import com.blueskycharts.app.preferences.PreferenceToggleFragment
 import com.blueskycharts.app.preferences.Preferences
+import com.blueskycharts.app.subscription.SubscriptionActivity
 import com.blueskycharts.app.subscription.SubscriptionChecker
+import com.blueskycharts.app.subscription.SubscriptionStatus
 import com.blueskycharts.app.utility.Log
 import kotlinx.android.synthetic.main.fragment_main_menu.*
 import kotlinx.coroutines.Dispatchers
@@ -24,7 +26,7 @@ import kotlinx.coroutines.yield
 import java.net.URL
 import java.util.*
 
-class ConsentActivity : SubscriptionChecker() {
+class ConsentActivity : SubscriptionChecker(false, false) {
     private val versionApiUrlTemplate = "https://api.blueskycharts.com/version-authorization/appVersion"
     private val versionComplianceUrl: URL
         get() {
@@ -96,7 +98,11 @@ class ConsentActivity : SubscriptionChecker() {
             showPrivacyDialog()
         } else {
             Log.refreshFirebaseConsent(baseContext)
-            startActivity(Intent(this, MapViewActivity::class.java))
+            if (subscriptionStatus == SubscriptionStatus.NotActive) {
+                startActivity(Intent(this, SubscriptionActivity::class.java))
+            } else {
+                startActivity(Intent(this, MapViewActivity::class.java))
+            }
         }
     }
 
