@@ -14,6 +14,7 @@ import com.blueskycharts.app.preferences.SetPreferencesActivity
 import com.blueskycharts.app.map.models.OverlayViewModel
 import com.blueskycharts.app.map.view.OverlayTypes
 import com.blueskycharts.app.mapselection.MapSelectionActivity
+import com.blueskycharts.app.preferences.Preferences
 import com.blueskycharts.app.utility.Log
 
 class MainMenuFragment() : Fragment() {
@@ -37,6 +38,11 @@ class MainMenuFragment() : Fragment() {
             openMenuButton?.setOnClickListener {
                 if (displayedMenu != null) showOrToggleMenu(displayedMenu)
                 else showOrToggleMenu(mainMenu)
+            }
+
+            val zoomToSelfButton = view.findViewById<ImageButton>(R.id.zoomToSelfButton)
+            zoomToSelfButton?.setOnClickListener {
+                Preferences.instance.setPreference(Preferences.propertyNameMapTrackLocation, true)
             }
 
             setupMainMenuHandlers()

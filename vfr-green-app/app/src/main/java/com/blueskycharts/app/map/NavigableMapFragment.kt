@@ -24,7 +24,8 @@ import com.google.android.gms.tasks.Task
 
 class NavigableMapFragment: Fragment() {
     private val requestCode: Int = com.blueskycharts.app.Constants.geoLocationRequestCode
-    private var mapView: NavigableMap2d? = null
+    var mapView: NavigableMap2d? = null
+        private set
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
         return inflater.inflate(R.layout.fragment_navigable_map, container, false)
@@ -44,6 +45,10 @@ class NavigableMapFragment: Fragment() {
         } else {
             Log.error(null, "Loaded view without activity.  Can not connect view model.")
         }
+    }
+
+    override fun onResume() {
+        super.onResume()
 
         requestLocationPermissions()
     }

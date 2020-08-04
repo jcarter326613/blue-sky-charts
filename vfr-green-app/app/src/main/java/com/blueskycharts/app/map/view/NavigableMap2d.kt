@@ -41,7 +41,6 @@ class NavigableMap2d(context: Context, attributes: AttributeSet) :
     private var tileProvider: TileProvider? = null
     private var shadowTileProvider: ShadowProvider? = null
     private val dataProvider: DataProvider
-    private val redrawTimer = Timer(false)
     private val itemTextPaint = Paint()
     private val textHeight: Float
     private val textBackgroundPaint = Paint()
@@ -72,7 +71,11 @@ class NavigableMap2d(context: Context, attributes: AttributeSet) :
             }
         }
     private var currentLocation2d: Point2d? = null
-    private var trackCurrentLocation: Boolean = true
+    var trackCurrentLocation: Boolean = true
+        set(value) {
+            field = value
+            requestRedraw()
+        }
     private var scale: Double
     private var scaleDriver: Float = 0F
     private val maxScaleDriver: Float = 12F
@@ -685,6 +688,7 @@ class NavigableMap2d(context: Context, attributes: AttributeSet) :
     private fun mouseMoveHelper(offsetX: Float, offsetY: Float) {
         if (this.isDragging) {
             this.trackCurrentLocation = false
+            Preferences.instance.setPreference(Preferences.propertyNameMapTrackLocation, false)
             val xDifference = offsetX - this.mouseDownClient.x
             val yDifference = offsetY - this.mouseDownClient.y
             val viewport = this.calculateViewport()?: return
