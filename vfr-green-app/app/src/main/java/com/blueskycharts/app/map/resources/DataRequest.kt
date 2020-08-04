@@ -17,13 +17,14 @@ class DataRequest(private val provider: DataProvider, private var receiver: Data
     private var data: WeatherConditionResponse? = null
     private var timeReceived: Long = 0
     private var oldestDataAgeAtRetrievalSeconds: Int? = null
-    private val maxAgeMilliseconds = 5 * 60 * 1000  /* 5 minute */
+    private val maxAgeMillisecondsBeforeExpiration = 5 * 60 * 1000  /* 5 minute */
+    private val maxIssueAgeSeconds = 120 * 60
 
     override val expired: Boolean
         get() {
             return if (this.loaded) {
                 val now = System.currentTimeMillis()
-                now - this.timeReceived > maxAgeMilliseconds;
+                now - this.timeReceived > maxAgeMillisecondsBeforeExpiration;
             } else {
                 false;
             }
@@ -76,6 +77,9 @@ class DataRequest(private val provider: DataProvider, private var receiver: Data
             val longitude = condition.longitude ?: continue
             val latitude = condition.latitude ?: continue
             val issueAgeSeconds = condition.issueAgeSeconds ?: continue
+            if (issueAgeSeconds > maxIssueAgeSeconds) {
+                continue
+            }
 
             val geoLocation = PointGeo(longitude.toDouble(), latitude.toDouble())
             receiver.receiveData(geoLocation, condition, issueAgeSeconds + secondsSinceRequest, immediate, canvas, this.receiverData)
