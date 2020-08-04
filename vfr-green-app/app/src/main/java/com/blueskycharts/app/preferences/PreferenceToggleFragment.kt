@@ -12,6 +12,7 @@ import android.widget.ToggleButton
 import com.blueskycharts.app.R
 import com.blueskycharts.app.map.assetmanagement.MapPersistenceStatistics
 import com.blueskycharts.app.map.assetmanagement.TilePersistenceManager
+import com.blueskycharts.app.utility.Log
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
@@ -41,7 +42,9 @@ class PreferenceToggleFragment(private val mapGroup: Int, private val mapName: S
         val toggleButton = view.findViewById<ToggleButton>(R.id.proactivePersistToggleButton)
         toggleButton.isChecked = proactiveDownload
         toggleButton.setOnCheckedChangeListener { _, isChecked ->
-            Preferences.instance.setPreference(Preferences.propertyTemplateMapProactiveDownload(mapGroup, mapName), isChecked)
+            val preferenceName = Preferences.propertyTemplateMapProactiveDownload(mapGroup, mapName)
+            Preferences.instance.setPreference(preferenceName, isChecked)
+            Log.changePreference(preferenceName)
         }
 
         // Set up the download progress indicator

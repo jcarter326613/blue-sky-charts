@@ -24,6 +24,7 @@ import com.blueskycharts.app.map.resources.ShadowProvider
 import com.blueskycharts.app.map.resources.TileProvider
 import com.blueskycharts.app.preferences.Preferences
 import com.blueskycharts.app.utility.Log
+import com.google.firebase.analytics.FirebaseAnalytics
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
@@ -321,8 +322,10 @@ class NavigableMap2d(context: Context, attributes: AttributeSet) :
                 )
                 config = config.filterForSubMap(subMapId) ?: return@launch
                 this@NavigableMap2d.mapPositionPropertyName = Preferences.propertyTemplateMapPosition(config.groupId, subMapId)
+                Log.mapSelection("${config.groupId}.$subMapId")
             } else {
                 this@NavigableMap2d.mapPositionPropertyName = Preferences.propertyTemplateMapPosition(config.groupId, "all")
+                Log.mapSelection("${config.groupId}.all")
             }
             val mapPositionString = Preferences.instance.getStringValue(this@NavigableMap2d.mapPositionPropertyName, Preferences.defaultValueMapPosition)
 
