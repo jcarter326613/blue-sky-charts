@@ -16,6 +16,7 @@ import com.blueskycharts.app.map.models.OverlayViewModel
 import com.blueskycharts.app.map.view.OverlayTypes
 import com.blueskycharts.app.mapselection.MapSelectionActivity
 import com.blueskycharts.app.preferences.Preferences
+import com.blueskycharts.app.subscription.ManageSubscriptionActivity
 import com.blueskycharts.app.subscription.SubscriptionActivity
 import com.blueskycharts.app.subscription.SubscriptionChecker
 import com.blueskycharts.app.utility.Log
@@ -74,8 +75,7 @@ class MainMenuFragment() : Fragment() {
 
         val subscriptionButton = view?.findViewById<Button>(R.id.subscription)
         subscriptionButton?.setOnClickListener {
-            val intent = Intent(context, SubscriptionActivity::class.java)
-            intent.putExtra(SubscriptionActivity.NewCustomerParameter, false)
+            val intent = Intent(context, ManageSubscriptionActivity::class.java)
             startActivity(intent)
         }
     }

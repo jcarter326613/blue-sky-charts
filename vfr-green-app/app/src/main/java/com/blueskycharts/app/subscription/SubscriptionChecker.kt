@@ -131,7 +131,6 @@ open class SubscriptionChecker(private val redirectOnPurchaseMade: Boolean, priv
             subscriptionStatus = SubscriptionStatus.NotActive
             if (redirectOnNotPurchased) {
                 val intent = Intent(this, SubscriptionActivity::class.java)
-                intent.putExtra(SubscriptionActivity.NewCustomerParameter, true)
                 startActivity(intent)
             }
         } else {

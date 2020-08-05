@@ -1,13 +1,7 @@
 package com.blueskycharts.app.subscription
 
-import android.app.AlertDialog
-import android.content.DialogInterface
-import android.content.DialogInterface.OnShowListener
 import android.content.Intent
-import android.graphics.Color
 import android.net.Uri
-import android.opengl.Visibility
-import android.os.Build
 import android.os.Bundle
 import android.text.Spannable
 import android.text.SpannableString
@@ -15,38 +9,23 @@ import android.text.style.BulletSpan
 import android.view.View
 import android.widget.Button
 import android.widget.TextView
-import androidx.annotation.RequiresApi
-import androidx.appcompat.app.AppCompatActivity
-import com.android.billingclient.api.*
 import com.blueskycharts.app.R
-import com.blueskycharts.app.assests.AssetProvider
-import com.blueskycharts.app.assests.RemoteAssetDescription
-import com.blueskycharts.app.assests.StorageLocation
-import com.blueskycharts.app.assests.Volatility
-import com.blueskycharts.app.map.MapViewActivity
-import com.blueskycharts.app.mapselection.MapSelectionActivity
-import com.blueskycharts.app.preferences.Preferences
-import com.blueskycharts.app.preferences.SetPreferencesActivity
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.GlobalScope
-import kotlinx.coroutines.launch
-import java.net.URL
 
-class SubscriptionActivity : SubscriptionChecker(true, false)  {
+class ManageSubscriptionActivity : SubscriptionChecker(false, true) {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_subscription)
 
         val addSubscriptionButton = findViewById<Button>(R.id.add_subscription_button)
         addSubscriptionButton.setOnClickListener {
-            sendCustomerToOrderFlow()
+            sendCustomerToManageSubscriptions()
         }
 
-        setupFreeTrialText()
+        setupUnsubscribeText()
     }
 
-    private fun setupFreeTrialText() {
-        setupText(R.string.subscription_ad_free_trial, R.string.subscription_ad_free_trial_cta)
+    private fun setupUnsubscribeText() {
+        setupText(R.string.subscription_ad_unsubscribing_customer, R.string.subscription_ad_unsubscribing_customer_cta)
     }
 
     private fun setupText(marketingTextId: Int, ctaId: Int) {
@@ -79,4 +58,12 @@ class SubscriptionActivity : SubscriptionChecker(true, false)  {
     private fun convertDipToPixels(dp: Float): Int {
         return (dp * applicationContext.resources.displayMetrics.density + 0.5f).toInt()
     }
+
+    private fun sendCustomerToManageSubscriptions() {
+        val uri: Uri =
+            Uri.parse("https://play.google.com/store/account/subscriptions?sku=$skuBasicAnnual&package=com.blueskycharts.app")
+        val intent = Intent(Intent.ACTION_VIEW, uri)
+        startActivity(intent)
+    }
+
 }
