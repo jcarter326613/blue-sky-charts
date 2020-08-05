@@ -1,6 +1,7 @@
 package com.blueskycharts.app.menu
 
 import android.content.Intent
+import android.net.Uri
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
@@ -15,6 +16,8 @@ import com.blueskycharts.app.map.models.OverlayViewModel
 import com.blueskycharts.app.map.view.OverlayTypes
 import com.blueskycharts.app.mapselection.MapSelectionActivity
 import com.blueskycharts.app.preferences.Preferences
+import com.blueskycharts.app.subscription.SubscriptionActivity
+import com.blueskycharts.app.subscription.SubscriptionChecker
 import com.blueskycharts.app.utility.Log
 
 class MainMenuFragment() : Fragment() {
@@ -67,6 +70,13 @@ class MainMenuFragment() : Fragment() {
         val preferencesButton = view?.findViewById<Button>(R.id.preferences)
         preferencesButton?.setOnClickListener {
             startActivity(Intent(context, SetPreferencesActivity::class.java))
+        }
+
+        val subscriptionButton = view?.findViewById<Button>(R.id.subscription)
+        subscriptionButton?.setOnClickListener {
+            val intent = Intent(context, SubscriptionActivity::class.java)
+            intent.putExtra(SubscriptionActivity.NewCustomerParameter, false)
+            startActivity(intent)
         }
     }
 

@@ -36,22 +36,33 @@ class SubscriptionActivity : SubscriptionChecker(true, false)  {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_subscription)
+        val newCustomer = intent.getBooleanExtra(NewCustomerParameter, true)
 
         val addSubscriptionButton = findViewById<Button>(R.id.add_subscription_button)
         addSubscriptionButton.setOnClickListener {
-            sendCustomerToOrderFlow()
+            if (newCustomer) {
+                sendCustomerToOrderFlow()
+            } else {
+                sendCustomerToManageSubscriptions()
+            }
         }
 
-        val newCustomer = intent.getBooleanExtra(NewCustomerParameter, false)
         if (newCustomer) {
             setupFreeTrialText()
         } else {
-            setupReturningCustomerText()
+            setupUnsubscribeText()
         }
     }
 
-    private fun setupReturningCustomerText() {
-        setupText(R.string.subscription_ad_returning_customer, R.string.subscription_ad_returning_customer_cta)
+    private fun sendCustomerToManageSubscriptions() {
+        val uri: Uri =
+            Uri.parse("https://play.google.com/store/account/subscriptions?sku=$skuBasicAnnual&package=com.blueskycharts.app")
+        val intent = Intent(Intent.ACTION_VIEW, uri)
+        startActivity(intent)
+    }
+
+    private fun setupUnsubscribeText() {
+        setupText(R.string.subscription_ad_unsubscribing_customer, R.string.subscription_ad_unsubscribing_customer_cta)
     }
 
     private fun setupFreeTrialText() {
