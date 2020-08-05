@@ -28,10 +28,11 @@
             android:theme="@style/AppTheme.NoActionBar" />
         <activity
             android:name=".subscription.SubscriptionActivity"
-            android:theme="@style/AppTheme.NoActionBar" />
+            android:theme="@style/AppTheme"
+            android:label="Subscription Required" />
         <activity
             android:name=".ConsentActivity"
-            android:theme="@style/AppTheme.NoActionBar">
+            android:theme="@style/SplashTheme">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
                 <category android:name="android.intent.category.LAUNCHER" />

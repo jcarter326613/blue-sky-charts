@@ -1,6 +1,8 @@
 <resources>
     <string name="app_name">Blue Sky Charts</string>
     <string name="main_menu_caption">Main Menu</string>
-    <!-- TODO: Remove or change this placeholder text -->
-    <string name="hello_blank_fragment">Hello blank fragment</string>
+    <string name="subscription_ad_returning_customer">Resubscribe to get access to all features.\n|Download FAA VFR charts|METAR overlays|Location tracking|A great value for VFR pilots who normally purchase physical maps.</string>
+    <string name="subscription_ad_returning_customer_cta">Resubscribe</string>
+    <string name="subscription_ad_free_trial">Start your free trial now*\n|Access to all features for one month free!|Download FAA VFR charts|METAR overlays|Location tracking|No payments until the trial ends.|Don\'t like it?  It\'s easy to unsubscribe.\n\n* Free trial only available to new subscribers.</string>
+    <string name="subscription_ad_free_trial_cta">Start your free trial</string>
 </resources>

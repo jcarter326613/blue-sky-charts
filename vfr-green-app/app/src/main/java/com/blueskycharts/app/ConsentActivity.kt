@@ -98,11 +98,11 @@ class ConsentActivity : SubscriptionChecker(false, false) {
             showPrivacyDialog()
         } else {
             Log.refreshFirebaseConsent(baseContext)
-            if (subscriptionStatus == SubscriptionStatus.NotActive) {
-                startActivity(Intent(this, SubscriptionActivity::class.java))
-            } else {
+            //if (subscriptionStatus == SubscriptionStatus.NotActive) {
+            //    startActivity(Intent(this, SubscriptionActivity::class.java))
+            //} else {
                 startActivity(Intent(this, MapViewActivity::class.java))
-            }
+            //}
         }
     }
 

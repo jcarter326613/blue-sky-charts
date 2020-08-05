@@ -90,7 +90,6 @@ class NavigableMapFragment: Fragment() {
 
     private fun getLocation() {
         // Get the current location
-        val activity = this.activity ?: return
         try {
             fusedLocationClient?.lastLocation?.addOnSuccessListener { location ->
                 if (location == null) {
@@ -112,7 +111,7 @@ class NavigableMapFragment: Fragment() {
             val activity = this.activity ?: return@let
             val builder = LocationSettingsRequest.Builder().addLocationRequest(it)
             val client: SettingsClient = LocationServices.getSettingsClient(activity)
-            val task: Task<LocationSettingsResponse> = client.checkLocationSettings(builder.build())
+            client.checkLocationSettings(builder.build())
                 .addOnSuccessListener {
                     try {
                         fusedLocationClient?.requestLocationUpdates(
@@ -143,7 +142,7 @@ class NavigableMapFragment: Fragment() {
         override fun onLocationResult(p0: LocationResult?) {
             super.onLocationResult(p0)
             p0?.lastLocation?.let { location ->
-                mapView?.updateCurrentLocation(location)
+                mapView.updateCurrentLocation(location)
             }
         }
     }

@@ -103,6 +103,7 @@ open class SubscriptionChecker(private val redirectOnPurchaseMade: Boolean, priv
         }
 
         var isSubscriptionPurchased = false
+        var newCustomer = true
         if (billingClient.isFeatureSupported(BillingClient.FeatureType.SUBSCRIPTIONS).responseCode != BillingClient.BillingResponseCode.OK) {
             // Notify that they need to update their google play store application because subscriptions are not supported on their install
             if (!redirectOnNotPurchased) {
@@ -113,7 +114,6 @@ open class SubscriptionChecker(private val redirectOnPurchaseMade: Boolean, priv
                     .create()
                 alertDialog.show()
             }
-            isSubscriptionPurchased = false
         } else {
             // Check if the user already has a subscription
             val queryResults = billingClient.queryPurchases(BillingClient.SkuType.SUBS)
@@ -125,6 +125,8 @@ open class SubscriptionChecker(private val redirectOnPurchaseMade: Boolean, priv
                             isSubscriptionPurchased = true
                         }
                     }
+
+                    newCustomer = purchaseList.size == 0
                 }
             }
         }
@@ -132,7 +134,9 @@ open class SubscriptionChecker(private val redirectOnPurchaseMade: Boolean, priv
         if (!isSubscriptionPurchased) {
             subscriptionStatus = SubscriptionStatus.NotActive
             if (redirectOnNotPurchased) {
-                startActivity(Intent(this, SubscriptionActivity::class.java))
+                val intent = Intent(this, SubscriptionActivity::class.java)
+                intent.putExtra(SubscriptionActivity.NewCustomerParameter, newCustomer)
+                startActivity(intent)
             }
         } else {
             subscriptionStatus = SubscriptionStatus.Active
@@ -188,6 +192,30 @@ open class SubscriptionChecker(private val redirectOnPurchaseMade: Boolean, priv
     override fun onBillingSetupFinished(billingResult: BillingResult) {
         if (billingResult.responseCode ==  BillingClient.BillingResponseCode.OK) {
             verifySubscription()
+
+            /*
+            // Get the details on whether a free trial is available
+            GlobalScope.launch(Dispatchers.IO) {
+                val skuList = ArrayList<String>()
+                skuList.add(skuBasicAnnual)
+                val params = SkuDetailsParams.newBuilder()
+                params.setSkusList(skuList).setType(BillingClient.SkuType.SUBS)
+                val skuDetailsResult = billingClient?.querySkuDetails(params.build())
+                if (skuDetailsResult?.billingResult?.responseCode == BillingClient.BillingResponseCode.OK) {
+                    val iter = skuDetailsResult?.skuDetailsList?.iterator()
+                    if (iter != null) {
+                        for (detail in iter) {
+                            if (detail.sku == skuBasicAnnual) {
+                                val freeTrialCode = detail.freeTrialPeriod
+                                if (freeTrialCode.equals("P4W2D", true)) {
+                                    freeTrialDuration = TrialDuration.Days14
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+             */
         }
     }
 
