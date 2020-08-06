@@ -1,6 +1,7 @@
 package com.blueskycharts.app.menu
 
 import android.content.Intent
+import android.graphics.drawable.Drawable
 import android.net.Uri
 import android.os.Bundle
 import android.view.LayoutInflater
@@ -54,6 +55,22 @@ class MainMenuFragment() : Fragment() {
         } else {
             Log.error(null, "Loaded view without activity.  Can not connect view model.")
         }
+    }
+
+    override fun onResume() {
+        super.onResume()
+        Preferences.instance.addListener(object: Preferences.Listener{
+            override fun preferenceChanged(preferenceName: String) {
+                if (preferenceName == Preferences.propertyNameMapTrackLocation) {
+                    val zoomToSelfButton = view?.findViewById<ImageButton>(R.id.zoomToSelfButton)
+                    if (Preferences.instance.getBooleanValue(Preferences.propertyNameMapTrackLocation, Preferences.defaultValueMapTrackLocation)) {
+                        zoomToSelfButton?.setImageResource(R.drawable.ic_my_location_set)
+                    } else {
+                        zoomToSelfButton?.setImageResource(R.drawable.ic_my_location_not_set)
+                    }
+                }
+            }
+        })
     }
 
     private fun setupMainMenuHandlers() {
