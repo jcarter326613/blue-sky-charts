@@ -75,12 +75,12 @@ class MainMenuFragment() : Fragment() {
 
     private fun setupMainMenuHandlers() {
         val weatherMenu = view?.findViewById<View>(R.id.weather_grid_layout)
-        val weatherButton = view?.findViewById<Button>(R.id.weather_button)
+        val weatherButton = view?.findViewById<ImageButton>(R.id.weather_button)
         weatherButton?.setOnClickListener {
             showOrToggleMenu(weatherMenu)
         }
 
-        val mapSelectionButton = view?.findViewById<Button>(R.id.map_selection_button)
+        val mapSelectionButton = view?.findViewById<ImageButton>(R.id.map_selection_button)
         mapSelectionButton?.setOnClickListener {
             startActivity(Intent(context, MapSelectionActivity::class.java))
         }
