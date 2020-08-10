@@ -1,146 +1,136 @@
 <?xml version="1.0" encoding="utf-8"?>
-<androidx.constraintlayout.widget.ConstraintLayout
+<LinearLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
-    xmlns:tools="http://schemas.android.com/tools"
     android:id="@+id/main_menu_layout"
     android:layout_width="match_parent"
-    android:layout_height="match_parent">
+    android:layout_height="match_parent"
+    android:orientation="vertical">
 
-    <ImageButton
-        android:id="@+id/open_menu_button"
-        android:layout_width="100dp"
-        android:layout_height="100dp"
-        android:padding="10dp"
-        android:contentDescription="@string/main_menu_caption"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintTop_toTopOf="parent"
-        app:srcCompat="@drawable/ic_hamburger_menu"
-        android:background="@android:color/transparent"
-        android:scaleType="fitCenter"
-        android:adjustViewBounds="true"
-        />
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content">
+        <View
+            android:layout_width="0dp"
+            android:layout_height="0dp"
+            android:layout_weight="1" />
 
-    <ImageButton
-        android:id="@+id/zoomToSelfButton"
-        android:layout_width="100dp"
-        android:layout_height="100dp"
-        android:padding="10dp"
-        app:layout_constraintEnd_toStartOf="@+id/open_menu_button"
-        app:layout_constraintTop_toTopOf="parent"
-        app:srcCompat="@drawable/ic_my_location_set"
-        android:background="@android:color/transparent"
-        android:scaleType="fitCenter"
-        android:adjustViewBounds="true"/>
+        <ImageButton
+            android:id="@+id/zoomToSelfButton"
+            android:layout_width="100dp"
+            android:layout_height="100dp"
+            android:padding="10dp"
+            app:layout_constraintEnd_toStartOf="@+id/open_menu_button"
+            app:layout_constraintTop_toTopOf="parent"
+            app:srcCompat="@drawable/ic_my_location_set"
+            android:background="@android:color/transparent"
+            android:scaleType="fitCenter"
+            android:adjustViewBounds="true"/>
 
-    <com.google.android.flexbox.FlexboxLayout xmlns:android="http://schemas.android.com/apk/res/android"
-        xmlns:app="http://schemas.android.com/apk/res-auto"
+        <ImageButton
+            android:id="@+id/open_menu_button"
+            android:layout_width="100dp"
+            android:layout_height="100dp"
+            android:padding="10dp"
+            android:contentDescription="@string/main_menu_caption"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
+            app:srcCompat="@drawable/ic_hamburger_menu"
+            android:background="@android:color/transparent"
+            android:scaleType="fitCenter"
+            android:adjustViewBounds="true"
+            />
+
+    </LinearLayout>
+    <LinearLayout
         android:id="@+id/main_menu_grid_layout"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/open_menu_button"
-        app:alignContent="flex_start"
-        app:alignItems="flex_start"
-        app:flexWrap="wrap"
-        android:visibility="invisible">
-
-        <ImageButton
-            android:id="@+id/weather_button"
-            android:layout_width="100dp"
-            android:layout_height="100dp"
-            android:layout_margin="10dp"
-            app:srcCompat="@drawable/ic_weather"
-            android:background="@android:color/transparent"
-            android:scaleType="fitCenter"
-            android:adjustViewBounds="true" />
-
-        <ImageButton
-            android:id="@+id/map_selection_button"
-            android:layout_width="100dp"
-            android:layout_height="100dp"
-            android:layout_margin="10dp"
-            app:srcCompat="@drawable/ic_maps"
-            android:background="@android:color/transparent"
-            android:scaleType="fitCenter"
-            android:adjustViewBounds="true" />
-
-        <Button
-            android:id="@+id/preferences"
-            android:layout_width="100dp"
-            android:layout_height="100dp"
-            android:layout_margin="10dp"
-            android:text="Preferences" />
-
-        <Button
-            android:id="@+id/subscription"
-            android:layout_width="100dp"
-            android:layout_height="100dp"
-            android:layout_margin="10dp"
-            android:text="Subscription" />
-    </com.google.android.flexbox.FlexboxLayout>
-
-    <com.google.android.flexbox.FlexboxLayout xmlns:android="http://schemas.android.com/apk/res/android"
-        xmlns:app="http://schemas.android.com/apk/res-auto"
-        android:id="@+id/weather_grid_layout"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:visibility="gone"
+        android:background="@color/colorMenuOverlayBackground">
+
+        <View
+            android:layout_width="0dp"
+            android:layout_height="0dp"
+            android:layout_weight="1" />
+
+        <com.google.android.flexbox.FlexboxLayout xmlns:android="http://schemas.android.com/apk/res/android"
+            xmlns:app="http://schemas.android.com/apk/res-auto"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/open_menu_button"
+            app:alignContent="flex_start"
+            app:alignItems="flex_start"
+            app:flexWrap="wrap">
+
+            <ImageButton
+                android:id="@+id/weather_button"
+                android:layout_width="100dp"
+                android:layout_height="100dp"
+                android:layout_margin="10dp"
+                app:srcCompat="@drawable/ic_weather"
+                android:background="@android:color/transparent"
+                android:scaleType="fitCenter"
+                android:adjustViewBounds="true" />
+
+            <ImageButton
+                android:id="@+id/map_selection_button"
+                android:layout_width="100dp"
+                android:layout_height="100dp"
+                android:layout_margin="10dp"
+                app:srcCompat="@drawable/ic_maps"
+                android:background="@android:color/transparent"
+                android:scaleType="fitCenter"
+                android:adjustViewBounds="true" />
+
+            <ImageButton
+                android:id="@+id/preferences"
+                android:layout_width="100dp"
+                android:layout_height="100dp"
+                android:layout_margin="10dp"
+                app:srcCompat="@drawable/ic_preferences"
+                android:background="@android:color/transparent"
+                android:scaleType="fitCenter"
+                android:adjustViewBounds="true" />
+
+            <ImageButton
+                android:id="@+id/subscription"
+                android:layout_width="100dp"
+                android:layout_height="100dp"
+                android:layout_margin="10dp"
+                app:srcCompat="@drawable/ic_subscription"
+                android:background="@android:color/transparent"
+                android:scaleType="fitCenter"
+                android:adjustViewBounds="true" />
+        </com.google.android.flexbox.FlexboxLayout>
+
+        <View
+            android:layout_width="0dp"
+            android:layout_height="0dp"
+            android:layout_weight="1" />
+
+    </LinearLayout>
+
+    <ScrollView
+        android:id="@+id/weather_grid_layout"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1"
+        android:visibility="gone"
         app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/open_menu_button"
-        app:alignContent="space_around"
-        app:alignItems="flex_start"
-        app:flexWrap="wrap"
-        android:visibility="invisible">
+        android:background="@color/colorMenuOverlayBackground"
+        >
 
-        <Button
-            android:id="@+id/none"
-            android:layout_width="100dp"
-            android:layout_height="100dp"
-            android:text="None" />
+        <LinearLayout
+            android:id="@+id/weather_button_container"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical" />
+    </ScrollView>
 
-        <Button
-            android:id="@+id/ceiling"
-            android:layout_width="100dp"
-            android:layout_height="100dp"
-            android:text="Ceiling" />
-
-        <Button
-            android:id="@+id/visibility"
-            android:layout_width="100dp"
-            android:layout_height="100dp"
-            android:text="Visibility" />
-
-        <Button
-            android:id="@+id/cloud_cover"
-            android:layout_width="100dp"
-            android:layout_height="100dp"
-            android:text="Cloud Cover" />
-
-        <Button
-            android:id="@+id/wind"
-            android:layout_width="100dp"
-            android:layout_height="100dp"
-            android:text="Surface Wind" />
-
-        <Button
-            android:id="@+id/temperature"
-            android:layout_width="100dp"
-            android:layout_height="100dp"
-            android:text="Temperature Celsius" />
-
-        <Button
-            android:id="@+id/dewpoint"
-            android:layout_width="100dp"
-            android:layout_height="100dp"
-            android:text="Dew Point Spread Celsius" />
-
-        <Button
-            android:id="@+id/category"
-            android:layout_width="100dp"
-            android:layout_height="100dp"
-            android:text="Flight Category" />
-
-    </com.google.android.flexbox.FlexboxLayout>
-
-</androidx.constraintlayout.widget.ConstraintLayout>
+</LinearLayout>

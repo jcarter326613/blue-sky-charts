@@ -6,4 +6,5 @@
     <color name="colorTextOnBackground">#101010</color>
     <color name="colorLogoBackground">#8999FF</color>
     <color name="colorLogoBackgroundDark">#001ac3</color>
+    <color name="colorMenuOverlayBackground">#B5E0E0E0</color>
 </resources>

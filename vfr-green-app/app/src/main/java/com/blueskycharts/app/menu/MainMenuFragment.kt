@@ -9,6 +9,7 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.Button
 import android.widget.ImageButton
+import android.widget.LinearLayout
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModelProvider
 import com.blueskycharts.app.R
@@ -21,10 +22,12 @@ import com.blueskycharts.app.subscription.ManageSubscriptionActivity
 import com.blueskycharts.app.subscription.SubscriptionActivity
 import com.blueskycharts.app.subscription.SubscriptionChecker
 import com.blueskycharts.app.utility.Log
+import com.blueskycharts.app.utility.ScreenUnits
 
 class MainMenuFragment() : Fragment() {
     private var overlayModel: OverlayViewModel? = null
     private var displayedMenu: View? = null
+    private var currentlyTracking: Boolean = true
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
         //overlayModel = ViewModelProvider(this).get(OverlayViewModel::class.java)
@@ -41,8 +44,7 @@ class MainMenuFragment() : Fragment() {
             val mainMenu = view.findViewById<View>(R.id.main_menu_grid_layout)
             val openMenuButton = view.findViewById<ImageButton>(R.id.open_menu_button)
             openMenuButton?.setOnClickListener {
-                if (displayedMenu != null) showOrToggleMenu(displayedMenu)
-                else showOrToggleMenu(mainMenu)
+                showOrToggleMenu(mainMenu)
             }
 
             val zoomToSelfButton = view.findViewById<ImageButton>(R.id.zoomToSelfButton)
@@ -63,10 +65,14 @@ class MainMenuFragment() : Fragment() {
             override fun preferenceChanged(preferenceName: String) {
                 if (preferenceName == Preferences.propertyNameMapTrackLocation) {
                     val zoomToSelfButton = view?.findViewById<ImageButton>(R.id.zoomToSelfButton)
-                    if (Preferences.instance.getBooleanValue(Preferences.propertyNameMapTrackLocation, Preferences.defaultValueMapTrackLocation)) {
-                        zoomToSelfButton?.setImageResource(R.drawable.ic_my_location_set)
-                    } else {
-                        zoomToSelfButton?.setImageResource(R.drawable.ic_my_location_not_set)
+                    val newTracking = Preferences.instance.getBooleanValue(Preferences.propertyNameMapTrackLocation, Preferences.defaultValueMapTrackLocation)
+                    if ( currentlyTracking != newTracking ) {
+                        if (newTracking) {
+                            zoomToSelfButton?.setImageResource(R.drawable.ic_my_location_set)
+                        } else {
+                            zoomToSelfButton?.setImageResource(R.drawable.ic_my_location_not_set)
+                        }
+                        currentlyTracking = newTracking
                     }
                 }
             }
@@ -85,12 +91,12 @@ class MainMenuFragment() : Fragment() {
             startActivity(Intent(context, MapSelectionActivity::class.java))
         }
 
-        val preferencesButton = view?.findViewById<Button>(R.id.preferences)
+        val preferencesButton = view?.findViewById<ImageButton>(R.id.preferences)
         preferencesButton?.setOnClickListener {
             startActivity(Intent(context, SetPreferencesActivity::class.java))
         }
 
-        val subscriptionButton = view?.findViewById<Button>(R.id.subscription)
+        val subscriptionButton = view?.findViewById<ImageButton>(R.id.subscription)
         subscriptionButton?.setOnClickListener {
             val intent = Intent(context, ManageSubscriptionActivity::class.java)
             startActivity(intent)
@@ -98,58 +104,59 @@ class MainMenuFragment() : Fragment() {
     }
 
     private fun setupWeatherHandlers() {
-        var button: Button? = view?.findViewById(R.id.none)
-        button?.setOnClickListener {
-            showOrToggleMenu()
-            overlayModel?.setOverlayType(OverlayTypes.None)
-        }
+        val weatherButtonContainer = view?.findViewById<LinearLayout>(R.id.weather_button_container) ?: return
 
-        button = view?.findViewById(R.id.ceiling)
-        button?.setOnClickListener {
-            showOrToggleMenu()
-            overlayModel?.setOverlayType(OverlayTypes.Ceiling)
-        }
+        for (type in OverlayTypes.values()) {
+            val newButton = Button(context)
+            newButton.text = getNameForOverlayType(type)
 
-        button = view?.findViewById(R.id.visibility)
-        button?.setOnClickListener {
-            showOrToggleMenu()
-            overlayModel?.setOverlayType(OverlayTypes.Visibility)
-        }
+            val layout = LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT, LinearLayout.LayoutParams.WRAP_CONTENT)
+            val marginSize = context?.let { ScreenUnits.convertDipToPixels(10f, it) }?.toInt() ?: 0
+            val paddingSize = context?.let { ScreenUnits.convertDipToPixels(30f, it) }?.toInt() ?: 0
+            layout.setMargins(marginSize, marginSize, marginSize, marginSize)
 
-        button = view?.findViewById(R.id.cloud_cover)
-        button?.setOnClickListener {
-            showOrToggleMenu()
-            overlayModel?.setOverlayType(OverlayTypes.CloudCover)
-        }
+            newButton.setPadding(0, paddingSize, 2, paddingSize)
+            newButton.setOnClickListener {
+                showOrToggleMenu()
+                overlayModel?.setOverlayType(type)
+            }
 
-        button = view?.findViewById(R.id.wind)
-        button?.setOnClickListener {
-            showOrToggleMenu()
-            overlayModel?.setOverlayType(OverlayTypes.SurfaceWind)
+            weatherButtonContainer.addView(newButton)
         }
+    }
 
-        button = view?.findViewById(R.id.temperature)
-        button?.setOnClickListener {
-            showOrToggleMenu()
-            overlayModel?.setOverlayType(OverlayTypes.Temperature)
-        }
-
-        button = view?.findViewById(R.id.dewpoint)
-        button?.setOnClickListener {
-            showOrToggleMenu()
-            overlayModel?.setOverlayType(OverlayTypes.DewPointSpread)
-        }
-
-        button = view?.findViewById(R.id.category)
-        button?.setOnClickListener {
-            showOrToggleMenu()
-            overlayModel?.setOverlayType(OverlayTypes.Category)
+    private fun getNameForOverlayType(type: OverlayTypes): String {
+        return when (type) {
+            OverlayTypes.None -> {
+                "None"
+            }
+            OverlayTypes.Category -> {
+                "Flight Category"
+            }
+            OverlayTypes.Ceiling -> {
+                "Ceiling"
+            }
+            OverlayTypes.CloudCover -> {
+                "Cloud Cover"
+            }
+            OverlayTypes.DewPointSpread -> {
+                "Dew Point Spread Celsius"
+            }
+            OverlayTypes.SurfaceWind -> {
+                "Surface Wind"
+            }
+            OverlayTypes.Temperature -> {
+                "Temperature Celcius"
+            }
+            OverlayTypes.Visibility -> {
+                "Visibility"
+            }
         }
     }
 
     private fun showOrToggleMenu(menu: View? = null) {
         val displayedMenu = this.displayedMenu
-        if ( displayedMenu != null && displayedMenu != menu ) displayedMenu.visibility = View.INVISIBLE
+        if ( displayedMenu != null && displayedMenu != menu ) displayedMenu.visibility = View.GONE
         if ( menu != null ) {
             if ( menu.visibility == View.VISIBLE ) {
                 menu.visibility = View.INVISIBLE
