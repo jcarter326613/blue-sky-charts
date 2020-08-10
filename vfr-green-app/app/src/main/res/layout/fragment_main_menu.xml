@@ -57,7 +57,8 @@
             android:layout_height="0dp"
             android:layout_weight="1" />
 
-        <com.google.android.flexbox.FlexboxLayout xmlns:android="http://schemas.android.com/apk/res/android"
+        <com.google.android.flexbox.FlexboxLayout
+            xmlns:android="http://schemas.android.com/apk/res/android"
             xmlns:app="http://schemas.android.com/apk/res-auto"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
@@ -134,5 +135,69 @@
             android:layout_height="wrap_content"
             android:orientation="vertical" />
     </ScrollView>
+
+    <LinearLayout
+        android:id="@+id/settings_selector"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:visibility="gone"
+        android:background="@color/colorMenuOverlayBackground">
+
+        <View
+            android:layout_width="0dp"
+            android:layout_height="0dp"
+            android:layout_weight="1" />
+
+        <com.google.android.flexbox.FlexboxLayout
+            xmlns:android="http://schemas.android.com/apk/res/android"
+            xmlns:app="http://schemas.android.com/apk/res-auto"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/open_menu_button"
+            app:alignContent="flex_start"
+            app:alignItems="flex_start"
+            app:flexWrap="wrap">
+
+            <ImageButton
+                android:id="@+id/settings_downloads"
+                android:layout_width="100dp"
+                android:layout_height="100dp"
+                android:layout_margin="10dp"
+                app:srcCompat="@drawable/ic_weather"
+                android:background="@android:color/transparent"
+                android:scaleType="fitCenter"
+                android:adjustViewBounds="true" />
+
+            <ImageButton
+                android:id="@+id/settings_memory"
+                android:layout_width="100dp"
+                android:layout_height="100dp"
+                android:layout_margin="10dp"
+                app:srcCompat="@drawable/ic_maps"
+                android:background="@android:color/transparent"
+                android:scaleType="fitCenter"
+                android:adjustViewBounds="true" />
+
+            <ImageButton
+                android:id="@+id/settings_privacy"
+                android:layout_width="100dp"
+                android:layout_height="100dp"
+                android:layout_margin="10dp"
+                app:srcCompat="@drawable/ic_preferences"
+                android:background="@android:color/transparent"
+                android:scaleType="fitCenter"
+                android:adjustViewBounds="true" />
+            
+        </com.google.android.flexbox.FlexboxLayout>
+
+        <View
+            android:layout_width="0dp"
+            android:layout_height="0dp"
+            android:layout_weight="1" />
+
+    </LinearLayout>
 
 </LinearLayout>

@@ -1,13 +1,5 @@
 package com.blueskycharts.app.subscription
 
-import android.app.AlertDialog
-import android.content.DialogInterface
-import android.content.DialogInterface.OnShowListener
-import android.content.Intent
-import android.graphics.Color
-import android.net.Uri
-import android.opengl.Visibility
-import android.os.Build
 import android.os.Bundle
 import android.text.Spannable
 import android.text.SpannableString
@@ -15,22 +7,7 @@ import android.text.style.BulletSpan
 import android.view.View
 import android.widget.Button
 import android.widget.TextView
-import androidx.annotation.RequiresApi
-import androidx.appcompat.app.AppCompatActivity
-import com.android.billingclient.api.*
 import com.blueskycharts.app.R
-import com.blueskycharts.app.assests.AssetProvider
-import com.blueskycharts.app.assests.RemoteAssetDescription
-import com.blueskycharts.app.assests.StorageLocation
-import com.blueskycharts.app.assests.Volatility
-import com.blueskycharts.app.map.MapViewActivity
-import com.blueskycharts.app.mapselection.MapSelectionActivity
-import com.blueskycharts.app.preferences.Preferences
-import com.blueskycharts.app.preferences.SetPreferencesActivity
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.GlobalScope
-import kotlinx.coroutines.launch
-import java.net.URL
 
 class SubscriptionActivity : SubscriptionChecker(true, false)  {
     override fun onCreate(savedInstanceState: Bundle?) {
