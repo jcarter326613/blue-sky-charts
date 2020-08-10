@@ -19,7 +19,8 @@
         android:theme="@style/AppTheme">
         <activity
             android:name=".mapselection.MapSelectionActivity"
-            android:parentActivityName=".map.MapViewActivity" />
+            android:parentActivityName=".map.MapViewActivity"
+            android:label="Select Map" />
         <activity
             android:name=".preferences.SetPreferencesActivity"
             android:parentActivityName=".map.MapViewActivity" />

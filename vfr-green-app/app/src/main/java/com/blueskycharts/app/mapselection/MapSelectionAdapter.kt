@@ -1,6 +1,7 @@
 package com.blueskycharts.app.mapselection
 
 import android.content.Context
+import android.graphics.Typeface
 import android.util.TypedValue
 import android.view.View
 import android.view.ViewGroup
@@ -8,6 +9,7 @@ import android.widget.*
 import com.blueskycharts.app.R
 import com.blueskycharts.app.map.configuration.Inventory
 import com.blueskycharts.app.preferences.Preferences
+import com.blueskycharts.app.utility.ScreenUnits
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
@@ -20,11 +22,11 @@ class MapSelectionAdapter(private var listener: Listener?, context: Context) : B
         fun loadComplete(adapter: MapSelectionAdapter)
     }
 
-    class Group(val id: Int, val name: String, val displayAll: Boolean) {
+    class Group(val name: String) {
         val children = mutableListOf<Child>()
     }
 
-    class Child(val id: String, val name: String)
+    class Child(val mapId: String, val groupId: Int, val name: String)
 
     init {
         val arr = IntArray(1)
@@ -33,20 +35,48 @@ class MapSelectionAdapter(private var listener: Listener?, context: Context) : B
         groupLeftPadding = attributeValue.getDimensionPixelSize(0, 0)
 
         GlobalScope.launch {
+            val downloadedGroup = Group("Downloaded")
+
             for (group in Inventory.instance.mapGroups) {
-                val newGroup = Group(group.id, group.humanName, group.displayAll)
+                val newGroup = Group(group.humanName)
                 if (group.displayAll) {
-                    newGroup.children.add(Child("", group.humanName))
+                    newGroup.children.add(Child("", group.id, group.humanName))
+                    val config = group.getConfiguration()
+                    if (config != null) {
+                        for (map in config.mapList) {
+                            if (Preferences.instance.getBooleanValue(Preferences.propertyTemplateMapProactiveDownload(group.id, map),
+                                    Preferences.defaultValueMapProactiveDownload)) {
+                                downloadedGroup.children.add(Child(map, group.id, "${group.humanName}"))
+                                break
+                            }
+                        }
+                    }
                 } else {
                     val config = group.getConfiguration()
                     if (config != null) {
                         for (map in config.mapList) {
-                            newGroup.children.add(Child(map, map))
+                            newGroup.children.add(Child(map, group.id, map))
+                            if (Preferences.instance.getBooleanValue(Preferences.propertyTemplateMapProactiveDownload(group.id, map),
+                                    Preferences.defaultValueMapProactiveDownload)) {
+                                downloadedGroup.children.add(Child(map, group.id, "${group.humanName} - $map"))
+                            }
                         }
                     }
                 }
-                itemDictionary.add(newGroup)
+                if (newGroup.children.size > 0) {
+                    newGroup.children.sortBy {
+                        it.name
+                    }
+                    itemDictionary.add(newGroup)
+                }
             }
+            if (downloadedGroup.children.size > 0) {
+                downloadedGroup.children.sortBy {
+                    it.name
+                }
+                itemDictionary.add(0, downloadedGroup)
+            }
+
             listener?.loadComplete(this@MapSelectionAdapter)
             listener = null
         }
@@ -69,9 +99,12 @@ class MapSelectionAdapter(private var listener: Listener?, context: Context) : B
             convertView.text = this.itemDictionary[groupIndex].name
             convertView
         } else {
+            val padding = ScreenUnits.convertDipToPixels(10f, parent.context).toInt()
             val newView = TextView(parent.context)
             newView.text = this.itemDictionary[groupIndex].name
-            newView.setPadding(groupLeftPadding, 0, 0, 0)
+            newView.setPadding(groupLeftPadding, padding, padding, padding)
+            newView.setTypeface(newView.typeface, Typeface.BOLD)
+            newView.setTextSize(TypedValue.COMPLEX_UNIT_DIP, 20F)
             newView
         }
     }
@@ -81,8 +114,11 @@ class MapSelectionAdapter(private var listener: Listener?, context: Context) : B
             convertView.text = this.itemDictionary[groupIndex].children[childIndex].name
             convertView
         } else {
+            val padding = ScreenUnits.convertDipToPixels(10f, parent.context).toInt()
             val newView = TextView(parent.context)
             newView.text = this.itemDictionary[groupIndex].children[childIndex].name
+            newView.setPadding(padding, padding, padding, padding)
+            newView.setTextSize(TypedValue.COMPLEX_UNIT_DIP, 20F)
             newView
         }
     }
@@ -104,78 +140,6 @@ class MapSelectionAdapter(private var listener: Listener?, context: Context) : B
     }
 
     override fun getChildId(groupIndex: Int, childIndex: Int): Long {
-        return (this.itemDictionary.size + childIndex).toLong()
+        return childIndex.toLong()
     }
-
-    /*
-    private fun displayMaps() {
-        GlobalScope.launch {    //ok1
-            // Get the group configurations
-            val buttonGroups: Array<GroupDetails?> = Array(Inventory.instance.mapGroups.size) {null}
-            for ( group in Inventory.instance.mapGroups ) {
-                buttonGroups[group.id - 1] = getGroupConfig(group)
-            }
-
-            // Switch back to the main thread
-            GlobalScope.launch(context = Dispatchers.Main) {
-                val buttonLayout = findViewById<ExpandableListView>(R.id.select_map_layout)
-                buttonLayout.setAdapter(MapSelectionAdapter())
-                for ( group in buttonGroups ) {
-                    if ( group == null ) {
-                        continue
-                    }
-                    if ( group.displayGroupOnly ) {
-                        val mapButton = Button(buttonLayout.context)
-                        mapButton.text = group.text
-                        mapButton.setOnClickListener {
-                            Preferences.instance.setPreference(Preferences.propertyNameDisplayedSubMapId, "")
-                            Preferences.instance.setPreference(Preferences.propertyNameDisplayedMapGroupId, group.id)
-                        }
-                        buttonLayout.addView(mapButton)
-                    } else if (group.buttons != null) {
-                        val groupLabel = TextView(buttonLayout.context)
-                        groupLabel.text = group.text
-                        buttonLayout.addView(groupLabel)
-                        for (button in group.buttons) {
-                            val mapButton = Button(buttonLayout.context)
-                            mapButton.text = button.text
-                            mapButton.setOnClickListener {
-                                Preferences.instance.setPreference(Preferences.propertyNameDisplayedSubMapId, button.subMapId)
-                                Preferences.instance.setPreference(Preferences.propertyNameDisplayedMapGroupId, group.id)
-                            }
-                            buttonLayout.addView(mapButton)
-                        }
-                    }
-                }
-            }
-        }
-    }
-
-    private suspend fun getGroupConfig(group: Inventory.Group): GroupDetails? {
-        val config = group.getConfiguration()
-
-        // Check if the config failed to download
-        if (config == null) {
-            //TODO: post a message about how the preferences could not be loaded
-            return null
-        }
-
-        // Pull out the needed information to display a button
-        val displayGroupOnly = config.displayAll
-        val groupName = group.humanName
-        return if (displayGroupOnly) {
-            GroupDetails(displayGroupOnly, groupName, group.id, null)
-        } else {
-            val buttonList = mutableListOf<ButtonDetails>()
-            for (map in config.mapList) {
-                buttonList.add(ButtonDetails(map, map))
-            }
-            GroupDetails(displayGroupOnly, groupName, group.id, buttonList)
-        }
-    }
-
-    private class GroupDetails(val displayGroupOnly: Boolean, val text: String, val id: Int, val buttons: List<ButtonDetails>?)
-    private class ButtonDetails(val text: String, val subMapId: String )
-
-     */
 }

@@ -25,15 +25,9 @@ class MapSelectionActivity : SubscriptionChecker(false, true) {
             val groupData = adapter?.getGroup(groupPosition)
             val childData = adapter?.getChild(groupPosition, childPosition)
             if (groupData is MapSelectionAdapter.Group && childData is MapSelectionAdapter.Child) {
-                if (groupData.displayAll) {
-                    Preferences.instance.setPreference(Preferences.propertyNameDisplayedSubMapId, "")
-                    Preferences.instance.setPreference(Preferences.propertyNameDisplayedMapGroupId, groupData.id)
-                } else {
-                    Preferences.instance.setPreference(Preferences.propertyNameDisplayedSubMapId, childData.id)
-                    Preferences.instance.setPreference(Preferences.propertyNameDisplayedMapGroupId, groupData.id)
-                }
-                val intent = Intent(this, MapViewActivity::class.java)
-                startActivity(intent)
+                Preferences.instance.setPreference(Preferences.propertyNameDisplayedSubMapId, childData.mapId)
+                Preferences.instance.setPreference(Preferences.propertyNameDisplayedMapGroupId, childData.groupId)
+                startActivity(Intent(this, MapViewActivity::class.java))
             }
             true
         }
