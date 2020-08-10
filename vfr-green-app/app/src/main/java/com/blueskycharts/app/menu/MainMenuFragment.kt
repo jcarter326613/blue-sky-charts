@@ -3,6 +3,7 @@ package com.blueskycharts.app.menu
 import android.content.Intent
 import android.graphics.drawable.Drawable
 import android.net.Uri
+import android.opengl.Visibility
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
@@ -23,6 +24,9 @@ import com.blueskycharts.app.subscription.SubscriptionActivity
 import com.blueskycharts.app.subscription.SubscriptionChecker
 import com.blueskycharts.app.utility.Log
 import com.blueskycharts.app.utility.ScreenUnits
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.launch
 
 class MainMenuFragment() : Fragment() {
     private var overlayModel: OverlayViewModel? = null
@@ -64,15 +68,23 @@ class MainMenuFragment() : Fragment() {
         Preferences.instance.addListener(object: Preferences.Listener{
             override fun preferenceChanged(preferenceName: String) {
                 if (preferenceName == Preferences.propertyNameMapTrackLocation) {
-                    val zoomToSelfButton = view?.findViewById<ImageButton>(R.id.zoomToSelfButton)
-                    val newTracking = Preferences.instance.getBooleanValue(Preferences.propertyNameMapTrackLocation, Preferences.defaultValueMapTrackLocation)
-                    if ( currentlyTracking != newTracking ) {
-                        if (newTracking) {
-                            zoomToSelfButton?.setImageResource(R.drawable.ic_my_location_set)
-                        } else {
-                            zoomToSelfButton?.setImageResource(R.drawable.ic_my_location_not_set)
+                    GlobalScope.launch(Dispatchers.Main) {
+                        val zoomToSelfButton =
+                            view?.findViewById<ImageButton>(R.id.zoomToSelfButton)
+                        val newTracking = Preferences.instance.getBooleanValue(
+                            Preferences.propertyNameMapTrackLocation,
+                            Preferences.defaultValueMapTrackLocation
+                        )
+                        if (currentlyTracking != newTracking) {
+                            if (newTracking) {
+                                //zoomToSelfButton?.setImageResource(R.drawable.ic_my_location_set)
+                                zoomToSelfButton?.visibility = View.INVISIBLE
+                            } else {
+                                //zoomToSelfButton?.setImageResource(R.drawable.ic_my_location_not_set)
+                                zoomToSelfButton?.visibility = View.VISIBLE
+                            }
+                            currentlyTracking = newTracking
                         }
-                        currentlyTracking = newTracking
                     }
                 }
             }
