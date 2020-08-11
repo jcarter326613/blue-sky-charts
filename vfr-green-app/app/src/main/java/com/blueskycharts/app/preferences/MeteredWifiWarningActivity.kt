@@ -21,9 +21,9 @@ open class MeteredWifiWarningActivity(private val wifiWarningViewId: Int) : Subs
         val onWifi = (networkInfo?.isConnected ?: false) && !connectivityManager.isActiveNetworkMetered
 
         if (onWifi) {
-            wifiWarningView.visibility = View.GONE
+            wifiWarningView?.visibility = View.GONE
         } else {
-            wifiWarningView.visibility = View.VISIBLE
+            wifiWarningView?.visibility = View.VISIBLE
         }
     }
 }

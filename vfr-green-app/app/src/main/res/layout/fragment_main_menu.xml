@@ -166,7 +166,7 @@
                 android:layout_width="100dp"
                 android:layout_height="100dp"
                 android:layout_margin="10dp"
-                app:srcCompat="@drawable/ic_weather"
+                app:srcCompat="@drawable/ic_downloads"
                 android:background="@android:color/transparent"
                 android:scaleType="fitCenter"
                 android:adjustViewBounds="true" />
@@ -176,7 +176,7 @@
                 android:layout_width="100dp"
                 android:layout_height="100dp"
                 android:layout_margin="10dp"
-                app:srcCompat="@drawable/ic_maps"
+                app:srcCompat="@drawable/ic_memory"
                 android:background="@android:color/transparent"
                 android:scaleType="fitCenter"
                 android:adjustViewBounds="true" />
@@ -186,11 +186,11 @@
                 android:layout_width="100dp"
                 android:layout_height="100dp"
                 android:layout_margin="10dp"
-                app:srcCompat="@drawable/ic_preferences"
+                app:srcCompat="@drawable/ic_privacy"
                 android:background="@android:color/transparent"
                 android:scaleType="fitCenter"
                 android:adjustViewBounds="true" />
-            
+
         </com.google.android.flexbox.FlexboxLayout>
 
         <View

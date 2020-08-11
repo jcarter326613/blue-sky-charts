@@ -17,14 +17,22 @@
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
         android:theme="@style/AppTheme">
-        <activity android:name=".preferences.ManagePrivacyActivity"></activity>
-        <activity android:name=".preferences.ManageMemoryActivity" />
+
+        <activity
+            android:name=".preferences.ManagePrivacyActivity"
+            android:label="Privacy Settings"
+            android:parentActivityName=".map.MapViewActivity" />
+        <activity
+            android:name=".preferences.ManageMemoryActivity"
+            android:label="Memory Usage"
+            android:parentActivityName=".map.MapViewActivity" />
         <activity
             android:name=".mapselection.MapSelectionActivity"
             android:label="Select Map"
             android:parentActivityName=".map.MapViewActivity" />
         <activity
             android:name=".preferences.DownloadPreferencesActivity"
+            android:label="Manage Downloads"
             android:parentActivityName=".map.MapViewActivity" />
         <activity
             android:name=".map.MapViewActivity"

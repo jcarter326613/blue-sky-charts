@@ -15,6 +15,8 @@ import com.blueskycharts.app.preferences.DownloadPreferencesActivity
 import com.blueskycharts.app.map.models.OverlayViewModel
 import com.blueskycharts.app.map.view.OverlayTypes
 import com.blueskycharts.app.mapselection.MapSelectionActivity
+import com.blueskycharts.app.preferences.ManageMemoryActivity
+import com.blueskycharts.app.preferences.ManagePrivacyActivity
 import com.blueskycharts.app.preferences.Preferences
 import com.blueskycharts.app.subscription.ManageSubscriptionActivity
 import com.blueskycharts.app.utility.Log
@@ -53,6 +55,7 @@ class MainMenuFragment() : Fragment() {
 
             setupMainMenuHandlers()
             setupWeatherHandlers()
+            setupPreferencesHandlers()
         } else {
             Log.error(null, "Loaded view without activity.  Can not connect view model.")
         }
@@ -98,14 +101,35 @@ class MainMenuFragment() : Fragment() {
             startActivity(Intent(context, MapSelectionActivity::class.java))
         }
 
+        val preferencesMenu = view?.findViewById<View>(R.id.settings_selector)
         val preferencesButton = view?.findViewById<ImageButton>(R.id.preferences)
         preferencesButton?.setOnClickListener {
-            startActivity(Intent(context, DownloadPreferencesActivity::class.java))
+            showOrToggleMenu(preferencesMenu)
         }
 
         val subscriptionButton = view?.findViewById<ImageButton>(R.id.subscription)
         subscriptionButton?.setOnClickListener {
             val intent = Intent(context, ManageSubscriptionActivity::class.java)
+            startActivity(intent)
+        }
+    }
+
+    private fun setupPreferencesHandlers() {
+        val downloadsButton = view?.findViewById<ImageButton>(R.id.settings_downloads)
+        downloadsButton?.setOnClickListener {
+            val intent = Intent(context, DownloadPreferencesActivity::class.java)
+            startActivity(intent)
+        }
+
+        val memoryButton = view?.findViewById<ImageButton>(R.id.settings_memory)
+        memoryButton?.setOnClickListener {
+            val intent = Intent(context, ManageMemoryActivity::class.java)
+            startActivity(intent)
+        }
+
+        val privacyButton = view?.findViewById<ImageButton>(R.id.settings_privacy)
+        privacyButton?.setOnClickListener {
+            val intent = Intent(context, ManagePrivacyActivity::class.java)
             startActivity(intent)
         }
     }
