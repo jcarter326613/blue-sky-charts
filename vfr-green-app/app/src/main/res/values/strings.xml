@@ -7,4 +7,8 @@
     <string name="subscription_ad_returning_customer_cta">Resubscribe</string>
     <string name="subscription_ad_free_trial">Start your free trial now*\n|Access to all features for one month free!|Download FAA VFR charts.|METAR overlays.|Location tracking.|No payments until the trial ends.|Don\'t like it?  It\'s easy to unsubscribe.\n\n* Free trial only available to new subscribers.</string>
     <string name="subscription_ad_free_trial_cta">Subscribe</string>
+    <string name="privacy_settings_description">When you consent to data collection as outlined in the privacy policy, you are contributing to our understanding of what features you use within the application and if any crashes are occurring.  We do not sell any of this information to other parties.  Enabling data collection gives us valuable information to improve this product.\n\nFor more information refer to https://blueskycharts.com/privacy.html</string>
+    <string name="privacy_settings_checkbox">I consent to the collection of data for use in Firebase as outlined in the privacy policy.</string>
+    <string name="privacy_settings_cta">Save Changes</string>
+
 </resources>
