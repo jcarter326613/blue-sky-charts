@@ -11,4 +11,5 @@
     <string name="privacy_settings_checkbox">I consent to the collection of data for use in Firebase as outlined in the privacy policy.</string>
     <string name="privacy_settings_cta">Save Changes</string>
     <string name="downloads_on_hold">Downloads are on hold because you are not on an un-metered wifi connection.</string>
+    <string name="download_preferences_instructions">Select maps to download them for offline viewing.</string>
 </resources>
