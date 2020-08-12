@@ -2,9 +2,6 @@ package com.blueskycharts.app.preferences
 
 import android.app.AlertDialog
 import android.content.DialogInterface
-import android.content.Intent
-import android.net.Uri
-import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.widget.Button
 import android.widget.TextView
