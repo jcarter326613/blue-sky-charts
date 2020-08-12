@@ -7,38 +7,38 @@
    xmlns="http://www.w3.org/2000/svg"
    xmlns:sodipodi="http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd"
    xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape"
-   width="800"
-   height="800"
-   viewBox="0 0 211.66666 211.66667"
-   version="1.1"
-   id="svg8"
-   inkscape:version="1.0 (4035a4fb49, 2020-05-01)"
-   sodipodi:docname="hamburger_menu.svg"
-   inkscape:export-filename="D:\Code\graphical-assets\app\menu_icons\my_location_set.png"
+   inkscape:export-ydpi="96"
    inkscape:export-xdpi="96"
-   inkscape:export-ydpi="96">
+   inkscape:export-filename="D:\Code\graphical-assets\app\menu_icons\my_location_set.png"
+   sodipodi:docname="hamburger_menu.svg"
+   inkscape:version="1.0 (4035a4fb49, 2020-05-01)"
+   id="svg8"
+   version="1.1"
+   viewBox="0 0 211.66666 211.66667"
+   height="800"
+   width="800">
   <defs
      id="defs2" />
   <sodipodi:namedview
-     id="base"
-     pagecolor="#ffffff"
-     bordercolor="#666666"
-     borderopacity="1.0"
-     inkscape:pageopacity="0.0"
-     inkscape:pageshadow="2"
-     inkscape:zoom="0.35"
-     inkscape:cx="400"
-     inkscape:cy="560"
-     inkscape:document-units="mm"
-     inkscape:current-layer="layer1"
-     inkscape:document-rotation="0"
-     showgrid="false"
-     units="px"
-     inkscape:window-width="1920"
-     inkscape:window-height="1017"
-     inkscape:window-x="1912"
+     inkscape:window-maximized="1"
      inkscape:window-y="-8"
-     inkscape:window-maximized="1" />
+     inkscape:window-x="-8"
+     inkscape:window-height="1017"
+     inkscape:window-width="1920"
+     units="px"
+     showgrid="false"
+     inkscape:document-rotation="0"
+     inkscape:current-layer="layer1"
+     inkscape:document-units="mm"
+     inkscape:cy="361.83235"
+     inkscape:cx="466.08142"
+     inkscape:zoom="0.7"
+     inkscape:pageshadow="2"
+     inkscape:pageopacity="0.0"
+     borderopacity="1.0"
+     bordercolor="#666666"
+     pagecolor="#ffffff"
+     id="base" />
   <metadata
      id="metadata5">
     <rdf:RDF>
@@ -52,29 +52,27 @@
     </rdf:RDF>
   </metadata>
   <g
-     inkscape:label="Layer 1"
+     id="layer1"
      inkscape:groupmode="layer"
-     id="layer1">
-    <rect
-       y="0"
-       x="0"
-       height="26.458334"
-       width="211.66667"
-       id="rect832"
-       style="opacity:1;fill:#000000;fill-opacity:1;stroke-width:46.0406" />
-    <rect
-       style="opacity:1;fill:#000000;fill-opacity:1;stroke-width:46.0407"
-       id="rect832-9"
-       width="211.66667"
-       height="26.458334"
-       x="0"
-       y="185.20833" />
-    <rect
-       style="opacity:1;fill:#000000;fill-opacity:1;stroke-width:46.0407"
-       id="rect832-5"
-       width="211.66667"
-       height="26.458334"
-       x="0"
-       y="92.604164" />
+     inkscape:label="Layer 1">
+    <g
+       transform="translate(0,10.205358)"
+       id="g879">
+      <path
+         id="rect832"
+         style="opacity:1;fill:#000000;fill-opacity:1;stroke-width:31.5218"
+         d="M 12.095237,36.85268 H 199.57143 c 0,0 7.9375,-1.176247 7.9375,6.614584 0,7.79083 -7.9375,6.614583 -7.9375,6.614583 H 12.095237 c 0,0 -7.9374998,1.070933 -7.9374998,-6.614583 0,-7.685516 7.9374998,-6.614584 7.9374998,-6.614584 z"
+         sodipodi:nodetypes="cczcczc" />
+      <path
+         sodipodi:nodetypes="cczcczc"
+         d="M 12.095239,89.013395 H 199.57143 c 0,0 7.9375,-1.176247 7.9375,6.614584 0,7.790831 -7.9375,6.614581 -7.9375,6.614581 H 12.095239 c 0,0 -7.9375012,1.07093 -7.9375012,-6.614581 0,-7.685516 7.9375012,-6.614584 7.9375012,-6.614584 z"
+         style="opacity:1;fill:#000000;fill-opacity:1;stroke-width:31.5219"
+         id="rect832-4" />
+      <path
+         sodipodi:nodetypes="cczcczc"
+         d="M 12.095236,141.1741 H 199.57143 c 0,0 7.9375,-1.17624 7.9375,6.61459 0,7.79083 -7.9375,6.61458 -7.9375,6.61458 H 12.095236 c 0,0 -7.9374995,1.07093 -7.9374995,-6.61458 0,-7.68552 7.9374995,-6.61459 7.9374995,-6.61459 z"
+         style="opacity:1;fill:#000000;fill-opacity:1;stroke-width:31.5219"
+         id="rect832-0" />
+    </g>
   </g>
 </svg>
