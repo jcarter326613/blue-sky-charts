@@ -146,6 +146,7 @@ class Preferences private constructor() {
         val propertyTemplatePrefixProactiveDownload = "map.proactiveDownload."
         fun propertyTemplateMapProactiveDownload(mapGroup: Int, mapName: String): String = "$propertyTemplatePrefixProactiveDownload$mapGroup.$mapName"
         fun propertyTemplateMapPosition(mapGroup: Int, mapName: String): String = "map.$mapGroup.$mapName.position"
+        val propertyNameMapShift: String = "map.shift"
         val propertyNameDisplayedMapGroupId: String = "map.active.group"
         val propertyNameDisplayedSubMapId: String = "map.active.submap"
         val propertyNameMaxUnPersistedTileDiskSpace: String = "map.cache.size"
@@ -160,6 +161,7 @@ class Preferences private constructor() {
         const val defaultValueMapProactiveDownload = false
         const val defaultValueDisplayedMapGroupId = 1
         const val defaultValueDisplayedSubMapId = ""
+        const val defaultValueMapShift = 0
         const val defaultValueMaxUnPersistedTileDiskSpace = 50 * 1000 * 1000
         const val defaultValueStoreMapsExternally = false
         const val defaultValueRequestClearCache = false

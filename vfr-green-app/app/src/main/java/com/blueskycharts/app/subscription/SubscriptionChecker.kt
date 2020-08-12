@@ -12,6 +12,7 @@ import android.view.View
 import androidx.appcompat.app.AppCompatActivity
 import com.android.billingclient.api.*
 import com.blueskycharts.app.map.MapViewActivity
+import com.blueskycharts.app.preferences.Preferences
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
@@ -82,12 +83,14 @@ open class SubscriptionChecker(private val redirectOnPurchaseMade: Boolean, priv
             }
 
             if (purchaseSku == null) {
-                val alertDialog = AlertDialog.Builder(this@SubscriptionChecker)
-                    .setMessage("There was a problem placing your purchase. Please try again.  If a second attempt does not work, please try updating this app.")
-                    .setPositiveButton("Ok") { _: DialogInterface, _: Int ->
-                    }
-                    .create()
-                alertDialog.show()
+                GlobalScope.launch(Dispatchers.Main) {
+                    val alertDialog = AlertDialog.Builder(this@SubscriptionChecker)
+                        .setMessage("There was a problem sending you to the purchase flow.  Please ensure you are logged into the Google Play Store and restart this app.")
+                        .setPositiveButton("Ok") { _: DialogInterface, _: Int ->
+                        }
+                        .create()
+                    alertDialog.show()
+                }
             }
         }
     }
@@ -134,6 +137,7 @@ open class SubscriptionChecker(private val redirectOnPurchaseMade: Boolean, priv
                 startActivity(intent)
             }
         } else {
+            Preferences.instance.setPreference(Preferences.propertyNameMapShift, mapShift)
             subscriptionStatus = SubscriptionStatus.Active
         }
     }
@@ -147,6 +151,7 @@ open class SubscriptionChecker(private val redirectOnPurchaseMade: Boolean, priv
                         //TODO: Look at doing this in the future
                         //https://developer.android.com/google/play/billing/security#verify
 
+                        Preferences.instance.setPreference(Preferences.propertyNameMapShift, mapShift)
                         val alertDialog = AlertDialog.Builder(this)
                             .setMessage("Your subscription is now active")
                             .setPositiveButton("Ok") { _: DialogInterface, _: Int ->
@@ -187,6 +192,13 @@ open class SubscriptionChecker(private val redirectOnPurchaseMade: Boolean, priv
     override fun onBillingSetupFinished(billingResult: BillingResult) {
         if (billingResult.responseCode ==  BillingClient.BillingResponseCode.OK) {
             verifySubscription()
+        } else {
+            if (Preferences.instance.getIntValue(Preferences.propertyNameMapShift, Preferences.defaultValueMapShift) != mapShift) {
+                if (redirectOnNotPurchased) {
+                    val intent = Intent(this, SubscriptionActivity::class.java)
+                    startActivity(intent)
+                }
+            }
         }
     }
 
@@ -198,5 +210,6 @@ open class SubscriptionChecker(private val redirectOnPurchaseMade: Boolean, priv
 
     companion object {
         const val skuBasicAnnual = "basic.annual"
+        private const val mapShift = 20
     }
 }
