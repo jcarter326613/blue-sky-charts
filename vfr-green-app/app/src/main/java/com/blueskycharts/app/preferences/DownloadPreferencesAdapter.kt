@@ -9,19 +9,20 @@ import android.widget.BaseExpandableListAdapter
 import android.widget.LinearLayout
 import android.widget.Space
 import android.widget.TextView
-import androidx.core.view.get
+import com.blueskycharts.app.map.assetmanagement.MapPersistenceStatistics
 import com.blueskycharts.app.map.assetmanagement.TilePersistenceManager
 import com.blueskycharts.app.map.configuration.Inventory
 import com.blueskycharts.app.utility.ScreenUnits
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
 import java.util.concurrent.atomic.AtomicInteger
 
-class DownloadPreferencesAdapter(private var listener: DownloadPreferencesAdapter.Listener?, context: Context) : BaseExpandableListAdapter(), Preferences.Listener {
+class DownloadPreferencesAdapter(private var listener: DownloadPreferencesAdapter.Listener?, context: Context) : BaseExpandableListAdapter() {
     private val itemDictionary = mutableListOf<Group>()
     private val groupLeftPadding: Int
     private val mapViewLibrary = mutableMapOf<Int, ViewRecord>()
-    private val mapIdLibrary = mutableMapOf<String, ViewRecord>()
+    private val downloadLabelLookup = mutableMapOf<String, String>()
     private var nextId = AtomicInteger(1)
 
     interface Listener {
@@ -49,6 +50,11 @@ class DownloadPreferencesAdapter(private var listener: DownloadPreferencesAdapte
                 if (config != null) {
                     for (map in config.mapList) {
                         newGroup.children.add(Child(map, group.id, map))
+                        TilePersistenceManager.getInstance(null).getMapStatistics(group.id, map).addListener(object: MapPersistenceStatistics.Listener {
+                            override fun statisticsUpdated(groupId: Int, mapId: String, downloadedSizeBytes: Long) {
+                                updateView(groupId, mapId)
+                            }
+                        })
                     }
                 }
                 if (newGroup.children.size > 0) {
@@ -61,16 +67,21 @@ class DownloadPreferencesAdapter(private var listener: DownloadPreferencesAdapte
             listener?.loadComplete(this@DownloadPreferencesAdapter)
             listener = null
         }
-
-        Preferences.instance.addListener(this)
     }
 
-    override fun preferenceChanged(preferenceName: String) {
-        if (preferenceName.startsWith(Preferences.propertyTemplatePrefixProactiveDownload)) {
-            val groupAndMap = Preferences.extractMapGroupAndNameFromProactiveDownloadKey(preferenceName)
-            val groupId = groupAndMap.first
-            val map = groupAndMap.second
-            val viewEntry = this.
+    fun updateView(groupId: Int, map: String) {
+        GlobalScope.launch {
+            if (Preferences.instance.getBooleanValue(Preferences.propertyTemplateMapProactiveDownload(groupId, map), Preferences.defaultValueMapProactiveDownload)) {
+                val persistenceManager = TilePersistenceManager.getInstance(null)
+                val statistics = persistenceManager.getMapStatistics(groupId, map)
+                downloadLabelLookup[getKeyForId(groupId, map)] = "${statistics.downloadedSizeBytes / 1000000} M"
+            } else {
+                downloadLabelLookup[getKeyForId(groupId, map)] = ""
+            }
+
+            GlobalScope.launch(Dispatchers.Main) {
+                notifyDataSetChanged()
+            }
         }
     }
 
@@ -113,12 +124,8 @@ class DownloadPreferencesAdapter(private var listener: DownloadPreferencesAdapte
             downloadLabel = viewLibraryEntry.downloadView
             layout = viewLibraryEntry.layoutView
 
-            mapIdLibrary.remove(getKeyForId(viewLibraryEntry.groupId, viewLibraryEntry.mapId))
-
             viewLibraryEntry.groupId = mapInfo.groupId
             viewLibraryEntry.mapId = mapInfo.mapId
-
-            mapIdLibrary[getKeyForId(mapInfo.groupId, mapInfo.mapId)] = viewLibraryEntry
         } else {
             val padding = ScreenUnits.convertDipToPixels(10f, parent.context).toInt()
             nameLabel = TextView(parent.context)
@@ -147,11 +154,10 @@ class DownloadPreferencesAdapter(private var listener: DownloadPreferencesAdapte
 
             val viewRecord = ViewRecord(layout, nameLabel, downloadLabel, mapInfo.groupId, mapInfo.mapId)
             mapViewLibrary[layout.id] = viewRecord
-            mapIdLibrary[getKeyForId(mapInfo.groupId, mapInfo.mapId)] = viewRecord
         }
 
         nameLabel.text = mapInfo.name
-        downloadLabel.text = getDownloadLabelText(mapInfo.groupId, mapInfo.mapId)
+        downloadLabel.text = downloadLabelLookup[getKeyForId(mapInfo.groupId, mapInfo.mapId)] ?: ""
 
         return layout
     }
@@ -174,17 +180,6 @@ class DownloadPreferencesAdapter(private var listener: DownloadPreferencesAdapte
 
     override fun getChildId(groupIndex: Int, childIndex: Int): Long {
         return childIndex.toLong()
-    }
-
-    private fun getDownloadLabelText(groupId: Int, mapId: String): String {
-        if (Preferences.instance.getBooleanValue(Preferences.propertyTemplateMapProactiveDownload(groupId, mapId), Preferences.defaultValueMapProactiveDownload)) {
-            val persistenceManager = TilePersistenceManager.getInstance(null)
-            //val statistics = persistenceManager.getMapStatistics(groupId, mapId)
-            //statistics.downloadedSizeBytes
-            return "Downloading ..."
-        } else {
-            return ""
-        }
     }
 
     private fun getKeyForId(groupId: Int, mapId: String): String {

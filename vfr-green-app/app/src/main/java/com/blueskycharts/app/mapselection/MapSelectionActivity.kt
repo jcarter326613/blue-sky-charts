@@ -22,14 +22,15 @@ class MapSelectionActivity : SubscriptionChecker(false, true) {
 
         val buttonLayout = findViewById<ExpandableListView>(R.id.select_map_layout)
         buttonLayout.setOnChildClickListener { _, _, groupPosition, childPosition, _ ->
-            val groupData = adapter?.getGroup(groupPosition)
             val childData = adapter?.getChild(groupPosition, childPosition)
-            if (groupData is MapSelectionAdapter.Group && childData is MapSelectionAdapter.Child) {
+            var retVal = false
+            if (childData is MapSelectionAdapter.Child) {
                 Preferences.instance.setPreference(Preferences.propertyNameDisplayedSubMapId, childData.mapId)
                 Preferences.instance.setPreference(Preferences.propertyNameDisplayedMapGroupId, childData.groupId)
                 startActivity(Intent(this, MapViewActivity::class.java))
+                retVal = true
             }
-            true
+            retVal
         }
 
         adapter = MapSelectionAdapter(object: MapSelectionAdapter.Listener {

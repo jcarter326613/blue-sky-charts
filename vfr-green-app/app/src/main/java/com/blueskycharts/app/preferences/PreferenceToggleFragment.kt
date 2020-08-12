@@ -57,7 +57,7 @@ class PreferenceToggleFragment(private val mapGroup: Int, private val mapName: S
                 private var updateNeeded = false
                 private var sizeText: String = ""
 
-                override fun statisticsUpdated(downloadedSizeBytes: Long) {
+                override fun statisticsUpdated(groupId: Int, mapId: String, downloadedSizeBytes: Long) {
                     sizeText = "${downloadedSizeBytes / 1000000} M"
                     if (sizeText != downloadSizeLabel.text) {
                         updateNeeded = true

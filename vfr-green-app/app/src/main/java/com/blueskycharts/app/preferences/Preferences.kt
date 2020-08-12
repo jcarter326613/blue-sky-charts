@@ -183,7 +183,7 @@ class Preferences private constructor() {
                 throw Error("Incorrect preference key passed to extractMapGroupAndNameFromProactiveDownloadKey.  Dot not found.")
             }
 
-            val groupIdString = pairString.substring(0, dotIndex - 1)
+            val groupIdString = pairString.substring(0, dotIndex)
             val mapName = pairString.substring(dotIndex + 1)
             return Pair(groupIdString.toInt(), mapName)
         }

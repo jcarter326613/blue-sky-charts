@@ -19,10 +19,10 @@ class MapPersistenceStatistics(val groupId: Int, val mapName: String, downloaded
      * Adds a listener and guarantees an updated broadcast of statistics
      */
     fun addListener(newListener: Listener) {
-        GlobalScope.launch {    //ok1
+        GlobalScope.launch {
             broadcastMutex.withLock {
                 listeners.add(newListener)
-                newListener.statisticsUpdated(downloadedSizeBytes)
+                newListener.statisticsUpdated(groupId, mapName, downloadedSizeBytes)
             }
         }
     }
@@ -39,13 +39,13 @@ class MapPersistenceStatistics(val groupId: Int, val mapName: String, downloaded
                 return
             }
             for (listener in listeners) {
-                listener.statisticsUpdated(downloadedSizeBytes)
+                listener.statisticsUpdated(groupId, mapName, downloadedSizeBytes)
             }
             broadcastNeeded = false
         }
     }
 
     interface Listener {
-        fun statisticsUpdated(downloadedSizeBytes: Long)
+        fun statisticsUpdated(groupId: Int, mapId: String, downloadedSizeBytes: Long)
     }
 }

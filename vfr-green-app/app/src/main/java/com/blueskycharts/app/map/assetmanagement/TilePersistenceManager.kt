@@ -101,7 +101,7 @@ class TilePersistenceManager(private val connectivityManager: ConnectivityManage
             for (map in config.mapList) {
                 val mapStatistics = getMapStatistics(group.id, map)
                 mapStatistics.addListener(object: MapPersistenceStatistics.Listener {
-                    override fun statisticsUpdated(downloadedSizeBytes: Long) {
+                    override fun statisticsUpdated(groupId: Int, mapId: String, downloadedSizeBytes: Long) {
                         //Set a future time to restart so we're not constantly starting and restarting the persistence process
                         if (!this@TilePersistenceManager.manifestUpdateStartTimerWaiting.getAndSet(true)) {
                             GlobalScope.launch {
