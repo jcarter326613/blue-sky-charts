@@ -130,11 +130,11 @@ class DownloadPreferencesAdapter(private var listener: DownloadPreferencesAdapte
             val padding = ScreenUnits.convertDipToPixels(10f, parent.context).toInt()
             nameLabel = TextView(parent.context)
             nameLabel.setPadding(padding, padding, padding, padding)
-            nameLabel.setTextSize(TypedValue.COMPLEX_UNIT_DIP, 20F)
+            nameLabel.setTextSize(TypedValue.COMPLEX_UNIT_SP, 20F)
 
             downloadLabel = TextView(parent.context)
             downloadLabel.setPadding(padding, padding, padding, padding)
-            downloadLabel.setTextSize(TypedValue.COMPLEX_UNIT_DIP, 20F)
+            downloadLabel.setTextSize(TypedValue.COMPLEX_UNIT_SP, 20F)
 
             val spacerLayoutParams = LinearLayout.LayoutParams(0, 0, 1f)
             val spacer = Space(parent.context)
