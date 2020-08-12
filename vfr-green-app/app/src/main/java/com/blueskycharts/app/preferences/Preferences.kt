@@ -1,6 +1,7 @@
 package com.blueskycharts.app.preferences
 
 import com.blueskycharts.app.assests.*
+import com.blueskycharts.app.utility.Log
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.sync.Mutex
@@ -167,5 +168,24 @@ class Preferences private constructor() {
         const val defaultValueAcceptedPrivacyVersion = ""
         const val defaultValueAllowFirebaseLogging = false
         const val defaultValueAllowFirebaseCrashalytics = false
+
+        // Other
+        fun extractMapGroupAndNameFromProactiveDownloadKey(key: String): Pair<Int, String> {
+            if (!key.startsWith(propertyTemplatePrefixProactiveDownload)) {
+                Log.error(null, "Incorrect preference key passed to extractMapGroupAndNameFromProactiveDownloadKey")
+                throw Error("Incorrect preference key passed to extractMapGroupAndNameFromProactiveDownloadKey")
+            }
+            val pairString = key.substring(propertyTemplatePrefixProactiveDownload.length)
+            val dotIndex = pairString.indexOf(".")
+
+            if (dotIndex < 0) {
+                Log.error(null, "Incorrect preference key passed to extractMapGroupAndNameFromProactiveDownloadKey.  Dot not found.")
+                throw Error("Incorrect preference key passed to extractMapGroupAndNameFromProactiveDownloadKey.  Dot not found.")
+            }
+
+            val groupIdString = pairString.substring(0, dotIndex - 1)
+            val mapName = pairString.substring(dotIndex + 1)
+            return Pair(groupIdString.toInt(), mapName)
+        }
     }
 }

@@ -10,5 +10,5 @@
     <string name="privacy_settings_description">When you consent to data collection as outlined in the privacy policy, you are contributing to our understanding of what features you use within the application and if any crashes are occurring.  We do not sell any of this information to other parties.  Enabling data collection gives us valuable information to improve this product.\n\nFor more information refer to https://blueskycharts.com/privacy.html</string>
     <string name="privacy_settings_checkbox">I consent to the collection of data for use in Firebase as outlined in the privacy policy.</string>
     <string name="privacy_settings_cta">Save Changes</string>
-
+    <string name="downloads_on_hold">Downloads are on hold because you are not on an un-metered wifi connection.</string>
 </resources>

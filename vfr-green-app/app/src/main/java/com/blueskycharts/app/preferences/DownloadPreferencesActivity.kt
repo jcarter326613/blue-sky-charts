@@ -1,37 +1,33 @@
 package com.blueskycharts.app.preferences
 
-import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
-import android.os.Environment
-import android.provider.Settings
-import android.widget.Button
-import android.widget.ToggleButton
+import android.widget.ExpandableListView
 import com.blueskycharts.app.R
-import com.blueskycharts.app.assests.DiskCacheFactory
-import com.blueskycharts.app.map.assetmanagement.TilePersistenceManager
-import com.blueskycharts.app.map.configuration.Inventory
-import com.blueskycharts.app.map.configuration.MapConfiguration
-import com.blueskycharts.app.subscription.SubscriptionChecker
+import com.blueskycharts.app.mapselection.MapSelectionAdapter
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
 
 class DownloadPreferencesActivity : MeteredWifiWarningActivity(R.id.wifiNote) {
+    private var adapter: DownloadPreferencesAdapter? = null
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        setContentView(R.layout.activity_set_preferences)
+        setContentView(R.layout.activity_download_preferences)
 
-        val clearCacheButton = findViewById<Button>(R.id.clearCacheButton)
-        clearCacheButton?.setOnClickListener {
-            Preferences.instance.setPreference(Preferences.propertyNameRequestClearCache, true)
-            TilePersistenceManager.getInstance(null).start()
-        }
-
-        displayPreferences()
+        val buttonLayout = findViewById<ExpandableListView>(R.id.set_preferences_layout)
+        adapter = DownloadPreferencesAdapter(object: DownloadPreferencesAdapter.Listener {
+            override fun loadComplete(adapter: DownloadPreferencesAdapter) {
+                GlobalScope.launch(Dispatchers.Main) {
+                    buttonLayout.setAdapter(adapter)
+                }
+            }
+        }, applicationContext)
     }
 
+    /*
     private fun displayPreferences() {
-        GlobalScope.launch {    //ok1
+        GlobalScope.launch {
             val configList = mutableListOf<MapConfiguration>()
             for (group in Inventory.instance.mapGroups) {
                 val config = group.getConfiguration()
@@ -53,4 +49,5 @@ class DownloadPreferencesActivity : MeteredWifiWarningActivity(R.id.wifiNote) {
             }
         }
     }
+     */
 }
