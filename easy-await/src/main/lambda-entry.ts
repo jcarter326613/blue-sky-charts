@@ -32,6 +32,8 @@ export class LambdaEntry {
         } else if (!(event["httpMethod"] == httpMethod && "origin" in event["headers"] && (
             event["headers"]["origin"] == "http://localhost:3000" ||
             event["headers"]["origin"] == "http://localhost:3000/" ||
+            event["headers"]["origin"] == "http://localhost:4000" ||
+            event["headers"]["origin"] == "http://localhost:4000/" ||
             event["headers"]["origin"] == "http://blueskycharts.com" ||
             event["headers"]["origin"] == "http://blueskycharts.com/" ||
             event["headers"]["origin"] == "https://blueskycharts.com" ||
