@@ -1,3 +1,11 @@
+# Setup
+```bash
+bundle install
+bundle exec jekyll build
+bundle exec jekyll serve
+```
+
+
 # Creative Theme for Jekyll
 
 A Jekyll implementation of the [Creative Theme](https://startbootstrap.com/themes/creative/) template by [Start Bootstrap](https://startbootstrap.com).

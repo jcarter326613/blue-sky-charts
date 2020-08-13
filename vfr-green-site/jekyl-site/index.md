@@ -3,49 +3,42 @@ layout: home
 header:
   title: Blue Sky Charts
   text: >
-    View FAA VFR charts while connected to the internet or download them for when you need to turn on airplane mode.  
-    View graphical METAR data on any sectional or terminal chart or a combined world view.
+    View graphical METAR data on available sectional charts, terminal charts or a combined world view.
+    Bring electronic backup charts with you for full offline access when you need them.
     Track your current location to enhance your situational awareness while in flight.
-  action: # action button is optional
+  action:
     image:
       src: 'https://play.google.com/intl/en_us/badges/static/images/badges/en_badge_web_generic.png'
       alt: 'Get it on Google Play'
-
+    url: 'https://www.google.com'
 
 sections:
   - type: call-to-action.html
     section_id: about
     background_style: bg-primary
-    title: We've got what you need!
-    text: Start Bootstrap has everything you need to get your new website up and running in no time! All of the templates and themes on Start Bootstrap are open source, free to download, and easy to use. No strings attached!
+    title: Cheaper than a paper map subscription with 14 day free trial
+    text: We offer most FAA VFR Sectional and Terminal Charts for one low annual subscription price of $14.99.  Completely risk free 14 day trial period.  No need to worry about getting locked in by a confusing unsubscription process.  We make it quick and easy.  There's nothing to loose, give Blue Sky Charts a try!
     actions:
-      - title: Get Started!
-        url: '#page-top'
+      - title: Download Now
+        url: 'https://www.google.com'
         class: btn-light
 
   - type: services.html
     section_id: services
     #background_style: bg-info
-    title: At Your Service
+    title: App features
     services:
-      - title: Sturdy Templates
-        text: Our templates are updated regularly so they don't break.
-        icon: fa-gem text-info
-        url: https://startbootstrap.com/
-      - title: Ready to Ship
-        text: You can use this theme as is, or you can make changes!
+      - title: METAR data
+        text: View current METAR data including ceiling, winds, etc with issue time displayed
+        icon: fa-gem
+      - title: GPS tracking
+        text: Track your current location on any map
         icon: fa-paper-plane
-      - title: Up to Date
-        text: We update dependencies to keep things fresh.
+      - title: Download maps
+        text: Select any available map to be downloaded for offline viewing
         icon: fa-laptop-code
-      - title: Made with Love
-        text: You have to make your websites with love these days!
-        icon: fa-heart
-      - title: Other 1
-        text: Some not-so long text here.
-        icon: fa-heart
-      - title: Other 2
-        text: Some not-so long text here.
+      - title: Small download size
+        text: Each map is encoded for maximum storage efficiency.  Most Sectional Charts are less than 200 Mb.
         icon: fa-heart
 
   - type: portfolio.html
