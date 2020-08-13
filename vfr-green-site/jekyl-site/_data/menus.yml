@@ -3,8 +3,6 @@
 # However on github-pages custom plugins are disabled, and the script doesn't
 # run. So please, fill in any custom menu entry here.
 header:
-- title: Home
-  url: /
 - title: Instructions
   url: /instructions
 - title: Weather Symbols
