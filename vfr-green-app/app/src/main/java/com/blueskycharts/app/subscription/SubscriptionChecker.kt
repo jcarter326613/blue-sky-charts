@@ -20,6 +20,7 @@ import kotlinx.coroutines.yield
 import java.util.concurrent.atomic.AtomicBoolean
 
 open class SubscriptionChecker(private val redirectOnPurchaseMade: Boolean, private val redirectOnNotPurchased: Boolean): AppCompatActivity(), BillingClientStateListener, PurchasesUpdatedListener {
+    private val skipCheck = com.blueskycharts.app.BuildConfig.DEBUG
     private var billingClient: BillingClient? = null
     private var subscriptionVerified = AtomicBoolean(false)
     var subscriptionStatus: SubscriptionStatus = SubscriptionStatus.Unknown
@@ -104,7 +105,7 @@ open class SubscriptionChecker(private val redirectOnPurchaseMade: Boolean, priv
             return
         }
 
-        var isSubscriptionPurchased = false
+        var isSubscriptionPurchased = skipCheck
         if (billingClient.isFeatureSupported(BillingClient.FeatureType.SUBSCRIPTIONS).responseCode != BillingClient.BillingResponseCode.OK) {
             // Notify that they need to update their google play store application because subscriptions are not supported on their install
             if (!redirectOnNotPurchased) {
