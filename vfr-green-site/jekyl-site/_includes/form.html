@@ -1,0 +1,28 @@
+<section id="{{ section.section_id }}" class="page-section {{ section.background_style }}">
+  <div class="container">
+    <div class="row justify-content-center">
+      <div class="col-lg-8 text-center">
+        <h2 class="mt-0">{{ section.title }}</h2>
+        <hr class="divider my-4">
+        <p class="text-muted mb-5">{{ section.instructions | markdownify }}</p>
+      </div>
+    </div>
+    <div class="row justify-content-center">
+      <div class="col-lg-8 text-left form-section">
+        {% for entry in section.elements %}
+        <div class="form-section-label">{{ entry.label }}</div>
+        <div class="form-section-input">
+          {% if entry.type == "textarea" %}
+          <textarea id="{{entry.form_name}}"></textarea>
+          {% else %}
+          <input type="{{ type }}" id="{{entry.form_name}}"/>
+          {% endif %}
+        </div>
+        {% endfor %}
+        <div class="buttons">
+          <a class="btn btn-primary submitForm" onclick="javascript: return false;">Send Message</a>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>

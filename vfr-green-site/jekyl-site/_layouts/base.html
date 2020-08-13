@@ -19,9 +19,10 @@
   <link href="assets/css/creative.css" rel="stylesheet">
   <link href="assets/css/main.css" rel="stylesheet">
   <link href="assets/css/bsc.css" rel="stylesheet">
+  {% for new_css in page.additional_css %}
+  <link href="assets/css/{{ new_css }}.css" rel="stylesheet">
+  {% endfor %}
 
-  <!-- HTML5 Shim and Respond.js IE8 support of HTML5 elements and media queries -->
-  <!-- WARNING: Respond.js doesn't work if you view the page via file:// -->
   <!--[if lt IE 9]>
       <script src="https://oss.maxcdn.com/libs/html5shiv/3.7.0/html5shiv.js"></script>
       <script src="https://oss.maxcdn.com/libs/respond.js/1.4.2/respond.min.js"></script>
@@ -41,8 +42,11 @@
   <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery-easing/1.4.1/jquery.easing.min.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/magnific-popup.js/1.1.0/jquery.magnific-popup.min.js"></script>
   <!-- Core theme JS-->
-
   <script src="assets/js/creative.min.js"></script>
+  <!-- Custom js -->
+  {% for new_js in page.additional_js %}
+  <script src="assets/js/{{ new_js }}.js"></script>
+  {% endfor %}
 </body>
 
 </html>

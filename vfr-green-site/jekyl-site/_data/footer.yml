@@ -1,3 +1,9 @@
 links:
+  - text: Home
+    url: '/'
+  - text: Instructions
+    url: /instructions
+  - text: Weather Symbols
+    url: /instructions/weather-symbols
   - text: Contact Us
     url: '/contact.html'
