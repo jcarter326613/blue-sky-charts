@@ -9,18 +9,18 @@
 
   <title>{% assign title_is_not_empty = page.title | is_not_empty %}{% if title_is_not_empty %}{{ page.title }} - {% endif %}{{ site.title }}</title>
   <!-- Favicon-->
-  <link rel="icon" type="image/x-icon" href="assets/img/favicon.ico" />
+  <link rel="icon" type="image/x-icon" href="/assets/img/favicon.ico" />
   <!-- Font Awesome icons (free version)-->
   <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.10.0/css/all.css" crossorigin="anonymous">
   <!-- Google fonts-->
   <link href="https://fonts.googleapis.com/css?family=Merriweather+Sans:400,700" rel="stylesheet" />
   <link href="https://fonts.googleapis.com/css?family=Merriweather:400,300,300italic,400italic,700,700italic" rel="stylesheet" type="text/css" />
   <link href="https://cdnjs.cloudflare.com/ajax/libs/magnific-popup.js/1.1.0/magnific-popup.min.css" rel="stylesheet" />
-  <link href="assets/css/creative.css" rel="stylesheet">
-  <link href="assets/css/main.css" rel="stylesheet">
-  <link href="assets/css/bsc.css" rel="stylesheet">
+  <link href="/assets/css/creative.css" rel="stylesheet">
+  <link href="/assets/css/main.css" rel="stylesheet">
+  <link href="/assets/css/bsc.css" rel="stylesheet">
   {% for new_css in page.additional_css %}
-  <link href="assets/css/{{ new_css }}.css" rel="stylesheet">
+  <link href="/assets/css/{{ new_css }}.css" rel="stylesheet">
   {% endfor %}
 
   <!--[if lt IE 9]>
@@ -41,10 +41,10 @@
   <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery-easing/1.4.1/jquery.easing.min.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/magnific-popup.js/1.1.0/jquery.magnific-popup.min.js"></script>
   <!-- Core theme JS-->
-  <script src="assets/js/creative.min.js"></script>
+  <script src="/assets/js/creative.min.js"></script>
   <!-- Custom js -->
   {% for new_js in page.additional_js %}
-  <script src="assets/js/{{ new_js }}.js"></script>
+  <script src="/assets/js/{{ new_js }}.js"></script>
   {% endfor %}
 </body>
 
