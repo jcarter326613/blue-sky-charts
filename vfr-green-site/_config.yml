@@ -22,3 +22,5 @@ exclude:
   - Gemfile.lock
   - build-in-docker.sh
   - README.md
+  - contract-history
+  - deploy
