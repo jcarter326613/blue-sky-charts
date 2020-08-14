@@ -30,16 +30,16 @@ sections:
     services:
       - title: METAR data
         text: View current METAR data including ceiling, winds, etc with issue time displayed
-        icon: fa-gem
+        icon: fa-cloud-sun
       - title: GPS tracking
         text: Track your current location on any map
-        icon: fa-paper-plane
+        icon: fa-map-marker-alt
       - title: Offline viewing
         text: Select any available map to be downloaded for offline viewing
-        icon: fa-laptop-code
+        icon: fa-download
       - title: Small download size
         text: Each map is compressed for maximum storage efficiency.  Most Sectional Charts are less than 200 Mb.
-        icon: fa-heart
+        icon: fa-compress-alt
 
   - type: aside.html
     section_id: aside
