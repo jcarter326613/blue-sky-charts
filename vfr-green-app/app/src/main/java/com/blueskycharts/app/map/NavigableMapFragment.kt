@@ -2,9 +2,12 @@ package com.blueskycharts.app.map
 
 import android.Manifest
 import android.app.AlertDialog
+import android.content.Context
 import android.content.IntentSender
 import android.content.pm.PackageManager
 import android.location.Location
+import android.location.LocationListener
+import android.location.LocationManager
 import android.os.Bundle
 import android.os.Looper
 import android.view.LayoutInflater
@@ -28,6 +31,7 @@ class NavigableMapFragment: Fragment() {
     var mapView: NavigableMap2d? = null
         private set
     private var fusedLocationClient: FusedLocationProviderClient? = null
+    private var locationManager: LocationManager? = null
     private var locationUpdatesCallback: LocationUpdatesCallback? = null
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
@@ -86,6 +90,7 @@ class NavigableMapFragment: Fragment() {
     override fun onPause() {
         super.onPause()
         this.fusedLocationClient?.removeLocationUpdates(locationUpdatesCallback)
+        locationUpdatesCallback?.let{ this.locationManager?.removeUpdates(it) }
     }
 
     private fun getLocation() {
@@ -133,15 +138,48 @@ class NavigableMapFragment: Fragment() {
                         } catch (sendEx: IntentSender.SendIntentException) {
                             // Ignore the error.
                         }
+                    } else {
+                        if (locationManager == null) {
+                            locationManager = activity.getSystemService(Context.LOCATION_SERVICE) as LocationManager
+                        }
+                        val gpsEnabled = try {
+                            // "Checking for GPS support"
+                            locationManager?.isProviderEnabled(LocationManager.GPS_PROVIDER) ?: false
+                        } catch (e: Throwable) {
+                            false
+                        }
+
+                        if (gpsEnabled)
+                        {
+                            val context = this.context ?: return@addOnFailureListener
+
+                            if (ActivityCompat.checkSelfPermission(context, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
+                                return@addOnFailureListener
+                            }
+                            locationUpdatesCallback?.let { it ->
+                                locationManager?.requestLocationUpdates(
+                                    LocationManager.GPS_PROVIDER,
+                                    10000,
+                                    0f,
+                                    it
+                                )
+                            }
+                        }
                     }
                 }
         }
     }
 
-    private class LocationUpdatesCallback(val mapView: NavigableMap2d) : LocationCallback() {
+    private class LocationUpdatesCallback(val mapView: NavigableMap2d) : LocationCallback(), LocationListener {
         override fun onLocationResult(p0: LocationResult?) {
             super.onLocationResult(p0)
             p0?.lastLocation?.let { location ->
+                mapView.updateCurrentLocation(location)
+            }
+        }
+
+        override fun onLocationChanged(p0: Location) {
+            p0.let { location ->
                 mapView.updateCurrentLocation(location)
             }
         }
