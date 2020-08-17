@@ -12,9 +12,8 @@ import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
 import kotlin.math.floor
 
-open class TileProvider(val context: Context, map: Map, private val group: Inventory.Group) : CachedProvider(map, 0), TileProviderInterface {
-    val assetProvider
-        get() = TileAssetProvider.getInstance(group)
+open class TileProvider(val context: Context, map: Map, val group: Inventory.Group) : CachedProvider(map, 0), TileProviderInterface {
+    private val assetProvider = TileAssetProvider(group)
 
     override fun retrieveTile(mapName: String, mapVersion: String, zoomLevel: Int, location: Point2d, tileDimensions: Point2d,
                      receiver: TileReceiver, data: Any?, canvas: Canvas ) {

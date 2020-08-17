@@ -8,6 +8,7 @@ import android.widget.TextView
 import com.blueskycharts.app.R
 import com.blueskycharts.app.map.assetmanagement.MapPersistenceStatistics
 import com.blueskycharts.app.map.assetmanagement.TilePersistenceManager
+import com.blueskycharts.app.map.assetmanagement.TilePersistenceManagerFactory
 import com.blueskycharts.app.map.configuration.Inventory
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
@@ -38,7 +39,7 @@ class ManageMemoryActivity : MeteredWifiWarningActivity(R.id.wifiNote) {
                 .setMessage("This will delete all map data that hasn't been marked for offline access.  Are you sure you want to do this?")
                 .setPositiveButton("Yes") { _: DialogInterface, _: Int ->
                     Preferences.instance.setPreference(Preferences.propertyNameRequestClearCache, true)
-                    TilePersistenceManager.getInstance(null).start()
+                    TilePersistenceManagerFactory.instance.start()
                 }
                 .setNegativeButton("No") { _: DialogInterface, _: Int ->
                 }
@@ -58,7 +59,7 @@ class ManageMemoryActivity : MeteredWifiWarningActivity(R.id.wifiNote) {
                 val config = group.getConfiguration()
                 if (config != null) {
                     for (map in config.mapList) {
-                        val mapStatistics = TilePersistenceManager.getInstance(null).getMapStatistics(group.id, map)
+                        val mapStatistics = TilePersistenceManagerFactory.instance.getMapStatistics(group.id, map)
                         if (Preferences.instance.getBooleanValue(Preferences.propertyTemplateMapProactiveDownload(group.id, map), Preferences.defaultValueMapProactiveDownload)) {
                             mapStatistics.addListener(object : MapPersistenceStatistics.Listener {
                                 override fun statisticsUpdated(groupId: Int, mapId: String, downloadedSizeBytes: Long) {

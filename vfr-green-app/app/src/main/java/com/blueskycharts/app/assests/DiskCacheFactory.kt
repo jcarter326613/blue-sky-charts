@@ -4,13 +4,10 @@ import android.content.Context
 import android.util.AttributeSet
 import android.view.View
 
-class DiskCacheFactory(context: Context? = null, attributes: AttributeSet? = null): View(context, attributes) {
+class DiskCacheFactory(context: Context) {
     init {
         if ( _instance == null ) {
-            if ( context == null ) {
-                throw Error("Error initializing disk cache factory.  Null context.")
-            }
-            _instance = DiskCache(context)
+            _instance = DiskCache(context.applicationContext)
         }
     }
 

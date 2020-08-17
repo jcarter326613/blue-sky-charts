@@ -33,8 +33,6 @@ class MapViewActivity : SubscriptionChecker(false, true), Preferences.Listener {
         setContentView(R.layout.activity_map_view)
         map = findViewById<NavigableMap2d>(R.id.navigableMap2d)
 
-        TilePersistenceManager.getInstance(getSystemService(Context.CONNECTIVITY_SERVICE) as ConnectivityManager)
-
         Preferences.instance.addListener(this)
     }
 

@@ -11,6 +11,7 @@ import android.widget.Space
 import android.widget.TextView
 import com.blueskycharts.app.map.assetmanagement.MapPersistenceStatistics
 import com.blueskycharts.app.map.assetmanagement.TilePersistenceManager
+import com.blueskycharts.app.map.assetmanagement.TilePersistenceManagerFactory
 import com.blueskycharts.app.map.configuration.Inventory
 import com.blueskycharts.app.utility.ScreenUnits
 import kotlinx.coroutines.Dispatchers
@@ -50,7 +51,7 @@ class DownloadPreferencesAdapter(private var listener: DownloadPreferencesAdapte
                 if (config != null) {
                     for (map in config.mapList) {
                         newGroup.children.add(Child(map, group.id, map))
-                        TilePersistenceManager.getInstance(null).getMapStatistics(group.id, map).addListener(object: MapPersistenceStatistics.Listener {
+                        TilePersistenceManagerFactory.instance.getMapStatistics(group.id, map).addListener(object: MapPersistenceStatistics.Listener {
                             override fun statisticsUpdated(groupId: Int, mapId: String, downloadedSizeBytes: Long) {
                                 updateView(groupId, mapId)
                             }
@@ -72,7 +73,7 @@ class DownloadPreferencesAdapter(private var listener: DownloadPreferencesAdapte
     fun updateView(groupId: Int, map: String) {
         GlobalScope.launch {
             if (Preferences.instance.getBooleanValue(Preferences.propertyTemplateMapProactiveDownload(groupId, map), Preferences.defaultValueMapProactiveDownload)) {
-                val persistenceManager = TilePersistenceManager.getInstance(null)
+                val persistenceManager = TilePersistenceManagerFactory.instance
                 val statistics = persistenceManager.getMapStatistics(groupId, map)
                 downloadLabelLookup[getKeyForId(groupId, map)] = "${statistics.downloadedSizeBytes / 1000000} M"
             } else {

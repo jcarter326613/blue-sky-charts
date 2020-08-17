@@ -20,7 +20,9 @@ import java.net.URL
  *  Provides a method for deletion of files which are in the manifest and removes them
  * Manages the expiration of non persisted tiles using the manifest which should contain last access info for each tile in a heap
  */
-class TileAssetProvider private constructor(private val group: Inventory.Group) {
+class TileAssetProvider(private val group: Inventory.Group) {
+    private val assetProvider = AssetProvider()
+
     fun retrieveTile(mapName: String, mapVersion: String, zoom: Int, x: Int, y: Int, callback: ((asset: Asset) -> Unit)) {
         // Request the tile from the base class
         val assetDescription = getTileFileDescription(mapName, mapVersion, zoom, x, y)
@@ -60,23 +62,7 @@ class TileAssetProvider private constructor(private val group: Inventory.Group) 
     }
 
     companion object {
-        private var instances: MutableMap<Int, TileAssetProvider> = mutableMapOf()
         private const val imageExtension = "jpg"
-        private val assetProvider = AssetProvider()
-
-        init {
-            for ( group in Inventory.instance.mapGroups ) {
-                instances[group.id] = TileAssetProvider(group)
-            }
-        }
-
-        fun getInstance(group: Inventory.Group): TileAssetProvider {
-            return getInstance(group.id)
-        }
-
-        fun getInstance(groupId: Int): TileAssetProvider {
-            return instances[groupId]?: throw Error("Asset provider not created for group ${groupId}")
-        }
 
         fun getMapAssetDescriptionContainer(): AssetDescription {
             val tileUrl = Inventory.topLevelMapUrl

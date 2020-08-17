@@ -4,6 +4,7 @@ import android.graphics.Bitmap
 import android.graphics.Canvas
 import com.blueskycharts.app.coordinates.Box2d
 import com.blueskycharts.app.coordinates.Point2d
+import com.blueskycharts.app.map.assetmanagement.TileAssetProvider
 
 class TileRequest(private val provider: TileProvider, private var receiver: TileReceiver?, private var data: Any?,
                   private val location: Point2d, private val dimensions: Point2d,
@@ -12,7 +13,7 @@ class TileRequest(private val provider: TileProvider, private var receiver: Tile
         private set
 
     override fun sendRequest() {
-        val provider = provider.assetProvider
+        val provider = TileAssetProvider(provider.group)
         provider.retrieveTile(mapName, mapVersion, zoomLevel, location.x.toInt(), location.y.toInt() ) {
             try {
                 val bitmap = it.asBitmap()

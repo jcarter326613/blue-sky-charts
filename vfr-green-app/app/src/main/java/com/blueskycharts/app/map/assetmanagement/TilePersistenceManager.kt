@@ -118,6 +118,8 @@ class TilePersistenceManager(private val connectivityManager: ConnectivityManage
     }
 
     suspend fun getMapStatistics(groupId: Int, mapName: String): MapPersistenceStatistics {
+        val group = Inventory.instance.findGroupById(groupId) ?: return MapPersistenceStatistics(groupId, mapName, 0)
+
         val lookupKey = getMapKey(groupId, mapName)
         val statistics = statisticsRecords[lookupKey]
         if ( statistics == null ) {
@@ -130,7 +132,7 @@ class TilePersistenceManager(private val connectivityManager: ConnectivityManage
                     statisticsNotNull = MapPersistenceStatistics(groupId, mapName, 0)
                     var statisticsSet = false
 
-                    val assetProvider = TileAssetProvider.getInstance(groupId)
+                    val assetProvider = TileAssetProvider(group)
                     DiskCacheFactory.instance.addListener(assetProvider.getMapAssetDescriptionContainer(mapName), object:DiskCacheListener {
                         override suspend fun totalSizeChanged(totalSize: Long) {
                             statisticsNotNull.setStatistics(totalSize)
@@ -159,7 +161,7 @@ class TilePersistenceManager(private val connectivityManager: ConnectivityManage
         var usedBytes: Long = 0
         val persistedFileRootList = mutableListOf<AssetDescription>()
         for (group in Inventory.instance.mapGroups) {
-            val assetProvider = TileAssetProvider.getInstance(group.id)
+            val assetProvider = TileAssetProvider(group)
             val configuration = group.getConfiguration() ?: continue
             for (mapName in configuration.mapList) {
                 val proactiveDownload = Preferences.instance.getBooleanValue(
@@ -251,7 +253,7 @@ class TilePersistenceManager(private val connectivityManager: ConnectivityManage
 
             // Create a map of all tiles for the map so that we can start to the ones that have been identified as
             // cached or copied to the cache from local sources
-            val tileProvider = TileAssetProvider.getInstance(group)
+            val tileProvider = TileAssetProvider(group)
 
             // For each file
             for ( z in 0..metaData.maxZoom ) {
@@ -312,22 +314,6 @@ class TilePersistenceManager(private val connectivityManager: ConnectivityManage
                     }
                 }
             }
-        }
-    }
-
-    companion object {
-        private var instance: TilePersistenceManager? = null
-
-        fun getInstance(cm: ConnectivityManager?): TilePersistenceManager {
-            var i = instance
-            if (i == null) {
-                if (cm == null) {
-                    throw Error("Can not instantiate TilePersistenceManager with null Connectivity Manager")
-                }
-                i = TilePersistenceManager(cm)
-                instance = i
-            }
-            return i
         }
     }
 }

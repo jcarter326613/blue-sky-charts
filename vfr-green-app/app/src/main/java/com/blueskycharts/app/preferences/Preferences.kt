@@ -64,25 +64,12 @@ class Preferences private constructor() {
         }
     }
 
-    fun setPreference(key: Array<String>, value: String) {
-        if ( !validateKeyArray(key) ) {
-            throw Error("Invalid key for set preferences ${key.contentToString()}")
-        }
-
-        setPreference(getKeyString(key), value)
-    }
-
     fun setPreference(key: String, value: Int) = setPreference(key, value.toString())
-    fun setPreference(key: Array<String>, value: Int) = setPreference(key, value.toString())
     fun setPreference(key: String, value: Boolean) = setPreference(key, value.toString())
-    fun setPreference(key: Array<String>, value: Boolean) = setPreference(key, value.toString())
 
     fun getStringValue(key: String, defaultValue: String): String = this.preferences[key] ?: defaultValue
-    fun getStringValue(key: Array<String>, defaultValue: String): String = getStringValue(getKeyString(key), defaultValue)
     fun getBooleanValue(key: String, defaultValue: Boolean): Boolean = this.preferences[key]?.toBoolean() ?: defaultValue
-    fun getBooleanValue(key: Array<String>, defaultValue: Boolean): Boolean = getBooleanValue(getKeyString(key), defaultValue)
     fun getIntValue(key: String, defaultValue: Int): Int = this.preferences[key]?.toInt() ?: defaultValue
-    fun getIntValue(key: Array<String>, defaultValue: Int): Int = getIntValue(getKeyString(key), defaultValue)
 
     private fun validateKeyArray(tokens: Array<String>): Boolean {
         for ( token in tokens ) {
@@ -92,8 +79,6 @@ class Preferences private constructor() {
         }
         return true
     }
-
-    private fun getKeyString(tokens: Array<String>): String = tokens.joinToString(".")
 
     private fun validateKeyToken(token: String): Boolean {
         for ( c in token ) {

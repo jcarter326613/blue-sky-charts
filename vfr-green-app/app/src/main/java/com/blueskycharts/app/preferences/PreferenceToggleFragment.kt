@@ -12,6 +12,7 @@ import android.widget.ToggleButton
 import com.blueskycharts.app.R
 import com.blueskycharts.app.map.assetmanagement.MapPersistenceStatistics
 import com.blueskycharts.app.map.assetmanagement.TilePersistenceManager
+import com.blueskycharts.app.map.assetmanagement.TilePersistenceManagerFactory
 import com.blueskycharts.app.utility.Log
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
@@ -49,7 +50,7 @@ class PreferenceToggleFragment(private val mapGroup: Int, private val mapName: S
 
         // Set up the download progress indicator
         // Set up the downloaded file size indicator
-        val tilePersistenceManager = TilePersistenceManager.getInstance(this.context?.getSystemService(Context.CONNECTIVITY_SERVICE) as ConnectivityManager)
+        val tilePersistenceManager = TilePersistenceManagerFactory.instance
         val downloadSizeLabel = view.findViewById<TextView>(R.id.size_on_disk_label)
         GlobalScope.launch {
             val statistics = tilePersistenceManager.getMapStatistics(mapGroup, mapName)
