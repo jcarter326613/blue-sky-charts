@@ -29,6 +29,34 @@ class MainMenuFragment() : Fragment() {
     private var overlayModel: OverlayViewModel? = null
     private var displayedMenu: View? = null
     private var currentlyTracking: Boolean = true
+    private val preferencesListener: Preferences.Listener
+
+    init {
+        preferencesListener = object: Preferences.Listener {
+            override fun preferenceChanged(preferenceName: String) {
+                if (preferenceName == Preferences.propertyNameMapTrackLocation) {
+                    GlobalScope.launch(Dispatchers.Main) {
+                        val zoomToSelfButton =
+                            view?.findViewById<ImageButton>(R.id.zoomToSelfButton)
+                        val newTracking = Preferences.instance.getBooleanValue(
+                            Preferences.propertyNameMapTrackLocation,
+                            Preferences.defaultValueMapTrackLocation
+                        )
+                        if (currentlyTracking != newTracking) {
+                            if (newTracking) {
+                                //zoomToSelfButton?.setImageResource(R.drawable.ic_my_location_set)
+                                zoomToSelfButton?.visibility = View.INVISIBLE
+                            } else {
+                                //zoomToSelfButton?.setImageResource(R.drawable.ic_my_location_not_set)
+                                zoomToSelfButton?.visibility = View.VISIBLE
+                            }
+                            currentlyTracking = newTracking
+                        }
+                    }
+                }
+            }
+        }
+    }
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
         //overlayModel = ViewModelProvider(this).get(OverlayViewModel::class.java)
@@ -63,30 +91,12 @@ class MainMenuFragment() : Fragment() {
 
     override fun onResume() {
         super.onResume()
-        Preferences.instance.addListener(object: Preferences.Listener{
-            override fun preferenceChanged(preferenceName: String) {
-                if (preferenceName == Preferences.propertyNameMapTrackLocation) {
-                    GlobalScope.launch(Dispatchers.Main) {
-                        val zoomToSelfButton =
-                            view?.findViewById<ImageButton>(R.id.zoomToSelfButton)
-                        val newTracking = Preferences.instance.getBooleanValue(
-                            Preferences.propertyNameMapTrackLocation,
-                            Preferences.defaultValueMapTrackLocation
-                        )
-                        if (currentlyTracking != newTracking) {
-                            if (newTracking) {
-                                //zoomToSelfButton?.setImageResource(R.drawable.ic_my_location_set)
-                                zoomToSelfButton?.visibility = View.INVISIBLE
-                            } else {
-                                //zoomToSelfButton?.setImageResource(R.drawable.ic_my_location_not_set)
-                                zoomToSelfButton?.visibility = View.VISIBLE
-                            }
-                            currentlyTracking = newTracking
-                        }
-                    }
-                }
-            }
-        })
+        Preferences.instance.addListener(preferencesListener)
+    }
+
+    override fun onPause() {
+        super.onPause()
+        Preferences.instance.removeListener(preferencesListener)
     }
 
     private fun setupMainMenuHandlers() {

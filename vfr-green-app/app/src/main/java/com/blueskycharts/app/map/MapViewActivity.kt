@@ -32,8 +32,16 @@ class MapViewActivity : SubscriptionChecker(false, true), Preferences.Listener {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_map_view)
         map = findViewById<NavigableMap2d>(R.id.navigableMap2d)
+    }
 
+    override fun onResume() {
+        super.onResume()
         Preferences.instance.addListener(this)
+    }
+
+    override fun onPause() {
+        super.onPause()
+        Preferences.instance.removeListener(this)
     }
 
     override fun preferenceChanged(preferenceName: String) {

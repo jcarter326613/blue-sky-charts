@@ -6,6 +6,8 @@ import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
+import kotlinx.coroutines.yield
+import java.util.concurrent.atomic.AtomicInteger
 
 class Preferences private constructor() {
     // Private variables
@@ -16,6 +18,7 @@ class Preferences private constructor() {
     private val persistMutex = Mutex()
     private val listeners = mutableListOf<Listener>()
     private val listenerMutex = Mutex()
+    private val pendingRemoveCount = AtomicInteger(0)
 
     init {
         val preferencesAsset = Asset(preferencesAssetDescription)
@@ -38,7 +41,7 @@ class Preferences private constructor() {
      * Adds a listener to receive notification of property updates. Guarantees a call to the new listener with every property after added.
      */
     fun addListener(newListener: Listener) {
-        GlobalScope.launch {    //ok1
+        GlobalScope.launch {
             listenerMutex.withLock {
                 this@Preferences.listeners.add(newListener)
             }
@@ -50,16 +53,35 @@ class Preferences private constructor() {
         }
     }
 
+    fun removeListener(oldListener: Listener) {
+        pendingRemoveCount.incrementAndGet()
+        GlobalScope.launch {
+            listenerMutex.withLock {
+                this@Preferences.listeners.remove(oldListener)
+                pendingRemoveCount.decrementAndGet()
+            }
+        }
+    }
+
     fun setPreference(key: String, value: String) {
-        GlobalScope.launch {    //ok1
+        GlobalScope.launch {
             persistMutex.withLock {
                 this@Preferences.preferences[key] = value
                 persist()
             }
-            listenerMutex.withLock {
-                for (listener in this@Preferences.listeners) {
-                    listener.preferenceChanged(key)
+            var leaveLoop = false
+            while(!leaveLoop) {
+                if (pendingRemoveCount.get() == 0) {
+                    listenerMutex.withLock {
+                        if (pendingRemoveCount.get() == 0) {
+                            for (listener in this@Preferences.listeners) {
+                                listener.preferenceChanged(key)
+                            }
+                            leaveLoop = true
+                        }
+                    }
                 }
+                yield()
             }
         }
     }
@@ -70,26 +92,6 @@ class Preferences private constructor() {
     fun getStringValue(key: String, defaultValue: String): String = this.preferences[key] ?: defaultValue
     fun getBooleanValue(key: String, defaultValue: Boolean): Boolean = this.preferences[key]?.toBoolean() ?: defaultValue
     fun getIntValue(key: String, defaultValue: Int): Int = this.preferences[key]?.toInt() ?: defaultValue
-
-    private fun validateKeyArray(tokens: Array<String>): Boolean {
-        for ( token in tokens ) {
-            if ( !validateKeyToken(token) ) {
-                return false
-            }
-        }
-        return true
-    }
-
-    private fun validateKeyToken(token: String): Boolean {
-        for ( c in token ) {
-            if (!((c in 'a'..'z') ||
-                  (c in 'A'..'Z') ||
-                  (c in '0'..'9')) ) {
-                return false
-            }
-        }
-        return true
-    }
 
     private fun persist() {
         version++

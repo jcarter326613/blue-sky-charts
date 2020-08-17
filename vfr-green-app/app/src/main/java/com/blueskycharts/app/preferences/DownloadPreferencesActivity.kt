@@ -24,8 +24,14 @@ class DownloadPreferencesActivity : MeteredWifiWarningActivity(R.id.wifiNote), P
             val childData = adapter?.getChild(groupPosition, childPosition)
             var retVal = false
             if (childData is DownloadPreferencesAdapter.Child) {
-                val propertyTemplateValue = Preferences.propertyTemplateMapProactiveDownload(childData.groupId, childData.mapId)
-                val proactiveDownload = Preferences.instance.getBooleanValue(propertyTemplateValue, Preferences.defaultValueMapProactiveDownload)
+                val propertyTemplateValue = Preferences.propertyTemplateMapProactiveDownload(
+                    childData.groupId,
+                    childData.mapId
+                )
+                val proactiveDownload = Preferences.instance.getBooleanValue(
+                    propertyTemplateValue,
+                    Preferences.defaultValueMapProactiveDownload
+                )
                 Preferences.instance.setPreference(propertyTemplateValue, !proactiveDownload)
                 retVal = true
             }
@@ -33,7 +39,18 @@ class DownloadPreferencesActivity : MeteredWifiWarningActivity(R.id.wifiNote), P
         }
 
         expandableListView?.setAdapter(adapter)
+    }
+
+    override fun onResume() {
+        super.onResume()
+        adapter?.connectListeners()
         Preferences.instance.addListener(this)
+    }
+
+    override fun onPause() {
+        super.onPause()
+        adapter?.detachListeners()
+        Preferences.instance.removeListener(this)
     }
 
     override fun preferenceChanged(preferenceName: String) {
@@ -41,7 +58,7 @@ class DownloadPreferencesActivity : MeteredWifiWarningActivity(R.id.wifiNote), P
             val groupAndMap = Preferences.extractMapGroupAndNameFromProactiveDownloadKey(preferenceName)
             val groupId = groupAndMap.first
             val map = groupAndMap.second
-            adapter?.updateView(groupId, map)
+            adapter?.statisticsUpdated(groupId, map)
         }
     }
 }

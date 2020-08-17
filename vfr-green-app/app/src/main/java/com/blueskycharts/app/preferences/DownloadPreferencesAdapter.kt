@@ -19,7 +19,7 @@ import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
 import java.util.concurrent.atomic.AtomicInteger
 
-class DownloadPreferencesAdapter(context: Context) : BaseExpandableListAdapter() {
+class DownloadPreferencesAdapter(context: Context) : BaseExpandableListAdapter(), MapPersistenceStatistics.Listener {
     private val itemDictionary = mutableListOf<Group>()
     private val groupLeftPadding: Int
     private val mapViewLibrary = mutableMapOf<Int, ViewRecord>()
@@ -47,11 +47,6 @@ class DownloadPreferencesAdapter(context: Context) : BaseExpandableListAdapter()
                 if (config != null) {
                     for (map in config.mapList) {
                         newGroup.children.add(Child(map, group.id, map))
-                        TilePersistenceManagerFactory.instance.getMapStatistics(group.id, map).addListener(object: MapPersistenceStatistics.Listener {
-                            override fun statisticsUpdated(groupId: Int, mapId: String, downloadedSizeBytes: Long) {
-                                updateView(groupId, mapId)
-                            }
-                        })
                     }
                 }
                 if (newGroup.children.size > 0) {
@@ -68,19 +63,42 @@ class DownloadPreferencesAdapter(context: Context) : BaseExpandableListAdapter()
         }
     }
 
-    fun updateView(groupId: Int, map: String) {
+    fun connectListeners() {
         GlobalScope.launch {
-            if (Preferences.instance.getBooleanValue(Preferences.propertyTemplateMapProactiveDownload(groupId, map), Preferences.defaultValueMapProactiveDownload)) {
-                val persistenceManager = TilePersistenceManagerFactory.instance
-                val statistics = persistenceManager.getMapStatistics(groupId, map)
-                downloadLabelLookup[getKeyForId(groupId, map)] = "${statistics.downloadedSizeBytes / 1000000} M"
-            } else {
-                downloadLabelLookup[getKeyForId(groupId, map)] = ""
+            for (group in itemDictionary) {
+                for (child in group.children) {
+                    TilePersistenceManagerFactory.instance.getMapStatistics(child.groupId, child.mapId).addListener(this@DownloadPreferencesAdapter)
+                }
             }
+        }
+    }
 
-            GlobalScope.launch(Dispatchers.Main) {
-                notifyDataSetChanged()
+    fun detachListeners() {
+        GlobalScope.launch {
+            for (group in itemDictionary) {
+                for (child in group.children) {
+                    TilePersistenceManagerFactory.instance.getMapStatistics(child.groupId, child.mapId).removeListener(this@DownloadPreferencesAdapter)
+                }
             }
+        }
+    }
+
+    fun statisticsUpdated(groupId: Int, mapId: String) {
+        GlobalScope.launch {
+            val size = TilePersistenceManagerFactory.instance.getMapStatistics(groupId, mapId).downloadedSizeBytes
+            statisticsUpdated(groupId, mapId, size)
+        }
+    }
+
+    override fun statisticsUpdated(groupId: Int, mapId: String, downloadedSizeBytes: Long) {
+        if (Preferences.instance.getBooleanValue(Preferences.propertyTemplateMapProactiveDownload(groupId, mapId), Preferences.defaultValueMapProactiveDownload)) {
+            downloadLabelLookup[getKeyForId(groupId, mapId)] = "${downloadedSizeBytes / 1000000} Mb"
+        } else {
+            downloadLabelLookup[getKeyForId(groupId, mapId)] = ""
+        }
+
+        GlobalScope.launch(Dispatchers.Main) {
+            notifyDataSetChanged()
         }
     }
 

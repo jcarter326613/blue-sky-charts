@@ -28,6 +28,40 @@ class ManageMemoryActivity : MeteredWifiWarningActivity(R.id.wifiNote) {
 
     private var downloadAmountView: TextView? = null
     private var cachedAmountView: TextView? = null
+    private val downloadListener: MapPersistenceStatistics.Listener
+    private val cachedListener: MapPersistenceStatistics.Listener
+
+    init {
+        downloadListener = object: MapPersistenceStatistics.Listener {
+            override fun statisticsUpdated(groupId: Int, mapId: String, downloadedSizeBytes: Long) {
+                GlobalScope.launch {
+                    amountMutex.withLock {
+                        val key = getKeyForId(groupId, mapId)
+                        val oldAmount = downloadedMapList[key] ?: 0
+                        val difference = downloadedSizeBytes - oldAmount
+                        downloadedAmount += difference
+                        downloadedMapList[key] = downloadedSizeBytes
+                        refreshContent()
+                    }
+                }
+            }
+        }
+
+        cachedListener = object: MapPersistenceStatistics.Listener {
+            override fun statisticsUpdated(groupId: Int, mapId: String, downloadedSizeBytes: Long) {
+                GlobalScope.launch {
+                    amountMutex.withLock {
+                        val key = getKeyForId(groupId, mapId)
+                        val oldAmount = cachedMapList[key] ?: 0
+                        val difference = downloadedSizeBytes - oldAmount
+                        cachedAmount += difference
+                        cachedMapList[key] = downloadedSizeBytes
+                        refreshContent()
+                    }
+                }
+            }
+        }
+    }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -51,8 +85,8 @@ class ManageMemoryActivity : MeteredWifiWarningActivity(R.id.wifiNote) {
         cachedAmountView = findViewById<TextView>(R.id.cache_amount)
     }
 
-    override fun onStart() {
-        super.onStart()
+    override fun onResume() {
+        super.onResume()
 
         GlobalScope.launch {
             for (group in Inventory.instance.mapGroups) {
@@ -61,35 +95,9 @@ class ManageMemoryActivity : MeteredWifiWarningActivity(R.id.wifiNote) {
                     for (map in config.mapList) {
                         val mapStatistics = TilePersistenceManagerFactory.instance.getMapStatistics(group.id, map)
                         if (Preferences.instance.getBooleanValue(Preferences.propertyTemplateMapProactiveDownload(group.id, map), Preferences.defaultValueMapProactiveDownload)) {
-                            mapStatistics.addListener(object : MapPersistenceStatistics.Listener {
-                                override fun statisticsUpdated(groupId: Int, mapId: String, downloadedSizeBytes: Long) {
-                                    GlobalScope.launch {
-                                        amountMutex.withLock {
-                                            val key = getKeyForId(groupId, mapId)
-                                            val oldAmount = downloadedMapList[key] ?: 0
-                                            val difference = downloadedSizeBytes - oldAmount
-                                            downloadedAmount += difference
-                                            downloadedMapList[key] = downloadedSizeBytes
-                                            refreshContent()
-                                        }
-                                    }
-                                }
-                            })
+                            mapStatistics.addListener(downloadListener)
                         } else {
-                            mapStatistics.addListener(object : MapPersistenceStatistics.Listener {
-                                override fun statisticsUpdated(groupId: Int, mapId: String, downloadedSizeBytes: Long) {
-                                    GlobalScope.launch {
-                                        amountMutex.withLock {
-                                            val key = getKeyForId(groupId, mapId)
-                                            val oldAmount = cachedMapList[key] ?: 0
-                                            val difference = downloadedSizeBytes - oldAmount
-                                            cachedAmount += difference
-                                            cachedMapList[key] = downloadedSizeBytes
-                                            refreshContent()
-                                        }
-                                    }
-                                }
-                            })
+                            mapStatistics.addListener(cachedListener)
                         }
                     }
                 }
@@ -97,6 +105,25 @@ class ManageMemoryActivity : MeteredWifiWarningActivity(R.id.wifiNote) {
         }
     }
 
+    override fun onPause() {
+        super.onPause()
+
+        GlobalScope.launch {
+            for (group in Inventory.instance.mapGroups) {
+                val config = group.getConfiguration()
+                if (config != null) {
+                    for (map in config.mapList) {
+                        val mapStatistics = TilePersistenceManagerFactory.instance.getMapStatistics(group.id, map)
+                        if (Preferences.instance.getBooleanValue(Preferences.propertyTemplateMapProactiveDownload(group.id, map), Preferences.defaultValueMapProactiveDownload)) {
+                            mapStatistics.removeListener(downloadListener)
+                        } else {
+                            mapStatistics.removeListener(cachedListener)
+                        }
+                    }
+                }
+            }
+        }
+    }
     private fun refreshContent() {
         if (!refreshRequested.getAndSet(true)) {
             GlobalScope.launch(Dispatchers.Main) {

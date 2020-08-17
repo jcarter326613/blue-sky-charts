@@ -1,5 +1,6 @@
 package com.blueskycharts.app.map.assetmanagement
 
+import com.blueskycharts.app.preferences.Preferences
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.sync.Mutex
@@ -14,6 +15,7 @@ class MapPersistenceStatistics(val groupId: Int, val mapName: String, downloaded
     private val listeners = mutableListOf<Listener>()
     private var broadcastNeeded = false
     private val broadcastMutex = Mutex()
+    private val pendingRemoveCount = AtomicInteger(0)
 
     /**
      * Adds a listener and guarantees an updated broadcast of statistics
@@ -23,6 +25,16 @@ class MapPersistenceStatistics(val groupId: Int, val mapName: String, downloaded
             broadcastMutex.withLock {
                 listeners.add(newListener)
                 newListener.statisticsUpdated(groupId, mapName, downloadedSizeBytes)
+            }
+        }
+    }
+
+    fun removeListener(oldListener: Listener) {
+        pendingRemoveCount.incrementAndGet()
+        GlobalScope.launch {
+            broadcastMutex.withLock {
+                listeners.remove(oldListener)
+                pendingRemoveCount.decrementAndGet()
             }
         }
     }
