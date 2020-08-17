@@ -5,6 +5,7 @@ import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
+import kotlinx.coroutines.yield
 import java.util.concurrent.atomic.AtomicInteger
 import java.util.concurrent.atomic.AtomicLong
 
@@ -46,14 +47,19 @@ class MapPersistenceStatistics(val groupId: Int, val mapName: String, downloaded
 
     private suspend fun fieldUpdated() {
         broadcastNeeded = true
-        broadcastMutex.withLock {
-            if (!broadcastNeeded) {
-                return
+        while (broadcastNeeded) {
+            broadcastMutex.withLock {
+                if (pendingRemoveCount.get() == 0) {
+                    if (!broadcastNeeded) {
+                        return
+                    }
+                    for (listener in listeners) {
+                        listener.statisticsUpdated(groupId, mapName, downloadedSizeBytes)
+                    }
+                    broadcastNeeded = false
+                }
             }
-            for (listener in listeners) {
-                listener.statisticsUpdated(groupId, mapName, downloadedSizeBytes)
-            }
-            broadcastNeeded = false
+            yield()
         }
     }
 

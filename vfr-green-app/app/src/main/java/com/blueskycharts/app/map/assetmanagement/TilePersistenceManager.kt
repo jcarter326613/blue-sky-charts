@@ -130,20 +130,12 @@ class TilePersistenceManager(private val connectivityManager: ConnectivityManage
                 statisticsIn = statisticsRecords[lookupKey]
                 if ( statisticsIn == null ) {
                     statisticsNotNull = MapPersistenceStatistics(groupId, mapName, 0)
-                    var statisticsSet = false
-
                     val assetProvider = TileAssetProvider(group)
                     DiskCacheFactory.instance.addListener(assetProvider.getMapAssetDescriptionContainer(mapName), object:DiskCacheListener {
                         override suspend fun totalSizeChanged(totalSize: Long) {
                             statisticsNotNull.setStatistics(totalSize)
-                            statisticsSet = true
                         }
                     })
-
-                    // Wait for the statistics to get set since this is a suspend func that expects the value to be set on return
-                    while(!statisticsSet) {
-                        yield()
-                    }
 
                     statisticsRecords[lookupKey] = statisticsNotNull
                 } else {

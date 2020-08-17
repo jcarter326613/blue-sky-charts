@@ -9,6 +9,8 @@ import java.util.*
 import com.blueskycharts.app.utility.Log
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
+import kotlinx.coroutines.yield
+import java.util.concurrent.atomic.AtomicInteger
 
 /**
  * Handles manipulation of the on disk cache.
@@ -59,6 +61,7 @@ final class DiskCache(private val context: Context) {
     // Disk statistics stuff
     private val statisticsListeners = mutableListOf<StatisticsListener>()
     private val statisticsListenersMutex = Mutex()
+    private val pendingListenerRemoval = AtomicInteger(0)
 
     init {
         val aliasFileDescriptor =
@@ -154,12 +157,7 @@ final class DiskCache(private val context: Context) {
                 outputStream.close()
 
                 // Tell the appropriate listeners
-                for ( listener in statisticsListeners ) {
-                    if ( file.name.startsWith(listener.prefix) ) {
-                        listener.diskUsage += file.length() - existingFileSize
-                        listener.listener.totalSizeChanged(listener.diskUsage)
-                    }
-                }
+                broadcastStatisticsChange(file.length() - existingFileSize, file.name)
             }
         } catch ( e: Throwable ) {
             Log.error(null, e.message ?: "Error writing asset to disk ${asset.description.localPath}")
@@ -175,16 +173,33 @@ final class DiskCache(private val context: Context) {
                 // Tell the appropriate listeners
                 GlobalScope.launch {
                     statisticsListenersMutex.withLock {
-                        for ( listener in statisticsListeners ) {
-                            if ( file.name.startsWith(listener.prefix) ) {
-                                listener.diskUsage -= fileSize
-                                listener.listener.totalSizeChanged(listener.diskUsage)
-                            }
-                        }
+                        broadcastStatisticsChange(fileSize, file.name)
                     }
                 }
             }
         } catch (e: Throwable) {
+        }
+    }
+
+    private suspend fun broadcastStatisticsChange(amount: Long, fileName: String) {
+        GlobalScope.launch {
+            var updateNeeded = true
+            while (updateNeeded) {
+                if (pendingListenerRemoval.get() == 0) {
+                    statisticsListenersMutex.withLock {
+                        if (pendingListenerRemoval.get() == 0) {
+                            for (listener in statisticsListeners) {
+                                if (fileName.startsWith(listener.prefix)) {
+                                    listener.diskUsage += amount
+                                    listener.listener.totalSizeChanged(listener.diskUsage)
+                                }
+                            }
+                            updateNeeded = false
+                        }
+                    }
+                }
+                yield()
+            }
         }
     }
 
@@ -245,6 +260,21 @@ final class DiskCache(private val context: Context) {
                 }
                 statisticsListeners.add(StatisticsListener(getFilePathForAsset(parentDescription), newListener, fileSize))
                 newListener.totalSizeChanged(fileSize)
+            }
+        }
+    }
+
+    fun removeListener(oldListener: DiskCacheListener) {
+        pendingListenerRemoval.incrementAndGet()
+        GlobalScope.launch {
+            statisticsListenersMutex.withLock {
+                for (listener in statisticsListeners) {
+                    if (listener.listener == oldListener) {
+                        statisticsListeners.remove(listener)
+                        break
+                    }
+                }
+                pendingListenerRemoval.decrementAndGet()
             }
         }
     }
