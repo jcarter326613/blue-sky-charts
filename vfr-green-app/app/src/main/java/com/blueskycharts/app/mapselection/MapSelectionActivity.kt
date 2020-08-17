@@ -2,18 +2,13 @@ package com.blueskycharts.app.mapselection
 
 import android.content.Intent
 import android.os.Bundle
-import android.view.View
 import android.widget.ExpandableListView
 import com.blueskycharts.app.R
 import com.blueskycharts.app.map.MapViewActivity
 import com.blueskycharts.app.preferences.Preferences
-import com.blueskycharts.app.subscription.SubscriptionActivity
-import com.blueskycharts.app.subscription.SubscriptionChecker
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.GlobalScope
-import kotlinx.coroutines.launch
+import com.blueskycharts.app.BlueSkyChartsActivity
 
-class MapSelectionActivity : SubscriptionChecker(false, true) {
+class MapSelectionActivity : BlueSkyChartsActivity(false, true) {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_map_selection)

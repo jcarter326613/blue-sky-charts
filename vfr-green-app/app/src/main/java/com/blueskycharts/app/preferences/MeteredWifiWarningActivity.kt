@@ -2,13 +2,11 @@ package com.blueskycharts.app.preferences
 
 import android.content.Context
 import android.net.ConnectivityManager
-import android.os.Bundle
 import android.view.View
 import android.widget.TextView
-import androidx.appcompat.app.AppCompatActivity
-import com.blueskycharts.app.subscription.SubscriptionChecker
+import com.blueskycharts.app.BlueSkyChartsActivity
 
-open class MeteredWifiWarningActivity(private val wifiWarningViewId: Int) : SubscriptionChecker(false, true) {
+open class MeteredWifiWarningActivity(private val wifiWarningViewId: Int) : BlueSkyChartsActivity(false, true) {
 
     @Suppress("DEPRECATION")
     override fun onStart() {

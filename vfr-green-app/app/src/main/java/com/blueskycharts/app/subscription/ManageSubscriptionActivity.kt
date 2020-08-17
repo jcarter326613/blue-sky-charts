@@ -10,8 +10,10 @@ import android.view.View
 import android.widget.Button
 import android.widget.TextView
 import com.blueskycharts.app.R
+import com.blueskycharts.app.subscription.SubscriptionChecker.Companion.skuBasicAnnual
+import com.blueskycharts.app.BlueSkyChartsActivity
 
-class ManageSubscriptionActivity : SubscriptionChecker(false, true) {
+class ManageSubscriptionActivity : BlueSkyChartsActivity(false, true) {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_subscription)
@@ -65,5 +67,4 @@ class ManageSubscriptionActivity : SubscriptionChecker(false, true) {
         val intent = Intent(Intent.ACTION_VIEW, uri)
         startActivity(intent)
     }
-
 }

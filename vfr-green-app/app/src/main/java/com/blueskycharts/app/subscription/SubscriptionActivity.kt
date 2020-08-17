@@ -7,16 +7,19 @@ import android.text.style.BulletSpan
 import android.view.View
 import android.widget.Button
 import android.widget.TextView
+import com.blueskycharts.app.BlueSkyChartsApplication
 import com.blueskycharts.app.R
+import com.blueskycharts.app.BlueSkyChartsActivity
 
-class SubscriptionActivity : SubscriptionChecker(true, false)  {
+class SubscriptionActivity : BlueSkyChartsActivity(true, false)  {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_subscription)
 
         val addSubscriptionButton = findViewById<Button>(R.id.add_subscription_button)
         addSubscriptionButton.setOnClickListener {
-            sendCustomerToOrderFlow()
+            val application = application as BlueSkyChartsApplication
+            application.sendCustomerToOrderFlow(this)
         }
 
         setupFreeTrialText()

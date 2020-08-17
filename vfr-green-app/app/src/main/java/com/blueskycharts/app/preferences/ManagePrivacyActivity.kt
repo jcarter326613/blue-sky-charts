@@ -6,10 +6,10 @@ import android.widget.Button
 import android.widget.CheckBox
 import com.blueskycharts.app.R
 import com.blueskycharts.app.map.MapViewActivity
-import com.blueskycharts.app.subscription.SubscriptionChecker
+import com.blueskycharts.app.BlueSkyChartsActivity
 import com.blueskycharts.app.utility.Log
 
-class ManagePrivacyActivity : SubscriptionChecker(false, true) {
+class ManagePrivacyActivity : BlueSkyChartsActivity(false, true) {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_manage_privacy)

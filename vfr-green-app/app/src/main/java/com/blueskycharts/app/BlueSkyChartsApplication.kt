@@ -6,8 +6,9 @@ import android.net.ConnectivityManager
 import com.blueskycharts.app.assests.DiskCacheFactory
 import com.blueskycharts.app.map.assetmanagement.TilePersistenceManagerFactory
 import com.blueskycharts.app.map.configuration.Inventory
+import com.blueskycharts.app.subscription.SubscriptionChecker
 
-class BlueSkyChartsApplication : Application() {
+class BlueSkyChartsApplication : SubscriptionChecker() {
     override fun onCreate() {
         super.onCreate()
 

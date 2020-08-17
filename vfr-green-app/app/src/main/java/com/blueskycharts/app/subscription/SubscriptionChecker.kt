@@ -1,9 +1,13 @@
 package com.blueskycharts.app.subscription
 
+import android.app.Activity
 import android.app.AlertDialog
+import android.app.Application
 import android.content.Context
 import android.content.DialogInterface
 import android.content.Intent
+import android.content.Intent.FLAG_ACTIVITY_CLEAR_TASK
+import android.content.Intent.FLAG_ACTIVITY_NEW_TASK
 import android.net.Uri
 import android.os.Bundle
 import android.os.PersistableBundle
@@ -19,20 +23,27 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.yield
 import java.util.concurrent.atomic.AtomicBoolean
 
-open class SubscriptionChecker(private val redirectOnPurchaseMade: Boolean, private val redirectOnNotPurchased: Boolean): AppCompatActivity(), BillingClientStateListener, PurchasesUpdatedListener {
+open class SubscriptionChecker(): Application(), BillingClientStateListener, PurchasesUpdatedListener {
     private val skipCheck = com.blueskycharts.app.BuildConfig.DEBUG
     private var billingClient: BillingClient? = null
     private var subscriptionVerified = AtomicBoolean(false)
+    var redirectOnNotPurchased: Boolean = false
+        set(value) {
+            field = value
+            if (value && subscriptionStatus == SubscriptionStatus.NotActive) {
+                val intent = Intent(this, SubscriptionActivity::class.java)
+                intent.addFlags(FLAG_ACTIVITY_NEW_TASK)
+                intent.addFlags(FLAG_ACTIVITY_CLEAR_TASK)
+                startActivity(intent)
+            }
+        }
+    var redirectOnPurchaseMade: Boolean = false
     var subscriptionStatus: SubscriptionStatus = SubscriptionStatus.Unknown
 
-    override fun onCreate(savedInstanceState: Bundle?) {
-        super.onCreate(savedInstanceState)
+    override fun onCreate() {
+        super.onCreate()
         setupBillingClient()
-    }
-
-    override fun onCreate(savedInstanceState: Bundle?, persistentState: PersistableBundle?) {
-        super.onCreate(savedInstanceState, persistentState)
-        setupBillingClient()
+        verifySubscription()
     }
 
     private fun setupBillingClient() {
@@ -46,12 +57,7 @@ open class SubscriptionChecker(private val redirectOnPurchaseMade: Boolean, priv
         billingClient?.startConnection(this)
     }
 
-    override fun onResume() {
-        super.onResume()
-        verifySubscription()
-    }
-
-    fun sendCustomerToOrderFlow() {
+    fun sendCustomerToOrderFlow(parentActivity: Activity) {
         GlobalScope.launch {
             var billingClient = this@SubscriptionChecker.billingClient
             while (billingClient == null) {
@@ -77,7 +83,7 @@ open class SubscriptionChecker(private val redirectOnPurchaseMade: Boolean, priv
                 val flowParams = BillingFlowParams.newBuilder()
                     .setSkuDetails(purchaseSku)
                     .build()
-                val responseCode = billingClient.launchBillingFlow(this@SubscriptionChecker, flowParams).responseCode
+                val responseCode = billingClient.launchBillingFlow(parentActivity, flowParams).responseCode
                 if (responseCode != BillingClient.BillingResponseCode.OK) {
                     purchaseSku = null
                 }
@@ -135,6 +141,8 @@ open class SubscriptionChecker(private val redirectOnPurchaseMade: Boolean, priv
             subscriptionStatus = SubscriptionStatus.NotActive
             if (redirectOnNotPurchased) {
                 val intent = Intent(this, SubscriptionActivity::class.java)
+                intent.addFlags(FLAG_ACTIVITY_NEW_TASK)
+                intent.addFlags(FLAG_ACTIVITY_CLEAR_TASK)
                 startActivity(intent)
             }
         } else {
@@ -195,8 +203,11 @@ open class SubscriptionChecker(private val redirectOnPurchaseMade: Boolean, priv
             verifySubscription()
         } else {
             if (Preferences.instance.getIntValue(Preferences.propertyNameMapShift, Preferences.defaultValueMapShift) != mapShift) {
+                subscriptionStatus = SubscriptionStatus.NotActive
                 if (redirectOnNotPurchased) {
                     val intent = Intent(this, SubscriptionActivity::class.java)
+                    intent.addFlags(FLAG_ACTIVITY_NEW_TASK)
+                    intent.addFlags(FLAG_ACTIVITY_CLEAR_TASK)
                     startActivity(intent)
                 }
             }

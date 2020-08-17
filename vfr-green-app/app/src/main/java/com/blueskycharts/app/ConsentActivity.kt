@@ -5,6 +5,7 @@ import android.content.DialogInterface
 import android.content.Intent
 import android.net.Uri
 import android.os.Bundle
+import androidx.appcompat.app.AppCompatActivity
 import com.blueskycharts.app.assests.*
 import com.blueskycharts.app.map.MapViewActivity
 import com.blueskycharts.app.preferences.Preferences
@@ -16,7 +17,7 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.yield
 import java.net.URL
 
-class ConsentActivity : SubscriptionChecker(false, false) {
+class ConsentActivity : BlueSkyChartsActivity(false, false) {
     private val versionApiUrlTemplate = "https://api.blueskycharts.com/version-authorization/appVersion"
     private val versionComplianceUrl: URL
         get() {
