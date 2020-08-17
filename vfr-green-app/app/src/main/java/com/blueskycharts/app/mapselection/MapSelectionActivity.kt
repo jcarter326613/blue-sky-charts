@@ -14,15 +14,14 @@ import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
 
 class MapSelectionActivity : SubscriptionChecker(false, true) {
-    private var adapter: MapSelectionAdapter? = null
-
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_map_selection)
 
         val buttonLayout = findViewById<ExpandableListView>(R.id.select_map_layout)
+        val adapter = MapSelectionAdapter(buttonLayout.context)
         buttonLayout.setOnChildClickListener { _, _, groupPosition, childPosition, _ ->
-            val childData = adapter?.getChild(groupPosition, childPosition)
+            val childData = adapter.getChild(groupPosition, childPosition)
             var retVal = false
             if (childData is MapSelectionAdapter.Child) {
                 Preferences.instance.setPreference(Preferences.propertyNameDisplayedSubMapId, childData.mapId)
@@ -33,12 +32,6 @@ class MapSelectionActivity : SubscriptionChecker(false, true) {
             retVal
         }
 
-        adapter = MapSelectionAdapter(object: MapSelectionAdapter.Listener {
-            override fun loadComplete(adapter: MapSelectionAdapter) {
-                GlobalScope.launch(Dispatchers.Main) {
-                    buttonLayout.setAdapter(adapter)
-                }
-            }
-        }, applicationContext)
+        buttonLayout.setAdapter(adapter)
     }
 }

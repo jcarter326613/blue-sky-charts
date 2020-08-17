@@ -19,16 +19,12 @@ import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
 import java.util.concurrent.atomic.AtomicInteger
 
-class DownloadPreferencesAdapter(private var listener: DownloadPreferencesAdapter.Listener?, context: Context) : BaseExpandableListAdapter() {
+class DownloadPreferencesAdapter(context: Context) : BaseExpandableListAdapter() {
     private val itemDictionary = mutableListOf<Group>()
     private val groupLeftPadding: Int
     private val mapViewLibrary = mutableMapOf<Int, ViewRecord>()
     private val downloadLabelLookup = mutableMapOf<String, String>()
     private var nextId = AtomicInteger(1)
-
-    interface Listener {
-        fun loadComplete(adapter: DownloadPreferencesAdapter)
-    }
 
     class Group(val name: String) {
         val children = mutableListOf<Child>()
@@ -65,8 +61,10 @@ class DownloadPreferencesAdapter(private var listener: DownloadPreferencesAdapte
                     itemDictionary.add(newGroup)
                 }
             }
-            listener?.loadComplete(this@DownloadPreferencesAdapter)
-            listener = null
+
+            GlobalScope.launch(Dispatchers.Main) {
+                this@DownloadPreferencesAdapter.notifyDataSetChanged()
+            }
         }
     }
 

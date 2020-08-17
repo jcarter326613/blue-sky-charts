@@ -14,10 +14,12 @@ class Inventory(val mapGroups: List<Group>) {
     }
 
     class Group(val id: Int, val humanName: String, val urlRoot: String, val displayAll: Boolean) {
-        suspend fun getConfiguration(): MapConfiguration? {
-            var mapConfigurationFile = URL("${urlRoot}/metadata.json")
+        var config: MapConfiguration? = null
+        var configRead = false
+
+        init {
+            val mapConfigurationFile = URL("${urlRoot}/metadata.json")
             val assetProvider = AssetProvider()
-            var config: MapConfiguration? = null
             val assetDescription = RemoteAssetDescription(mapConfigurationFile, Volatility.DayCache, StorageLocation.Internal)
             assetDescription.allowExpired = true
             assetProvider.retrieveAsset(assetDescription) {
@@ -37,8 +39,12 @@ class Inventory(val mapGroups: List<Group>) {
                 } else {
                     null
                 }
+                configRead = true
             }
-            while ( config == null ) {
+        }
+
+        suspend fun getConfiguration(): MapConfiguration? {
+            while ( !configRead ) {
                 yield()
             }
             return config

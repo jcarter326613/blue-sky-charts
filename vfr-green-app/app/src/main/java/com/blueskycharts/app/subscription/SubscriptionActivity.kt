@@ -54,6 +54,6 @@ class SubscriptionActivity : SubscriptionChecker(true, false)  {
     }
 
     private fun convertDipToPixels(dp: Float): Int {
-        return (dp * applicationContext.resources.displayMetrics.density + 0.5f).toInt()
+        return (dp * baseContext.resources.displayMetrics.density + 0.5f).toInt()
     }
 }

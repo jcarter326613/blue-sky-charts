@@ -14,13 +14,9 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
 
-class MapSelectionAdapter(private var listener: Listener?, context: Context) : BaseExpandableListAdapter() {
+class MapSelectionAdapter(context: Context) : BaseExpandableListAdapter() {
     private val itemDictionary = mutableListOf<Group>()
     private val groupLeftPadding: Int
-
-    interface Listener {
-        fun loadComplete(adapter: MapSelectionAdapter)
-    }
 
     class Group(val name: String) {
         val children = mutableListOf<Child>()
@@ -77,8 +73,9 @@ class MapSelectionAdapter(private var listener: Listener?, context: Context) : B
                 itemDictionary.add(0, downloadedGroup)
             }
 
-            listener?.loadComplete(this@MapSelectionAdapter)
-            listener = null
+            GlobalScope.launch(Dispatchers.Main) {
+                this@MapSelectionAdapter.notifyDataSetChanged()
+            }
         }
     }
 

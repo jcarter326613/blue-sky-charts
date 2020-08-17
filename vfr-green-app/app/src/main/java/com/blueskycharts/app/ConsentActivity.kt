@@ -4,27 +4,17 @@ import android.app.AlertDialog
 import android.content.DialogInterface
 import android.content.Intent
 import android.net.Uri
-import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
-import android.view.View
-import android.widget.Button
-import androidx.fragment.app.Fragment
-import com.android.billingclient.api.*
 import com.blueskycharts.app.assests.*
 import com.blueskycharts.app.map.MapViewActivity
-import com.blueskycharts.app.preferences.PreferenceToggleFragment
 import com.blueskycharts.app.preferences.Preferences
-import com.blueskycharts.app.subscription.SubscriptionActivity
 import com.blueskycharts.app.subscription.SubscriptionChecker
-import com.blueskycharts.app.subscription.SubscriptionStatus
 import com.blueskycharts.app.utility.Log
-import kotlinx.android.synthetic.main.fragment_main_menu.*
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.yield
 import java.net.URL
-import java.util.*
 
 class ConsentActivity : SubscriptionChecker(false, false) {
     private val versionApiUrlTemplate = "https://api.blueskycharts.com/version-authorization/appVersion"

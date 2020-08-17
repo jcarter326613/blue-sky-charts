@@ -13,13 +13,13 @@ import kotlinx.coroutines.launch
 
 class DownloadPreferencesActivity : MeteredWifiWarningActivity(R.id.wifiNote), Preferences.Listener {
     private var adapter: DownloadPreferencesAdapter? = null
-    private var expandableListView: ExpandableListView? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_download_preferences)
 
-        expandableListView = findViewById<ExpandableListView>(R.id.set_preferences_layout)
+        val expandableListView = findViewById<ExpandableListView>(R.id.set_preferences_layout)
+        adapter = DownloadPreferencesAdapter(expandableListView.context)
         expandableListView?.setOnChildClickListener { _, _, groupPosition, childPosition, _ ->
             val childData = adapter?.getChild(groupPosition, childPosition)
             var retVal = false
@@ -32,14 +32,7 @@ class DownloadPreferencesActivity : MeteredWifiWarningActivity(R.id.wifiNote), P
             retVal
         }
 
-        adapter = DownloadPreferencesAdapter(object: DownloadPreferencesAdapter.Listener {
-            override fun loadComplete(adapter: DownloadPreferencesAdapter) {
-                GlobalScope.launch(Dispatchers.Main) {
-                    expandableListView?.setAdapter(adapter)
-                }
-            }
-        }, applicationContext)
-
+        expandableListView?.setAdapter(adapter)
         Preferences.instance.addListener(this)
     }
 
@@ -51,30 +44,4 @@ class DownloadPreferencesActivity : MeteredWifiWarningActivity(R.id.wifiNote), P
             adapter?.updateView(groupId, map)
         }
     }
-
-    /*
-    private fun displayPreferences() {
-        GlobalScope.launch {
-            val configList = mutableListOf<MapConfiguration>()
-            for (group in Inventory.instance.mapGroups) {
-                val config = group.getConfiguration()
-                    ?: continue  //TODO: post a message about how the preferences could not be loaded
-                configList.add(config)
-            }
-
-            // Switch back to the main thread
-            GlobalScope.launch(context = Dispatchers.Main) {
-                // Add the toggles
-                val fragmentTransaction = supportFragmentManager.beginTransaction()
-                for (config in configList) {
-                    for (mapName in config.mapList) {
-                        val toggleFragment = PreferenceToggleFragment(config.groupId, mapName)
-                        fragmentTransaction.add(R.id.set_preferences_layout, toggleFragment)
-                    }
-                }
-                fragmentTransaction.commit()
-            }
-        }
-    }
-     */
 }

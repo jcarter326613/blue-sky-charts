@@ -35,7 +35,7 @@ class PersistentFile<T: PersistentFileContents>(private val contents: T, private
      * run once if those requests pile up faster than than the file can be written to disk
      */
     private fun serializeFile() {
-        GlobalScope.launch(Dispatchers.IO) {    //ok1
+        GlobalScope.launch(Dispatchers.IO) {
             serializeMutex.withLock {
                 if (fileVersion > writtenVersion) {
                     var versionToWrite: Int
