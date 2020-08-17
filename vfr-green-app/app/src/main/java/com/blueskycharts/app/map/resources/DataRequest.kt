@@ -66,11 +66,8 @@ class DataRequest(private val provider: DataProvider, private var receiver: Data
     }
 
     override fun broadcastData(immediate: Boolean, canvas: Canvas?) {
-        val oldestDataAgeAtRetrievalSeconds = this.oldestDataAgeAtRetrievalSeconds
-        val data = this.data
-        val dataConditions = data?.conditions
-        val receiver = this.receiver
-        if ( data == null || oldestDataAgeAtRetrievalSeconds == null || dataConditions == null || receiver == null ) return
+        val data = this.data ?: return
+        val dataConditions = data.conditions ?: return
 
         val secondsSinceRequest = ceil((System.currentTimeMillis() - this.timeReceived) / 1000.0).toInt()
         for ( condition in dataConditions ) {
@@ -82,7 +79,9 @@ class DataRequest(private val provider: DataProvider, private var receiver: Data
             }
 
             val geoLocation = PointGeo(longitude.toDouble(), latitude.toDouble())
-            receiver.receiveData(geoLocation, condition, issueAgeSeconds + secondsSinceRequest, immediate, canvas, this.receiverData)
+            receiver?.receiveData(geoLocation, condition, issueAgeSeconds + secondsSinceRequest, immediate, canvas, this.receiverData)
+            //this.receiver = null
+            //this.receiverData = null
         }
     }
 

@@ -316,7 +316,7 @@ class NavigableMap2d(context: Context, attributes: AttributeSet) :
     }
 
     private fun retrieveConfiguration() {
-        GlobalScope.launch {    //ok1
+        GlobalScope.launch {
             val mapGroupId = Preferences.instance.getIntValue(Preferences.propertyNameDisplayedMapGroupId, Preferences.defaultValueDisplayedMapGroupId)
             val mapGroup = Inventory.instance.findGroupById(mapGroupId)?: return@launch
             var config = mapGroup.getConfiguration() ?: return@launch
