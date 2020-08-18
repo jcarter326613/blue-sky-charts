@@ -32,7 +32,7 @@ class NavigableMapFragment: Fragment() {
         private set
     private var fusedLocationClient: FusedLocationProviderClient? = null
     private var locationManager: LocationManager? = null
-    private var locationUpdatesCallback: LocationUpdatesCallback? = null
+    private val locationUpdatesCallback = LocationUpdatesCallback(null)
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
         return inflater.inflate(R.layout.fragment_navigable_map, container, false)
@@ -44,9 +44,6 @@ class NavigableMapFragment: Fragment() {
         val activity = this.activity
         if ( activity != null ) {
             val overlayModel = ViewModelProvider(activity).get(OverlayViewModel::class.java)
-            val mapView = view.findViewById<NavigableMap2d>(R.id.navigableMap2d)
-            this.mapView = mapView
-            locationUpdatesCallback = LocationUpdatesCallback(mapView)
 
             overlayModel.getOverlayType().observe(viewLifecycleOwner, Observer {
                 mapView?.setOverlayType(it)
@@ -64,6 +61,10 @@ class NavigableMapFragment: Fragment() {
         if (context == null || activity == null ) {
             return
         }
+
+        val mapView = view?.findViewById<NavigableMap2d>(R.id.navigableMap2d)
+        this.mapView = mapView
+        locationUpdatesCallback.mapView = mapView
 
         when (ContextCompat.checkSelfPermission(context, Manifest.permission.ACCESS_FINE_LOCATION)) {
             PackageManager.PERMISSION_GRANTED -> {
@@ -89,6 +90,10 @@ class NavigableMapFragment: Fragment() {
 
     override fun onPause() {
         super.onPause()
+
+        this.mapView = null
+        locationUpdatesCallback.mapView = null
+
         this.fusedLocationClient?.removeLocationUpdates(locationUpdatesCallback)
         locationUpdatesCallback?.let{ this.locationManager?.removeUpdates(it) }
     }
@@ -170,17 +175,17 @@ class NavigableMapFragment: Fragment() {
         }
     }
 
-    private class LocationUpdatesCallback(val mapView: NavigableMap2d) : LocationCallback(), LocationListener {
+    private class LocationUpdatesCallback(var mapView: NavigableMap2d?) : LocationCallback(), LocationListener {
         override fun onLocationResult(p0: LocationResult?) {
             super.onLocationResult(p0)
             p0?.lastLocation?.let { location ->
-                mapView.updateCurrentLocation(location)
+                mapView?.updateCurrentLocation(location)
             }
         }
 
         override fun onLocationChanged(p0: Location) {
             p0.let { location ->
-                mapView.updateCurrentLocation(location)
+                mapView?.updateCurrentLocation(location)
             }
         }
     }

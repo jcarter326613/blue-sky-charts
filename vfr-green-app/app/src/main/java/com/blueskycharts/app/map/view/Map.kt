@@ -17,6 +17,12 @@ abstract class Map(context: Context, attributes: AttributeSet): View(context, at
         periodicRefreshTimer.scheduleAtFixedRate(task, 3 * 1000, 3 * 1000)
     }
 
+    override fun onDetachedFromWindow() {
+        super.onDetachedFromWindow()
+        periodicRefreshTimer.cancel()
+        periodicRefreshTimer.purge()
+    }
+
     fun requestRedraw() {
         this.postInvalidate()
     }

@@ -92,19 +92,6 @@ class NavigableMap2d(context: Context, attributes: AttributeSet) :
     private var pinchOriginalScale: Double
 
     init {
-        context.theme.obtainStyledAttributes(attributes, R.styleable.NavigableMap2d, 0, 0).apply {
-            try {
-                /*
-                scaleDriver = getFloat(R.styleable.NavigableMap2d_zoom, 4.25F);
-                val originLongitude = getFloat(R.styleable.NavigableMap2d_originLongitude, -98.5795F)
-                val originLatitude = getFloat(R.styleable.NavigableMap2d_originLongitude, 39.8283F)
-                originMercator = CoordinateConversion.convertPointGeoToPointWebMercator(PointGeo(originLongitude.toDouble(), originLatitude.toDouble()));
-                 */
-            } finally {
-                recycle()
-            }
-        }
-
         //Setup the paint objects
         itemTextPaint.color = Color.BLACK
         itemTextPaint.style = Paint.Style.FILL_AND_STROKE
