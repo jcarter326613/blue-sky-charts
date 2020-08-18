@@ -89,8 +89,6 @@ class NavigableMapFragment: Fragment() {
                     alertDialog.setOnDismissListener {
                         ActivityCompat.requestPermissions(activity, arrayOf(Manifest.permission.ACCESS_FINE_LOCATION), requestCode )
                     }
-                } else {
-                    ActivityCompat.requestPermissions(activity, arrayOf(Manifest.permission.ACCESS_FINE_LOCATION), requestCode )
                 }
             }
         }
