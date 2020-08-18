@@ -9,6 +9,8 @@ import com.blueskycharts.app.map.configuration.Inventory
 import com.blueskycharts.app.subscription.SubscriptionChecker
 
 class BlueSkyChartsApplication : SubscriptionChecker() {
+    var alreadyAskedLocationPermission = false
+
     override fun onCreate() {
         super.onCreate()
 

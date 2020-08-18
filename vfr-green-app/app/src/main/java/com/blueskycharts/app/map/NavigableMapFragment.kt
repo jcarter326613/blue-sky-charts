@@ -18,6 +18,7 @@ import androidx.core.content.ContextCompat
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProvider
+import com.blueskycharts.app.BlueSkyChartsApplication
 import com.blueskycharts.app.R
 import com.blueskycharts.app.map.models.OverlayViewModel
 import com.blueskycharts.app.map.view.NavigableMap2d
@@ -64,15 +65,15 @@ class NavigableMapFragment: Fragment() {
     override fun onResume() {
         super.onResume()
 
-        val context = this.context
-        val activity = this.activity
-        if (context == null || activity == null ) {
-            return
-        }
-
         val mapView = view?.findViewById<NavigableMap2d>(R.id.navigableMap2d)
         this.mapView = mapView
         locationUpdatesCallback.mapView = mapView
+        setupLocationUpdatePermissions()
+    }
+
+    private fun setupLocationUpdatePermissions() {
+        val context = this.context ?: return
+        val activity = this.activity ?: return
 
         when (ContextCompat.checkSelfPermission(context, Manifest.permission.ACCESS_FINE_LOCATION)) {
             PackageManager.PERMISSION_GRANTED -> {
@@ -81,16 +82,40 @@ class NavigableMapFragment: Fragment() {
                 setupLocationUpdates()
             }
             else -> {
+                val application = activity.application as BlueSkyChartsApplication
                 if (ActivityCompat.shouldShowRequestPermissionRationale(activity, Manifest.permission.ACCESS_FINE_LOCATION)) {
                     val alertDialog = AlertDialog.Builder(context)
                         .setMessage("Your location will not display on the maps unless this app is granted permissions to view your current location.  If you do not want this feature, you may deny location permissions.")
                         .create()
                     alertDialog.show()
                     alertDialog.setOnDismissListener {
-                        ActivityCompat.requestPermissions(activity, arrayOf(Manifest.permission.ACCESS_FINE_LOCATION), requestCode )
+                        ActivityCompat.requestPermissions(
+                            activity,
+                            arrayOf(Manifest.permission.ACCESS_FINE_LOCATION),
+                            requestCode
+                        )
+                        application.alreadyAskedLocationPermission = true
                     }
+                } else if (!application.alreadyAskedLocationPermission) {
+                    ActivityCompat.requestPermissions(
+                        activity,
+                        arrayOf(Manifest.permission.ACCESS_FINE_LOCATION),
+                        requestCode
+                    )
+                    application.alreadyAskedLocationPermission = true
                 }
             }
+        }
+    }
+
+    override fun onRequestPermissionsResult(
+        requestCode: Int,
+        permissions: Array<out String>,
+        grantResults: IntArray
+    ) {
+        super.onRequestPermissionsResult(requestCode, permissions, grantResults)
+        if (requestCode == this.requestCode) {
+            setupLocationUpdatePermissions()
         }
     }
 
