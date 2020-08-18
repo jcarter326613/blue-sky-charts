@@ -1,26 +1,24 @@
 package com.blueskycharts.app.map.assetmanagement
 
 import android.net.ConnectivityManager
-import android.util.Log
-import com.blueskycharts.app.Constants
-import com.blueskycharts.app.assests.Asset
 import com.blueskycharts.app.assests.AssetDescription
 import com.blueskycharts.app.assests.DiskCacheFactory
 import com.blueskycharts.app.assests.DiskCacheListener
 import com.blueskycharts.app.map.configuration.Inventory
 import com.blueskycharts.app.map.configuration.MapConfiguration
-import com.blueskycharts.app.map.resources.DataProvider
 import com.blueskycharts.app.map.resources.DataRequest
 import com.blueskycharts.app.preferences.Preferences
-import kotlinx.coroutines.*
+import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.launch
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
+import kotlinx.coroutines.yield
 import java.util.*
 import java.util.concurrent.atomic.AtomicBoolean
-import java.util.concurrent.atomic.AtomicInteger
-import kotlin.concurrent.thread
-import kotlin.concurrent.timer
+import kotlin.concurrent.timerTask
 import kotlin.math.pow
+
 
 /**
  * Performs background updates of the local cache by comparing the desired state to the current state
@@ -49,6 +47,7 @@ class TilePersistenceManager(private val connectivityManager: ConnectivityManage
             val networkInfo = connectivityManager.getNetworkInfo(ConnectivityManager.TYPE_WIFI)
             return (networkInfo?.isConnected ?: false) && !connectivityManager.isActiveNetworkMetered
         }
+    private var wifiWasOn = true
 
     init {
         start()
@@ -59,6 +58,17 @@ class TilePersistenceManager(private val connectivityManager: ConnectivityManage
                 }
             }
         })
+
+        // Monitor the wifi connection
+        val wifiCheckTimer = Timer(false)
+        val task: TimerTask = timerTask {
+            val oldWifiWasOn = wifiWasOn
+            wifiWasOn = onWifi
+            if (wifiWasOn && !oldWifiWasOn) {
+                start()
+            }
+        }
+        wifiCheckTimer.scheduleAtFixedRate(task, 5 * 1000, 5 * 1000)
     }
 
     fun start() {
@@ -294,7 +304,9 @@ class TilePersistenceManager(private val connectivityManager: ConnectivityManage
                         if ( shouldStop ) {
                             return
                         }
-                        if ( !fileDownloadedOrAliased && onWifi ) {
+                        val onWifiLocal = onWifi
+                        wifiWasOn = wifiWasOn && onWifiLocal
+                        if ( !fileDownloadedOrAliased && onWifiLocal ) {
                             var throttleBoolean = false
                             tileProvider.retrieveTile(name, currentMapVersion, z, x, y) {
                                 throttleBoolean = true
