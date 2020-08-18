@@ -173,7 +173,7 @@ final class DiskCache(private val context: Context) {
                 // Tell the appropriate listeners
                 GlobalScope.launch {
                     statisticsListenersMutex.withLock {
-                        broadcastStatisticsChange(fileSize, file.name)
+                        broadcastStatisticsChange(-fileSize, file.name)
                     }
                 }
             }
