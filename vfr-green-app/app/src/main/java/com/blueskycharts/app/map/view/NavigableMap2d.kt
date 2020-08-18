@@ -82,6 +82,7 @@ class NavigableMap2d(context: Context, attributes: AttributeSet) :
     private var drawnBounds: Box2d? = null
     private var rectangularAreaBounds: RectangularArea? = null
     private var mapPositionPropertyName: String = ""
+    private var activeOverlayType: OverlayTypes = OverlayTypes.None
 
     // Mouse event variables
     private var isDragging: Boolean
@@ -168,6 +169,7 @@ class NavigableMap2d(context: Context, attributes: AttributeSet) :
 
     fun setOverlayType(type: OverlayTypes): Boolean {
         Log.overlaySelection(type)
+        activeOverlayType = type
 
         var success: Boolean
         val rectangularAreaBounds = this.rectangularAreaBounds
@@ -464,19 +466,14 @@ class NavigableMap2d(context: Context, attributes: AttributeSet) :
 
     private fun renderInformationAgeBox(informationAgeLabel: List<SpannableString>, canvas: Canvas) {
         val lineHeight = this.textHeight
-        val lineSpace = lineHeight * 0.3f
+        val lineSpace = lineHeight * 1f
         val textDimensions = this.itemTextPaint.measureText(informationAgeLabel.toString())
         val heightBuffer = this.convertDipToPixels(14f)
         val widthBuffer = this.convertDipToPixels(10f)
         val margin = this.convertDipToPixels(5f)
 
-        val boxRect = Box2d(-(textDimensions + widthBuffer) / 2.0, -(lineHeight + heightBuffer) / 2.0,
-            (textDimensions + widthBuffer) / 2.0, (lineHeight + heightBuffer) / 2.0)
-
         canvas.save()
-        canvas.translate(-boxRect.upperLeft.x.toFloat() + margin, -boxRect.upperLeft.y.toFloat() + margin)
-        //canvas.drawRect(boxRect.upperLeft.x.toFloat(), boxRect.upperLeft.y.toFloat(), boxRect.lowerRight.x.toFloat(), boxRect.lowerRight.y.toFloat(), this.textBackgroundPaint)
-        //canvas.drawRect(boxRect.upperLeft.x.toFloat(), boxRect.upperLeft.y.toFloat(), boxRect.lowerRight.x.toFloat(), boxRect.lowerRight.y.toFloat(), this.textStrokePaint)
+        canvas.translate(((textDimensions + widthBuffer) / 2.0f) + margin, ((lineHeight + heightBuffer) / 2.0f) + margin)
         canvas.translate(-textDimensions / 2F, lineHeight / 2f)
         for (str in informationAgeLabel) {
             val oldWidth = itemTextPaint.strokeWidth
@@ -532,8 +529,21 @@ class NavigableMap2d(context: Context, attributes: AttributeSet) :
     }
 
     private fun getInformationAgeLabel(ageSeconds: LongRange): List<SpannableString> {
+        val sb0: SpannableString
         val sb1: SpannableString
         val sb2: SpannableString
+
+        val sb0String: String = when (activeOverlayType) {
+            OverlayTypes.Visibility -> "Visibility"
+            OverlayTypes.Temperature -> "Temperature"
+            OverlayTypes.SurfaceWind -> "Wind"
+            OverlayTypes.DewPointSpread -> "Dew Point Spread"
+            OverlayTypes.CloudCover -> "Cloud Cover"
+            OverlayTypes.Ceiling -> "Ceiling"
+            OverlayTypes.Category -> "Flight Category"
+            else -> activeOverlayType.name
+        }
+        sb0 = SpannableString(sb0String)
 
         if ( ageSeconds.last < 60 ) {
             sb1 = SpannableString("Issued 1")
@@ -563,9 +573,9 @@ class NavigableMap2d(context: Context, attributes: AttributeSet) :
         }
 
         return if (dataProvider.isWaitingForErrors()) {
-            listOf(sb1, sb2, SpannableString("Information stale"))
+            listOf(sb0, sb1, sb2, SpannableString("Information stale"))
         } else {
-            listOf(sb1, sb2)
+            listOf(sb0, sb1, sb2)
         }
     }
 
