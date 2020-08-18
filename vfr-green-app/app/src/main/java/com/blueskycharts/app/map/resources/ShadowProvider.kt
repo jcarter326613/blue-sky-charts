@@ -10,10 +10,11 @@ import com.blueskycharts.app.coordinates.Point2d
 import com.blueskycharts.app.map.configuration.Inventory
 import com.blueskycharts.app.map.view.Map
 
-class ShadowProvider(val context: Context): TileProviderInterface {
+class ShadowProvider(context: Context): TileProviderInterface {
+    private val image = ResourcesCompat.getDrawable(context.resources, R.drawable.world_shadow, null)
+
     override fun retrieveTile(mapName: String, mapVersion: String, zoomLevel: Int, location: Point2d, tileDimensions: Point2d,
                      receiver: TileReceiver, data: Any?, canvas: Canvas ) {
-        val image = ResourcesCompat.getDrawable(context.resources, R.drawable.world_shadow, null)
         val box = Box2d(0.0, 0.0, 1.0, 1.0)
         receiver.receiveTile(box, image?.toBitmap(), data, true, canvas)
     }

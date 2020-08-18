@@ -138,7 +138,7 @@ class NavigableMap2d(context: Context, attributes: AttributeSet) :
         currentLocationEdgeRect = RectF(-currentLocationEdgePaint.strokeWidth, -currentLocationEdgePaint.strokeWidth, currentLocationEdgePaint.strokeWidth, currentLocationEdgePaint.strokeWidth)
 
         // Set all constant and derived defaults
-        this.dataProvider = DataProvider(context, this)
+        this.dataProvider = DataProvider(this)
 
         if ( this.scaleDriver > this.maxScaleDriver ) {
             this.scaleDriver = this.maxScaleDriver;
@@ -267,9 +267,8 @@ class NavigableMap2d(context: Context, attributes: AttributeSet) :
             val mapData = configuration.getCurrentVersion(mapName)
             if ( mapData != null ) {
                 if ( firstMap ) {
-                    this.tileProvider = TileProvider(context, this, group)
+                    this.tileProvider = TileProvider(this, group)
                     firstMap = false
-
                     mercatorMap = mapData.projectionWebMercator?.extents != null
                 }
 
@@ -351,6 +350,9 @@ class NavigableMap2d(context: Context, attributes: AttributeSet) :
     override fun onDetachedFromWindow() {
         this.tileProvider?.clearQueue()
         this.dataProvider.clearQueue()
+        this.tileProvider?.map = null
+        this.dataProvider.map = null
+        this.mapViews = null
 
         super.onDetachedFromWindow()
     }

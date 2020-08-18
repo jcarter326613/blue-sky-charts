@@ -10,8 +10,9 @@ import java.util.*
 import java.util.concurrent.atomic.AtomicInteger
 import kotlin.concurrent.timerTask
 
-abstract class CachedProvider( private val map: Map, private val requestDelayMilliseconds: Int = 0, private val consecutiveErrorThreshold: Int = 5 ) {
+abstract class CachedProvider( map: Map, private val requestDelayMilliseconds: Int = 0, private val consecutiveErrorThreshold: Int = 5 ) {
     private val maxActiveRequests = 2
+    var map: Map? = map
     private val cache = Hashtable<String, CachedProviderRequest>() //Need to add ageoff, causing memory leak
     private var numActiveRequests = AtomicInteger(0)
     private var numAwaitingQueueAddition = AtomicInteger(0)
@@ -90,7 +91,7 @@ abstract class CachedProvider( private val map: Map, private val requestDelayMil
         this.numActiveRequests.getAndDecrement();
         this.processQueue();
         if (isSuccess) {
-            this.map.requestRedraw()
+            this.map?.requestRedraw()
         }
     }
 
