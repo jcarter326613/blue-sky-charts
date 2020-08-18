@@ -56,18 +56,22 @@ class NavigableMap2d(context: Context, attributes: AttributeSet) :
     private var mapBackground: SubMapPosition? = null
     private var mapViews: LinkedList<SubMapPosition>? = null
     private var dataOverlayView: SubMapPosition? = null
+    val isCurrentLocationInMap: Boolean
+        get() {
+            val currentLocation2d = this.currentLocation2d ?: return false
+            val rectangularAreaBounds = this.rectangularAreaBounds ?: return false
+            return rectangularAreaBounds.convertToBox2d().contains(currentLocation2d)
+        }
     private var origin2d: Point2d? = null
         get() {
-            if (trackCurrentLocation) {
-                val currentLocation2d = this.currentLocation2d ?: return field
-                val rectangularAreaBounds = this.rectangularAreaBounds ?: return field
-                return if (rectangularAreaBounds.convertToBox2d().contains(currentLocation2d)) {
+            return if (trackCurrentLocation) {
+                if (isCurrentLocationInMap) {
                     currentLocation2d
                 } else {
                     field
                 }
             } else {
-                return field
+                field
             }
         }
     private var currentLocation2d: Point2d? = null

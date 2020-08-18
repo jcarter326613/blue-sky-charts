@@ -32,7 +32,15 @@ class NavigableMapFragment: Fragment() {
         private set
     private var fusedLocationClient: FusedLocationProviderClient? = null
     private var locationManager: LocationManager? = null
-    private val locationUpdatesCallback = LocationUpdatesCallback(null)
+    private val locationUpdatesCallback = LocationUpdatesCallback(null, null)
+
+    interface LocationUpdateListener {
+        fun locationUpdated()
+    }
+
+    fun setExtraLocationUpdateListener(newListener: LocationUpdateListener?) {
+        locationUpdatesCallback.extraLocationUpdateListener = newListener
+    }
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
         return inflater.inflate(R.layout.fragment_navigable_map, container, false)
@@ -175,18 +183,20 @@ class NavigableMapFragment: Fragment() {
         }
     }
 
-    private class LocationUpdatesCallback(var mapView: NavigableMap2d?) : LocationCallback(), LocationListener {
+    private class LocationUpdatesCallback(var mapView: NavigableMap2d?, var extraLocationUpdateListener: LocationUpdateListener?) : LocationCallback(), LocationListener {
         override fun onLocationResult(p0: LocationResult?) {
             super.onLocationResult(p0)
             p0?.lastLocation?.let { location ->
                 mapView?.updateCurrentLocation(location)
             }
+            extraLocationUpdateListener?.locationUpdated()
         }
 
         override fun onLocationChanged(p0: Location) {
             p0.let { location ->
                 mapView?.updateCurrentLocation(location)
             }
+            extraLocationUpdateListener?.locationUpdated()
         }
     }
 }

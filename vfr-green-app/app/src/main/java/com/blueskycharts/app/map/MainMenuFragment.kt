@@ -1,4 +1,4 @@
-package com.blueskycharts.app.menu
+package com.blueskycharts.app.map
 
 import android.content.Intent
 import android.os.Bundle
@@ -8,11 +8,13 @@ import android.view.ViewGroup
 import android.widget.Button
 import android.widget.ImageButton
 import android.widget.LinearLayout
+import androidx.core.view.isVisible
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModelProvider
 import com.blueskycharts.app.R
 import com.blueskycharts.app.preferences.DownloadPreferencesActivity
 import com.blueskycharts.app.map.models.OverlayViewModel
+import com.blueskycharts.app.map.view.NavigableMap2d
 import com.blueskycharts.app.map.view.OverlayTypes
 import com.blueskycharts.app.mapselection.MapSelectionActivity
 import com.blueskycharts.app.preferences.ManageMemoryActivity
@@ -25,46 +27,30 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
 
-class MainMenuFragment() : Fragment() {
+class MainMenuFragment() : Fragment(), NavigableMapFragment.LocationUpdateListener {
     private var overlayModel: OverlayViewModel? = null
     private var displayedMenu: View? = null
-    private var currentlyTracking: Boolean = true
     private val preferencesListener: Preferences.Listener
+    private var mapView: NavigableMap2d? = null
+    private var zoomToSelfButton: ImageButton? = null
 
     init {
         preferencesListener = object: Preferences.Listener {
             override fun preferenceChanged(preferenceName: String) {
                 if (preferenceName == Preferences.propertyNameMapTrackLocation) {
-                    GlobalScope.launch(Dispatchers.Main) {
-                        val zoomToSelfButton =
-                            view?.findViewById<ImageButton>(R.id.zoomToSelfButton)
-                        val newTracking = Preferences.instance.getBooleanValue(
-                            Preferences.propertyNameMapTrackLocation,
-                            Preferences.defaultValueMapTrackLocation
-                        )
-                        if (currentlyTracking != newTracking) {
-                            if (newTracking) {
-                                //zoomToSelfButton?.setImageResource(R.drawable.ic_my_location_set)
-                                zoomToSelfButton?.visibility = View.INVISIBLE
-                            } else {
-                                //zoomToSelfButton?.setImageResource(R.drawable.ic_my_location_not_set)
-                                zoomToSelfButton?.visibility = View.VISIBLE
-                            }
-                            currentlyTracking = newTracking
-                        }
-                    }
+                    updateGeoLocationButton()
                 }
             }
         }
     }
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
-        //overlayModel = ViewModelProvider(this).get(OverlayViewModel::class.java)
         return inflater.inflate(R.layout.fragment_main_menu, container, false)
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
+        zoomToSelfButton = view.findViewById<ImageButton>(R.id.zoomToSelfButton)
 
         val activity = this.activity
         if ( activity != null ) {
@@ -76,7 +62,6 @@ class MainMenuFragment() : Fragment() {
                 showOrToggleMenu(mainMenu)
             }
 
-            val zoomToSelfButton = view.findViewById<ImageButton>(R.id.zoomToSelfButton)
             zoomToSelfButton?.setOnClickListener {
                 Preferences.instance.setPreference(Preferences.propertyNameMapTrackLocation, true)
             }
@@ -92,11 +77,36 @@ class MainMenuFragment() : Fragment() {
     override fun onResume() {
         super.onResume()
         Preferences.instance.addListener(preferencesListener)
+
+        val mapView = view?.rootView?.findViewById<NavigableMap2d>(R.id.navigableMap2d)
+        this.mapView = mapView
     }
 
     override fun onPause() {
         super.onPause()
         Preferences.instance.removeListener(preferencesListener)
+        this.mapView = null
+    }
+
+    fun updateGeoLocationButton() {
+        GlobalScope.launch(Dispatchers.Main) {
+            val shouldShowZoomToSelf: Boolean =
+                !Preferences.instance.getBooleanValue(Preferences.propertyNameMapTrackLocation, Preferences.defaultValueMapTrackLocation) &&
+                        (this@MainMenuFragment.mapView?.isCurrentLocationInMap == true)
+
+            if (!((zoomToSelfButton?.visibility == View.VISIBLE && shouldShowZoomToSelf) ||
+                        (zoomToSelfButton?.visibility == View.INVISIBLE && !shouldShowZoomToSelf))) {
+                if (shouldShowZoomToSelf) {
+                    zoomToSelfButton?.visibility = View.VISIBLE
+                } else {
+                    zoomToSelfButton?.visibility = View.INVISIBLE
+                }
+            }
+        }
+    }
+
+    override fun locationUpdated() {
+        updateGeoLocationButton()
     }
 
     private fun setupMainMenuHandlers() {
