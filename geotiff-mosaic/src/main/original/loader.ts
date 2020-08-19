@@ -17,6 +17,7 @@ export class Loader {
     private METADATA_FILE_OUTPUT = "./output/metadata.json"
 
     private type: MapType
+    public static skipTileGeneration: Boolean = false
 
     constructor(type: MapType) {
         this.type = type
@@ -124,60 +125,75 @@ export class Loader {
             }
             let versionList = neededMapVersions[mapName]
             for ( let version of versionList ) {
-                //Ensure png present
-                let pngFilePath = `./maps/${mapName}_${mapTypeAbbreviation}_${version}.tif`
-                if ( !existsSync(pngFilePath) ) {
-                    let pngGeoFilePath = `../geotiff-map-exploder/maps/${mapName}_${mapTypeAbbreviation}_${version}.tif`
-                    if ( !existsSync(pngGeoFilePath) ) {
-                        console.log(`Setting up map ${mapName} version ${version}`)
-                        execSync(`python3 ../geotiff-map-exploder/setup_map.py -use-defaults ${outputMapName} ${version} ${mapTypeLong}`)
-                    } else {
-                        execSync(`cp ${pngGeoFilePath} ./maps/`)
-                    }
-                }
-
-                //Explode the map
-                console.log(`Exploding map ${mapName} version ${version}`)
-                if ( existsSync("./maps/tiles") ) {
-                    execSync("rm -rf ./maps/tiles")
-                }
-                execSync(`python3 ../geotiff-map-exploder/explode_maps.py ${mapName} ${version} relative ${mapTypeLong}`)
-
-                //Prep the output directory
-                let mapOutputDirectory = `${this.OUTPUT_DIRECTORY}/${outputMapName}`
-                mkdirSync(mapOutputDirectory)
-                mapOutputDirectory = `${mapOutputDirectory}/${outputVersionId}`
-                mkdirSync(mapOutputDirectory)
-
-                //Convert all the artifacts to jpg files
-                let tileMapDirectory = `./maps/tiles/${mapName}_${mapTypeAbbreviation}_${version}`
-                let zoomDirectories = readdirSync(tileMapDirectory)
-                for ( let zoomDirectory of zoomDirectories ) {
-                    let fillZoomDirectory = `${mapOutputDirectory}/${zoomDirectory}`
-                    mkdirSync(fillZoomDirectory)
-                    let imageFiles = readdirSync(`${tileMapDirectory}/${zoomDirectory}`)
-                    for ( let imageFile of imageFiles ) {
-                        let lastDotIndex = imageFile.lastIndexOf(".")
-                        let jpegPath = `${fillZoomDirectory}/${imageFile.substring(0, lastDotIndex)}.jpg`
-                        let originalPath = `${tileMapDirectory}/${zoomDirectory}/${imageFile}`
-                        execSync(`convert ${originalPath} -quality 90 ${jpegPath}`)
-                    }
-                }
-
-                //Update the metadata output file
+                //Make sure this should be updated
+                let thisOutputVersionId = outputVersionId
                 let outputVersions = outputMetadata[outputMapName].versions
                 let inputVerions = subSectionVersions[mapName].versions
                 if (outputVersions === undefined || inputVerions === undefined) {
                     console.error("Broken code")
                     exit(1)
                 }
-                outputVersions[outputVersionId] = new SectionVersion()
-                outputVersions[outputVersionId].effectiveDate = inputVerions[version].effectiveDate
-                outputVersions[outputVersionId].imageHeight = inputVerions[version].imageHeight
-                outputVersions[outputVersionId].imageWidth = inputVerions[version].imageWidth
-                outputVersions[outputVersionId].maxZoom = inputVerions[version].maxZoom
-                outputVersions[outputVersionId].tileWidth = inputVerions[version].tileWidth
-                outputVersions[outputVersionId].version = outputVersionId
+                let duplicateDiscovered = false
+                for (let outputVersionKey in outputVersions) {
+                    if (outputVersions[outputVersionKey].effectiveDate?.substring(0, 10) == inputVerions[version].effectiveDate?.substring(0, 10)) {
+                        duplicateDiscovered = true
+                        thisOutputVersionId = outputVersionKey
+                        break
+                    }
+                }
+
+                // Explode the tiles
+                if (!duplicateDiscovered && !Loader.skipTileGeneration) {
+                    //Ensure png present
+                    let pngFilePath = `./maps/${mapName}_${mapTypeAbbreviation}_${version}.tif`
+                    if ( !existsSync(pngFilePath) ) {
+                        let pngGeoFilePath = `../geotiff-map-exploder/maps/${mapName}_${mapTypeAbbreviation}_${version}.tif`
+                        if ( !existsSync(pngGeoFilePath) ) {
+                            console.log(`Setting up map ${mapName} version ${version}`)
+                            execSync(`python3 ../geotiff-map-exploder/setup_map.py -use-defaults ${outputMapName} ${version} ${mapTypeLong}`)
+                        } else {
+                            execSync(`cp ${pngGeoFilePath} ./maps/`)
+                        }
+                    }
+
+                    //Explode the map
+                    console.log(`Exploding map ${mapName} version ${version}`)
+                    if ( existsSync("./maps/tiles") ) {
+                        execSync("rm -rf ./maps/tiles")
+                    }
+                    execSync(`python3 ../geotiff-map-exploder/explode_maps.py ${mapName} ${version} relative ${mapTypeLong}`)
+
+                    //Prep the output directory
+                    let mapOutputDirectory = `${this.OUTPUT_DIRECTORY}/${outputMapName}`
+                    mkdirSync(mapOutputDirectory)
+                    mapOutputDirectory = `${mapOutputDirectory}/${thisOutputVersionId}`
+                    mkdirSync(mapOutputDirectory)
+
+                    //Convert all the artifacts to jpg files
+                    let tileMapDirectory = `./maps/tiles/${mapName}_${mapTypeAbbreviation}_${version}`
+                    let zoomDirectories = readdirSync(tileMapDirectory)
+                    for ( let zoomDirectory of zoomDirectories ) {
+                        let fillZoomDirectory = `${mapOutputDirectory}/${zoomDirectory}`
+                        mkdirSync(fillZoomDirectory)
+                        let imageFiles = readdirSync(`${tileMapDirectory}/${zoomDirectory}`)
+                        for ( let imageFile of imageFiles ) {
+                            let lastDotIndex = imageFile.lastIndexOf(".")
+                            let jpegPath = `${fillZoomDirectory}/${imageFile.substring(0, lastDotIndex)}.jpg`
+                            let originalPath = `${tileMapDirectory}/${zoomDirectory}/${imageFile}`
+                            execSync(`convert ${originalPath} -quality 90 ${jpegPath}`)
+                        }
+                    }
+                }
+
+                //Update the metadata output file
+                outputVersions[thisOutputVersionId] = new SectionVersion()
+                outputVersions[thisOutputVersionId].effectiveDate = inputVerions[version].effectiveDate
+                outputVersions[thisOutputVersionId].expirationDate = inputVerions[version].expirationDate
+                outputVersions[thisOutputVersionId].imageHeight = inputVerions[version].imageHeight
+                outputVersions[thisOutputVersionId].imageWidth = inputVerions[version].imageWidth
+                outputVersions[thisOutputVersionId].maxZoom = inputVerions[version].maxZoom
+                outputVersions[thisOutputVersionId].tileWidth = inputVerions[version].tileWidth
+                outputVersions[thisOutputVersionId].version = thisOutputVersionId
 
                 // Validate the projection
                 let originalProjectionLcc = inputVerions[version].originalProjectionData
@@ -200,7 +216,7 @@ export class Loader {
                     console.error("Bad projection")
                     exit(1)
                 }
-                outputVersions[outputVersionId].projectionLcc = projectionLcc
+                outputVersions[thisOutputVersionId].projectionLcc = projectionLcc
 
                 // Validate the projection extents
                 let originalExtents = inputVerions[version].originalProjectionBounds

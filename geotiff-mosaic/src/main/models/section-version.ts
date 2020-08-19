@@ -5,6 +5,7 @@ import { ProjectionWebMercator } from './projection-web-mercator'
 
 export class SectionVersion {
     public effectiveDate: string | undefined
+    public expirationDate: string | undefined
     public fileExtent: FileExtent | undefined
     public mosaicFileExtent: FileExtent | undefined
     public maxZoom: number | undefined
