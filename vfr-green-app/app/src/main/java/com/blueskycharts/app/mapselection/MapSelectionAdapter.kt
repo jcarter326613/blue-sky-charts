@@ -51,7 +51,7 @@ class MapSelectionAdapter(context: Context) : BaseExpandableListAdapter() {
                     val config = group.getConfiguration()
                     if (config != null) {
                         for (map in config.mapList) {
-                            newGroup.children.add(Child(map, group.id, map))
+                            newGroup.children.add(Child(map, group.id, config.getHumanName(map)))
                             if (Preferences.instance.getBooleanValue(Preferences.propertyTemplateMapProactiveDownload(group.id, map),
                                     Preferences.defaultValueMapProactiveDownload)) {
                                 downloadedGroup.children.add(Child(map, group.id, "${group.humanName} - $map"))

@@ -27,6 +27,32 @@ class MapConfiguration(val data: MapMetaDataModelCollection, val baseUrl: String
             return retVal
         }
 
+    fun getHumanName(mapId: String): String {
+        var humanName = data.maps[mapId]?.humanName
+        if (humanName == null) {
+            var lastWasSpace = true
+            humanName = ""
+            for (c in mapId) {
+                when {
+                    lastWasSpace -> {
+                        humanName += c.toUpperCase()
+                        lastWasSpace = false
+                    }
+                    c == '_' -> {
+                        humanName += ' '
+                        lastWasSpace = true
+                    }
+                    else -> {
+                        humanName += c
+                        lastWasSpace = false
+                    }
+                }
+            }
+        }
+
+        return humanName
+    }
+
     fun filterForSubMap(mapName: String): MapConfiguration? {
         for (key in data.maps.keys) {
             if ( key == mapName ) {

@@ -46,7 +46,7 @@ class DownloadPreferencesAdapter(context: Context) : BaseExpandableListAdapter()
                 val config = group.getConfiguration()
                 if (config != null) {
                     for (map in config.mapList) {
-                        newGroup.children.add(Child(map, group.id, map))
+                        newGroup.children.add(Child(map, group.id, config.getHumanName(map)))
                     }
                 }
                 if (newGroup.children.size > 0) {
