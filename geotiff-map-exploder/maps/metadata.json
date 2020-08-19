@@ -7339,7 +7339,8 @@
         "type": "Sectional",
         "versions": {
             "104": {
-                "effectiveDate": "2020-03-26",
+                "effectiveDate": "2020-03-26 09-01",
+                "expirationDate": "2020-09-10 09-01",
                 "fileExtent": {
                     "bottomLeft": {
                         "latitude": 32.016171,
@@ -7486,7 +7487,8 @@
         "type": "TerminalArea",
         "versions": {
             "62": {
-                "effectiveDate": "2020-03-26",
+                "effectiveDate": "2020-03-26 09-01",
+                "expirationDate": "2020-09-10 09-01",
                 "imageHeight": 7597,
                 "imageWidth": 11132,
                 "maxZoom": 4,

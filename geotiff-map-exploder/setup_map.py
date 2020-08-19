@@ -144,17 +144,6 @@ map_version_metadata = map_inventory[mi_lookup]["versions"][str(version)]
 map_version_metadata["tileWidth"] = TILE_WIDTH
 mi.write_inventory_metadata(map_inventory)
 
-# Get the effective date
-print("What is the effective date? (YYYY-MM-DD)")
-if "effectiveDate" in map_version_metadata:
-    effective_date = map_version_metadata["effectiveDate"]
-    print("({})".format(effective_date))
-effective_date_request = sys.stdin.readline().strip()
-if effective_date_request != None and len(effective_date_request) > 0:
-    effective_date = effective_date_request
-map_version_metadata["effectiveDate"] = effective_date
-mi.write_inventory_metadata(map_inventory)
-
 # Download the zip file and extract it
 if map_type == "terminal":
     if map_name == "Anchorage" or map_name == "Fairbanks":
@@ -283,3 +272,27 @@ if map_type == "sectional":
     # Cleanup intermediate files
     #os.system("rm -f {}".format(tif_file))
     os.system("rm -f {}".format(web_tiff_path))
+else:
+    define_crops(tif_file, None)    #So we can get the effective and expiration dates
+
+# Get the effective date
+print("What is the effective date? (YYYY-MM-DD HH-MM)")
+if "effectiveDate" in map_version_metadata:
+    effective_date = map_version_metadata["effectiveDate"]
+    print("({})".format(effective_date))
+effective_date_request = sys.stdin.readline().strip()
+if effective_date_request != None and len(effective_date_request) > 0:
+    effective_date = effective_date_request
+map_version_metadata["effectiveDate"] = effective_date
+mi.write_inventory_metadata(map_inventory)
+
+# Get the expiration date
+print("What is the expiration date? (YYYY-MM-DD HH-MM)")
+if "expirationDate" in map_version_metadata:
+    expiration_date = map_version_metadata["expirationDate"]
+    print("({})".format(expiration_date))
+expiration_date_request = sys.stdin.readline().strip()
+if expiration_date_request != None and len(expiration_date_request) > 0:
+    expiration_date = expiration_date_request
+map_version_metadata["expirationDate"] = expiration_date
+mi.write_inventory_metadata(map_inventory)

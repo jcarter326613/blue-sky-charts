@@ -20,7 +20,7 @@ def define_crops(tif_path, existing_points):
     Image.MAX_IMAGE_PIXELS = 300000000
     image = Image.open(tif_path)
     original_size = image.size
-    image = image.resize((3000, math.floor((image.size[1] / float(image.size[0])) * 3000)), Image.ANTIALIAS)
+    image = image.resize((6000, math.floor((image.size[1] / float(image.size[0])) * 6000)), Image.ANTIALIAS)
     scaled_size = image.size
 
     # Create the widow and canvas we are going to draw on
