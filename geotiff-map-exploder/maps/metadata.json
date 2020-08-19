@@ -9707,6 +9707,32 @@
                     "y_0": 0
                 },
                 "tileWidth": 1024
+            },
+            "61": {
+                "effectiveDate": "2020-08-13 09-01",
+                "expirationDate": "2020-12-31 09-01",
+                "imageHeight": 7806,
+                "imageWidth": 11839,
+                "maxZoom": 4,
+                "originalProjectionBounds": [
+                    -167942.70795320044,
+                    -78673.06233612378,
+                    82655.33175297844,
+                    86564.81138458382
+                ],
+                "originalProjectionData": {
+                    "datum": "NAD83",
+                    "lat_0": 28.5,
+                    "lat_1": 45,
+                    "lat_2": 33,
+                    "lon_0": -80.96666666666667,
+                    "no_defs": true,
+                    "proj": "lcc",
+                    "units": "m",
+                    "x_0": 0,
+                    "y_0": 0
+                },
+                "tileWidth": 1024
             }
         }
     },
@@ -10282,7 +10308,8 @@
         "type": "TerminalArea",
         "versions": {
             "62": {
-                "effectiveDate": "2020-03-26",
+                "effectiveDate": "2020-03-26 09-01",
+                "expirationDate": "2020-10-08 09-01",
                 "imageHeight": 7619,
                 "imageWidth": 10489,
                 "maxZoom": 4,
@@ -10440,7 +10467,8 @@
         "type": "TerminalArea",
         "versions": {
             "80": {
-                "effectiveDate": "2020-06-18",
+                "effectiveDate": "2020-06-18 09-01",
+                "expirationDate": "2020-11-05 09-01",
                 "imageHeight": 6175,
                 "imageWidth": 12103,
                 "maxZoom": 4,
@@ -10757,6 +10785,32 @@
                     "y_0": 0
                 },
                 "tileWidth": 1024
+            },
+            "97": {
+                "effectiveDate": "2020-08-13 09-01",
+                "expirationDate": "2021-02-25 09-01",
+                "imageHeight": 7265,
+                "imageWidth": 10493,
+                "maxZoom": 4,
+                "originalProjectionBounds": [
+                    -144541.36432226023,
+                    -80805.86427401348,
+                    77585.03780072223,
+                    72991.0416679812
+                ],
+                "originalProjectionData": {
+                    "datum": "NAD83",
+                    "lat_0": 37.6,
+                    "lat_1": 45,
+                    "lat_2": 33,
+                    "lon_0": -122.25,
+                    "no_defs": true,
+                    "proj": "lcc",
+                    "units": "m",
+                    "x_0": 0,
+                    "y_0": 0
+                },
+                "tileWidth": 1024
             }
         }
     },
@@ -10956,7 +11010,8 @@
         "type": "TerminalArea",
         "versions": {
             "94": {
-                "effectiveDate": "2020-05-21",
+                "effectiveDate": "2020-05-21 09-01",
+                "expirationDate": "2020-12-03 09-01",
                 "imageHeight": 7708,
                 "imageWidth": 9208,
                 "maxZoom": 4,
@@ -11346,7 +11401,8 @@
         "type": "TerminalArea",
         "versions": {
             "94": {
-                "effectiveDate": "2020-06-18",
+                "effectiveDate": "2020-06-18 09-01",
+                "expirationDate": "2020-11-05 09-01",
                 "imageHeight": 6329,
                 "imageWidth": 9141,
                 "maxZoom": 4,
@@ -11377,6 +11433,32 @@
         "versions": {
             "60": {
                 "effectiveDate": "2020-01-30",
+                "imageHeight": 7747,
+                "imageWidth": 8995,
+                "maxZoom": 4,
+                "originalProjectionBounds": [
+                    -79830.07549635421,
+                    -81238.10380595144,
+                    110578.0446977555,
+                    82770.10324534315
+                ],
+                "originalProjectionData": {
+                    "datum": "NAD83",
+                    "lat_0": 27.95,
+                    "lat_1": 45,
+                    "lat_2": 33,
+                    "lon_0": -82.61666666666666,
+                    "no_defs": true,
+                    "proj": "lcc",
+                    "units": "m",
+                    "x_0": 0,
+                    "y_0": 0
+                },
+                "tileWidth": 1024
+            },
+            "61": {
+                "effectiveDate": "2020-08-13 09-01",
+                "expirationDate": "2020-12-31 09-01",
                 "imageHeight": 7747,
                 "imageWidth": 8995,
                 "maxZoom": 4,
