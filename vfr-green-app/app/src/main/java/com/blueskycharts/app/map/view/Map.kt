@@ -10,7 +10,8 @@ import kotlin.concurrent.timerTask
 abstract class Map(context: Context, attributes: AttributeSet): View(context, attributes) {
     private val periodicRefreshTimer = Timer(false)
 
-    init {
+    override fun onAttachedToWindow() {
+        super.onAttachedToWindow()
         val task: TimerTask = timerTask {
             requestRedraw()
         }

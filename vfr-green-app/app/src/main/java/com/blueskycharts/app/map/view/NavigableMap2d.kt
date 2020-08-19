@@ -46,6 +46,7 @@ class NavigableMap2d(context: Context, attributes: AttributeSet) :
     private val textBackgroundPaint = Paint()
     private val textStrokePaint = Paint()
     private val currentLocationCenterPaint = Paint()
+    private val currentLocationCenterOldPaint = Paint()
     private val currentLocationEdgePaint = Paint()
     private val currentLocationBorderPaint = Paint()
     private val currentLocationCenterRect: RectF
@@ -80,6 +81,8 @@ class NavigableMap2d(context: Context, attributes: AttributeSet) :
             field = value
             requestRedraw()
         }
+    private var currentLocationTime: Long = 0
+    private val currentLocationOldAgeThresholdMs: Long = 30 * 1000 /* 30 seconds */
     private var scale: Double
     private var scaleDriver: Float = 0F
     private val maxScaleDriver: Float = 12F
@@ -118,6 +121,10 @@ class NavigableMap2d(context: Context, attributes: AttributeSet) :
         currentLocationCenterPaint.style = Paint.Style.FILL
         currentLocationCenterPaint.strokeWidth = convertDipToPixels(6f)
 
+        currentLocationCenterOldPaint.color = Color.GRAY
+        currentLocationCenterOldPaint.style = Paint.Style.FILL
+        currentLocationCenterOldPaint.strokeWidth = convertDipToPixels(6f)
+
         currentLocationEdgePaint.color = Color.WHITE
         currentLocationEdgePaint.style = Paint.Style.FILL
         currentLocationEdgePaint.strokeWidth = convertDipToPixels(2f) + currentLocationCenterPaint.strokeWidth
@@ -153,6 +160,8 @@ class NavigableMap2d(context: Context, attributes: AttributeSet) :
     }
 
     fun updateCurrentLocation(location: Location) {
+        currentLocationTime = location.time
+
         val loc = PointGeo(longitude = location.longitude, latitude = location.latitude)
         when (val rectangularAreaBounds = this.rectangularAreaBounds) {
             is RectangularAreaLcc -> {
@@ -437,6 +446,8 @@ class NavigableMap2d(context: Context, attributes: AttributeSet) :
     private fun drawCurrentLocation(viewport: Box2d, canvas: Canvas) {
         val currentLocation = this.currentLocation2d ?: return
         val origin2d = this.origin2d ?: return
+        val age = Date().time - currentLocationTime
+        val currentLocationIsOld = age > currentLocationOldAgeThresholdMs
 
         val saveCount = canvas.save()
 
@@ -446,7 +457,23 @@ class NavigableMap2d(context: Context, attributes: AttributeSet) :
 
         canvas.drawArc(currentLocationEdgeRect, 0f, 360f, true, this.currentLocationEdgePaint)
         canvas.drawArc(currentLocationEdgeRect, 0f, 360f, true, this.currentLocationBorderPaint)
-        canvas.drawArc(currentLocationCenterRect, 0f, 360f, true, this.currentLocationCenterPaint)
+        if (currentLocationIsOld) {
+            canvas.drawArc(
+                currentLocationCenterRect,
+                0f,
+                360f,
+                true,
+                this.currentLocationCenterOldPaint
+            )
+        } else {
+            canvas.drawArc(
+                currentLocationCenterRect,
+                0f,
+                360f,
+                true,
+                this.currentLocationCenterPaint
+            )
+        }
 
         canvas.restoreToCount(saveCount)
     }
