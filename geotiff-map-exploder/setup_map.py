@@ -138,7 +138,7 @@ if "versions" not in map_inventory[mi_lookup]:
     map_inventory[mi_lookup]["versions"] = {}
 if str(version) not in map_inventory[mi_lookup]["versions"]:
     map_inventory[mi_lookup]["versions"][str(version)] = {}
-    if str(version-1) in map_inventory[mi_lookup]["versions"]:
+    if str(version-1) in map_inventory[mi_lookup]["versions"] and "mapBounds" in map_inventory[mi_lookup]["versions"][str(version-1)]:
         map_inventory[mi_lookup]["versions"][str(version)]["mapBounds"] = deepcopy(map_inventory[mi_lookup]["versions"][str(version-1)]["mapBounds"])
 map_version_metadata = map_inventory[mi_lookup]["versions"][str(version)]
 map_version_metadata["tileWidth"] = TILE_WIDTH

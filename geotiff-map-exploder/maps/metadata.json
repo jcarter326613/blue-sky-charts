@@ -913,6 +913,32 @@
                     "y_0": 0
                 },
                 "tileWidth": 1024
+            },
+            "102": {
+                "effectiveDate": "2020-08-13 09-01",
+                "expirationDate": "2021-02-25 09-01",
+                "imageHeight": 7641,
+                "imageWidth": 9035,
+                "maxZoom": 4,
+                "originalProjectionBounds": [
+                    -121993.31924295505,
+                    -76679.81981434069,
+                    69240.58407213549,
+                    85051.36969566518
+                ],
+                "originalProjectionData": {
+                    "datum": "NAD83",
+                    "lat_0": 33.65,
+                    "lat_1": 45,
+                    "lat_2": 33,
+                    "lon_0": -84.33333333333333,
+                    "no_defs": true,
+                    "proj": "lcc",
+                    "units": "m",
+                    "x_0": 0,
+                    "y_0": 0
+                },
+                "tileWidth": 1024
             }
         }
     },
@@ -920,7 +946,8 @@
         "type": "TerminalArea",
         "versions": {
             "101": {
-                "effectiveDate": "2020-07-16",
+                "effectiveDate": "2020-07-16 09-01",
+                "expirationDate": "2020-12-31 09-01",
                 "imageHeight": 8829,
                 "imageWidth": 12077,
                 "maxZoom": 4,
@@ -1538,7 +1565,8 @@
         "type": "TerminalArea",
         "versions": {
             "96": {
-                "effectiveDate": "2020-04-23",
+                "effectiveDate": "2020-04-23 09-01",
+                "expirationDate": "2020-11-05 09-01",
                 "imageHeight": 8969,
                 "imageWidth": 12478,
                 "maxZoom": 4,
@@ -2348,7 +2376,8 @@
         "type": "TerminalArea",
         "versions": {
             "63": {
-                "effectiveDate": "2020-07-16",
+                "effectiveDate": "2020-07-16 09-01",
+                "expirationDate": "2020-12-31 09-01",
                 "imageHeight": 7544,
                 "imageWidth": 9019,
                 "maxZoom": 4,
@@ -3142,7 +3171,8 @@
         "type": "TerminalArea",
         "versions": {
             "100": {
-                "effectiveDate": "2020-04-23",
+                "effectiveDate": "2020-04-23 09-01",
+                "expirationDate": "2020-10-08 09-01",
                 "imageHeight": 6068,
                 "imageWidth": 9015,
                 "maxZoom": 4,
@@ -3336,7 +3366,8 @@
         "type": "TerminalArea",
         "versions": {
             "43": {
-                "effectiveDate": "2020-06-18",
+                "effectiveDate": "2020-06-18 09-01",
+                "expirationDate": "2020-11-05 09-01",
                 "imageHeight": 8784,
                 "imageWidth": 9019,
                 "maxZoom": 4,
@@ -3366,7 +3397,8 @@
         "type": "TerminalArea",
         "versions": {
             "93": {
-                "effectiveDate": "2020-03-26",
+                "effectiveDate": "2020-03-26 09-01",
+                "expirationDate": "2020-09-10 09-01",
                 "imageHeight": 6234,
                 "imageWidth": 9605,
                 "maxZoom": 4,
@@ -3576,7 +3608,8 @@
         "type": "TerminalArea",
         "versions": {
             "94": {
-                "effectiveDate": "2020-07-16",
+                "effectiveDate": "2020-07-16 09-01",
+                "expirationDate": "2020-12-31 09-01",
                 "imageHeight": 8603,
                 "imageWidth": 11710,
                 "maxZoom": 4,
@@ -3730,7 +3763,8 @@
         "type": "TerminalArea",
         "versions": {
             "95": {
-                "effectiveDate": "2020-02-27",
+                "effectiveDate": "2020-02-27 09-01",
+                "expirationDate": "2020-09-10 09-01",
                 "imageHeight": 8738,
                 "imageWidth": 12011,
                 "maxZoom": 4,
@@ -4164,7 +4198,8 @@
         "type": "TerminalArea",
         "versions": {
             "94": {
-                "effectiveDate": "2020-07-16",
+                "effectiveDate": "2020-07-16 09-01",
+                "expirationDate": "2020-12-31 09-01",
                 "imageHeight": 8704,
                 "imageWidth": 9027,
                 "maxZoom": 4,
@@ -4326,7 +4361,8 @@
         "type": "TerminalArea",
         "versions": {
             "93": {
-                "effectiveDate": "2020-03-26",
+                "effectiveDate": "2020-03-26 09-01",
+                "expirationDate": "2020-09-10 09-01",
                 "imageHeight": 7502,
                 "imageWidth": 10503,
                 "maxZoom": 4,
@@ -5955,7 +5991,8 @@
         "type": "TerminalArea",
         "versions": {
             "93": {
-                "effectiveDate": "2020-02-27",
+                "effectiveDate": "2020-02-27 09-01",
+                "expirationDate": "2020-09-10 09-01",
                 "imageHeight": 8140,
                 "imageWidth": 9067,
                 "maxZoom": 4,
@@ -6529,7 +6566,8 @@
         "type": "TerminalArea",
         "versions": {
             "91": {
-                "effectiveDate": "2020-05-21",
+                "effectiveDate": "2020-05-21 09-01",
+                "expirationDate": "2020-11-05 09-01",
                 "imageHeight": 7662,
                 "imageWidth": 11054,
                 "maxZoom": 4,
@@ -7450,6 +7488,32 @@
                     "y_0": 0
                 },
                 "tileWidth": 1024
+            },
+            "93": {
+                "effectiveDate": "2020-08-13 09-01",
+                "expirationDate": "2021-02-25 09-01",
+                "imageHeight": 6251,
+                "imageWidth": 10565,
+                "maxZoom": 4,
+                "originalProjectionBounds": [
+                    -113388.24739871225,
+                    -66136.36978034367,
+                    110244.04021045622,
+                    66178.38819299446
+                ],
+                "originalProjectionData": {
+                    "datum": "NAD83",
+                    "lat_0": 36.25,
+                    "lat_1": 45,
+                    "lat_2": 33,
+                    "lon_0": -115.0833333333333,
+                    "no_defs": true,
+                    "proj": "lcc",
+                    "units": "m",
+                    "x_0": 0,
+                    "y_0": 0
+                },
+                "tileWidth": 1024
             }
         }
     },
@@ -7637,7 +7701,8 @@
         "type": "TerminalArea",
         "versions": {
             "81": {
-                "effectiveDate": "2020-06-18",
+                "effectiveDate": "2020-06-18 09-01",
+                "expirationDate": "2020-11-05 09-01",
                 "imageHeight": 6040,
                 "imageWidth": 16501,
                 "maxZoom": 5,
@@ -8421,6 +8486,32 @@
                     "y_0": 0
                 },
                 "tileWidth": 1024
+            },
+            "96": {
+                "effectiveDate": "2020-08-13 09-01",
+                "expirationDate": "2020-12-31 09-01",
+                "imageHeight": 8984,
+                "imageWidth": 10552,
+                "maxZoom": 4,
+                "originalProjectionBounds": [
+                    -141048.17614269396,
+                    -96557.98218115186,
+                    82328.92701032138,
+                    93638.85618121809
+                ],
+                "originalProjectionData": {
+                    "datum": "NAD83",
+                    "lat_0": 25.95,
+                    "lat_1": 45,
+                    "lat_2": 33,
+                    "lon_0": -80.11666666666666,
+                    "no_defs": true,
+                    "proj": "lcc",
+                    "units": "m",
+                    "x_0": 0,
+                    "y_0": 0
+                },
+                "tileWidth": 1024
             }
         }
     },
@@ -8428,7 +8519,8 @@
         "type": "TerminalArea",
         "versions": {
             "94": {
-                "effectiveDate": "2020-06-18",
+                "effectiveDate": "2020-06-18 09-01",
+                "expirationDate": "2020-12-31 09-01",
                 "imageHeight": 6151,
                 "imageWidth": 10696,
                 "maxZoom": 4,
@@ -8886,7 +8978,8 @@
         "type": "TerminalArea",
         "versions": {
             "91": {
-                "effectiveDate": "2020-05-21",
+                "effectiveDate": "2020-05-21 09-01",
+                "expirationDate": "2020-11-05 09-01",
                 "imageHeight": 6098,
                 "imageWidth": 10513,
                 "maxZoom": 4,
@@ -9056,7 +9149,8 @@
         "type": "TerminalArea",
         "versions": {
             "99": {
-                "effectiveDate": "2020-04-23",
+                "effectiveDate": "2020-04-23 09-01",
+                "expirationDate": "2020-11-05 09-01",
                 "imageHeight": 6222,
                 "imageWidth": 12027,
                 "maxZoom": 4,
@@ -9620,7 +9714,8 @@
         "type": "TerminalArea",
         "versions": {
             "92": {
-                "effectiveDate": "2020-07-16",
+                "effectiveDate": "2020-07-16 09-01",
+                "expirationDate": "2020-12-31 09-01",
                 "imageHeight": 8515,
                 "imageWidth": 10203,
                 "maxZoom": 4,
@@ -9798,7 +9893,8 @@
         "type": "TerminalArea",
         "versions": {
             "62": {
-                "effectiveDate": "2020-04-23",
+                "effectiveDate": "2020-04-23 09-01",
+                "expirationDate": "2020-10-08 09-01",
                 "imageHeight": 7548,
                 "imageWidth": 10518,
                 "maxZoom": 4,
@@ -9828,7 +9924,8 @@
         "type": "TerminalArea",
         "versions": {
             "93": {
-                "effectiveDate": "2020-03-26",
+                "effectiveDate": "2020-03-26 09-01",
+                "expirationDate": "2020-09-10 09-01",
                 "imageHeight": 6136,
                 "imageWidth": 9554,
                 "maxZoom": 4,
@@ -10006,7 +10103,8 @@
         "type": "TerminalArea",
         "versions": {
             "46": {
-                "effectiveDate": "2019-10-10",
+                "effectiveDate": "2019-10-10 09-01",
+                "expirationDate": "2020-10-08 09-01",
                 "imageHeight": 6195,
                 "imageWidth": 17871,
                 "maxZoom": 5,
