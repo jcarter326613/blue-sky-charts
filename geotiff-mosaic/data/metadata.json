@@ -38,6 +38,7 @@
     }
   },
   "usa48": {
+    "humanName": "Contiguous States",
     "versions": {
       "2020-07-15T22-45-01": {
         "imageHeight": 24759592.89395228,
