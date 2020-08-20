@@ -66,7 +66,7 @@ class MapConfiguration(val data: MapMetaDataModelCollection, val baseUrl: String
         return null
     }
 
-    fun getCurrentVersion(mapName: String): SubMapModel? {
+    fun getCurrentVersion(mapName: String, allowExpired: Boolean): SubMapModel? {
         val mapVersionCollection = data.maps[mapName] ?: return null
         var latestActiveVersion: Date? = null
         var latestActiveVersionMap: SubMapModel? = null
@@ -81,6 +81,18 @@ class MapConfiguration(val data: MapMetaDataModelCollection, val baseUrl: String
 
                 latestActiveVersion = effectiveDate
                 latestActiveVersionMap = versionEntry.value
+            }
+        }
+
+        if (latestActiveVersionMap == null && allowExpired) {
+            for (versionEntry in mapVersionCollection.versions) {
+                val effectiveDate = versionEntry.value.effectiveDate ?: continue
+                if (effectiveDate <= now &&
+                    (latestActiveVersion == null || effectiveDate > latestActiveVersion)) {
+
+                    latestActiveVersion = effectiveDate
+                    latestActiveVersionMap = versionEntry.value
+                }
             }
         }
         return latestActiveVersionMap
@@ -100,7 +112,7 @@ class MapConfiguration(val data: MapMetaDataModelCollection, val baseUrl: String
      * Sorted from earliest to latest
      */
     fun getFutureSortedVersionList(mapName: String, includeCurrent: Boolean = false): List<String> {
-        val currentVersion = getCurrentVersion(mapName)
+        val currentVersion = getCurrentVersion(mapName, false)
         if (currentVersion?.version == null) {
             return listOf()
         }
@@ -124,7 +136,7 @@ class MapConfiguration(val data: MapMetaDataModelCollection, val baseUrl: String
      * Sorted from latest to earliest
      */
     fun getPastSortedVersionList(mapName: String, includeCurrent: Boolean = false): List<String> {
-        val currentVersion = getCurrentVersion(mapName)
+        val currentVersion = getCurrentVersion(mapName, true)
         if (currentVersion?.version == null) {
             return listOf()
         }
@@ -138,7 +150,7 @@ class MapConfiguration(val data: MapMetaDataModelCollection, val baseUrl: String
                 retVal.add(versionEntry.key)
             }
         }
-        if ( includeCurrent ) {
+        if ( includeCurrent || currentVersion.isExpired ) {
             retVal.add(currentVersion.version)
         }
         return retVal.sortedDescending()

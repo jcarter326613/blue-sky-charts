@@ -31,4 +31,8 @@ abstract class Map(context: Context, attributes: AttributeSet): View(context, at
     fun convertDipToPixels(dp: Float): Float {
         return ScreenUnits.convertDipToPixels(dp, context)
     }
+
+    fun convertSdipToPixels(sp: Float): Float {
+        return ScreenUnits.convertSdipToPixels(sp, context)
+    }
 }

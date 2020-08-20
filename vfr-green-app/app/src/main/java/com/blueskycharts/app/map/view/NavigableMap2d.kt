@@ -45,6 +45,7 @@ class NavigableMap2d(context: Context, attributes: AttributeSet) :
     private val textHeight: Float
     private val textBackgroundPaint = Paint()
     private val textStrokePaint = Paint()
+    private val mapExpirationPaint = Paint()
     private val currentLocationCenterPaint = Paint()
     private val currentLocationCenterOldPaint = Paint()
     private val currentLocationEdgePaint = Paint()
@@ -57,6 +58,7 @@ class NavigableMap2d(context: Context, attributes: AttributeSet) :
     private var mapBackground: SubMapPosition? = null
     private var mapViews: LinkedList<SubMapPosition>? = null
     private var dataOverlayView: SubMapPosition? = null
+    var isExpired: Boolean = false
     val isCurrentLocationInMap: Boolean
         get() {
             val currentLocation2d = this.currentLocation2d ?: return false
@@ -104,7 +106,7 @@ class NavigableMap2d(context: Context, attributes: AttributeSet) :
         itemTextPaint.color = Color.BLACK
         itemTextPaint.style = Paint.Style.FILL_AND_STROKE
         itemTextPaint.strokeWidth = convertDipToPixels(1f)
-        itemTextPaint.textSize = convertDipToPixels(20f)
+        itemTextPaint.textSize = convertSdipToPixels(20f)
         itemTextPaint.textAlign = Paint.Align.LEFT
         val buffer = Rect()
         itemTextPaint.getTextBounds("00000", 0, 5, buffer)
@@ -116,6 +118,13 @@ class NavigableMap2d(context: Context, attributes: AttributeSet) :
         textStrokePaint.color = Color.BLACK
         textStrokePaint.style = Paint.Style.STROKE
         textStrokePaint.strokeWidth = convertDipToPixels(1f)
+
+        mapExpirationPaint.color = Color.BLACK
+        mapExpirationPaint.style = Paint.Style.FILL_AND_STROKE
+        mapExpirationPaint.textSize = convertSdipToPixels(20f)
+        mapExpirationPaint.textAlign = Paint.Align.LEFT
+        mapExpirationPaint.strokeWidth = convertDipToPixels(1f)
+        mapExpirationPaint.setShadowLayer(10f, 0f, 0f, Color.RED)
 
         currentLocationCenterPaint.color = Color.BLUE
         currentLocationCenterPaint.style = Paint.Style.FILL
@@ -266,8 +275,9 @@ class NavigableMap2d(context: Context, attributes: AttributeSet) :
         var rectangularAreaBounds: RectangularArea? = null
         var mercatorMap = false
         val mapViewList = LinkedList<SubMapPosition>()
+        isExpired = false
         for (mapName in configuration.mapList) {
-            val mapData = configuration.getCurrentVersion(mapName)
+            val mapData = configuration.getCurrentVersion(mapName, true)
             if ( mapData != null ) {
                 if ( firstMap ) {
                     this.tileProvider = TileProvider(this, group)
@@ -290,6 +300,7 @@ class NavigableMap2d(context: Context, attributes: AttributeSet) :
                         }
                     }
                 }
+                isExpired = isExpired || mapData.isExpired
             }
         }
 
@@ -441,6 +452,13 @@ class NavigableMap2d(context: Context, attributes: AttributeSet) :
             }
 
             canvas.restoreToCount(restoreCount)
+        }
+
+        // Draw the expired map indicator
+        if (isExpired) {
+            val xBuffer = convertDipToPixels(6f)
+            val yBuffer = convertSdipToPixels(6f) + convertDipToPixels(2f)
+            canvas.drawText("Map expired", xBuffer, height.toFloat() - yBuffer, mapExpirationPaint)
         }
     }
 

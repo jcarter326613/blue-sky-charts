@@ -245,7 +245,7 @@ class TilePersistenceManager(private val connectivityManager: ConnectivityManage
     private fun getMapKey(groupId: Int, mapName: String) = "$groupId-$mapName"
 
     private suspend fun enforcePreferences(group: Inventory.Group, name: String, mapsMetaData: MapConfiguration) {
-        val metaData = mapsMetaData.getCurrentVersion(name)
+        val metaData = mapsMetaData.getCurrentVersion(name, false)
         if (metaData?.maxZoom == null || shouldStop) {
             return
         }
@@ -272,41 +272,13 @@ class TilePersistenceManager(private val connectivityManager: ConnectivityManage
                             continue
                         }
 
-                        // Descending into the past for each version
-                        var fileDownloadedOrAliased = false
-                        val listOfVersions = mapsMetaData.getPastSortedVersionList(name)
-                        for ( version in listOfVersions ) {
-                            if ( shouldStop ) {
-                                return
-                            }
-                            // Check if the manifest has the needed file
-                            val existingFileDescription = tileProvider.getTileFileDescription(name, version, z, x, y)
-                            val hasAliasTile = DiskCacheFactory.instance.exists(existingFileDescription)
-                            if (hasAliasTile) {
-                                // If it does and this isn't the current version, create an alias to the current version
-                                DiskCacheFactory.instance.createAlias(existingFileDescription, targetFileDescription)
-                                fileDownloadedOrAliased = true
-                                break
-                            } else {
-                                // Check if the file is in the changeset for this version
-                                val changeSet = mapsMetaData.getVersion(name, version)
-                                val fileInChangeSetEvidence = changeSet?.changeSet?.tiles?.get(z)?.get(x)?.get(y)
-                                if ( fileInChangeSetEvidence != null ) {
-                                    // If they are, download them
-                                    tileProvider.retrieveTile(name, currentMapVersion, z, x, y) {}
-                                    fileDownloadedOrAliased = true
-                                    break
-                                }
-                            }
-                        }
-
                         // If the file was not downloaded, download it
                         if ( shouldStop ) {
                             return
                         }
                         val onWifiLocal = onWifi
                         wifiWasOn = wifiWasOn && onWifiLocal
-                        if ( !fileDownloadedOrAliased && onWifiLocal ) {
+                        if ( onWifiLocal ) {
                             var throttleBoolean = false
                             tileProvider.retrieveTile(name, currentMapVersion, z, x, y) {
                                 throttleBoolean = true

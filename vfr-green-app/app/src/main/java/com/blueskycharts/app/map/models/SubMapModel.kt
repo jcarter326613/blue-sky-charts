@@ -15,6 +15,13 @@ class SubMapModel ( val tileWidth: Int?,
                     val maxZoom: Int?,
                     val changeSet: ChangeSet?
 ) {
+    val isExpired: Boolean
+        get() {
+            val now = Date()
+            now.time = now.time - TimeZone.getDefault().getOffset(now.time)
+            return expirationDate != null && expirationDate <= now
+        }
+
     companion object {
         fun readFromJsonReader(reader: JsonReader): SubMapModel {
             var tileWidth: Int? = null
