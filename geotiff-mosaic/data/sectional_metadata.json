@@ -2,7 +2,8 @@
   "Albuquerque": {
     "versions": {
       "2020-07-23T20-18-20": {
-        "effectiveDate": "2020-04-23",
+        "effectiveDate": "2020-04-23 09-01",
+        "expirationDate": "2020-10-08 09-01",
         "imageHeight": 12315,
         "imageWidth": 17947,
         "maxZoom": 5,
@@ -28,7 +29,8 @@
   "Anchorage": {
     "versions": {
       "2020-07-23T20-18-20": {
-        "effectiveDate": "2020-05-21",
+        "effectiveDate": "2020-05-21 09-01",
+        "expirationDate": "2020-11-05 09-01",
         "imageHeight": 12355,
         "imageWidth": 16677,
         "maxZoom": 5,
@@ -74,13 +76,37 @@
         },
         "tileWidth": 1024,
         "version": "2020-07-23T20-18-20"
+      },
+      "2020-08-20T15-34-49": {
+        "effectiveDate": "2020-08-13 09-01",
+        "expirationDate": "2021-02-25 09-01",
+        "imageHeight": 12354,
+        "imageWidth": 17951,
+        "maxZoom": 5,
+        "projectionLcc": {
+          "extents": {
+            "bottom": 278559.45448675624,
+            "left": -424300.4989163972,
+            "right": 335631.47504449857,
+            "top": -244410.91968771745
+          },
+          "lat0": 34.10833333333333,
+          "lat1": 38.66666666666666,
+          "lat2": 33.33333333333334,
+          "lon0": -84.5,
+          "x0": 0,
+          "y0": 0
+        },
+        "tileWidth": 1024,
+        "version": "2020-08-20T15-34-49"
       }
     }
   },
   "Bethel": {
     "versions": {
       "2020-07-23T20-18-20": {
-        "effectiveDate": "2020-07-16",
+        "effectiveDate": "2020-07-16 09-01",
+        "expirationDate": "2021-02-25 09-01",
         "imageHeight": 12244,
         "imageWidth": 16666,
         "maxZoom": 5,
@@ -106,7 +132,8 @@
   "Billings": {
     "versions": {
       "2020-07-23T20-18-20": {
-        "effectiveDate": "2020-03-26",
+        "effectiveDate": "2020-03-26 09-01",
+        "expirationDate": "2020-09-10 09-01",
         "imageHeight": 12322,
         "imageWidth": 17881,
         "maxZoom": 5,
@@ -152,13 +179,37 @@
         },
         "tileWidth": 1024,
         "version": "2020-07-23T20-18-20"
+      },
+      "2020-08-20T15-34-49": {
+        "effectiveDate": "2020-08-13 09-01",
+        "expirationDate": "2020-12-31 09-01",
+        "imageHeight": 12323,
+        "imageWidth": 16602,
+        "maxZoom": 5,
+        "projectionLcc": {
+          "extents": {
+            "bottom": 242619.5021685572,
+            "left": -367473.13154097897,
+            "right": 335374.4851765582,
+            "top": -279088.17738815583
+          },
+          "lat0": 26.083333333,
+          "lat1": 30.66666666666667,
+          "lat2": 25.33333333333333,
+          "lon0": -100,
+          "x0": 0,
+          "y0": 0
+        },
+        "tileWidth": 1024,
+        "version": "2020-08-20T15-34-49"
       }
     }
   },
   "Cape_Lisburne": {
     "versions": {
       "2020-07-23T20-18-20": {
-        "effectiveDate": "2020-06-18",
+        "effectiveDate": "2020-06-18 09-01",
+        "expirationDate": "2021-02-25 09-01",
         "imageHeight": 12258,
         "imageWidth": 16583,
         "maxZoom": 5,
@@ -184,7 +235,8 @@
   "Charlotte": {
     "versions": {
       "2020-07-23T20-18-20": {
-        "effectiveDate": "2020-07-16",
+        "effectiveDate": "2020-07-16 09-01",
+        "expirationDate": "2020-12-31 09-01",
         "imageHeight": 12358,
         "imageWidth": 16867,
         "maxZoom": 5,
@@ -210,7 +262,8 @@
   "Cheyenne": {
     "versions": {
       "2020-07-23T20-18-20": {
-        "effectiveDate": "2020-07-16",
+        "effectiveDate": "2020-07-16 09-01",
+        "expirationDate": "2020-12-31 09-01",
         "imageHeight": 12350,
         "imageWidth": 17921,
         "maxZoom": 5,
@@ -236,7 +289,8 @@
   "Chicago": {
     "versions": {
       "2020-07-23T20-18-20": {
-        "effectiveDate": "2020-04-23",
+        "effectiveDate": "2020-04-23 09-01",
+        "expirationDate": "2020-10-08 09-01",
         "imageHeight": 12384,
         "imageWidth": 17932,
         "maxZoom": 5,
@@ -262,7 +316,8 @@
   "Cincinnati": {
     "versions": {
       "2020-07-23T20-18-20": {
-        "effectiveDate": "2020-06-18",
+        "effectiveDate": "2020-06-18 09-01",
+        "expirationDate": "2020-11-05 09-01",
         "imageHeight": 12323,
         "imageWidth": 17921,
         "maxZoom": 5,
@@ -288,7 +343,8 @@
   "Cold_Bay": {
     "versions": {
       "2020-07-23T20-18-20": {
-        "effectiveDate": "2020-01-30",
+        "effectiveDate": "2020-01-30 09-01",
+        "expirationDate": "2021-01-28 09-01",
         "imageHeight": 6270,
         "imageWidth": 16570,
         "maxZoom": 5,
@@ -314,7 +370,8 @@
   "Dallas-Ft_Worth": {
     "versions": {
       "2020-07-23T20-18-20": {
-        "effectiveDate": "2020-02-27",
+        "effectiveDate": "2020-02-27 09-01",
+        "expirationDate": "2020-09-10 09-01",
         "imageHeight": 12243,
         "imageWidth": 17957,
         "maxZoom": 5,
@@ -340,7 +397,8 @@
   "Dawson": {
     "versions": {
       "2020-07-23T20-18-20": {
-        "effectiveDate": "2019-10-10",
+        "effectiveDate": "2019-10-10 09-01",
+        "expirationDate": "2020-10-08 09-01",
         "imageHeight": 12279,
         "imageWidth": 16608,
         "maxZoom": 5,
@@ -366,7 +424,8 @@
   "Denver": {
     "versions": {
       "2020-07-23T20-18-20": {
-        "effectiveDate": "2020-07-16",
+        "effectiveDate": "2020-07-16 09-01",
+        "expirationDate": "2020-12-31 09-01",
         "imageHeight": 12391,
         "imageWidth": 16635,
         "maxZoom": 5,
@@ -392,7 +451,8 @@
   "Detroit": {
     "versions": {
       "2020-07-23T20-18-20": {
-        "effectiveDate": "2020-03-26",
+        "effectiveDate": "2020-03-26 09-01",
+        "expirationDate": "2020-09-10 09-01",
         "imageHeight": 12380,
         "imageWidth": 17925,
         "maxZoom": 5,
@@ -438,13 +498,37 @@
         },
         "tileWidth": 1024,
         "version": "2020-07-23T20-18-20"
+      },
+      "2020-08-20T15-34-49": {
+        "effectiveDate": "2020-02-27 09-01",
+        "expirationDate": "2021-02-25 09-01",
+        "imageHeight": 12331,
+        "imageWidth": 16600,
+        "maxZoom": 5,
+        "projectionLcc": {
+          "extents": {
+            "bottom": 232527.75223247206,
+            "left": -365400.6295524279,
+            "right": 337374.5596672124,
+            "top": -289512.0054175186
+          },
+          "lat0": 54.16666666666666,
+          "lat1": 54.66666666666666,
+          "lat2": 49.33333333333334,
+          "lon0": -168.5,
+          "x0": 0,
+          "y0": 0
+        },
+        "tileWidth": 1024,
+        "version": "2020-08-20T15-34-49"
       }
     }
   },
   "El_Paso": {
     "versions": {
       "2020-07-23T20-18-20": {
-        "effectiveDate": "2020-07-16",
+        "effectiveDate": "2020-07-16 09-01",
+        "expirationDate": "2020-12-31 09-01",
         "imageHeight": 12296,
         "imageWidth": 16562,
         "maxZoom": 5,
@@ -470,7 +554,8 @@
   "Fairbanks": {
     "versions": {
       "2020-07-23T20-18-20": {
-        "effectiveDate": "2020-05-21",
+        "effectiveDate": "2020-05-21 09-01",
+        "expirationDate": "2020-11-05 09-01",
         "imageHeight": 12260,
         "imageWidth": 16666,
         "maxZoom": 5,
@@ -496,7 +581,8 @@
   "Great_Falls": {
     "versions": {
       "2020-07-23T20-18-20": {
-        "effectiveDate": "2020-06-18",
+        "effectiveDate": "2020-06-18 09-01",
+        "expirationDate": "2020-12-31 09-01",
         "imageHeight": 12398,
         "imageWidth": 17885,
         "maxZoom": 5,
@@ -522,7 +608,8 @@
   "Green_Bay": {
     "versions": {
       "2020-07-23T20-18-20": {
-        "effectiveDate": "2020-05-21",
+        "effectiveDate": "2020-05-21 09-01",
+        "expirationDate": "2020-12-03 09-01",
         "imageHeight": 12331,
         "imageWidth": 17909,
         "maxZoom": 5,
@@ -568,13 +655,37 @@
         },
         "tileWidth": 1024,
         "version": "2020-07-23T20-18-20"
+      },
+      "2020-08-20T15-34-49": {
+        "effectiveDate": "2020-08-13 09-01",
+        "expirationDate": "2021-02-25 09-01",
+        "imageHeight": 12349,
+        "imageWidth": 16598,
+        "maxZoom": 5,
+        "projectionLcc": {
+          "extents": {
+            "bottom": 236622.74587395455,
+            "left": -376878.14586541033,
+            "right": 325773.2402717995,
+            "top": -286167.1237233703
+          },
+          "lat0": 46.16666666666666,
+          "lat1": 46.66666666666666,
+          "lat2": 41.33333333333334,
+          "lon0": -65,
+          "x0": 0,
+          "y0": 0
+        },
+        "tileWidth": 1024,
+        "version": "2020-08-20T15-34-49"
       }
     }
   },
   "Hawaiian_Islands": {
     "versions": {
       "2020-07-23T20-18-20": {
-        "effectiveDate": "2020-04-23",
+        "effectiveDate": "2020-04-23 09-01",
+        "expirationDate": "2020-10-08 09-01",
         "imageHeight": 16370,
         "imageWidth": 20186,
         "maxZoom": 5,
@@ -600,7 +711,8 @@
   "Houston": {
     "versions": {
       "2020-07-23T20-18-20": {
-        "effectiveDate": "2020-02-27",
+        "effectiveDate": "2020-02-27 09-01",
+        "expirationDate": "2020-09-10 09-01",
         "imageHeight": 12218,
         "imageWidth": 16572,
         "maxZoom": 5,
@@ -646,13 +758,37 @@
         },
         "tileWidth": 1024,
         "version": "2020-07-23T20-18-20"
+      },
+      "2020-08-20T15-34-49": {
+        "effectiveDate": "2020-08-13 09-01",
+        "expirationDate": "2020-12-31 09-01",
+        "imageHeight": 12412,
+        "imageWidth": 16617,
+        "maxZoom": 5,
+        "projectionLcc": {
+          "extents": {
+            "bottom": 224871.75127304034,
+            "left": -366632.06548702955,
+            "right": 336837.4563858385,
+            "top": -300575.80360185704
+          },
+          "lat0": 30.25,
+          "lat1": 30.66666666666667,
+          "lat2": 25.33333333333333,
+          "lon0": -82,
+          "x0": 0,
+          "y0": 0
+        },
+        "tileWidth": 1024,
+        "version": "2020-08-20T15-34-49"
       }
     }
   },
   "Juneau": {
     "versions": {
       "2020-07-23T20-18-20": {
-        "effectiveDate": "2020-03-26",
+        "effectiveDate": "2020-03-26 09-01",
+        "expirationDate": "2021-03-25 09-01",
         "imageHeight": 12333,
         "imageWidth": 16574,
         "maxZoom": 5,
@@ -698,13 +834,37 @@
         },
         "tileWidth": 1024,
         "version": "2020-07-23T20-18-20"
+      },
+      "2020-08-20T15-34-49": {
+        "effectiveDate": "2020-05-21 09-01",
+        "expirationDate": "2020-11-05 09-01",
+        "imageHeight": 12345,
+        "imageWidth": 16601,
+        "maxZoom": 5,
+        "projectionLcc": {
+          "extents": {
+            "bottom": 235458.11451694355,
+            "left": -385558.56235633197,
+            "right": 317246.3609868974,
+            "top": -287171.8799450082
+          },
+          "lat0": 38.16666666666666,
+          "lat1": 38.66666666666666,
+          "lat2": 33.33333333333334,
+          "lon0": -93.43333333333334,
+          "x0": 0,
+          "y0": 0
+        },
+        "tileWidth": 1024,
+        "version": "2020-08-20T15-34-49"
       }
     }
   },
   "Ketchikan": {
     "versions": {
       "2020-07-23T20-18-20": {
-        "effectiveDate": "2020-04-23",
+        "effectiveDate": "2020-04-23 09-01",
+        "expirationDate": "2021-04-22 09-01",
         "imageHeight": 12247,
         "imageWidth": 16539,
         "maxZoom": 5,
@@ -730,7 +890,8 @@
   "Klamath_Falls": {
     "versions": {
       "2020-07-23T20-18-20": {
-        "effectiveDate": "2020-03-26",
+        "effectiveDate": "2020-03-26 09-01",
+        "expirationDate": "2020-09-10 09-01",
         "imageHeight": 12398,
         "imageWidth": 17910,
         "maxZoom": 5,
@@ -756,7 +917,8 @@
   "Kodiak": {
     "versions": {
       "2020-07-23T20-18-20": {
-        "effectiveDate": "2019-11-07",
+        "effectiveDate": "2019-11-07 09-01",
+        "expirationDate": "2020-11-05 09-01",
         "imageHeight": 12282,
         "imageWidth": 16612,
         "maxZoom": 5,
@@ -782,7 +944,8 @@
   "Lake_Huron": {
     "versions": {
       "2020-07-23T20-18-20": {
-        "effectiveDate": "2020-03-26",
+        "effectiveDate": "2020-03-26 09-01",
+        "expirationDate": "2020-09-10 09-01",
         "imageHeight": 12291,
         "imageWidth": 17898,
         "maxZoom": 5,
@@ -828,13 +991,37 @@
         },
         "tileWidth": 1024,
         "version": "2020-07-23T20-18-20"
+      },
+      "2020-08-20T15-34-49": {
+        "effectiveDate": "2020-08-13 09-01",
+        "expirationDate": "2021-02-25 09-01",
+        "imageHeight": 12280,
+        "imageWidth": 17849,
+        "maxZoom": 5,
+        "projectionLcc": {
+          "extents": {
+            "bottom": 244775.46352365174,
+            "left": -431009.93039572437,
+            "right": 324613.24103234895,
+            "top": -275109.31765375135
+          },
+          "lat0": 37.91666666666666,
+          "lat1": 38.66666666666666,
+          "lat2": 33.33333333333334,
+          "lon0": -114.5,
+          "x0": 0,
+          "y0": 0
+        },
+        "tileWidth": 1024,
+        "version": "2020-08-20T15-34-49"
       }
     }
   },
   "Los_Angeles": {
     "versions": {
       "2020-07-23T20-18-20": {
-        "effectiveDate": "2020-06-18",
+        "effectiveDate": "2020-06-18 09-01",
+        "expirationDate": "2020-11-05 09-01",
         "imageHeight": 12349,
         "imageWidth": 16645,
         "maxZoom": 5,
@@ -860,7 +1047,8 @@
   "McGrath": {
     "versions": {
       "2020-07-23T20-18-20": {
-        "effectiveDate": "2020-07-16",
+        "effectiveDate": "2020-07-16 09-01",
+        "expirationDate": "2021-02-25 09-01",
         "imageHeight": 12291,
         "imageWidth": 16499,
         "maxZoom": 5,
@@ -933,6 +1121,29 @@
         },
         "tileWidth": 1024,
         "version": "2020-07-23T20-18-20"
+      },
+      "2020-08-20T15-34-49": {
+        "effectiveDate": "2020-08-13 09-01",
+        "expirationDate": "2020-12-31 09-01",
+        "imageHeight": 12313,
+        "imageWidth": 17198,
+        "maxZoom": 5,
+        "projectionLcc": {
+          "extents": {
+            "bottom": 254530.3044284882,
+            "left": -377598.9529860567,
+            "right": 350455.0635108446,
+            "top": -266742.03087195934
+          },
+          "lat0": 26.25,
+          "lat1": 30.66666666666667,
+          "lat2": 25.33333333333333,
+          "lon0": -79.91666666666667,
+          "x0": 0,
+          "y0": 0
+        },
+        "tileWidth": 1024,
+        "version": "2020-08-20T15-34-49"
       }
     }
   },
@@ -959,13 +1170,37 @@
         },
         "tileWidth": 1024,
         "version": "2020-07-23T20-18-20"
+      },
+      "2020-08-20T15-34-49": {
+        "effectiveDate": "2020-08-13 09-01",
+        "expirationDate": "2021-02-25 09-01",
+        "imageHeight": 12341,
+        "imageWidth": 17911,
+        "maxZoom": 5,
+        "projectionLcc": {
+          "extents": {
+            "bottom": 229482.51721539948,
+            "left": -412008.52089930524,
+            "right": 346246.05518652324,
+            "top": -292962.20515199384
+          },
+          "lat0": 46.25,
+          "lat1": 46.66666666666666,
+          "lat2": 41.33333333333334,
+          "lon0": -72.96666666666667,
+          "x0": 0,
+          "y0": 0
+        },
+        "tileWidth": 1024,
+        "version": "2020-08-20T15-34-49"
       }
     }
   },
   "New_Orleans": {
     "versions": {
       "2020-07-23T20-18-20": {
-        "effectiveDate": "2020-05-21",
+        "effectiveDate": "2020-05-21 09-01",
+        "expirationDate": "2020-11-05 09-01",
         "imageHeight": 12347,
         "imageWidth": 16617,
         "maxZoom": 5,
@@ -991,7 +1226,8 @@
   "New_York": {
     "versions": {
       "2020-07-23T20-18-20": {
-        "effectiveDate": "2020-04-23",
+        "effectiveDate": "2020-04-23 09-01",
+        "expirationDate": "2020-11-05 09-01",
         "imageHeight": 12377,
         "imageWidth": 17885,
         "maxZoom": 5,
@@ -1017,7 +1253,8 @@
   "Nome": {
     "versions": {
       "2020-07-23T20-18-20": {
-        "effectiveDate": "2020-06-18",
+        "effectiveDate": "2020-06-18 09-01",
+        "expirationDate": "2021-02-25 09-01",
         "imageHeight": 12250,
         "imageWidth": 16626,
         "maxZoom": 5,
@@ -1043,7 +1280,8 @@
   "Omaha": {
     "versions": {
       "2020-07-23T20-18-20": {
-        "effectiveDate": "2020-07-16",
+        "effectiveDate": "2020-07-16 09-01",
+        "expirationDate": "2020-12-31 09-01",
         "imageHeight": 12358,
         "imageWidth": 17921,
         "maxZoom": 5,
@@ -1069,7 +1307,8 @@
   "Phoenix": {
     "versions": {
       "2020-07-23T20-18-20": {
-        "effectiveDate": "2020-04-23",
+        "effectiveDate": "2020-04-23 09-01",
+        "expirationDate": "2020-10-08 09-01",
         "imageHeight": 12299,
         "imageWidth": 17908,
         "maxZoom": 5,
@@ -1095,7 +1334,8 @@
   "Point_Barrow": {
     "versions": {
       "2020-07-23T20-18-20": {
-        "effectiveDate": "2020-04-23",
+        "effectiveDate": "2020-04-23 09-01",
+        "expirationDate": "2021-04-22 09-01",
         "imageHeight": 12363,
         "imageWidth": 16576,
         "maxZoom": 5,
@@ -1121,7 +1361,8 @@
   "Salt_Lake_City": {
     "versions": {
       "2020-07-23T20-18-20": {
-        "effectiveDate": "2020-03-26",
+        "effectiveDate": "2020-03-26 09-01",
+        "expirationDate": "2020-10-08 09-01",
         "imageHeight": 12361,
         "imageWidth": 17897,
         "maxZoom": 5,
@@ -1147,7 +1388,8 @@
   "San_Antonio": {
     "versions": {
       "2020-07-23T20-18-20": {
-        "effectiveDate": "2020-04-23",
+        "effectiveDate": "2020-04-23 09-01",
+        "expirationDate": "2020-11-05 09-01",
         "imageHeight": 12232,
         "imageWidth": 16855,
         "maxZoom": 5,
@@ -1193,13 +1435,37 @@
         },
         "tileWidth": 1024,
         "version": "2020-07-23T20-18-20"
+      },
+      "2020-08-20T15-34-49": {
+        "effectiveDate": "2020-08-13 09-01",
+        "expirationDate": "2021-02-25 09-01",
+        "imageHeight": 12340,
+        "imageWidth": 16658,
+        "maxZoom": 5,
+        "projectionLcc": {
+          "extents": {
+            "bottom": 256254.5947889543,
+            "left": -384321.7108235379,
+            "right": 320921.38326930406,
+            "top": -266186.0601677208
+          },
+          "lat0": 38.33333333333334,
+          "lat1": 38.66666666666666,
+          "lat2": 33.33333333333334,
+          "lon0": -121.4166666666667,
+          "x0": 0,
+          "y0": 0
+        },
+        "tileWidth": 1024,
+        "version": "2020-08-20T15-34-49"
       }
     }
   },
   "Seattle": {
     "versions": {
       "2020-07-23T20-18-20": {
-        "effectiveDate": "2020-05-21",
+        "effectiveDate": "2020-05-21 09-01",
+        "expirationDate": "2020-12-03 09-01",
         "imageHeight": 12333,
         "imageWidth": 17869,
         "maxZoom": 5,
@@ -1225,7 +1491,8 @@
   "Seward": {
     "versions": {
       "2020-07-23T20-18-20": {
-        "effectiveDate": "2020-05-21",
+        "effectiveDate": "2020-05-21 09-01",
+        "expirationDate": "2020-11-05 09-01",
         "imageHeight": 6253,
         "imageWidth": 17886,
         "maxZoom": 5,
@@ -1251,7 +1518,8 @@
   "St_Louis": {
     "versions": {
       "2020-07-23T20-18-20": {
-        "effectiveDate": "2020-06-18",
+        "effectiveDate": "2020-06-18 09-01",
+        "expirationDate": "2020-11-05 09-01",
         "imageHeight": 12326,
         "imageWidth": 17935,
         "maxZoom": 5,
@@ -1277,7 +1545,8 @@
   "Twin_Cities": {
     "versions": {
       "2020-07-23T20-18-20": {
-        "effectiveDate": "2020-06-18",
+        "effectiveDate": "2020-06-18 09-01",
+        "expirationDate": "2020-12-31 09-01",
         "imageHeight": 12357,
         "imageWidth": 17920,
         "maxZoom": 5,
@@ -1303,7 +1572,8 @@
   "Washington": {
     "versions": {
       "2020-07-23T20-18-20": {
-        "effectiveDate": "2020-07-16",
+        "effectiveDate": "2020-07-16 09-01",
+        "expirationDate": "2020-12-31 09-01",
         "imageHeight": 12341,
         "imageWidth": 16708,
         "maxZoom": 5,
@@ -1329,7 +1599,8 @@
   "Whitehorse": {
     "versions": {
       "2020-07-23T20-18-20": {
-        "effectiveDate": "2020-03-26",
+        "effectiveDate": "2020-03-26 09-01",
+        "expirationDate": "2021-03-25 09-01",
         "imageHeight": 12267,
         "imageWidth": 16545,
         "maxZoom": 5,
@@ -1355,7 +1626,8 @@
   "Wichita": {
     "versions": {
       "2020-07-23T20-18-20": {
-        "effectiveDate": "2020-07-16",
+        "effectiveDate": "2020-07-16 09-01",
+        "expirationDate": "2020-12-31 09-01",
         "imageHeight": 12378,
         "imageWidth": 16680,
         "maxZoom": 5,
