@@ -51,6 +51,16 @@ class TileAssetProvider(private val group: Inventory.Group) {
         return description
     }
 
+    fun getVersionFileDescription(mapName: String, mapVersion: String): RemoteAssetDescription {
+        val tileUrl = "${group.urlRoot}/${mapName}/$mapVersion"
+        val storage = if (Preferences.instance.getBooleanValue(Preferences.propertyNameStoreMapsExternally, Preferences.defaultValueStoreMapsExternally)) {
+            StorageLocation.External
+        } else {
+            StorageLocation.Internal
+        }
+        return RemoteAssetDescription(URL(tileUrl), Volatility.Indefinite, storage, requiresCors = false, isFolder = true)
+    }
+
     fun getMapAssetDescriptionContainer(mapName: String): AssetDescription {
         val tileUrl = "${group.urlRoot}/${mapName}"
         val storage = if (Preferences.instance.getBooleanValue(Preferences.propertyNameStoreMapsExternally, Preferences.defaultValueStoreMapsExternally)) {

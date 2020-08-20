@@ -290,6 +290,18 @@ class TilePersistenceManager(private val connectivityManager: ConnectivityManage
                     }
                 }
             }
+
+            //If we've gotten here, the map is completely downloaded.  Delete any non current or future version tiles
+            val mapContainer = tileProvider.getMapAssetDescriptionContainer(name)
+            val nowAndFutureMapContainers = mapsMetaData.getFutureSortedVersionList(name, true)
+            val noDeleteList = mutableListOf<AssetDescription>()
+            for (version in nowAndFutureMapContainers) {
+                noDeleteList.add(tileProvider.getVersionFileDescription(name, version))
+            }
+            val descriptionsToDelete = DiskCacheFactory.instance.getAssetDescriptionsInNotIn(mapContainer, noDeleteList)
+            for (toDelete in descriptionsToDelete) {
+                DiskCacheFactory.instance.deleteAsset(toDelete)
+            }
         }
     }
 }

@@ -6,6 +6,8 @@ import kotlinx.coroutines.launch
 import java.io.File
 import java.io.FileInputStream
 import java.util.*
+import kotlin.collections.mutableListOf
+import kotlin.collections.listOf
 import com.blueskycharts.app.utility.Log
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
@@ -310,6 +312,26 @@ final class DiskCache(private val context: Context) {
 
         for (file in fileList) {
             retList.add(DiskAssetDescription(file))
+        }
+        return retList
+    }
+
+    suspend fun getAssetDescriptionsInNotIn(descriptionIn: AssetDescription, descriptionNotIn: List<AssetDescription>): Collection<DiskAssetDescription> {
+        val allFiles = getAssetDescriptionsIn(descriptionIn)
+        val retList = mutableListOf<DiskAssetDescription>()
+
+        for (file in allFiles) {
+            var exclude = false
+            for (notIn in descriptionNotIn) {
+                val localPath = getFilePathForAsset(notIn)
+                if (file.localPath.startsWith(localPath)) {
+                    exclude = true
+                    break
+                }
+            }
+            if (!exclude) {
+                retList.add(file)
+            }
         }
         return retList
     }
