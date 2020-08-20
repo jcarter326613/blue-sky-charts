@@ -248,6 +248,7 @@ class NavigableMap2d(context: Context, attributes: AttributeSet) :
                         version = "1",
                         changeSet = null,
                         effectiveDate = null,
+                        expirationDate = null,
                         projectionLcc = null,
                         projectionWebMercator = projectionWebMercator
                     )

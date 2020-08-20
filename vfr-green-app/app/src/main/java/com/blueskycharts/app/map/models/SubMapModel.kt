@@ -5,14 +5,15 @@ import com.blueskycharts.app.coordinates.Point2d
 import java.util.*
 
 class SubMapModel ( val tileWidth: Int?,
-                         val version: String?,
-                         val effectiveDate: Date?,
-                         val imageWidth: Double?,
-                         val imageHeight: Double?,
-                         val projectionWebMercator: ProjectionWebMercatorModel?,
-                         val projectionLcc: ProjectionLccModel?,
-                         val maxZoom: Int?,
-                         val changeSet: ChangeSet?
+                    val version: String?,
+                    val effectiveDate: Date?,
+                    val expirationDate: Date?,
+                    val imageWidth: Double?,
+                    val imageHeight: Double?,
+                    val projectionWebMercator: ProjectionWebMercatorModel?,
+                    val projectionLcc: ProjectionLccModel?,
+                    val maxZoom: Int?,
+                    val changeSet: ChangeSet?
 ) {
     companion object {
         fun readFromJsonReader(reader: JsonReader): SubMapModel {
@@ -25,6 +26,7 @@ class SubMapModel ( val tileWidth: Int?,
             var projectionLcc: ProjectionLccModel? = null
             var projectionWebMercator: ProjectionWebMercatorModel? = null
             var effectiveDate: Date? = null
+            var expirationDate: Date? = null
 
             reader.beginObject()
             while ( reader.hasNext() ) {
@@ -55,10 +57,11 @@ class SubMapModel ( val tileWidth: Int?,
                     }
                     "effectiveDate" -> {
                         val effectiveDateString = reader.nextString()
-                        if (effectiveDateString.length == 10) {
-                            @Suppress("DEPRECATION")
-                            effectiveDate = Date(effectiveDateString.substring(0, 4).toInt() - 1900, effectiveDateString.substring(5, 7).toInt() - 1, effectiveDateString.substring(8, 10).toInt())
-                        }
+                        effectiveDate = extractDateTime(effectiveDateString)
+                    }
+                    "expirationDate" -> {
+                        val expirationDateString = reader.nextString()
+                        expirationDate = extractDateTime(expirationDateString)
                     }
                     else -> {
                         reader.skipValue()
@@ -76,8 +79,21 @@ class SubMapModel ( val tileWidth: Int?,
                 changeSet = changeSet,
                 projectionLcc = projectionLcc,
                 projectionWebMercator = projectionWebMercator,
-                effectiveDate = effectiveDate
+                effectiveDate = effectiveDate,
+                expirationDate = expirationDate
             )
+        }
+
+        @Suppress("DEPRECATION")
+        private fun extractDateTime(s: String): Date? {
+            var effectiveDate: Date? = null
+            if (s.length == 10) {
+                effectiveDate = Date(s.substring(0, 4).toInt() - 1900, s.substring(5, 7).toInt() - 1, s.substring(8, 10).toInt())
+            } else if (s.length == 16) {
+                effectiveDate = Date(s.substring(0, 4).toInt() - 1900, s.substring(5, 7).toInt() - 1, s.substring(8, 10).toInt(), s.substring(11, 13).toInt(), s.substring(14, 16).toInt())
+            }
+
+            return effectiveDate
         }
     }
 

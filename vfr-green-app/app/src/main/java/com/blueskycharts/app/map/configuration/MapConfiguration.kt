@@ -67,17 +67,19 @@ class MapConfiguration(val data: MapMetaDataModelCollection, val baseUrl: String
     }
 
     fun getCurrentVersion(mapName: String): SubMapModel? {
-        //TODO: fix the fact that this doens't respect effectiveDate
         val mapVersionCollection = data.maps[mapName] ?: return null
         var latestActiveVersion: Date? = null
         var latestActiveVersionMap: SubMapModel? = null
         val now = Date()
-        //now.hours += TimeZone.getDefault().getOffset(now.time)
         now.time = now.time - TimeZone.getDefault().getOffset(now.time)
         for (versionEntry in mapVersionCollection.versions) {
-            val versionDate = convertVersionToDateTime(versionEntry.key)
-            if ( versionDate != null && ( versionDate < now && (latestActiveVersion == null || versionDate > latestActiveVersion)) ) {
-                latestActiveVersion = versionDate
+            val effectiveDate = versionEntry.value.effectiveDate ?: continue
+            val expirationDate = versionEntry.value.expirationDate
+            if (effectiveDate <= now &&
+                (latestActiveVersion == null || effectiveDate > latestActiveVersion) &&
+                (expirationDate == null || expirationDate > now)) {
+
+                latestActiveVersion = effectiveDate
                 latestActiveVersionMap = versionEntry.value
             }
         }
