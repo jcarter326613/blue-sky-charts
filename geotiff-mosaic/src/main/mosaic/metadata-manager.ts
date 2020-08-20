@@ -5,6 +5,7 @@ import { SectionVersionList } from '../models/section-version-list'
 export class MetadataManager {
     public extractCurrentVersions(versionLists: Record<string, SectionVersionList>): Record<string, SectionVersion> {
         let returnMapping: Record<string, SectionVersion> = {}
+        let now = new Date()
 
         for ( let mapName in versionLists ) {
             let versionList = versionLists[mapName]
@@ -13,7 +14,9 @@ export class MetadataManager {
             for ( let versionId in versionList.versions ) {
                 let version = versionList.versions[versionId]
                 let effectiveDate = this.extractDate(version.effectiveDate)
-                if ( effectiveDate !== undefined && effectiveDate <= new Date() ) {
+                let expirationDate = this.extractDate(version.expirationDate)
+                if ( effectiveDate !== undefined && effectiveDate <= now &&
+                    (expirationDate === undefined || expirationDate > now) ) {
                     if ( latestCurrentVersionDate === undefined || latestCurrentVersionDate < effectiveDate ) {
                         latestCurrentVersionDate = effectiveDate
                         latestCurrentVersion = version
@@ -34,7 +37,7 @@ export class MetadataManager {
     }
 
     private extractDate(date: string | undefined): (Date | undefined) {
-        if ( date === undefined || date.length != 10 ) {
+        if ( date === undefined || date.length < 10 ) {
             return undefined
         }
 
