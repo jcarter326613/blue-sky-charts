@@ -116,7 +116,7 @@ export class Loader {
                 outputMapName = mapName.substring(0, mapName.length - "_terminal".length)
             }
 
-            if ( !(mapName in outputMetadata) ) {
+            if ( !(outputMapName in outputMetadata) ) {
                 outputMetadata[outputMapName] = new SectionVersionList()
                 outputMetadata[outputMapName].versions = {}
             } 
