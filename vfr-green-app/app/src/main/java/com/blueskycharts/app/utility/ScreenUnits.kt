@@ -5,7 +5,6 @@ import android.content.Context
 object ScreenUnits {
     fun convertDipToPixels(dp: Float, context: Context): Float {
         return dp * context.resources.displayMetrics.density + 0.5f
-        context.resources.displayMetrics.scaledDensity
     }
 
     fun convertSdipToPixels(sp: Float, context: Context): Float {

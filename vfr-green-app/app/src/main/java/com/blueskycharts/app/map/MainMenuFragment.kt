@@ -196,6 +196,9 @@ class MainMenuFragment() : Fragment(), NavigableMapFragment.LocationUpdateListen
             OverlayTypes.SurfaceWind -> {
                 "Surface Wind"
             }
+            OverlayTypes.Gust -> {
+                "Surface Wind Gust"
+            }
             OverlayTypes.Temperature -> {
                 "Temperature Celcius"
             }

@@ -6,6 +6,7 @@ enum class OverlayTypes {
     Visibility,
     CloudCover,
     SurfaceWind,
+    Gust,
     Temperature,
     DewPointSpread,
     Category

@@ -136,7 +136,7 @@ open class SubscriptionChecker(): Application(), BillingClientStateListener, Pur
                                     val acknowledgeParams = AcknowledgePurchaseParams.newBuilder()
                                         .setPurchaseToken(purchase.purchaseToken)
                                         .build()
-                                    billingClient?.acknowledgePurchase(acknowledgeParams)
+                                    billingClient.acknowledgePurchase(acknowledgeParams)
                                 }
                             }
                             isSubscriptionPurchased = true

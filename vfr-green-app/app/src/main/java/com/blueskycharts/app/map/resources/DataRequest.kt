@@ -167,6 +167,7 @@ class DataRequest(private val provider: DataProvider, private var receiver: Data
                 OverlayTypes.Temperature -> "temperatureCelcius"
                 OverlayTypes.Visibility -> "visibility"
                 OverlayTypes.SurfaceWind -> "wind"
+                OverlayTypes.Gust -> "gust"
                 else -> {
                     Log.error(null, "Invalid overlay type")
                     ""
@@ -183,6 +184,7 @@ class DataRequest(private val provider: DataProvider, private var receiver: Data
                 "temperatureCelcius" -> OverlayTypes.Temperature
                 "visibility" -> OverlayTypes.Visibility
                 "wind" -> OverlayTypes.SurfaceWind
+                "gust" -> OverlayTypes.Gust
                 else -> {
                     throw Error("Bad overlay type name")
                 }

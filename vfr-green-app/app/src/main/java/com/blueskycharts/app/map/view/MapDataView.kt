@@ -124,6 +124,7 @@ class MapDataView(private val dataProvider: DataProvider, private val overlayTyp
             OverlayTypes.Temperature -> this.renderTemperature(data, dataAgeSeconds, canvas)
             OverlayTypes.Visibility -> this.renderVisibility(data, dataAgeSeconds, canvas)
             OverlayTypes.SurfaceWind -> this.renderWind(data, dataAgeSeconds, canvas)
+            OverlayTypes.Gust -> this.renderGust(data, dataAgeSeconds, canvas)
             OverlayTypes.CloudCover -> this.renderCloudCover(data, dataAgeSeconds, canvas)
             else -> Log.error(null, "Request to render unknown type.")
         }
@@ -395,6 +396,11 @@ class MapDataView(private val dataProvider: DataProvider, private val overlayTyp
             }
         }
         canvas.restoreToCount(restoreCount)
+    }
+
+    private fun renderGust(data: WeatherCondition, dataAgeSeconds: Long, canvas: Canvas) {
+        val gust = data.windGustDifference ?: return
+        this.renderBoxText(gust.toString(), dataAgeSeconds, canvas)
     }
 
     private fun renderCeiling(data: WeatherCondition, dataAgeSeconds: Long, canvas: Canvas) {

@@ -126,7 +126,7 @@ class NavigableMapFragment: Fragment() {
         locationUpdatesCallback.mapView = null
 
         this.fusedLocationClient?.removeLocationUpdates(locationUpdatesCallback)
-        locationUpdatesCallback?.let{ this.locationManager?.removeUpdates(it) }
+        locationUpdatesCallback.let{ this.locationManager?.removeUpdates(it) }
     }
 
     private fun getLocation() {
@@ -192,7 +192,7 @@ class NavigableMapFragment: Fragment() {
                             if (ActivityCompat.checkSelfPermission(context, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
                                 return@addOnFailureListener
                             }
-                            locationUpdatesCallback?.let { it ->
+                            locationUpdatesCallback.let { it ->
                                 locationManager?.requestLocationUpdates(
                                     LocationManager.GPS_PROVIDER,
                                     10000,

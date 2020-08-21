@@ -10,6 +10,7 @@ data class WeatherCondition (
     var windSpeed: Int?,
     var windDirection: String?,
     var windGust: Int?,
+    var windGustDifference: Int?,
     var temperatureCelcius: Int?,
     var dewpointSpreadCelcius: Int?,
     var flightCategory: String?

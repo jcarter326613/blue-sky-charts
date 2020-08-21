@@ -587,6 +587,7 @@ class NavigableMap2d(context: Context, attributes: AttributeSet) :
             OverlayTypes.Visibility -> "Visibility"
             OverlayTypes.Temperature -> "Temperature"
             OverlayTypes.SurfaceWind -> "Wind"
+            OverlayTypes.Gust -> "Gust"
             OverlayTypes.DewPointSpread -> "Dew Point Spread"
             OverlayTypes.CloudCover -> "Cloud Cover"
             OverlayTypes.Ceiling -> "Ceiling"
