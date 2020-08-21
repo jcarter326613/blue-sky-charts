@@ -3954,6 +3954,32 @@
                     "y_0": 0
                 },
                 "tileWidth": 1024
+            },
+            "101": {
+                "effectiveDate": "2020-09-10 09-01",
+                "expirationDate": "2021-02-25 09-01",
+                "imageHeight": 6068,
+                "imageWidth": 9015,
+                "maxZoom": 4,
+                "originalProjectionBounds": [
+                    -96298.09921987416,
+                    -68401.50799725228,
+                    94543.96104944526,
+                    60050.753815860524
+                ],
+                "originalProjectionData": {
+                    "datum": "NAD83",
+                    "lat_0": 42.05,
+                    "lat_1": 45,
+                    "lat_2": 33,
+                    "lon_0": -88,
+                    "no_defs": true,
+                    "proj": "lcc",
+                    "units": "m",
+                    "x_0": 0,
+                    "y_0": 0
+                },
+                "tileWidth": 1024
             }
         }
     },
@@ -4158,6 +4184,32 @@
             "93": {
                 "effectiveDate": "2020-03-26 09-01",
                 "expirationDate": "2020-09-10 09-01",
+                "imageHeight": 6234,
+                "imageWidth": 9605,
+                "maxZoom": 4,
+                "originalProjectionBounds": [
+                    -85082.1267361569,
+                    -62452.6719081543,
+                    118241.53034308626,
+                    69504.28301694346
+                ],
+                "originalProjectionData": {
+                    "datum": "NAD83",
+                    "lat_0": 41.38333333333333,
+                    "lat_1": 45,
+                    "lat_2": 33,
+                    "lon_0": -82,
+                    "no_defs": true,
+                    "proj": "lcc",
+                    "units": "m",
+                    "x_0": 0,
+                    "y_0": 0
+                },
+                "tileWidth": 1024
+            },
+            "94": {
+                "effectiveDate": "2020-09-10 09-01",
+                "expirationDate": "2021-02-25 09-01",
                 "imageHeight": 6234,
                 "imageWidth": 9605,
                 "maxZoom": 4,
@@ -4625,6 +4677,32 @@
             "95": {
                 "effectiveDate": "2020-02-27 09-01",
                 "expirationDate": "2020-09-10 09-01",
+                "imageHeight": 8738,
+                "imageWidth": 12011,
+                "maxZoom": 4,
+                "originalProjectionBounds": [
+                    -142804.06241115273,
+                    -92922.05734985153,
+                    111431.17622270514,
+                    92031.40136171383
+                ],
+                "originalProjectionData": {
+                    "datum": "NAD83",
+                    "lat_0": 32.86666666666667,
+                    "lat_1": 45,
+                    "lat_2": 33,
+                    "lon_0": -97.05,
+                    "no_defs": true,
+                    "proj": "lcc",
+                    "units": "m",
+                    "x_0": 0,
+                    "y_0": 0
+                },
+                "tileWidth": 1024
+            },
+            "96": {
+                "effectiveDate": "2020-09-10 09-01",
+                "expirationDate": "2021-02-25 09-01",
                 "imageHeight": 8738,
                 "imageWidth": 12011,
                 "maxZoom": 4,
@@ -5437,6 +5515,32 @@
             "93": {
                 "effectiveDate": "2020-03-26 09-01",
                 "expirationDate": "2020-09-10 09-01",
+                "imageHeight": 7502,
+                "imageWidth": 10503,
+                "maxZoom": 4,
+                "originalProjectionBounds": [
+                    -136063.90376216962,
+                    -89551.91229094796,
+                    86241.06923510929,
+                    69229.98468031311
+                ],
+                "originalProjectionData": {
+                    "datum": "NAD83",
+                    "lat_0": 42.25,
+                    "lat_1": 45,
+                    "lat_2": 33,
+                    "lon_0": -83.41666666666667,
+                    "no_defs": true,
+                    "proj": "lcc",
+                    "units": "m",
+                    "x_0": 0,
+                    "y_0": 0
+                },
+                "tileWidth": 1024
+            },
+            "94": {
+                "effectiveDate": "2020-09-10 09-01",
+                "expirationDate": "2021-02-25 09-01",
                 "imageHeight": 7502,
                 "imageWidth": 10503,
                 "maxZoom": 4,
@@ -7301,6 +7405,32 @@
             "93": {
                 "effectiveDate": "2020-02-27 09-01",
                 "expirationDate": "2020-09-10 09-01",
+                "imageHeight": 8140,
+                "imageWidth": 9067,
+                "maxZoom": 4,
+                "originalProjectionBounds": [
+                    -102850.82793856502,
+                    -82653.0242469744,
+                    89085.27887670774,
+                    89653.63861736718
+                ],
+                "originalProjectionData": {
+                    "datum": "NAD83",
+                    "lat_0": 29.8,
+                    "lat_1": 45,
+                    "lat_2": 33,
+                    "lon_0": -95.41666666666667,
+                    "no_defs": true,
+                    "proj": "lcc",
+                    "units": "m",
+                    "x_0": 0,
+                    "y_0": 0
+                },
+                "tileWidth": 1024
+            },
+            "94": {
+                "effectiveDate": "2020-09-10 09-01",
+                "expirationDate": "2021-02-25 09-01",
                 "imageHeight": 8140,
                 "imageWidth": 9067,
                 "maxZoom": 4,
@@ -9851,6 +9981,32 @@
                     "y_0": 0
                 },
                 "tileWidth": 1024
+            },
+            "63": {
+                "effectiveDate": "2020-09-10 09-01",
+                "expirationDate": "2021-02-25 09-01",
+                "imageHeight": 7597,
+                "imageWidth": 11132,
+                "maxZoom": 4,
+                "originalProjectionBounds": [
+                    -110361.99680736757,
+                    -77860.04942478969,
+                    125262.24971929271,
+                    82955.55471533314
+                ],
+                "originalProjectionData": {
+                    "datum": "NAD83",
+                    "lat_0": 35.06666666666667,
+                    "lat_1": 45,
+                    "lat_2": 33,
+                    "lon_0": -90.03333333333333,
+                    "no_defs": true,
+                    "proj": "lcc",
+                    "units": "m",
+                    "x_0": 0,
+                    "y_0": 0
+                },
+                "tileWidth": 1024
             }
         }
     },
@@ -11719,6 +11875,32 @@
                     "y_0": 0
                 },
                 "tileWidth": 1024
+            },
+            "63": {
+                "effectiveDate": "2020-09-10 09-01",
+                "expirationDate": "2021-02-25 09-01",
+                "imageHeight": 7548,
+                "imageWidth": 10518,
+                "maxZoom": 4,
+                "originalProjectionBounds": [
+                    -144825.23578900876,
+                    -74975.06627892274,
+                    77826.74438600303,
+                    84805.24774608763
+                ],
+                "originalProjectionData": {
+                    "datum": "NAD83",
+                    "lat_0": 33.43333333333333,
+                    "lat_1": 45,
+                    "lat_2": 33,
+                    "lon_0": -112,
+                    "no_defs": true,
+                    "proj": "lcc",
+                    "units": "m",
+                    "x_0": 0,
+                    "y_0": 0
+                },
+                "tileWidth": 1024
             }
         }
     },
@@ -11907,6 +12089,32 @@
             "46": {
                 "effectiveDate": "2019-10-10 09-01",
                 "expirationDate": "2020-10-08 09-01",
+                "imageHeight": 6195,
+                "imageWidth": 17871,
+                "maxZoom": 5,
+                "originalProjectionBounds": [
+                    -185624.6518103494,
+                    -64530.792480079064,
+                    192677.27075275136,
+                    66600.24077403695
+                ],
+                "originalProjectionData": {
+                    "datum": "NAD83",
+                    "lat_0": 18.2,
+                    "lat_1": 20,
+                    "lat_2": 7,
+                    "lon_0": -66.05,
+                    "no_defs": true,
+                    "proj": "lcc",
+                    "units": "m",
+                    "x_0": 0,
+                    "y_0": 0
+                },
+                "tileWidth": 1024
+            },
+            "47": {
+                "effectiveDate": "2020-09-10 09-01",
+                "expirationDate": "2021-02-25 09-01",
                 "imageHeight": 6195,
                 "imageWidth": 17871,
                 "maxZoom": 5,
@@ -12211,6 +12419,32 @@
             "62": {
                 "effectiveDate": "2020-03-26 09-01",
                 "expirationDate": "2020-10-08 09-01",
+                "imageHeight": 7619,
+                "imageWidth": 10489,
+                "maxZoom": 4,
+                "originalProjectionBounds": [
+                    -98221.25386549553,
+                    -74268.14518654089,
+                    123826.33349640734,
+                    87009.56639217942
+                ],
+                "originalProjectionData": {
+                    "datum": "NAD83",
+                    "lat_0": 40.76666666666667,
+                    "lat_1": 45,
+                    "lat_2": 33,
+                    "lon_0": -112.1333333333333,
+                    "no_defs": true,
+                    "proj": "lcc",
+                    "units": "m",
+                    "x_0": 0,
+                    "y_0": 0
+                },
+                "tileWidth": 1024
+            },
+            "63": {
+                "effectiveDate": "2020-09-10 09-01",
+                "expirationDate": "2021-02-25 09-01",
                 "imageHeight": 7619,
                 "imageWidth": 10489,
                 "maxZoom": 4,
