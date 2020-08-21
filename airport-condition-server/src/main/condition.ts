@@ -10,6 +10,7 @@ export class Condition {
     public windSpeed: number | undefined;
     public windDirection: string | undefined;
     public windGust: number | undefined;
+    public windGustDifference: number | undefined;
     public temperatureCelcius: number | undefined;
     public dewpointSpreadCelcius: number | undefined;
     public flightCategory: string | undefined;

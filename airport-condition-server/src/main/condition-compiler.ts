@@ -169,6 +169,9 @@ export class ConditionCompiler {
             case "wind": {
                 return this.getWindComparitor();
             }
+            case "gust": {
+                return this.getGustComparitor();
+            }
             case "temperatureCelcius": {
                 return this.getTemperatureCelciusComparitor();
             }
@@ -232,7 +235,7 @@ export class ConditionCompiler {
 
     private getWindComparitor(): ((a: AirportInformation, b: AirportInformation) => number) {
         return (a: AirportInformation, b: AirportInformation) => {
-            if ( a.windSpeed === undefined  ) {
+            if ( a.windSpeed === undefined ) {
                 if ( b.windSpeed === undefined ) {
                     return 0;
                 } else {
@@ -249,6 +252,33 @@ export class ConditionCompiler {
             if ( b.windGust !== undefined ) {
                 bSpeed = b.windGust;
             }
+            return bSpeed - aSpeed;
+        }
+    }
+
+    private getGustComparitor(): ((a: AirportInformation, b: AirportInformation) => number) {
+        return (a: AirportInformation, b: AirportInformation) => {
+            if ( a.windSpeed === undefined ) {
+                if ( b.windSpeed === undefined ) {
+                    return 0;
+                } else {
+                    return 1;
+                }
+            } else if ( b.windSpeed === undefined ) {
+                return -1;
+            }
+            if ( a.windGust === undefined ) {
+                if ( b.windGust === undefined ) {
+                    return 0;
+                } else {
+                    return 1;
+                }
+            } else if ( b.windGust === undefined ) {
+                return -1;
+            }
+
+            let aSpeed = a.windGust - a.windSpeed;
+            let bSpeed = b.windGust - b.windSpeed;
             return bSpeed - aSpeed;
         }
     }
@@ -315,6 +345,9 @@ export class ConditionCompiler {
             case "wind": {
                 return this.assignValueWind;
             }
+            case "gust": {
+                return this.assignValueGust;
+            }
             case "temperatureCelcius": {
                 return this.assignValueTemperatureCelcius;
             }
@@ -362,6 +395,18 @@ export class ConditionCompiler {
         condition.windDirection = info.windDirection
         condition.windGust = info.windGust
         condition.windSpeed = info.windSpeed
+        return true;
+    }
+
+    private assignValueGust(condition: Condition, info: AirportInformation): boolean {
+        if ( info.windSpeed === undefined ) {
+            return false;
+        }
+        if ( info.windGust === undefined ) {
+            condition.windGustDifference = 0
+        } else {
+            condition.windGustDifference = info.windGust - info.windSpeed
+        }
         return true;
     }
 
