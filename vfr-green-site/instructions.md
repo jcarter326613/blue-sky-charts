@@ -70,6 +70,11 @@ At this point, the map will begin downloading if you are on an un-metered wifi c
 
 Once the map completes downloading, you will be able to view it any time whether connected to the internet or not.
 
+## Expired maps
+All FAA VFR charts have expiration dates.  These dates are important because after these dates, items on the map such as frequencies, obstructions, or even the existence of an airport may be incorrect.  Prior to a map's expiration date, the FAA issues NOTAMs in order to make pilots aware of these changes but after the expiration date, there may be no such notification.  Fortunately, Blue Sky Charts is updated regularly as new maps are released.
+
+If for some reason your copy of the app has not been opened recently while connected to wifi, you are more likely to encounter a scenario where the latest maps have not been downloaded and the app is displaying an expired map.  If this happens, a notification will display in the lower right corner saying *Map expired*.  To resolve this issue, simply open the app while your device is connected to an unmetered wifi network and the latest maps will be downloaded.
+
 # Managing memory usage
 Maps occupy storage space on your device in two categories.  The first category is maps that you opt to download for offline viewing.  To remove these from your device and free up memory, simply follow the instructions for [downloading offline maps](#offline-maps) and in step 5, click the map that is already downloaded.  This will remove it from the list of offline maps.
 

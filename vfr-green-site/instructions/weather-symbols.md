@@ -45,11 +45,14 @@ Wind barbs are made up of three components.  There is the base, which is a small
 
 To determine the wind speed indicated by a barb you sum together the value of the flags.  There are three types of flags: triangles, long lines, short lines.  Each triangle represents the number 50.  Each long line represents the number 10.  Each short line, of which there can only be one of, represents the number 5.  When you sum together the values of all the flags present you get the total wind speed rounded up to the nearest 5 knots.  It is important to note that when you only see one line, you can tell if it is a short or long line by looking at the position on the stem.  A short line will only appear by itself halfway up the stem.  A long line will only appear by itself at the tip of the stem.
 
-If the surface wind has a gust component, the maximum gust value will be used as the surface wind speed.  For example, if the wind is gusting from 5 to 15 knots, you will see a barb representing 15 knots.  
+If the surface wind has a gust component, the gust value plus the base wind speed will be shown as the surface wind speed.  For example, if the wind is gusting from 5 to 15 knots, you will see a barb representing 15 knots.  
 
 There are two other symbols you may see when looking at surface wind.  The first is an empty white circle with a black border.  This indicates the weather station is reporting calm wind.  The second is a white circle with another black circle inside it.  This indicates variable wind which is defined as wind with a changing direction that is equal to or less than 3 knots.
 
 As you zoom out, the station with the highest surface wind will be shown for an area.
+
+# Surface Wind Gust
+The component of the [surface wind](#surface-wind) that is due to gusts.  For example, if the surface wind is 15 knots gusting to 20 knots, the surface wind gust will be 5 knots.  As you zoom out, the station with the lowest temperature will be shown for an area.
 
 # Temperature Celcius
 Temperature is given in degrees celsius.  As you zoom out, the station with the lowest temperature will be shown for an area.
