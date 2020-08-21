@@ -15,6 +15,7 @@ import android.util.AttributeSet
 import android.view.View
 import androidx.appcompat.app.AppCompatActivity
 import com.android.billingclient.api.*
+import com.blueskycharts.app.R
 import com.blueskycharts.app.map.MapViewActivity
 import com.blueskycharts.app.preferences.Preferences
 import kotlinx.coroutines.Dispatchers
@@ -92,7 +93,7 @@ open class SubscriptionChecker(): Application(), BillingClientStateListener, Pur
 
             if (purchaseSku == null) {
                 GlobalScope.launch(Dispatchers.Main) {
-                    val alertDialog = AlertDialog.Builder(this@SubscriptionChecker.activeActivityContext)
+                    val alertDialog = AlertDialog.Builder(this@SubscriptionChecker.activeActivityContext, R.style.AlertTheme)
                         .setMessage("There was a problem sending you to the purchase flow.  Please ensure you are logged into the Google Play Store and restart this app.")
                         .setPositiveButton("Ok") { _: DialogInterface, _: Int ->
                         }
@@ -116,7 +117,7 @@ open class SubscriptionChecker(): Application(), BillingClientStateListener, Pur
         if (billingClient.isFeatureSupported(BillingClient.FeatureType.SUBSCRIPTIONS).responseCode != BillingClient.BillingResponseCode.OK) {
             // Notify that they need to update their google play store application because subscriptions are not supported on their install
             if (!redirectOnNotPurchased) {
-                val alertDialog = AlertDialog.Builder(this@SubscriptionChecker.activeActivityContext)
+                val alertDialog = AlertDialog.Builder(this@SubscriptionChecker.activeActivityContext, R.style.AlertTheme)
                     .setMessage("Your version of Google Play Store does not support subscriptions.  Please update before proceeding.")
                     .setPositiveButton("Ok") { _: DialogInterface, _: Int ->
                     }
@@ -171,7 +172,7 @@ open class SubscriptionChecker(): Application(), BillingClientStateListener, Pur
 
                         subscriptionStatus = SubscriptionStatus.Active
                         Preferences.instance.setPreference(Preferences.propertyNameMapShift, mapShift)
-                        val alertDialog = AlertDialog.Builder(this@SubscriptionChecker.activeActivityContext)
+                        val alertDialog = AlertDialog.Builder(this@SubscriptionChecker.activeActivityContext, R.style.AlertTheme)
                             .setMessage("Your subscription is now active")
                             .setPositiveButton("Ok") { _: DialogInterface, _: Int ->
                             }
@@ -187,7 +188,7 @@ open class SubscriptionChecker(): Application(), BillingClientStateListener, Pur
                         }
                     }
                     Purchase.PurchaseState.PENDING -> {
-                        val alertDialog = AlertDialog.Builder(this@SubscriptionChecker.activeActivityContext)
+                        val alertDialog = AlertDialog.Builder(this@SubscriptionChecker.activeActivityContext, R.style.AlertTheme)
                             .setMessage("Your payment is pending.  Your subscription will activate when your payment is complete.")
                             .setPositiveButton("Ok") { _: DialogInterface, _: Int ->
                             }

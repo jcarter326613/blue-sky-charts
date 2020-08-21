@@ -84,7 +84,7 @@ class NavigableMapFragment: Fragment() {
             else -> {
                 val application = activity.application as BlueSkyChartsApplication
                 if (ActivityCompat.shouldShowRequestPermissionRationale(activity, Manifest.permission.ACCESS_FINE_LOCATION)) {
-                    val alertDialog = AlertDialog.Builder(context)
+                    val alertDialog = AlertDialog.Builder(context, R.style.AlertTheme)
                         .setMessage("Your location will not display on the maps unless this app is granted permissions to view your current location.  If you do not want this feature, you may deny location permissions.")
                         .create()
                     alertDialog.show()

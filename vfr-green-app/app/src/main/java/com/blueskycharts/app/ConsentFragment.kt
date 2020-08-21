@@ -70,7 +70,7 @@ class ConsentFragment : Fragment() {
             if (privacyCheckbox?.isChecked == true && termsCheckbox?.isChecked == true) {
                 acceptPolicy()
             } else {
-                val alertDialog = AlertDialog.Builder(context)
+                val alertDialog = AlertDialog.Builder(context, R.style.AlertTheme)
                 .setMessage("You must consent to the Terms of Service and Privacy Policy before continuing.")
                 .setPositiveButton("I understand") { _: DialogInterface, _: Int ->
                 }

@@ -69,7 +69,7 @@ class ManageMemoryActivity : MeteredWifiWarningActivity(R.id.wifiNote) {
 
         val clearCacheButton = findViewById<Button>(R.id.clearCacheButton)
         clearCacheButton?.setOnClickListener {
-            AlertDialog.Builder(this@ManageMemoryActivity)
+            AlertDialog.Builder(this@ManageMemoryActivity, R.style.AlertTheme)
                 .setMessage("This will delete all map data that hasn't been marked for offline access.  Are you sure you want to do this?")
                 .setPositiveButton("Yes") { _: DialogInterface, _: Int ->
                     Preferences.instance.setPreference(Preferences.propertyNameRequestClearCache, true)

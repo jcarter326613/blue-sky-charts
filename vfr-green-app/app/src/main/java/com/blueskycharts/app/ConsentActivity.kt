@@ -108,7 +108,7 @@ class ConsentActivity : BlueSkyChartsActivity(false, false) {
     private fun showAppUpdateDialog(policyUpdateNeeded: Boolean) {
         GlobalScope.launch(Dispatchers.Main) {
             var updatePressed = false
-            val alertDialog = AlertDialog.Builder(this@ConsentActivity)
+            val alertDialog = AlertDialog.Builder(this@ConsentActivity, R.style.AlertTheme)
                 .setMessage("The application must be updated from the Google Play Store.  Some features may not work until an update is completed.")
                 .setPositiveButton("Update Now") { _: DialogInterface, _: Int ->
                     updatePressed = true
