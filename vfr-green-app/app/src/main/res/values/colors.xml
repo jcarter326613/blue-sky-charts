@@ -8,5 +8,10 @@
     <color name="colorLogoBackgroundDark">#001ac3</color>
     <color name="colorMenuOverlayBackground">#B5E0E0E0</color>
     <color name="colorWarning">#EE2020</color>
-    <color name="colorSeperator">#D0D0D0</color>
+    <color name="colorSeparator">#D0D0D0</color>
+    <color name="colorWhite">#FFFFFF</color>
+    <color name="colorButtonPrimary">#8999FF</color>
+    <color name="colorButtonTextPrimary">#FFFFFF</color>
+    <color name="colorButtonSecondary">#03DAC5</color>
+    <color name="colorButtonTextSecondary">#101010</color>
 </resources>

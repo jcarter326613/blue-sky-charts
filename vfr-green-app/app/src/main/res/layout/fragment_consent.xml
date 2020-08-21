@@ -4,24 +4,56 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="@color/colorLogoBackground"
+    android:background="@color/colorWhite"
     tools:context=".ConsentFragment">
 
     <WebView
         android:id="@+id/privacyWebView"
         android:layout_width="match_parent"
         android:layout_height="0dp"
-        app:layout_constraintBottom_toTopOf="@+id/space1"
+        app:layout_constraintBottom_toTopOf="@+id/separator"
         app:layout_constraintTop_toTopOf="parent"
         app:layout_constraintVertical_bias="1.0"
         app:layout_constraintVertical_weight="1"></WebView>
+
+    <View
+        android:id="@+id/separator"
+        android:layout_height="1dp"
+        android:layout_width="match_parent"
+        android:background="@color/colorSeparator"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintBottom_toTopOf="@+id/space1"
+        />
 
     <Space
         android:id="@+id/space1"
         android:layout_width="wrap_content"
         android:layout_height="10dp"
-        app:layout_constraintBottom_toTopOf="@+id/firebaseConsent"
+        app:layout_constraintBottom_toTopOf="@+id/termsConsent"
         app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent" />
+
+    <CheckBox
+        android:id="@+id/termsConsent"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:checked="false"
+        android:text="@string/consent_terms_checkbox"
+        android:textColor="@color/colorTextOnBackground"
+        app:buttonTint="@color/colorTextOnBackground"
+        app:layout_constraintBottom_toTopOf="@+id/privacyConsent"
+        app:layout_constraintStart_toStartOf="parent" />
+
+    <CheckBox
+        android:id="@+id/privacyConsent"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:checked="false"
+        android:text="@string/consent_privacy_checkbox"
+        android:textColor="@color/colorTextOnBackground"
+        app:buttonTint="@color/colorTextOnBackground"
+        app:layout_constraintBottom_toTopOf="@+id/firebaseConsent"
         app:layout_constraintStart_toStartOf="parent" />
 
     <CheckBox
@@ -31,8 +63,8 @@
         android:checked="false"
         android:text="@string/consent_firebase_checkbox"
         android:textColor="@color/colorTextOnBackground"
+        app:buttonTint="@color/colorTextOnBackground"
         app:layout_constraintBottom_toTopOf="@+id/space2"
-        app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent" />
 
     <Space
@@ -55,14 +87,16 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_weight="1"
-            android:text="Close App" />
+            android:textColor="@color/colorButtonTextSecondary"
+            android:text="@string/consent_cancel_button" />
 
         <Button
             android:id="@+id/acceptPolicyButton"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_weight="1"
-            android:text="Accept Policy" />
+            android:textColor="@color/colorButtonTextSecondary"
+            android:text="@string/consent_continue_button" />
 
     </LinearLayout>
 

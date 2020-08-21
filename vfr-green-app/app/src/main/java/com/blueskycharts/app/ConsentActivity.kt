@@ -41,7 +41,7 @@ class ConsentActivity : BlueSkyChartsActivity(false, false) {
 
             var collectionComplete = false
             var appUpdateNeeded = false
-            var policyUpdateNeeded = !ConsentFragment.policyAccepted
+            var policyUpdateNeeded = !ConsentFragment.policyAccepted && !ConsentFragment.termsAccepted
 
             val assetProvider = AssetProvider()
             assetProvider.retrieveAsset(
@@ -89,11 +89,10 @@ class ConsentActivity : BlueSkyChartsActivity(false, false) {
             showPrivacyDialog()
         } else {
             Log.refreshFirebaseConsent(baseContext)
-            //if (subscriptionStatus == SubscriptionStatus.NotActive) {
-            //    startActivity(Intent(this, SubscriptionActivity::class.java))
-            //} else {
-                startActivity(Intent(this, MapViewActivity::class.java))
-            //}
+            val intent = Intent(this, MapViewActivity::class.java)
+            intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+            intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK)
+            startActivity(intent)
         }
     }
 
