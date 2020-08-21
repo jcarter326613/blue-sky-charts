@@ -1,9 +1,9 @@
 links:
   - text: Home
-    url: '/'
+    url: '/index.html'
   - text: Instructions
-    url: /instructions
+    url: /instructions.html
   - text: Weather Symbols
-    url: /instructions/weather-symbols
+    url: /instructions/weather-symbols.html
   - text: Contact Us
     url: '/contact.html'
