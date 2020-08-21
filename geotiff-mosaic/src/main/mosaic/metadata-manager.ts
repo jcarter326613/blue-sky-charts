@@ -36,11 +36,16 @@ export class MetadataManager {
         return returnMapping
     }
 
-    private extractDate(date: string | undefined): (Date | undefined) {
+    public extractDate(date: string | undefined): (Date | undefined) {
         if ( date === undefined || date.length < 10 ) {
             return undefined
         }
 
-        return new Date(parseInt(date.substring(0, 4)), parseInt(date.substring(5, 7)) - 1, parseInt(date.substring(8, 10)))
+        if (date.length == 10) {
+            return new Date(parseInt(date.substring(0, 4)), parseInt(date.substring(5, 7)) - 1, parseInt(date.substring(8, 10)))
+        } else {
+            return new Date(parseInt(date.substring(0, 4)), parseInt(date.substring(5, 7)) - 1, parseInt(date.substring(8, 10)), 
+                parseInt(date.substring(11, 13)), parseInt(date.substring(14, 16)))
+        }
     }
 }

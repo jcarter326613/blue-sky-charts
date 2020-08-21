@@ -19,6 +19,7 @@ import { ProjectionExtents } from '../models/projection-extents'
 export class Generator {
     private MAP_CONFIGURATION_FILE = "./data/config.json"
     private SUBSECTION_META_FILE = "../geotiff-map-exploder/maps/metadata.json"
+    private PREVIOUS_METADATA_FILE = "./data/metadata.json"
     private OUTPUT_DIRECTORY = "./output"
 
     public async generateMosaics(): Promise<void> {
@@ -40,6 +41,10 @@ export class Generator {
             console.log("No sections to load")
             return
         }
+
+        // Load the previous generated metadata file
+        rawdata = readFileSync(this.PREVIOUS_METADATA_FILE)
+        let newSubSectionMetadata: Record<string, SectionVersionList> = JSON.parse(rawdata.toString())
     
         // Load the map subsection metadata
         let subsectionMetaFile = this.SUBSECTION_META_FILE
@@ -48,7 +53,6 @@ export class Generator {
         let subSectionMetadata = metadataManager.extractCurrentVersions(subSectionVersions)
 
         // For each mosaic image to make
-        let newSubSectionMetadata: Record<string, SectionVersionList> = {}
         for ( let imageConfigurationName in configuration.sections ) {
             let imageConfiguration = configuration.sections[imageConfigurationName]
             if ( imageConfiguration.subMaps === undefined ) {
@@ -98,6 +102,29 @@ export class Generator {
             newSectionData.version = mosaicVersion
             let changeSet: Record<string, ChangeSet> = {}
 
+            // Update the effective and expiration dates
+            let latestEffective: Date | undefined
+            let earliestExpiration: Date | undefined
+            for ( let subSectionKey in subSectionMetadata ) {
+                let subSection = subSectionMetadata[subSectionKey]
+
+                let effectiveDate = metadataManager.extractDate(subSection.effectiveDate)
+                if (latestEffective === undefined || (effectiveDate !== undefined && latestEffective < effectiveDate)) {
+                    latestEffective = effectiveDate
+                }
+
+                let expirationDate = metadataManager.extractDate(subSection.expirationDate)
+                if (earliestExpiration === undefined || (expirationDate !== undefined && earliestExpiration > expirationDate)) {
+                    earliestExpiration = expirationDate
+                }
+            }
+            if (latestEffective !== undefined) {
+                newSectionData.effectiveDate = `${latestEffective.getFullYear()}-${this.digitPad(latestEffective.getMonth()+1, 2)}-${this.digitPad(latestEffective.getDate(), 2)} ${this.digitPad(latestEffective.getHours(), 2)}-${this.digitPad(latestEffective.getMinutes(), 2)}`
+            }
+            if (earliestExpiration !== undefined) {
+                newSectionData.expirationDate = `${earliestExpiration.getFullYear()}-${this.digitPad(earliestExpiration.getMonth()+1, 2)}-${this.digitPad(earliestExpiration.getDate(), 2)} ${this.digitPad(earliestExpiration.getHours(), 2)}-${this.digitPad(earliestExpiration.getMinutes(), 2)}`
+            }
+
             // For each zoom level
             for ( let zoom = 0; zoom <= maxZoom; zoom++ ) {
                 console.log(`Starting zoom level ${zoom}`)
@@ -109,8 +136,6 @@ export class Generator {
                 // Update the changeset
                 let newChangeSet = tileQueue.getChangeSet()
                 for ( let effectiveDate of Object.keys(newChangeSet) ) {
-                    newSectionData.effectiveDate = effectiveDate    // This is arbitrary but it has to be.
-                                                                    // There should only ever be one in the list anyway
                     if ( !(effectiveDate in changeSet) ) {
                         changeSet[effectiveDate] = new ChangeSet()
                         changeSet[effectiveDate].tiles = []
@@ -188,8 +213,13 @@ export class Generator {
                 }
             }
 
-            let versionList = new SectionVersionList()
-            versionList.versions = {}
+            let versionList = newSubSectionMetadata[imageConfigurationName]
+            if (versionList === undefined) {
+                versionList = new SectionVersionList()
+            }
+            if (versionList.versions === undefined) {
+                versionList.versions = {}
+            }
             versionList.versions[newSectionData.version] = newSectionData
             newSubSectionMetadata[imageConfigurationName] = versionList
         }
@@ -197,7 +227,12 @@ export class Generator {
         // Write out the new metadata
         let newMetadataString = JSON.stringify(newSubSectionMetadata)
         writeFileSync("./output/metadata.json", newMetadataString)
-        writeFileSync("./data/metadata.json", newMetadataString)
+        writeFileSync(this.PREVIOUS_METADATA_FILE, newMetadataString)
+    }
+
+    private digitPad(n: number, length: number): string {
+        let s = `${n}`
+        return s.padStart(length, "0")
     }
 
     private getMosaicExtentsMercator(imageConfiguration: string[], subSectionMetadata: Record<string, SectionVersion>): BoxWebMercator {
