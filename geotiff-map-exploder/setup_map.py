@@ -272,7 +272,7 @@ if map_type == "sectional":
     # Cleanup intermediate files
     #os.system("rm -f {}".format(tif_file))
     os.system("rm -f {}".format(web_tiff_path))
-else:
+elif not default_map:
     define_crops(tif_file, None)    #So we can get the effective and expiration dates
 
 # Get the effective date
