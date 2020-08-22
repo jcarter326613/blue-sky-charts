@@ -6,6 +6,7 @@ import com.blueskycharts.app.assests.DiskCacheFactory
 import com.blueskycharts.app.assests.DiskCacheListener
 import com.blueskycharts.app.map.configuration.Inventory
 import com.blueskycharts.app.map.configuration.MapConfiguration
+import com.blueskycharts.app.map.models.SubMapModel
 import com.blueskycharts.app.map.resources.DataRequest
 import com.blueskycharts.app.preferences.Preferences
 import kotlinx.coroutines.GlobalScope
@@ -87,13 +88,26 @@ class TilePersistenceManager(private val connectivityManager: ConnectivityManage
                 }
             }
             if (iShouldRun) {
-                if (firstRun) {
-                    addManifestChangeListeners()
-                    firstRun = false
+                try {
+                    if (firstRun) {
+                        addManifestChangeListeners()
+                        firstRun = false
+                    }
+                    cleanOldNonPersistedTiles()
+                    if (shouldStop) {
+                        return@launch
+                    }
+                    cleanOldDataFiles()
+                    if (shouldStop) {
+                        return@launch
+                    }
+                    enforceAllPreferences()
                 }
-                cleanOldNonPersistedTiles()
-                cleanOldDataFiles()
-                enforceAllPreferences()
+                finally {
+                    singleThreadMutex.withLock {
+                        running = false
+                    }
+                }
                 if ( requestVersion != runningVersion && !stopRunning ) {
                     start()
                 }
@@ -176,6 +190,9 @@ class TilePersistenceManager(private val connectivityManager: ConnectivityManage
                 } else {
                     persistedFileRootList.add(assetProvider.getMapAssetDescriptionContainer(mapName))
                 }
+                if ( shouldStop ) {
+                    return
+                }
             }
         }
 
@@ -195,6 +212,9 @@ class TilePersistenceManager(private val connectivityManager: ConnectivityManage
             DiskCacheFactory.instance.deleteAsset(oldestFile)       //TODO: revisit this when we get aliases working.  If we delete an alias or rename a file to another alias,
                                                                     // we'll be either not reporting the right size change or updating the mod date on the rename
             usedBytes -= size
+            if ( shouldStop ) {
+                return
+            }
         }
         if (Preferences.instance.getBooleanValue(Preferences.propertyNameRequestClearCache, Preferences.defaultValueRequestClearCache)) {
             Preferences.instance.setPreference(Preferences.propertyNameRequestClearCache, false)
@@ -214,28 +234,14 @@ class TilePersistenceManager(private val connectivityManager: ConnectivityManage
 
     private suspend fun enforceAllPreferences() {
         if (shouldStop) {
-            singleThreadMutex.withLock {
-                running = false
-            }
             return
         }
-        val threadCount = Inventory.instance.mapGroups.size
-        var completedThreads = 0
         for ( group in Inventory.instance.mapGroups ) {
             val configuration = group.getConfiguration()
             if ( configuration != null ) {
-                singleThreadMutex.withLock {
-                    try {
-                        if (!shouldStop) {
-                            for (name in configuration.mapList) {
-                                enforcePreferences(group, name, configuration)
-                            }
-                        }
-                    } finally {
-                        completedThreads++
-                        if (completedThreads == threadCount) {
-                            running = false
-                        }
+                if (!shouldStop) {
+                    for (name in configuration.mapList) {
+                        enforcePreferences(group, name, configuration)
                     }
                 }
             }
@@ -258,38 +264,7 @@ class TilePersistenceManager(private val connectivityManager: ConnectivityManage
             val tileProvider = TileAssetProvider(group)
 
             // For each file
-            for ( z in 0..metaData.maxZoom ) {
-                for ( x in 0 until 2.0.pow(z.toDouble()).toInt() ) {
-                    for ( y in 0 until 2.0.pow(z.toDouble()).toInt() ) {
-                        if ( shouldStop ) {
-                            return
-                        }
-
-                        // Check if we already have the file
-                        val targetFileDescription = tileProvider.getTileFileDescription(name, currentMapVersion, z, x, y)
-                        val hasTile = DiskCacheFactory.instance.exists(targetFileDescription)
-                        if ( hasTile ) {
-                            continue
-                        }
-
-                        // If the file was not downloaded, download it
-                        if ( shouldStop ) {
-                            return
-                        }
-                        val onWifiLocal = onWifi
-                        wifiWasOn = wifiWasOn && onWifiLocal
-                        if ( onWifiLocal ) {
-                            var throttleBoolean = false
-                            tileProvider.retrieveTile(name, currentMapVersion, z, x, y) {
-                                throttleBoolean = true
-                            }
-                            while (!throttleBoolean) {
-                                yield()
-                            }
-                        }
-                    }
-                }
-            }
+            downloadMap(metaData, name, currentMapVersion, tileProvider)
 
             //If we've gotten here, the map is completely downloaded.  Delete any non current or future version tiles
             val mapContainer = tileProvider.getMapAssetDescriptionContainer(name)
@@ -301,6 +276,54 @@ class TilePersistenceManager(private val connectivityManager: ConnectivityManage
             val descriptionsToDelete = DiskCacheFactory.instance.getAssetDescriptionsInNotIn(mapContainer, noDeleteList)
             for (toDelete in descriptionsToDelete) {
                 DiskCacheFactory.instance.deleteAsset(toDelete)
+                if ( shouldStop ) {
+                    return
+                }
+            }
+
+            // Now download any future versions of these maps that are ready on the site
+            val futureMapContainers = mapsMetaData.getFutureSortedVersionList(name, false)
+            for (version in futureMapContainers) {
+                downloadMap(metaData, name, version, tileProvider)
+            }
+        }
+    }
+
+    private suspend fun downloadMap(metaData: SubMapModel, name: String, currentMapVersion: String, tileProvider: TileAssetProvider) {
+        if (metaData.maxZoom == null) {
+            return
+        }
+
+        for ( z in 0..metaData.maxZoom ) {
+            for ( x in 0 until 2.0.pow(z.toDouble()).toInt() ) {
+                for ( y in 0 until 2.0.pow(z.toDouble()).toInt() ) {
+                    if ( shouldStop ) {
+                        return
+                    }
+
+                    // Check if we already have the file
+                    val targetFileDescription = tileProvider.getTileFileDescription(name, currentMapVersion, z, x, y)
+                    val hasTile = DiskCacheFactory.instance.exists(targetFileDescription)
+                    if ( hasTile ) {
+                        continue
+                    }
+
+                    // If the file was not downloaded, download it
+                    if ( shouldStop ) {
+                        return
+                    }
+                    val onWifiLocal = onWifi
+                    wifiWasOn = wifiWasOn && onWifiLocal
+                    if ( onWifiLocal ) {
+                        var throttleBoolean = false
+                        tileProvider.retrieveTile(name, currentMapVersion, z, x, y) {
+                            throttleBoolean = true
+                        }
+                        while (!throttleBoolean) {
+                            yield()
+                        }
+                    }
+                }
             }
         }
     }
