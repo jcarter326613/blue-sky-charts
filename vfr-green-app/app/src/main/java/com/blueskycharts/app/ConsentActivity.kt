@@ -41,7 +41,7 @@ class ConsentActivity : BlueSkyChartsActivity(false, false) {
 
             var collectionComplete = false
             var appUpdateNeeded = false
-            var policyUpdateNeeded = !ConsentFragment.policyAccepted && !ConsentFragment.termsAccepted
+            var policyUpdateNeeded = !ConsentFragment.policyAccepted || !ConsentFragment.termsAccepted
 
             val assetProvider = AssetProvider()
             assetProvider.retrieveAsset(
