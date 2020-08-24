@@ -7,38 +7,38 @@
    xmlns="http://www.w3.org/2000/svg"
    xmlns:sodipodi="http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd"
    xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape"
-   inkscape:export-ydpi="96"
-   inkscape:export-xdpi="96"
-   inkscape:export-filename="D:\Code\graphical-assets\app\menu_icons\my_location_set.png"
-   sodipodi:docname="hamburger_menu.svg"
-   inkscape:version="1.0 (4035a4fb49, 2020-05-01)"
-   id="svg8"
-   version="1.1"
-   viewBox="0 0 211.66666 211.66667"
+   width="800"
    height="800"
-   width="800">
+   viewBox="0 0 211.66666 211.66667"
+   version="1.1"
+   id="svg8"
+   inkscape:version="1.0 (4035a4fb49, 2020-05-01)"
+   sodipodi:docname="hamburger_menu.svg"
+   inkscape:export-filename="D:\Code\graphical-assets\app\menu_icons\my_location_set.png"
+   inkscape:export-xdpi="96"
+   inkscape:export-ydpi="96">
   <defs
      id="defs2" />
   <sodipodi:namedview
-     inkscape:window-maximized="1"
-     inkscape:window-y="-8"
-     inkscape:window-x="-8"
-     inkscape:window-height="1017"
-     inkscape:window-width="1920"
-     units="px"
-     showgrid="false"
-     inkscape:document-rotation="0"
-     inkscape:current-layer="layer1"
-     inkscape:document-units="mm"
-     inkscape:cy="361.83235"
-     inkscape:cx="466.08142"
-     inkscape:zoom="0.7"
-     inkscape:pageshadow="2"
-     inkscape:pageopacity="0.0"
-     borderopacity="1.0"
-     bordercolor="#666666"
+     id="base"
      pagecolor="#ffffff"
-     id="base" />
+     bordercolor="#666666"
+     borderopacity="1.0"
+     inkscape:pageopacity="0.0"
+     inkscape:pageshadow="2"
+     inkscape:zoom="0.7"
+     inkscape:cx="466.08142"
+     inkscape:cy="361.83235"
+     inkscape:document-units="mm"
+     inkscape:current-layer="layer3"
+     inkscape:document-rotation="0"
+     showgrid="false"
+     units="px"
+     inkscape:window-width="1920"
+     inkscape:window-height="1017"
+     inkscape:window-x="1912"
+     inkscape:window-y="-8"
+     inkscape:window-maximized="1" />
   <metadata
      id="metadata5">
     <rdf:RDF>
@@ -52,27 +52,47 @@
     </rdf:RDF>
   </metadata>
   <g
-     id="layer1"
+     inkscape:label="Layer 3"
+     id="layer3"
+     inkscape:groupmode="layer" />
+  <g
+     inkscape:label="Layer 2"
+     id="layer2"
+     inkscape:groupmode="layer">
+    <path
+       sodipodi:nodetypes="cczcczc"
+       d="M 12.095237,47.058038 H 199.57143 c 0,0 7.9375,-1.176247 7.9375,6.614584 0,7.79083 -7.9375,6.614583 -7.9375,6.614583 H 12.095237 c 0,0 -7.9374998,1.070933 -7.9374998,-6.614583 0,-7.685516 7.9374998,-6.614584 7.9374998,-6.614584 z"
+       style="fill:none;fill-opacity:1;stroke-width:5.29166667;stroke:#ffffff;stroke-opacity:1;stroke-miterlimit:4;stroke-dasharray:none"
+       id="path1028" />
+    <path
+       id="path1035"
+       style="fill:none;fill-opacity:1;stroke-width:5.29166667;stroke:#ffffff;stroke-opacity:1;stroke-miterlimit:4;stroke-dasharray:none"
+       d="M 12.095239,99.218753 H 199.57143 c 0,0 7.9375,-1.176247 7.9375,6.614587 0,7.79083 -7.9375,6.61458 -7.9375,6.61458 H 12.095239 c 0,0 -7.9375012,1.07093 -7.9375012,-6.61458 0,-7.685519 7.9375012,-6.614587 7.9375012,-6.614587 z"
+       sodipodi:nodetypes="cczcczc" />
+    <path
+       id="path1038"
+       style="fill:none;fill-opacity:1;stroke-width:5.29166667;stroke-miterlimit:4;stroke-dasharray:none;stroke:#ffffff;stroke-opacity:1"
+       d="M 12.095236,151.37946 H 199.57143 c 0,0 7.9375,-1.17624 7.9375,6.61459 0,7.79083 -7.9375,6.61458 -7.9375,6.61458 H 12.095236 c 0,0 -7.9374995,1.07093 -7.9374995,-6.61458 0,-7.68552 7.9374995,-6.61459 7.9374995,-6.61459 z"
+       sodipodi:nodetypes="cczcczc" />
+  </g>
+  <g
+     inkscape:label="Layer 1"
      inkscape:groupmode="layer"
-     inkscape:label="Layer 1">
-    <g
-       transform="translate(0,10.205358)"
-       id="g879">
-      <path
-         id="rect832"
-         style="opacity:1;fill:#000000;fill-opacity:1;stroke-width:31.5218"
-         d="M 12.095237,36.85268 H 199.57143 c 0,0 7.9375,-1.176247 7.9375,6.614584 0,7.79083 -7.9375,6.614583 -7.9375,6.614583 H 12.095237 c 0,0 -7.9374998,1.070933 -7.9374998,-6.614583 0,-7.685516 7.9374998,-6.614584 7.9374998,-6.614584 z"
-         sodipodi:nodetypes="cczcczc" />
-      <path
-         sodipodi:nodetypes="cczcczc"
-         d="M 12.095239,89.013395 H 199.57143 c 0,0 7.9375,-1.176247 7.9375,6.614584 0,7.790831 -7.9375,6.614581 -7.9375,6.614581 H 12.095239 c 0,0 -7.9375012,1.07093 -7.9375012,-6.614581 0,-7.685516 7.9375012,-6.614584 7.9375012,-6.614584 z"
-         style="opacity:1;fill:#000000;fill-opacity:1;stroke-width:31.5219"
-         id="rect832-4" />
-      <path
-         sodipodi:nodetypes="cczcczc"
-         d="M 12.095236,141.1741 H 199.57143 c 0,0 7.9375,-1.17624 7.9375,6.61459 0,7.79083 -7.9375,6.61458 -7.9375,6.61458 H 12.095236 c 0,0 -7.9374995,1.07093 -7.9374995,-6.61458 0,-7.68552 7.9374995,-6.61459 7.9374995,-6.61459 z"
-         style="opacity:1;fill:#000000;fill-opacity:1;stroke-width:31.5219"
-         id="rect832-0" />
-    </g>
+     id="layer1">
+    <path
+       id="rect832"
+       style="fill:#000000;fill-opacity:1;stroke-width:31.5218"
+       d="M 12.095237,47.058038 H 199.57143 c 0,0 7.9375,-1.176247 7.9375,6.614584 0,7.79083 -7.9375,6.614583 -7.9375,6.614583 H 12.095237 c 0,0 -7.9374998,1.070933 -7.9374998,-6.614583 0,-7.685516 7.9374998,-6.614584 7.9374998,-6.614584 z"
+       sodipodi:nodetypes="cczcczc" />
+    <path
+       sodipodi:nodetypes="cczcczc"
+       d="M 12.095239,99.218753 H 199.57143 c 0,0 7.9375,-1.176247 7.9375,6.614587 0,7.79083 -7.9375,6.61458 -7.9375,6.61458 H 12.095239 c 0,0 -7.9375012,1.07093 -7.9375012,-6.61458 0,-7.685519 7.9375012,-6.614587 7.9375012,-6.614587 z"
+       style="fill:#000000;fill-opacity:1;stroke-width:31.5219"
+       id="rect832-4" />
+    <path
+       sodipodi:nodetypes="cczcczc"
+       d="M 12.095236,151.37946 H 199.57143 c 0,0 7.9375,-1.17624 7.9375,6.61459 0,7.79083 -7.9375,6.61458 -7.9375,6.61458 H 12.095236 c 0,0 -7.9374995,1.07093 -7.9374995,-6.61458 0,-7.68552 7.9374995,-6.61459 7.9374995,-6.61459 z"
+       style="fill:#000000;fill-opacity:1;stroke-width:31.5219"
+       id="rect832-0" />
   </g>
 </svg>
