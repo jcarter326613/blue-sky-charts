@@ -11932,6 +11932,32 @@
                     "y_0": 0
                 },
                 "tileWidth": 1024
+            },
+            "94": {
+                "effectiveDate": "2020-09-10 09-01",
+                "expirationDate": "2021-02-25 09-01",
+                "imageHeight": 6136,
+                "imageWidth": 9554,
+                "maxZoom": 4,
+                "originalProjectionBounds": [
+                    -90068.51554307344,
+                    -60890.54575249815,
+                    112159.64180765356,
+                    68979.83988940946
+                ],
+                "originalProjectionData": {
+                    "datum": "NAD83",
+                    "lat_0": 40.48333333333333,
+                    "lat_1": 45,
+                    "lat_2": 33,
+                    "lon_0": -80.3,
+                    "no_defs": true,
+                    "proj": "lcc",
+                    "units": "m",
+                    "x_0": 0,
+                    "y_0": 0
+                },
+                "tileWidth": 1024
             }
         }
     },
