@@ -15,7 +15,7 @@ export class MetadataManager {
                 let version = versionList.versions[versionId]
                 let effectiveDate = this.extractDate(version.effectiveDate)
                 let expirationDate = this.extractDate(version.expirationDate)
-                if ( effectiveDate !== undefined && effectiveDate <= now &&
+                if ( effectiveDate !== undefined &&
                     (expirationDate === undefined || expirationDate > now) ) {
                     if ( latestCurrentVersionDate === undefined || latestCurrentVersionDate < effectiveDate ) {
                         latestCurrentVersionDate = effectiveDate

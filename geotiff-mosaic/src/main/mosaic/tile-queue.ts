@@ -19,6 +19,9 @@ export class TileQueue {
     private changeSetKeys: Record<string, Date> = {}
     private changeSetFilterDate: Date
 
+    public latestEffective: Date | undefined
+    public earliestExpiration: Date | undefined
+
     public constructor (maps: Array<string>, metadata: Record<string, SectionVersion>, metadataManager: MetadataManager,
         tileCache: TileCache, zoom: number, changeSetFilterDate: Date) {
 
@@ -74,6 +77,17 @@ export class TileQueue {
                             this.addToChangeSet(zoom, x, y, section.effectiveDate)
                         }
                         overlaps.push(subMapDescription)
+                    }
+
+                    //Update the effective to expiration dates
+                    let effectiveDate = metadataManager.extractDate(section.effectiveDate)
+                    if (this.latestEffective === undefined || (effectiveDate !== undefined && this.latestEffective < effectiveDate)) {
+                        this.latestEffective = effectiveDate
+                    }
+
+                    let expirationDate = metadataManager.extractDate(section.expirationDate)
+                    if (this.earliestExpiration === undefined || (expirationDate !== undefined && this.earliestExpiration > expirationDate)) {
+                        this.earliestExpiration = expirationDate
                     }
                 }
 

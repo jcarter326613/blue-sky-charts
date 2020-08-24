@@ -105,25 +105,6 @@ export class Generator {
             // Update the effective and expiration dates
             let latestEffective: Date | undefined
             let earliestExpiration: Date | undefined
-            for ( let subSectionKey in subSectionMetadata ) {
-                let subSection = subSectionMetadata[subSectionKey]
-
-                let effectiveDate = metadataManager.extractDate(subSection.effectiveDate)
-                if (latestEffective === undefined || (effectiveDate !== undefined && latestEffective < effectiveDate)) {
-                    latestEffective = effectiveDate
-                }
-
-                let expirationDate = metadataManager.extractDate(subSection.expirationDate)
-                if (earliestExpiration === undefined || (expirationDate !== undefined && earliestExpiration > expirationDate)) {
-                    earliestExpiration = expirationDate
-                }
-            }
-            if (latestEffective !== undefined) {
-                newSectionData.effectiveDate = `${latestEffective.getFullYear()}-${this.digitPad(latestEffective.getMonth()+1, 2)}-${this.digitPad(latestEffective.getDate(), 2)} ${this.digitPad(latestEffective.getHours(), 2)}-${this.digitPad(latestEffective.getMinutes(), 2)}`
-            }
-            if (earliestExpiration !== undefined) {
-                newSectionData.expirationDate = `${earliestExpiration.getFullYear()}-${this.digitPad(earliestExpiration.getMonth()+1, 2)}-${this.digitPad(earliestExpiration.getDate(), 2)} ${this.digitPad(earliestExpiration.getHours(), 2)}-${this.digitPad(earliestExpiration.getMinutes(), 2)}`
-            }
 
             // For each zoom level
             for ( let zoom = 0; zoom <= maxZoom; zoom++ ) {
@@ -132,6 +113,17 @@ export class Generator {
                 // Create a lookup of all the tiles to generate and which sections are needed to create them
                 let tileCache = new TileCache()
                 let tileQueue = new TileQueue(imageConfiguration.subMaps, subSectionMetadata, metadataManager, tileCache, zoom, new Date())
+
+                // Update the effective and expiration dates
+                let effectiveDate = tileQueue.latestEffective
+                if (latestEffective === undefined || (effectiveDate !== undefined && latestEffective < effectiveDate)) {
+                    latestEffective = effectiveDate
+                }
+
+                let expirationDate = tileQueue.earliestExpiration
+                if (earliestExpiration === undefined || (expirationDate !== undefined && earliestExpiration > expirationDate)) {
+                    earliestExpiration = expirationDate
+                }
 
                 // Update the changeset
                 let newChangeSet = tileQueue.getChangeSet()
@@ -198,6 +190,14 @@ export class Generator {
                 }
 
                 tileCache.dispose()
+            }
+
+            // Save the effective and expiration dates
+            if (latestEffective !== undefined) {
+                newSectionData.effectiveDate = `${latestEffective.getFullYear()}-${this.digitPad(latestEffective.getMonth()+1, 2)}-${this.digitPad(latestEffective.getDate(), 2)} ${this.digitPad(latestEffective.getHours(), 2)}-${this.digitPad(latestEffective.getMinutes(), 2)}`
+            }
+            if (earliestExpiration !== undefined) {
+                newSectionData.expirationDate = `${earliestExpiration.getFullYear()}-${this.digitPad(earliestExpiration.getMonth()+1, 2)}-${this.digitPad(earliestExpiration.getDate(), 2)} ${this.digitPad(earliestExpiration.getHours(), 2)}-${this.digitPad(earliestExpiration.getMinutes(), 2)}`
             }
 
             // Save the metadata for this new tile
