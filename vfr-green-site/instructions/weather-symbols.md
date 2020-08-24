@@ -2,6 +2,8 @@
 layout: page
 title: Weather Symbols
 contentAsMarkDown: true
+additional_css:
+- instructions
 ---
 
 This page goes over the various symbols used to represent each type of weather observation
@@ -39,7 +41,12 @@ As you zoom out, the station with the most sky coverage will be shown for an are
 # Surface Wind
 Surface wind has two components.  Speed and direction.  Blue Sky Charts uses wind barbs to represent surface wind which allows you to see both components using one symbol.  Here is an example of a few wind barbs.
 
-
+<div class="wind-barbs">
+    <div><div><img alt="5 knots" src="/assets/img/weather-icons/wind-barb5.png" /></div><div>5 knots</div></div>
+    <div><div><img alt="10 knots" src="/assets/img/weather-icons/wind-barb10.png" /></div><div>10 knots</div></div>
+    <div><div><img alt="25 knots" src="/assets/img/weather-icons/wind-barb25.png" /></div><div>25 knots</div></div>
+    <div><div><img alt="60 knots" src="/assets/img/weather-icons/wind-barb60.png" /></div><div>60 knots</div></div>
+</div>
 
 Wind barbs are made up of three components.  There is the base, which is a small circle, the stem, which is the stick protruding from the base, and the flags, which are the lines or triangles coming out of the stem.  The base and stem indicate the direction the wind is coming from.  If the stem is pointing to the northwest out of the base, the wind is coming from the northwest.  On all maps, regardless of their projections, the wind barb is oriented so that a stem pointing straight up indicates the wind is coming from a true bearing of zero degrees and a stem pointing straight down indicates a wind coming from a true bearing of 180 degrees.
 
