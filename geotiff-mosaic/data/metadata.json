@@ -32,6 +32,23 @@
         },
         "tileWidth": 1024,
         "version": "2020-08-21T15-56-19"
+      },
+      "2020-08-24T12-49-40": {
+        "effectiveDate": "2020-09-10 09-01",
+        "expirationDate": "2020-11-05 09-01",
+        "imageHeight": 30410386.897800375,
+        "imageWidth": 29565664.823720388,
+        "maxZoom": 5,
+        "projectionWebMercator": {
+          "extents": {
+            "bottom": 6803271.12297499,
+            "left": -19278452.235802226,
+            "right": -14350841.431848828,
+            "top": 11871668.939275052
+          }
+        },
+        "tileWidth": 1024,
+        "version": "2020-08-24T12-49-40"
       }
     }
   },
@@ -68,6 +85,23 @@
         },
         "tileWidth": 1024,
         "version": "2020-08-21T15-56-19"
+      },
+      "2020-08-24T12-49-40": {
+        "effectiveDate": "2020-09-10 09-01",
+        "expirationDate": "2020-11-05 09-01",
+        "imageHeight": 3733842.9613957875,
+        "imageWidth": 4543759.492450923,
+        "maxZoom": 5,
+        "projectionWebMercator": {
+          "extents": {
+            "bottom": 2082604.3590834525,
+            "left": -17914132.690654274,
+            "right": -17156839.441912454,
+            "top": 2704911.5193160838
+          }
+        },
+        "tileWidth": 1024,
+        "version": "2020-08-24T12-49-40"
       }
     }
   },
@@ -105,6 +139,23 @@
         },
         "tileWidth": 1024,
         "version": "2020-08-21T15-56-19"
+      },
+      "2020-08-24T12-49-40": {
+        "effectiveDate": "2020-09-10 09-01",
+        "expirationDate": "2020-11-05 09-01",
+        "imageHeight": 24759592.89395228,
+        "imageWidth": 50148637.4440171,
+        "maxZoom": 6,
+        "projectionWebMercator": {
+          "extents": {
+            "bottom": 2753679.724687174,
+            "left": -13914195.627330586,
+            "right": -6750104.563899573,
+            "top": 6290764.423823214
+          }
+        },
+        "tileWidth": 1024,
+        "version": "2020-08-24T12-49-40"
       }
     }
   }
