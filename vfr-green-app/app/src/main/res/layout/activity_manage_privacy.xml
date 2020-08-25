@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout
+<ScrollView
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
@@ -8,41 +8,47 @@
     android:orientation="vertical"
     tools:context=".preferences.ManagePrivacyActivity">
 
-    <Space
-        android:layout_width="wrap_content"
-        android:layout_height="30dp" />
-
-    <CheckBox
-        android:id="@+id/firebaseConsent"
-        android:layout_width="wrap_content"
+    <LinearLayout
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:checked="false"
-        android:text="@string/privacy_settings_checkbox"
-        android:textSize="20sp"
-        android:paddingHorizontal="10dp" />
+        android:orientation="vertical">
 
-    <Space
-        android:layout_width="wrap_content"
-        android:layout_height="30dp" />
+        <Space
+            android:layout_width="wrap_content"
+            android:layout_height="30dp" />
 
-    <TextView
-        android:id="@+id/textView"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="@string/privacy_settings_description"
-        android:textSize="20sp"
-        android:paddingHorizontal="10dp" />
+        <CheckBox
+            android:id="@+id/firebaseConsent"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:checked="false"
+            android:text="@string/privacy_settings_checkbox"
+            android:textSize="20sp"
+            android:paddingHorizontal="10dp" />
 
-    <Space
-        android:layout_width="wrap_content"
-        android:layout_height="30dp" />
+        <Space
+            android:layout_width="wrap_content"
+            android:layout_height="30dp" />
 
-    <Button
-        android:id="@+id/cta"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:textAlignment="center"
-        android:gravity="center"
-        android:layout_gravity="center"
-        android:text="@string/privacy_settings_cta" />
-</LinearLayout>
+        <TextView
+            android:id="@+id/textView"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/privacy_settings_description"
+            android:textSize="20sp"
+            android:paddingHorizontal="10dp" />
+
+        <Space
+            android:layout_width="wrap_content"
+            android:layout_height="30dp" />
+
+        <Button
+            android:id="@+id/cta"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:textAlignment="center"
+            android:gravity="center"
+            android:layout_gravity="center"
+            android:text="@string/privacy_settings_cta" />
+    </LinearLayout>
+</ScrollView>
