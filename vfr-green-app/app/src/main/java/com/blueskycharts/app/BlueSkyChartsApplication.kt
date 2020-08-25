@@ -12,13 +12,13 @@ class BlueSkyChartsApplication : SubscriptionChecker() {
     var alreadyAskedLocationPermission = false
 
     override fun onCreate() {
-        super.onCreate()
-
         DiskCacheFactory(applicationContext)
 
         Inventory.instance
 
         val connectivityManager = getSystemService(Context.CONNECTIVITY_SERVICE) as ConnectivityManager
         TilePersistenceManagerFactory(connectivityManager)
+
+        super.onCreate()
     }
 }
