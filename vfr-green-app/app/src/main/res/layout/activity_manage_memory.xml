@@ -82,7 +82,7 @@
         android:layout_height="wrap_content"
         android:layout_gravity="center"
         android:gravity="center"
-        android:text="Clear cache data"
+        android:text="@string/manage_memory_clear_cache_button"
         />
 
     <Space

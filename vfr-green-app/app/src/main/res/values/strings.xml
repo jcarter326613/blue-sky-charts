@@ -14,6 +14,8 @@
     <string name="download_preferences_instructions">Select maps to download them for offline viewing.</string>
     <string name="manage_memory_downloaded_label">Downloaded maps</string>
     <string name="manage_memory_cache_label">Cached content</string>
+    <string name="manage_memory_clear_cache_button">Clear cache data</string>
+    <string name="manage_subscription_button">Add Subscription</string>
     <string name="consent_terms_checkbox">I consent to the Terms of Service. (required)</string>
     <string name="consent_privacy_checkbox">I consent to the Privacy Policy. (required)</string>
     <string name="consent_firebase_checkbox">I consent to the collection of data for use in Firebase as outlined in the policy. (recommended)</string>
