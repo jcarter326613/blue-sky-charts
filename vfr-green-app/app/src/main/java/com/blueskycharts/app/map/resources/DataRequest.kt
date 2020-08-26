@@ -47,7 +47,7 @@ class DataRequest(private val provider: DataProvider, private var receiver: Data
         provider.retrieveAsset(description) {
             try {
                 if ( !it.errorLoading ) {
-                    val conditionResponse = it.asJsonObject<WeatherConditionResponse>() //TODO: replace asJsonObject with asJsonReader
+                    val conditionResponse: WeatherConditionResponse? = it.asJsonReader()?.let{ reader -> WeatherConditionResponse.readFromJsonReader(reader) }
                     this@DataRequest.data = conditionResponse
                     this@DataRequest.timeReceived = System.currentTimeMillis()
                     if (conditionResponse != null) {
@@ -145,7 +145,7 @@ class DataRequest(private val provider: DataProvider, private var receiver: Data
 
                 val diskAsset = Asset(descriptor)
                 DiskCacheFactory.instance.retrieveAssetBytes(diskAsset)
-                val conditionResponse = diskAsset.asJsonObject<WeatherConditionResponse>() //TODO: replace asJsonObject with asJsonReader
+                val conditionResponse: WeatherConditionResponse? = diskAsset.asJsonReader()?.let{ reader -> WeatherConditionResponse.readFromJsonReader(reader) }
                 if (conditionResponse != null) {
                     dr.data = conditionResponse
                     dr.oldestDataAgeAtRetrievalSeconds = conditionResponse.oldestDataAgeSeconds
