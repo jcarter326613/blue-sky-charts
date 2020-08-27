@@ -15,6 +15,7 @@ import android.util.AttributeSet
 import android.view.View
 import androidx.appcompat.app.AppCompatActivity
 import com.android.billingclient.api.*
+import com.blueskycharts.app.BlueSkyChartsApplication
 import com.blueskycharts.app.R
 import com.blueskycharts.app.map.MapViewActivity
 import com.blueskycharts.app.preferences.Preferences
@@ -175,6 +176,7 @@ open class SubscriptionChecker(): Application(), BillingClientStateListener, Pur
                         val alertDialog = AlertDialog.Builder(this@SubscriptionChecker.activeActivityContext, R.style.AlertTheme)
                             .setMessage("Your subscription is now active")
                             .setPositiveButton("Ok") { _: DialogInterface, _: Int ->
+                                (this@SubscriptionChecker.applicationContext as BlueSkyChartsApplication).alreadyAskedLocationPermission = false
                             }
                             .create()
                         alertDialog.show()

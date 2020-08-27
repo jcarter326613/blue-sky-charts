@@ -33,9 +33,6 @@ class Log {
             if (shouldLog) {
                 android.util.Log.e(tag, msg)
             }
-            if (firebaseAnalyticsConsentGiven) {
-                firebaseAnalytics?.logEvent(msg, null)
-            }
             if (crashalyticsConsentGiven) {
                 crashalytics?.log(msg)
             }
