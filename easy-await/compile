@@ -1,0 +1,6 @@
+#!/bin/bash
+set -e
+
+tsc --build --clean
+tsc --build
+tsc --build --clean

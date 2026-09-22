@@ -1,0 +1,7 @@
+README.md
+*.tgz
+compile
+pack
+tsconfig.json
+src/test
+.vscode

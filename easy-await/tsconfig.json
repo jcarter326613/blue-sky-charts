@@ -1,0 +1,16 @@
+{
+    "compilerOptions": {
+        "baseUrl": "./src",
+        "rootDir": "./src",
+        "removeComments": true,
+        "strict": true,
+        "target": "es2017",
+        "module": "commonjs",
+        "esModuleInterop": true,
+        "inlineSourceMap": true
+    },
+    "include": [
+        "./src/**/*.ts",
+        "./src/**/*.d.ts"
+    ]
+}
