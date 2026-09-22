@@ -1,0 +1,370 @@
+package com.blueskycharts.app.assests
+
+import android.content.Context
+import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.launch
+import java.io.File
+import java.io.FileInputStream
+import java.util.*
+import kotlin.collections.mutableListOf
+import kotlin.collections.listOf
+import com.blueskycharts.app.utility.Log
+import kotlinx.coroutines.sync.Mutex
+import kotlinx.coroutines.sync.withLock
+import kotlinx.coroutines.yield
+import java.util.concurrent.atomic.AtomicInteger
+
+/**
+ * Handles manipulation of the on disk cache.
+ * Performs all file system direct manipulation and IO
+ */
+@Suppress("REDUNDANT_ELSE_IN_WHEN")
+final class DiskCache(private val context: Context) {
+    // External storage stuff
+    var externalCheckFilePerformed = false
+    var externalCheckFileSuccess = false
+    val isExternalStorageWritable: Boolean
+        get() {
+            return false /*
+            return if ( Environment.getExternalStorageState() == Environment.MEDIA_MOUNTED ) {
+                if ( externalCheckFilePerformed ) {
+                    externalCheckFileSuccess
+                } else {
+                    val externalDirectory = context.getExternalFilesDir(null)
+                    val file = File(externalDirectory, "writeTest")
+                    externalDirectory?.mkdirs()
+
+                    val outputStream = FileOutputStream(file)
+                    outputStream.write("1".toByteArray())
+                    outputStream.close()
+
+                    val inputStream = FileInputStream(file)
+                    val evidence = String(inputStream.readBytes())
+                    inputStream.close()
+
+                    externalCheckFilePerformed = true
+                    externalCheckFileSuccess = evidence == "1"
+                    file.delete()
+                    externalCheckFileSuccess
+                }
+            } else {
+                false
+            }*/
+        }
+    val isExternalStorageReadable: Boolean
+        get() {
+            return false
+            //return Environment.getExternalStorageState() in setOf(Environment.MEDIA_MOUNTED, Environment.MEDIA_MOUNTED_READ_ONLY)
+        }
+
+    // Alias stuff
+    private var aliasCollection: PersistentFile<AliasCollection>
+
+    // Disk statistics stuff
+    private val statisticsListeners = mutableListOf<StatisticsListener>()
+    private val statisticsListenersMutex = Mutex()
+    private val pendingListenerRemoval = AtomicInteger(0)
+
+    init {
+        val aliasFileDescriptor =
+            LocalAssetDescription("disk_cache_aliases", Volatility.Indefinite, StorageLocation.Internal)
+        val aliasAsset = Asset(aliasFileDescriptor)
+        aliasCollection = if ( retrieveAssetBytes(aliasAsset) ) {
+            val reader = aliasAsset.asJsonReader()
+            if ( reader != null ) {
+                val collection = AliasCollection.readFromJsonReader(reader)
+                PersistentFile(collection, aliasFileDescriptor)
+            } else {
+                PersistentFile(AliasCollection(), aliasFileDescriptor)
+            }
+        } else {
+            PersistentFile(AliasCollection(), aliasFileDescriptor)
+        }
+    }
+
+    fun isExpired(assetDescription: AssetDescription): Boolean {
+        if ( assetDescription.forceExpireDiskCache ) {
+            return true
+        }
+
+        // Get the max age of the asset
+        val maxAge: Int = when(assetDescription.volatility) {
+            Volatility.Indefinite -> return false
+            Volatility.NeverCache -> return true
+            Volatility.HourCache -> {
+                60 * 60 * 1000
+            }
+            Volatility.DayCache -> {
+                24 * 60 * 60 * 1000
+            }
+            else -> throw Error("Unrecognized volatility in isExpired")
+        }
+
+        // Figure out whether it's expired based on the
+        val now = Date()
+        val aDayAgo = now.time - maxAge
+        return try {
+            val file: File = if ( assetDescription.storageLocation == StorageLocation.External ) {
+                File(context.getExternalFilesDir(null), getFilePathForAsset(assetDescription))
+            } else {
+                context.getFileStreamPath(getFilePathForAsset(assetDescription))
+            }
+            file.lastModified() < aDayAgo
+        } catch (e: Throwable) {
+            true
+        }
+    }
+
+    fun exists(description: AssetDescription): Boolean {
+        val file = getFile(description)
+        return file?.exists() ?: false
+    }
+
+    fun retrieveAssetBytes(asset: Asset): Boolean {
+        if (!asset.description.allowExpired && isExpired(asset.description)) {
+            return false
+        }
+
+        var fileInput: FileInputStream? = null
+        try {
+            val file = getFile(asset.description) ?: return false
+            if (asset.description.readActsAsModification ) {
+                file.setLastModified(Date().time)
+            }
+            fileInput = file.inputStream()
+            asset.bytes = fileInput.readBytes()
+            return true
+        } catch ( e: Throwable ) {
+            return false
+        } finally {
+            fileInput?.close()
+        }
+    }
+
+    suspend fun writeAsset(asset: Asset) {
+        try {
+            statisticsListenersMutex.withLock {
+                // Get the file object to the destination
+                val file = getFile(asset.description) ?: throw Error("Could not create file object for asset ${asset.description.localPath}")
+
+                // If the file exists, record how much we aren't increasing disk usage by
+                var existingFileSize = 0L
+                if (file.exists()) {
+                    existingFileSize = file.length()
+                }
+
+                // Write the file to disk
+                val outputStream = file.outputStream()
+                outputStream.write(asset.bytes)
+                outputStream.close()
+
+                // Tell the appropriate listeners
+                broadcastStatisticsChange(file.length() - existingFileSize, file.name)
+            }
+        } catch ( e: Throwable ) {
+            Log.error(null, e.message ?: "Error writing asset to disk ${asset.description.localPath}")
+        }
+    }
+
+    fun deleteAsset(description: AssetDescription) {
+        try {
+            // TODO: make sure when we do deletion of aliases and renaming the file, we don't update the mod date on the file
+            val file = getFile(description) ?: return
+            val fileSize = file.length()
+            if (file.delete()) {
+                // Tell the appropriate listeners
+                GlobalScope.launch {
+                    statisticsListenersMutex.withLock {
+                        broadcastStatisticsChange(-fileSize, file.name)
+                    }
+                }
+            }
+        } catch (e: Throwable) {
+        }
+    }
+
+    private suspend fun broadcastStatisticsChange(amount: Long, fileName: String) {
+        GlobalScope.launch {
+            var updateNeeded = true
+            while (updateNeeded) {
+                if (pendingListenerRemoval.get() == 0) {
+                    statisticsListenersMutex.withLock {
+                        if (pendingListenerRemoval.get() == 0) {
+                            for (listener in statisticsListeners) {
+                                if (fileName.startsWith(listener.prefix)) {
+                                    listener.diskUsage += amount
+                                    listener.listener.totalSizeChanged(listener.diskUsage)
+                                }
+                            }
+                            updateNeeded = false
+                        }
+                    }
+                }
+                yield()
+            }
+        }
+    }
+
+    fun createAlias(existingObject: AssetDescription, newAlias: AssetDescription) {
+        GlobalScope.launch {    //ok1
+            aliasCollection.access {
+                // Get the paths out of the parameters
+                val existingLocation = existingObject.localPath
+                val newLocation = newAlias.localPath
+
+                // Determine if the existing object is actually aliased and points elsewhere
+                var actualOriginal = it.aliasFiles[existingLocation]
+                if (actualOriginal == null) {
+                    actualOriginal = existingLocation
+                }
+
+                // Update the alias pointers and add the new item
+                it.aliasFiles[newLocation] = actualOriginal
+                var actualFilesSet = it.actualFiles[actualOriginal]
+                if (actualFilesSet == null) {
+                    actualFilesSet = mutableSetOf()
+                    it.actualFiles[actualOriginal] = actualFilesSet
+                }
+                return@access actualFilesSet.add(newLocation)
+            }
+        }
+    }
+
+    suspend fun isAlias(description: AssetDescription): Boolean {
+        var response: Boolean? = null
+        aliasCollection.access {
+            response = description.localPath in it.aliasFiles
+            false
+        }
+        return response as Boolean
+    }
+
+    fun getFileSize(description: AssetDescription): Long {
+        return try {
+            if ( description.storageLocation == StorageLocation.External ) {
+                val file = File(context.getExternalFilesDir(null), getFilePathForAsset(description))
+                file.length()
+            } else {
+                context.getFileStreamPath(getFilePathForAsset(description)).length()
+            }
+        } catch (e: Throwable) {
+            0
+        }
+    }
+
+    fun addListener(parentDescription: AssetDescription, newListener: DiskCacheListener) {
+        GlobalScope.launch {
+            statisticsListenersMutex.withLock {
+                val existingFiles = getAssetDescriptionsIn(parentDescription)
+                var fileSize = 0L
+                for ( file in existingFiles ) {
+                    fileSize += file.size
+                }
+                statisticsListeners.add(StatisticsListener(getFilePathForAsset(parentDescription), newListener, fileSize))
+                newListener.totalSizeChanged(fileSize)
+            }
+        }
+    }
+
+    fun removeListener(oldListener: DiskCacheListener) {
+        pendingListenerRemoval.incrementAndGet()
+        GlobalScope.launch {
+            statisticsListenersMutex.withLock {
+                for (listener in statisticsListeners) {
+                    if (listener.listener == oldListener) {
+                        statisticsListeners.remove(listener)
+                        break
+                    }
+                }
+                pendingListenerRemoval.decrementAndGet()
+            }
+        }
+    }
+
+    suspend fun getOldest(areIn: AssetDescription, notIn: List<AssetDescription>): DiskAssetDescription? {
+        val allFiles = getAssetDescriptionsIn(areIn)
+        var oldestCandidate: DiskAssetDescription? = null
+        for ( file in allFiles ) {
+            var isInNotIn = file.localPath.contains("metadata.json")
+            if (!isInNotIn) {
+                for (notInCandidate in notIn) {
+                    if (file.localPath.startsWith(notInCandidate.localPath)) {
+                        isInNotIn = true
+                        break
+                    }
+                }
+            }
+            if (!isInNotIn) {
+                if (oldestCandidate == null || oldestCandidate.modDate > file.modDate) {
+                    oldestCandidate = file
+                }
+            }
+        }
+        return oldestCandidate
+    }
+
+    suspend fun getAssetDescriptionsIn(description: AssetDescription): Collection<DiskAssetDescription> {
+        val pathStart = getFilePathForAsset(description)
+        val retList = mutableListOf<DiskAssetDescription>()
+        val fileList = context.filesDir.listFiles { _: File?, s: String? ->
+            s?.startsWith(pathStart) ?: false
+        } ?: return retList
+
+        for (file in fileList) {
+            retList.add(DiskAssetDescription(file))
+        }
+        return retList
+    }
+
+    suspend fun getAssetDescriptionsInNotIn(descriptionIn: AssetDescription, descriptionNotIn: List<AssetDescription>): Collection<DiskAssetDescription> {
+        val allFiles = getAssetDescriptionsIn(descriptionIn)
+        val retList = mutableListOf<DiskAssetDescription>()
+
+        for (file in allFiles) {
+            var exclude = false
+            for (notIn in descriptionNotIn) {
+                val localPath = getFilePathForAsset(notIn)
+                if (file.localPath.startsWith(localPath)) {
+                    exclude = true
+                    break
+                }
+            }
+            if (!exclude) {
+                retList.add(file)
+            }
+        }
+        return retList
+    }
+
+    private fun getFile(description: AssetDescription): File? {
+        try {
+            if ( description.storageLocation == StorageLocation.External && isExternalStorageReadable ) {
+                val externalDirectory = context.getExternalFilesDir(null)
+                if ( externalDirectory != null ) {
+                    if (!externalDirectory.exists()) {
+                        try {
+                            externalDirectory.mkdirs()
+                        } catch (e: Throwable) {
+                            Log.error(null, "Could not create external directory ${externalDirectory.absolutePath}")
+                        }
+                    }
+                    return File(externalDirectory, getFilePathForAsset(description))
+                }
+                return context.getFileStreamPath(getFilePathForAsset(description))
+            } else {
+                return context.getFileStreamPath(getFilePathForAsset(description))
+            }
+        } catch ( e: Throwable ) {
+            return null
+        }
+    }
+
+    private fun getFilePathForAsset(description: AssetDescription): String {
+        if (description.hasDiskFriendlyLocalPath) {
+            return description.localPath
+        }
+        return description.localPath.replace("/", "-").replace(":", "_")
+    }
+
+    private class StatisticsListener(val prefix: String, val listener: DiskCacheListener, var diskUsage: Long)
+}

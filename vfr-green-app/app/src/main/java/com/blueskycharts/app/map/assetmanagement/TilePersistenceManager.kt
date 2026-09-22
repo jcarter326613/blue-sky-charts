@@ -1,0 +1,330 @@
+package com.blueskycharts.app.map.assetmanagement
+
+import android.net.ConnectivityManager
+import com.blueskycharts.app.assests.AssetDescription
+import com.blueskycharts.app.assests.DiskCacheFactory
+import com.blueskycharts.app.assests.DiskCacheListener
+import com.blueskycharts.app.map.configuration.Inventory
+import com.blueskycharts.app.map.configuration.MapConfiguration
+import com.blueskycharts.app.map.models.SubMapModel
+import com.blueskycharts.app.map.resources.DataRequest
+import com.blueskycharts.app.preferences.Preferences
+import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.sync.Mutex
+import kotlinx.coroutines.sync.withLock
+import kotlinx.coroutines.yield
+import java.util.*
+import java.util.concurrent.atomic.AtomicBoolean
+import kotlin.concurrent.timerTask
+import kotlin.math.pow
+
+
+/**
+ * Performs background updates of the local cache by comparing the desired state to the current state
+ * and issuing the necessary commands to the asset namespace to make changes
+ */
+@Suppress("DEPRECATION")
+class TilePersistenceManager(private val connectivityManager: ConnectivityManager) {
+    private var running = false
+    private var runningVersion = 0
+    private var requestVersion = 0
+    private var firstRun = true
+    private var stopRunning = false
+    private var singleThreadMutex = Mutex()
+    private val shouldStop: Boolean
+        get() = stopRunning || runningVersion != requestVersion
+    private val maxDataFileAgeMilliseconds = 120 * 60 * 1000    //120 minutes (2 hours)
+
+    private val statisticsRecords = mutableMapOf<String, MapPersistenceStatistics>()     //Key is groupid-mapname
+    private var statisticsRecordsMutex = Mutex()
+
+    private var manifestUpdateStartTimerWaiting = AtomicBoolean(false)
+
+    private val onWifi: Boolean
+        get() {
+            connectivityManager.networkPreference = ConnectivityManager.TYPE_WIFI
+            val networkInfo = connectivityManager.getNetworkInfo(ConnectivityManager.TYPE_WIFI)
+            return (networkInfo?.isConnected ?: false) && !connectivityManager.isActiveNetworkMetered
+        }
+    private var wifiWasOn = true
+
+    init {
+        start()
+        Preferences.instance.addListener(object: Preferences.Listener {
+            override fun preferenceChanged(preferenceName: String) {
+                if (preferenceName.startsWith(Preferences.propertyTemplatePrefixProactiveDownload)) {
+                    start()
+                }
+            }
+        })
+
+        // Monitor the wifi connection
+        val wifiCheckTimer = Timer(false)
+        val task: TimerTask = timerTask {
+            val oldWifiWasOn = wifiWasOn
+            wifiWasOn = onWifi
+            if (wifiWasOn && !oldWifiWasOn) {
+                start()
+            }
+        }
+        wifiCheckTimer.scheduleAtFixedRate(task, 5 * 1000, 5 * 1000)
+    }
+
+    fun start() {
+        requestVersion++
+        stopRunning = false
+        GlobalScope.launch {    //ok1
+            var iShouldRun: Boolean = !running && runningVersion != requestVersion
+
+            if ( iShouldRun ) {
+                singleThreadMutex.withLock {
+                    iShouldRun = !running && runningVersion != requestVersion
+                    if (iShouldRun) {
+                        running = true
+                        runningVersion = requestVersion
+                    }
+                }
+            }
+            if (iShouldRun) {
+                try {
+                    if (firstRun) {
+                        addManifestChangeListeners()
+                        firstRun = false
+                    }
+                    cleanOldNonPersistedTiles()
+                    if (shouldStop) {
+                        return@launch
+                    }
+                    cleanOldDataFiles()
+                    if (shouldStop) {
+                        return@launch
+                    }
+                    enforceAllPreferences()
+                }
+                finally {
+                    singleThreadMutex.withLock {
+                        running = false
+                    }
+                }
+                if ( requestVersion != runningVersion && !stopRunning ) {
+                    start()
+                }
+            }
+        }
+    }
+
+    fun stop() {
+        stopRunning = true
+    }
+
+    private suspend fun addManifestChangeListeners() {
+        for (group in Inventory.instance.mapGroups) {
+            val config = group.getConfiguration() ?: continue
+            for (map in config.mapList) {
+                val mapStatistics = getMapStatistics(group.id, map)
+                mapStatistics.addListener(object: MapPersistenceStatistics.Listener {
+                    override fun statisticsUpdated(groupId: Int, mapId: String, downloadedSizeBytes: Long) {
+                        //Set a future time to restart so we're not constantly starting and restarting the persistence process
+                        if (!this@TilePersistenceManager.manifestUpdateStartTimerWaiting.getAndSet(true)) {
+                            GlobalScope.launch {
+                                delay(10000L /*10 seconds*/)
+                                if (this@TilePersistenceManager.manifestUpdateStartTimerWaiting.getAndSet(false)) {
+                                    this@TilePersistenceManager.start()
+                                }
+                            }
+                        }
+                    }
+                })
+            }
+        }
+    }
+
+    suspend fun getMapStatistics(groupId: Int, mapName: String): MapPersistenceStatistics {
+        val group = Inventory.instance.findGroupById(groupId) ?: return MapPersistenceStatistics(groupId, mapName, 0)
+
+        val lookupKey = getMapKey(groupId, mapName)
+        val statistics = statisticsRecords[lookupKey]
+        if ( statistics == null ) {
+            // Need to add the statistics object to the dictionary
+            val statisticsIn: MapPersistenceStatistics?
+            val statisticsNotNull: MapPersistenceStatistics
+            statisticsRecordsMutex.withLock {
+                statisticsIn = statisticsRecords[lookupKey]
+                if ( statisticsIn == null ) {
+                    statisticsNotNull = MapPersistenceStatistics(groupId, mapName, 0)
+                    val assetProvider = TileAssetProvider(group)
+                    DiskCacheFactory.instance.addListener(assetProvider.getMapAssetDescriptionContainer(mapName), object:DiskCacheListener {
+                        override suspend fun totalSizeChanged(totalSize: Long) {
+                            statisticsNotNull.setStatistics(totalSize)
+                        }
+                    })
+
+                    statisticsRecords[lookupKey] = statisticsNotNull
+                } else {
+                    statisticsNotNull = statisticsIn
+                }
+            }
+            return statisticsNotNull
+        } else {
+            return statistics
+        }
+    }
+
+    private suspend fun cleanOldNonPersistedTiles() {
+        // Figure out how much space we are taking up from un persisted maps
+        var usedBytes: Long = 0
+        val persistedFileRootList = mutableListOf<AssetDescription>()
+        for (group in Inventory.instance.mapGroups) {
+            val assetProvider = TileAssetProvider(group)
+            val configuration = group.getConfiguration() ?: continue
+            for (mapName in configuration.mapList) {
+                val proactiveDownload = Preferences.instance.getBooleanValue(
+                    Preferences.propertyTemplateMapProactiveDownload(group.id, mapName),
+                    Preferences.defaultValueMapProactiveDownload
+                )
+                if (!proactiveDownload) {
+                    val mapStatistics = getMapStatistics(group.id, mapName)
+                    usedBytes += mapStatistics.downloadedSizeBytes
+                } else {
+                    persistedFileRootList.add(assetProvider.getMapAssetDescriptionContainer(mapName))
+                }
+                if ( shouldStop ) {
+                    return
+                }
+            }
+        }
+
+        // Start deleting files until we are down to our un-persisted cache limit
+        val unPersistedMaxSpaceBytes = if (Preferences.instance.getBooleanValue(Preferences.propertyNameRequestClearCache, Preferences.defaultValueRequestClearCache)) {
+            0
+        } else {
+            Preferences.instance.getIntValue(
+                Preferences.propertyNameMaxUnPersistedTileDiskSpace, Preferences.defaultValueMaxUnPersistedTileDiskSpace
+            )
+        }
+
+        val topLevelContainer = TileAssetProvider.getMapAssetDescriptionContainer()
+        while (unPersistedMaxSpaceBytes < usedBytes) {
+            val oldestFile = DiskCacheFactory.instance.getOldest(topLevelContainer, persistedFileRootList) ?: break
+            val size = oldestFile.size
+            DiskCacheFactory.instance.deleteAsset(oldestFile)       //TODO: revisit this when we get aliases working.  If we delete an alias or rename a file to another alias,
+                                                                    // we'll be either not reporting the right size change or updating the mod date on the rename
+            usedBytes -= size
+            if ( shouldStop ) {
+                return
+            }
+        }
+        if (Preferences.instance.getBooleanValue(Preferences.propertyNameRequestClearCache, Preferences.defaultValueRequestClearCache)) {
+            Preferences.instance.setPreference(Preferences.propertyNameRequestClearCache, false)
+        }
+    }
+
+    private suspend fun cleanOldDataFiles() {
+        // Start deleting files until we are down to our un-persisted cache limit
+        val topLevelContainer = DataRequest.endpointDescriptor
+        var oldestFile = DiskCacheFactory.instance.getOldest(topLevelContainer, listOf())
+        val now = Date().time
+        while (oldestFile != null && now - oldestFile.modDate > maxDataFileAgeMilliseconds) {
+            DiskCacheFactory.instance.deleteAsset(oldestFile)
+            oldestFile = DiskCacheFactory.instance.getOldest(topLevelContainer, listOf())
+        }
+    }
+
+    private suspend fun enforceAllPreferences() {
+        if (shouldStop) {
+            return
+        }
+        for ( group in Inventory.instance.mapGroups ) {
+            val configuration = group.getConfiguration()
+            if ( configuration != null ) {
+                if (!shouldStop) {
+                    for (name in configuration.mapList) {
+                        enforcePreferences(group, name, configuration)
+                    }
+                }
+            }
+        }
+    }
+
+    private fun getMapKey(groupId: Int, mapName: String) = "$groupId-$mapName"
+
+    private suspend fun enforcePreferences(group: Inventory.Group, name: String, mapsMetaData: MapConfiguration) {
+        val metaData = mapsMetaData.getCurrentVersion(name, false)
+        if (metaData?.maxZoom == null || shouldStop) {
+            return
+        }
+
+        if (Preferences.instance.getBooleanValue(Preferences.propertyTemplateMapProactiveDownload(mapsMetaData.groupId, name), Preferences.defaultValueMapProactiveDownload)) {
+            val currentMapVersion = metaData.version ?: return
+
+            // Create a map of all tiles for the map so that we can start to the ones that have been identified as
+            // cached or copied to the cache from local sources
+            val tileProvider = TileAssetProvider(group)
+
+            // For each file
+            downloadMap(metaData, name, currentMapVersion, tileProvider)
+
+            //If we've gotten here, the map is completely downloaded.  Delete any non current or future version tiles
+            val mapContainer = tileProvider.getMapAssetDescriptionContainer(name)
+            val nowAndFutureMapContainers = mapsMetaData.getFutureSortedVersionList(name, true)
+            val noDeleteList = mutableListOf<AssetDescription>()
+            for (version in nowAndFutureMapContainers) {
+                noDeleteList.add(tileProvider.getVersionFileDescription(name, version))
+            }
+            val descriptionsToDelete = DiskCacheFactory.instance.getAssetDescriptionsInNotIn(mapContainer, noDeleteList)
+            for (toDelete in descriptionsToDelete) {
+                DiskCacheFactory.instance.deleteAsset(toDelete)
+                if ( shouldStop ) {
+                    return
+                }
+            }
+
+            // Now download any future versions of these maps that are ready on the site
+            val futureMapContainers = mapsMetaData.getFutureSortedVersionList(name, false)
+            for (version in futureMapContainers) {
+                downloadMap(metaData, name, version, tileProvider)
+            }
+        }
+    }
+
+    private suspend fun downloadMap(metaData: SubMapModel, name: String, currentMapVersion: String, tileProvider: TileAssetProvider) {
+        if (metaData.maxZoom == null) {
+            return
+        }
+
+        for ( z in 0..metaData.maxZoom ) {
+            for ( x in 0 until 2.0.pow(z.toDouble()).toInt() ) {
+                for ( y in 0 until 2.0.pow(z.toDouble()).toInt() ) {
+                    if ( shouldStop ) {
+                        return
+                    }
+
+                    // Check if we already have the file
+                    val targetFileDescription = tileProvider.getTileFileDescription(name, currentMapVersion, z, x, y)
+                    val hasTile = DiskCacheFactory.instance.exists(targetFileDescription)
+                    if ( hasTile ) {
+                        continue
+                    }
+
+                    // If the file was not downloaded, download it
+                    if ( shouldStop ) {
+                        return
+                    }
+                    val onWifiLocal = onWifi
+                    wifiWasOn = wifiWasOn && onWifiLocal
+                    if ( onWifiLocal ) {
+                        var throttleBoolean = false
+                        tileProvider.retrieveTile(name, currentMapVersion, z, x, y) {
+                            throttleBoolean = true
+                        }
+                        while (!throttleBoolean) {
+                            yield()
+                        }
+                    }
+                }
+            }
+        }
+    }
+}

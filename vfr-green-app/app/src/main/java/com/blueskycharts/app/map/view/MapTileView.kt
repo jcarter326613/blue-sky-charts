@@ -1,0 +1,215 @@
+package com.blueskycharts.app.map.view
+
+import android.graphics.*
+import com.blueskycharts.app.coordinates.*
+import com.blueskycharts.app.map.models.SubMapModel
+import com.blueskycharts.app.map.resources.TileProvider
+import com.blueskycharts.app.map.resources.TileProviderInterface
+import com.blueskycharts.app.map.resources.TileReceiver
+import kotlin.math.*
+
+class MapTileView(private val tileProvider: TileProviderInterface, private val map: Map) : SubMapView, TileReceiver {
+    // Metadata
+    override var fileExtent: RectangularArea? = null
+    private var tileWidth: Int = 0
+    private var tileHeight: Int = 0
+    private val tileDimensionPercentage: Point2d = Point2d(1.0, 1.0)
+    private var mapName: String = ""
+    private var mapVersion: String = "0"
+    private var maxZoom: Int = 0
+
+    // Rendering
+    private var isDisposed: Boolean = false
+
+    fun initialize(name: String, model: SubMapModel): Box2d? {
+        if (model.imageHeight == null || model.imageWidth == null || model.tileWidth == null ||
+            model.version == null || model.maxZoom == null)
+            return null
+
+        this.tileWidth = model.tileWidth
+        this.tileHeight = model.tileWidth
+        this.mapName = name
+        this.mapVersion = model.version
+        this.maxZoom = model.maxZoom
+
+        // Handle the file extents
+        var fileExtent: RectangularArea? = null
+        if (model.projectionWebMercator?.extents != null) {
+            if ( model.projectionWebMercator.extents.left == null || model.projectionWebMercator.extents.top == null ||
+                model.projectionWebMercator.extents.right == null || model.projectionWebMercator.extents.bottom == null) {
+                return null
+            }
+
+            fileExtent = RectangularAreaWebMercator(
+                model.projectionWebMercator.extents.left,
+                model.projectionWebMercator.extents.top,
+                model.projectionWebMercator.extents.right,
+                model.projectionWebMercator.extents.bottom)
+        } else if (model.projectionLcc?.extents != null) {
+            if ( model.projectionLcc.lat0 == null || model.projectionLcc.lat1 == null || model.projectionLcc.lat2 == null ||
+                model.projectionLcc.lon0 == null || model.projectionLcc.x0 == null || model.projectionLcc.y0 == null ||
+                model.projectionLcc.extents.left == null || model.projectionLcc.extents.top == null ||
+                model.projectionLcc.extents.right == null || model.projectionLcc.extents.bottom == null ) {
+                return null
+            }
+
+            val projectionDescription = ProjectionLccDescription(
+                lat0 = model.projectionLcc.lat0,
+                lat1 = model.projectionLcc.lat1,
+                lat2 = model.projectionLcc.lat2,
+                lon0 = model.projectionLcc.lon0,
+                x0 = model.projectionLcc.x0,
+                y0 = model.projectionLcc.y0
+            )
+            fileExtent = RectangularAreaLcc(
+                topLeftX = model.projectionLcc.extents.left,
+                topLeftY = -model.projectionLcc.extents.bottom,     //This switch is from https://gdal.org/user/raster_data_model.html "Affine GeoTransformation"
+                                                                    //"The (GT(0),GT(3)) position is the top left corner of the top left pixel of the raster."
+                bottomRightX = model.projectionLcc.extents.right,
+                bottomRightY = -model.projectionLcc.extents.top,
+                projectionDescription = projectionDescription
+            )
+        }
+
+        if ( fileExtent != null ) {
+            if (fileExtent.width > fileExtent.height)
+                this.tileHeight =
+                    round(this.tileWidth * fileExtent.height / fileExtent.width).toInt()
+            else
+                this.tileWidth =
+                    round(this.tileHeight * fileExtent.width / fileExtent.height).toInt()
+        }
+        this.fileExtent = fileExtent
+
+        return fileExtent?.convertToBox2d()
+    }
+
+    override fun dispose() {
+        this.isDisposed = true;
+    }
+
+    override fun resetRequestedInformationAgeRecord() {
+    }
+
+    override fun getRequestedInformationAgeSeconds(): LongRange? {
+        return null;
+    }
+
+    override fun receiveTile(
+        subsection: Box2d,      // The subsection (in percentage) of the tile being provided that should be drawn.
+                                    // This may be less than (0,0,1,1) if a substitute lower zoom tile is being provided
+        tile: Bitmap?,          // The actual tile image to draw
+        data: Any?,             // A renderData object specifying the location to draw the tile.  This must be
+                                    // modified by the subsection
+        immediate: Boolean,     // True if this function is being called on the main thread
+        canvas: Canvas?         // The canvas to draw on
+    ) {
+        if ( this.isDisposed || tile == null ||
+             !immediate || canvas == null ||
+             data == null || data !is RenderData ) {
+            this.map.requestRedraw()
+            return
+        }
+
+        val restoreTo = canvas.save()
+
+        val sourceRect = Rect(
+            (subsection.upperLeft.x * tile.width).toInt(),
+            (subsection.upperLeft.y * tile.height).toInt(),
+            (subsection.lowerRight.x * tile.width).toInt(),
+            (subsection.lowerRight.y * tile.height).toInt()
+        )
+        val destinationRect = RectF(
+            data.destination.upperLeft.x.toFloat(),
+            data.destination.upperLeft.y.toFloat(),
+            data.destination.lowerRight.x.toFloat(),
+            data.destination.lowerRight.y.toFloat()
+        )
+        canvas.drawBitmap(tile, sourceRect, destinationRect, null)
+
+        canvas.restoreToCount(restoreTo);
+    }
+
+    /**
+     *
+     * @param context
+     * @param region The region of the map to draw
+     * @param destination The actual pixels to draw on (this must be in screen pixel coordinates so zoom level can be determined)
+     */
+    override fun render(canvas: Canvas, region: Box2d, destination: Box2d) {
+        if (this.isDisposed) {
+            return;
+        }
+        val fileExtent = this.fileExtent ?: return
+
+        // Figure out the Box2d for the full map
+        val regionPercentage = fileExtent.convertToBox2d().overlapPercentageUpperLeft(region)
+        val fullMapDestinationWidth = (destination.upperLeft.x - destination.lowerRight.x) / (regionPercentage.upperLeft.x - regionPercentage.lowerRight.x)
+        val fullMapDestinationX = destination.upperLeft.x - fullMapDestinationWidth * regionPercentage.upperLeft.x
+        val fullMapDestinationHeight = (destination.upperLeft.y - destination.lowerRight.y) / (regionPercentage.upperLeft.y - regionPercentage.lowerRight.y)
+        val fullMapDestinationY = destination.upperLeft.y - fullMapDestinationHeight * regionPercentage.upperLeft.y
+
+        // Figure out the zoom level for what we are drawing
+        val zoom0TilePixelsPerMercator = this.tileWidth / fileExtent.width
+        val desiredPixelsPerMercator = destination.width / region.width
+        var zoomLevel = ceil(log2(desiredPixelsPerMercator / zoom0TilePixelsPerMercator)).toInt()
+        if (zoomLevel < 0)
+            zoomLevel = 0
+        if (zoomLevel > this.maxZoom)
+            zoomLevel = this.maxZoom
+
+        // Figure out what tiles we need to draw
+        val numTilesAcross = 2.0.pow(zoomLevel).toInt()
+        var startX = floor(regionPercentage.upperLeft.x * numTilesAcross).toInt()
+        var startY = floor(regionPercentage.upperLeft.y * numTilesAcross).toInt()
+        var endX = ceil(regionPercentage.lowerRight.x * numTilesAcross).toInt()
+        var endY = ceil(regionPercentage.lowerRight.y * numTilesAcross).toInt()
+
+        if ( startX < 0 ) {
+            startX = 0
+        }
+        if ( endX > numTilesAcross ) {
+            endX = numTilesAcross
+        }
+        if ( startY < 0 ) {
+            startY = 0
+        }
+        if ( endY > numTilesAcross ) {
+            endY = numTilesAcross
+        }
+
+        if (endX - startX > 40 || endY - startY > 40) {
+            return
+        }
+
+        // Get all the images to draw
+        for (x in startX until endX) {
+            for (y in startY until endY ) {
+                // Figure out where to draw this tile
+                val tileDestination = Box2d(
+                    fullMapDestinationX + fullMapDestinationWidth * (x / numTilesAcross.toDouble()),
+                    fullMapDestinationY + fullMapDestinationHeight * (y / numTilesAcross.toDouble()),
+                    fullMapDestinationX + fullMapDestinationWidth * ((x+1) / numTilesAcross.toDouble()),
+                    fullMapDestinationY + fullMapDestinationHeight * ((y+1) / numTilesAcross.toDouble()))
+
+                // Get the tile image and request it be drawn
+                this.tileProvider.retrieveTile(
+                    mapName = this.mapName,
+                    mapVersion = this.mapVersion,
+                    zoomLevel = zoomLevel,
+                    location = Point2d(x.toDouble(), y.toDouble()),     // The tile "id" to draw
+                    tileDimensions = this.tileDimensionPercentage,      // Always 1,1.  This is the percentage of the tile to draw to the screen.
+                                                                        // Modified by fileTile in the tile provider if the tile is not available but a lower zoom is.
+                    receiver = this,
+                    canvas = canvas,
+                    data = RenderData(tileDestination)    // Describes the place to draw the full tile, not a portion of the tile
+                )
+            }
+        }
+    }
+
+    override fun moveOffscreen() {
+    }
+
+    private data class RenderData(val destination: Box2d)
+}

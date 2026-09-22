@@ -1,0 +1,8 @@
+<resources>
+    <declare-styleable name="NavigableMap2d">
+        <attr name="mapRoot" format="string" />
+        <attr name="originLongitude" format="float" />
+        <attr name="originLatitude" format="float" />
+        <attr name="zoom" format="integer" />
+    </declare-styleable>
+</resources>
