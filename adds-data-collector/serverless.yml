@@ -1,0 +1,33 @@
+service: adds-data-collection
+provider:
+  name: aws
+  runtime: nodejs12.x
+  memorySize: 256
+  timeout: 15
+  iamRoleStatements:
+    - Effect: 'Allow'
+      Action:
+        - 's3:PutObject'
+        - 's3:PutObjectAcl'
+      Resource:
+        - 'arn:aws:s3:::blueskycharts.com/*'
+
+functions:
+  collect:
+    handler: src/main/index.handler
+    events:
+    - schedule:
+        name: fire-adds-data-collection
+        description: 'Performs periodic retrieval of METAR data'
+        rate: rate(5 minutes)
+
+package:
+  exclude:
+    - src/*.ts
+    - src/test
+    - package.json
+    - package-lock.json
+    - README.md
+    - tsconfig.json
+    - compile
+    - deploy
