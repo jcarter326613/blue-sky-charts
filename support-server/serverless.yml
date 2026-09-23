@@ -1,0 +1,30 @@
+service: support-server
+provider:
+  name: aws
+  runtime: nodejs12.x
+  memorySize: 512
+  timeout: 4
+  iamRoleStatements:
+    - Effect: 'Allow'
+      Action:
+        - 'ses:SendEmail'
+        - 'ses:SendRawEmail'
+      Resource:
+        - '*'
+
+functions:
+  submitSupportRequest:
+    handler: src/main/index.receiveWebsiteMessage
+    events:
+      - http: POST submitSupportRequest
+
+package:
+  exclude:
+    - src/*.ts
+    - src/test
+    - package.json
+    - package-lock.json
+    - README.md
+    - tsconfig.json
+    - compile
+    - deploy
