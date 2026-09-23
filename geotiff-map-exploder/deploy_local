@@ -1,0 +1,4 @@
+#!/bin/bash
+set -e
+
+cp ./maps/metadata.json ../vfr-green-site/static/maps/world-vfr/metadata.json

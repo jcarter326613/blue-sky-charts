@@ -1,0 +1,6 @@
+*.tif
+*.zip
+*.png*
+*.jpg
+*.geojson
+tiles

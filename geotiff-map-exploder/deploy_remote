@@ -1,0 +1,11 @@
+#!/bin/bash
+set -e
+
+if [[ -d "./maps/tiles" ]]
+then
+    rm -rf ./maps/tiles
+fi
+mkdir ./maps/tiles
+
+python3 deploy_remote.py ./maps/tiles/metadata.json
+aws s3 sync ./maps/tiles s3://blueskycharts.com/maps/world-vfr
