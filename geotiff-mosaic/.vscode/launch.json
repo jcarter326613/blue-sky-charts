@@ -1,0 +1,83 @@
+{
+    // Use IntelliSense to learn about possible attributes.
+    // Hover to view descriptions of existing attributes.
+    // For more information, visit: https://go.microsoft.com/fwlink/?linkid=830387
+    "version": "0.2.0",
+    "configurations": [
+        {
+            "type": "node",
+            "request": "launch",
+            "name": "Launch Mosaic",
+            "skipFiles": [
+                "<node_internals>/**"
+            ],
+            "program": "${workspaceFolder}/src/test/mosaic.js",
+            "outFiles": [
+                "${workspaceFolder}/**/*.js"
+            ],
+            "preLaunchTask": "tsc: build - tsconfig.json"
+        },
+        {
+            "type": "node",
+            "request": "launch",
+            "name": "Launch Mosaic no compile",
+            "skipFiles": [
+                "<node_internals>/**"
+            ],
+            "program": "${workspaceFolder}/src/test/mosaic.js",
+            "outFiles": [
+                "${workspaceFolder}/**/*.js"
+            ]
+        },
+        {
+            "type": "node",
+            "request": "launch",
+            "name": "Launch Sectional",
+            "skipFiles": [
+                "<node_internals>/**"
+            ],
+            "program": "${workspaceFolder}/src/test/sectional.js",
+            "outFiles": [
+                "${workspaceFolder}/**/*.js"
+            ],
+            "preLaunchTask": "tsc: build - tsconfig.json"
+        },
+        {
+            "type": "node",
+            "request": "launch",
+            "name": "Launch Sectional no compile",
+            "skipFiles": [
+                "<node_internals>/**"
+            ],
+            "program": "${workspaceFolder}/src/test/sectional.js",
+            "outFiles": [
+                "${workspaceFolder}/**/*.js"
+            ]
+        },
+        {
+            "type": "node",
+            "request": "launch",
+            "name": "Launch Terminal",
+            "skipFiles": [
+                "<node_internals>/**"
+            ],
+            "program": "${workspaceFolder}/src/test/terminal.js",
+            "outFiles": [
+                "${workspaceFolder}/**/*.js"
+            ],
+            "preLaunchTask": "tsc: build - tsconfig.json"
+        },
+        {
+            "type": "node",
+            "request": "launch",
+            "name": "Launch Terminal no compile",
+            "skipFiles": [
+                "<node_internals>/**"
+            ],
+            "program": "${workspaceFolder}/src/test/terminal.js",
+            "outFiles": [
+                "${workspaceFolder}/**/*.js"
+            ]
+        }
+    ]
+}

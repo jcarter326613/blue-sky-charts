@@ -1,0 +1,341 @@
+
+import { readFileSync, writeFileSync, existsSync, mkdirSync } from 'fs'
+import { ChangeSet } from '../models/change-set'
+import { execSync } from 'child_process'
+import { exit } from "process"
+import { createCanvas, loadImage } from 'canvas'
+import { Config } from '../models/config'
+import { SectionVersion } from '../models/section-version'
+import { SectionVersionList } from '../models/section-version-list'
+import { TileQueue } from './tile-queue'
+import { TileCache } from './tile-cache'
+import { TileDescription } from './tile-description'
+import { BoxGeo, CoordinateConversion, PointWebMercator, BoxWebMercator, PointGeo } from 'coordinates'
+import { Conversion } from '../models/conversion'
+import { MetadataManager } from './metadata-manager'
+import { ProjectionWebMercator } from '../models/projection-web-mercator'
+import { ProjectionExtents } from '../models/projection-extents'
+
+export class Generator {
+    private MAP_CONFIGURATION_FILE = "./data/config.json"
+    private SUBSECTION_META_FILE = "../geotiff-map-exploder/maps/metadata.json"
+    private PREVIOUS_METADATA_FILE = "./data/metadata.json"
+    private OUTPUT_DIRECTORY = "./output"
+
+    public async generateMosaics(): Promise<void> {
+        // Clean the output directory
+        if (existsSync(this.OUTPUT_DIRECTORY)) {
+            execSync(`rm -rf ${this.OUTPUT_DIRECTORY}`)
+        }
+        mkdirSync(this.OUTPUT_DIRECTORY);
+
+        let metadataManager = new MetadataManager()
+        let mosaicVersion = (new Date()).toISOString().replace(/\..+/, "").replace(":", "-").replace(":", "-")
+
+        // Load the configuration
+        let mapConfigurationFile = this.MAP_CONFIGURATION_FILE
+        let rawdata = readFileSync(mapConfigurationFile)
+        let configuration: Config = JSON.parse(rawdata.toString())
+    
+        if ( configuration.sections === undefined ) {
+            console.log("No sections to load")
+            return
+        }
+
+        // Load the previous generated metadata file
+        rawdata = readFileSync(this.PREVIOUS_METADATA_FILE)
+        let newSubSectionMetadata: Record<string, SectionVersionList> = JSON.parse(rawdata.toString())
+    
+        // Load the map subsection metadata
+        let subsectionMetaFile = this.SUBSECTION_META_FILE
+        rawdata = readFileSync(subsectionMetaFile)
+        let subSectionVersions: Record<string, SectionVersionList> = JSON.parse(rawdata.toString())
+        let subSectionMetadata = metadataManager.extractCurrentVersions(subSectionVersions)
+
+        // For each mosaic image to make
+        for ( let imageConfigurationName in configuration.sections ) {
+            let imageConfiguration = configuration.sections[imageConfigurationName]
+            if ( imageConfiguration.subMaps === undefined ) {
+                continue
+            }
+
+            // Figure out the max zoom
+            let maxZoom: number | undefined
+            let mosaicExtentsMercator = this.getMosaicExtentsMercator(imageConfiguration.subMaps, subSectionMetadata)
+            for ( let subTileName of imageConfiguration.subMaps ) {
+                // Get the max resolution of the sub map
+                let metadata = subSectionMetadata[subTileName]
+                if ( metadata.mosaicImageHeight === undefined || metadata.mosaicImageWidth === undefined || 
+                    metadata.tileWidth === undefined || metadata.mosaicMaxZoom === undefined || metadata.mosaicFileExtent === undefined) {
+                    continue
+                }
+                let extentsBoxGeo = Conversion.convertFileExtentToBoxGeo(metadata.mosaicFileExtent)
+                if ( extentsBoxGeo === undefined ) {
+                    continue
+                }
+                let extentsMercator = CoordinateConversion.convertBoxGeoToBoxMercator(extentsBoxGeo)
+                let multiplier = 1
+                if ( metadata.mosaicImageHeight > metadata.mosaicImageWidth ) {
+                    multiplier = metadata.mosaicImageWidth / metadata.mosaicImageHeight
+                }
+                let maxZoomPixelWidth = metadata.tileWidth * multiplier * (2 ** metadata.mosaicMaxZoom)
+                let maxZoomResolution = maxZoomPixelWidth / extentsMercator.getWidth()
+                
+                // Get the corresponding zoom for the large tile
+                let targetPixelWidth = maxZoomResolution * mosaicExtentsMercator.getWidth()
+                let targetZoom = Math.ceil(Math.log2(targetPixelWidth / TileDescription.TILE_DIMENSIONS_PIXELS))
+                if ( maxZoom === undefined || maxZoom > targetZoom ) {
+                    maxZoom = targetZoom
+                }
+            }
+            if ( imageConfiguration.maxZoom !== undefined && (maxZoom === undefined || imageConfiguration.maxZoom < maxZoom) ) {
+                maxZoom = imageConfiguration.maxZoom
+            }
+            if ( maxZoom === undefined ) {
+                continue
+            }
+
+            // Start setting up the metadata for the mosaic tile
+            let newSectionData = new SectionVersion()
+            newSectionData.maxZoom = maxZoom
+            newSectionData.tileWidth = TileDescription.TILE_DIMENSIONS_PIXELS
+            newSectionData.version = mosaicVersion
+            let changeSet: Record<string, ChangeSet> = {}
+
+            // Update the effective and expiration dates
+            let latestEffective: Date | undefined
+            let earliestExpiration: Date | undefined
+
+            // For each zoom level
+            for ( let zoom = 0; zoom <= maxZoom; zoom++ ) {
+                console.log(`Starting zoom level ${zoom}`)
+
+                // Create a lookup of all the tiles to generate and which sections are needed to create them
+                let tileCache = new TileCache()
+                let tileQueue = new TileQueue(imageConfiguration.subMaps, subSectionMetadata, metadataManager, tileCache, zoom, new Date())
+
+                // Update the effective and expiration dates
+                let effectiveDate = tileQueue.latestEffective
+                if (latestEffective === undefined || (effectiveDate !== undefined && latestEffective < effectiveDate)) {
+                    latestEffective = effectiveDate
+                }
+
+                let expirationDate = tileQueue.earliestExpiration
+                if (earliestExpiration === undefined || (expirationDate !== undefined && earliestExpiration > expirationDate)) {
+                    earliestExpiration = expirationDate
+                }
+
+                // Update the changeset
+                let newChangeSet = tileQueue.getChangeSet()
+                for ( let effectiveDate of Object.keys(newChangeSet) ) {
+                    if ( !(effectiveDate in changeSet) ) {
+                        changeSet[effectiveDate] = new ChangeSet()
+                        changeSet[effectiveDate].tiles = []
+                    }
+                    let newTiles = newChangeSet[effectiveDate].tiles
+                    let oldTiles = changeSet[effectiveDate].tiles
+                    if ( oldTiles === undefined ) {
+                        oldTiles = {}
+                        changeSet[effectiveDate].tiles = oldTiles
+                    }
+                    if ( newTiles != undefined ) {
+                        for ( let zoom of Object.keys(newTiles) ) {
+                            let zoomNum = parseInt(zoom)
+                            if ( !(zoomNum in oldTiles) ) {
+                                oldTiles[zoomNum] = {}
+                            }
+                            
+                            for ( let x of Object.keys(newTiles[zoomNum])) {
+                                let xNum = parseInt(x)
+                                if ( !(xNum in oldTiles[zoomNum]) ) {
+                                    oldTiles[zoomNum][xNum] = []
+                                }
+                                for ( let y of newTiles[zoomNum][xNum] ) {
+                                    let hasY = false
+                                    for ( let oldY of oldTiles[zoomNum][xNum] ) {
+                                        if ( oldY == y ) {
+                                            hasY = true
+                                            break
+                                        }
+                                    }
+                                    if ( !hasY ) {
+                                        oldTiles[zoomNum][xNum].push(y)
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+    
+                // For each tile to generate, sorted in order of the alphabetical order of dependents
+                while ( tileQueue.hasNext() ) {
+                    let tile = tileQueue.pop();
+                    if ( tile === undefined ) {
+                        continue
+                    }
+                    if ( zoom == 0 ) {
+                        newSectionData.projectionWebMercator = new ProjectionWebMercator()
+                        newSectionData.projectionWebMercator.extents = new ProjectionExtents()
+                        newSectionData.projectionWebMercator.extents.left = tile.tileExtent.getTopLeft().x
+                        newSectionData.projectionWebMercator.extents.top = tile.tileExtent.getTopLeft().y
+                        newSectionData.projectionWebMercator.extents.right = tile.tileExtent.getBottomRight().x
+                        newSectionData.projectionWebMercator.extents.bottom = tile.tileExtent.getBottomRight().y
+
+                        newSectionData.imageWidth = tile.tileExtent.getWidth() * (maxZoom + 1)
+                        newSectionData.imageHeight = tile.tileExtent.getHeight() * (maxZoom + 1)
+                    }
+
+                    // Compose the tile with world map drawn first, then each section in alphabetical order
+                    await this.createTile(tile, imageConfigurationName, mosaicVersion)
+                }
+
+                tileCache.dispose()
+            }
+
+            // Save the effective and expiration dates
+            if (latestEffective !== undefined) {
+                newSectionData.effectiveDate = `${latestEffective.getFullYear()}-${this.digitPad(latestEffective.getMonth()+1, 2)}-${this.digitPad(latestEffective.getDate(), 2)} ${this.digitPad(latestEffective.getHours(), 2)}-${this.digitPad(latestEffective.getMinutes(), 2)}`
+            }
+            if (earliestExpiration !== undefined) {
+                newSectionData.expirationDate = `${earliestExpiration.getFullYear()}-${this.digitPad(earliestExpiration.getMonth()+1, 2)}-${this.digitPad(earliestExpiration.getDate(), 2)} ${this.digitPad(earliestExpiration.getHours(), 2)}-${this.digitPad(earliestExpiration.getMinutes(), 2)}`
+            }
+
+            // Save the metadata for this new tile
+            if ( Object.keys(changeSet).length > 1 ) {
+                console.error("Major issues with changeset effective dates")
+                exit(1)
+            } else if ( Object.keys(changeSet).length == 1 ) {
+                if ( newSectionData.changeSet === undefined ) {
+                    newSectionData.changeSet = new ChangeSet()
+                }
+                for ( let effectiveDate of Object.keys(changeSet) ) {
+                    newSectionData.changeSet.tiles = changeSet[effectiveDate].tiles
+                }
+            }
+
+            let versionList = newSubSectionMetadata[imageConfigurationName]
+            if (versionList === undefined) {
+                versionList = new SectionVersionList()
+            }
+            if (versionList.versions === undefined) {
+                versionList.versions = {}
+            }
+            versionList.versions[newSectionData.version] = newSectionData
+            newSubSectionMetadata[imageConfigurationName] = versionList
+        }
+
+        // Write out the new metadata
+        let newMetadataString = JSON.stringify(newSubSectionMetadata)
+        writeFileSync("./output/metadata.json", newMetadataString)
+        writeFileSync(this.PREVIOUS_METADATA_FILE, newMetadataString)
+    }
+
+    private digitPad(n: number, length: number): string {
+        let s = `${n}`
+        return s.padStart(length, "0")
+    }
+
+    private getMosaicExtentsMercator(imageConfiguration: string[], subSectionMetadata: Record<string, SectionVersion>): BoxWebMercator {
+        let startLatitude: number | undefined
+        let endLatitude: number | undefined
+        let startLongtude: number | undefined
+        let endLongtude: number | undefined
+        for ( let sectionName of imageConfiguration ) {
+            let sectionMetadata = subSectionMetadata[sectionName]
+
+            if ( sectionMetadata === undefined || sectionMetadata.mosaicFileExtent === undefined ||
+                sectionMetadata.mosaicFileExtent.topLeft === undefined || 
+                sectionMetadata.mosaicFileExtent.topLeft.latitude === undefined || sectionMetadata.mosaicFileExtent.topLeft.longitude === undefined ||
+                sectionMetadata.mosaicFileExtent.bottomRight === undefined || 
+                sectionMetadata.mosaicFileExtent.bottomRight.latitude === undefined || sectionMetadata.mosaicFileExtent.bottomRight.longitude === undefined ) {
+                console.error(`Error loading map ${sectionName} from metadata.json`)
+                exit(1)
+            }
+
+            if ( endLatitude === undefined || sectionMetadata.mosaicFileExtent.topLeft.latitude > endLatitude ) {
+                endLatitude = sectionMetadata.mosaicFileExtent.topLeft.latitude
+            }
+            if ( startLatitude === undefined || sectionMetadata.mosaicFileExtent.bottomRight.latitude < startLatitude ) {
+                startLatitude = sectionMetadata.mosaicFileExtent.bottomRight.latitude
+            }
+            if ( endLongtude === undefined || sectionMetadata.mosaicFileExtent.bottomRight.longitude > endLongtude ) {
+                endLongtude = sectionMetadata.mosaicFileExtent.bottomRight.longitude
+            }
+            if ( startLongtude === undefined || sectionMetadata.mosaicFileExtent.topLeft.longitude < startLongtude ) {
+                startLongtude = sectionMetadata.mosaicFileExtent.topLeft.longitude
+            }
+        }
+
+        return CoordinateConversion.convertBoxGeoToBoxMercator(new BoxGeo(
+            new PointGeo(startLongtude, endLatitude), new PointGeo(endLongtude, startLatitude)
+        ))
+    }
+
+    private async createTile(tile: TileDescription, mapName: string, mapVersion: string): Promise<void> {
+        // Create a bitmap to draw on
+        let canvas = createCanvas(tile.widthPixels, tile.heightPixels)
+        let context = canvas.getContext("2d")
+
+        // Draw the background onto it
+        let shadowImage = await loadImage("./data/world-shadow.png") // TODO: replace the world shadow with another image, preferably higher resolution
+        let entireAreaBoxGeo = new BoxGeo(
+            new PointGeo(CoordinateConversion.MIN_LONGITUDE, CoordinateConversion.MAX_LATITUDE),
+            new PointGeo(CoordinateConversion.MAX_LONGITUDE, CoordinateConversion.MIN_LATITUDE))
+        let entireAreaBoxMercator = CoordinateConversion.convertBoxGeoToBoxMercator(entireAreaBoxGeo)
+        let entireAreaBox2d = CoordinateConversion.convertBoxMercatorToBox2d(entireAreaBoxMercator)
+        let tileExtent2d = CoordinateConversion.convertBoxMercatorToBox2d(tile.tileExtent)
+        let percentageMultiplier = shadowImage.width / entireAreaBoxMercator.getWidth()
+
+        context.drawImage(shadowImage, 
+            (tileExtent2d.getUpperLeft().x - entireAreaBox2d.getUpperLeft().x) * percentageMultiplier,
+            (tileExtent2d.getUpperLeft().y - entireAreaBox2d.getUpperLeft().y) * percentageMultiplier,
+            tileExtent2d.getWidth() * percentageMultiplier,
+            tileExtent2d.getHeight() * percentageMultiplier,
+            0, 0, tile.widthPixels, tile.heightPixels)
+
+        // Draw each image onto the bitmap in the correct position
+        for ( let i = 0; i < tile.getNumSubMaps(); i++ ) {
+            let subTileExtents = tile.getSubTileDestinations2d(i)
+            let subTileImagePaths = tile.getImagePaths(i)
+
+            // For each image, load the image off the path and draw it on the parent tile
+            for ( let j = 0; j < subTileImagePaths.length; j++ ) {
+                let image = await loadImage(subTileImagePaths[j])
+                let destinationExtent2d = subTileExtents[j]
+
+                context.drawImage(
+                    image, 
+                    0, 0, image.naturalWidth, image.naturalHeight,
+                    Math.floor(destinationExtent2d.getUpperLeft().x), 
+                    Math.floor(destinationExtent2d.getUpperLeft().y), 
+                    Math.ceil(destinationExtent2d.getWidth()), 
+                    Math.ceil(destinationExtent2d.getHeight()))
+            }
+        }
+
+        // Write the tile out to disk
+        if (!existsSync(this.OUTPUT_DIRECTORY)){
+            mkdirSync(this.OUTPUT_DIRECTORY);
+        }
+        let areaDirectory = `${this.OUTPUT_DIRECTORY}/${mapName}`
+        if (!existsSync(areaDirectory)){
+            mkdirSync(areaDirectory);
+        }
+        let versionDirectory = `${areaDirectory}/${mapVersion}`
+        if (!existsSync(versionDirectory)){
+            mkdirSync(versionDirectory);
+        }
+        let zoomDirectory = `${versionDirectory}/${tile.zoom}`
+        if (!existsSync(zoomDirectory)){
+            mkdirSync(zoomDirectory);
+        }
+        let pngPath = `${zoomDirectory}/${tile.x}_${tile.y}.png`
+        let stream = canvas.toBuffer()
+        writeFileSync(pngPath, stream)
+
+        // Convert the png to a jpeg and clean up the png
+        let jpegPath = `${zoomDirectory}/${tile.x}_${tile.y}.jpg`
+        execSync(`convert ${pngPath} -quality 90 ${jpegPath}`)
+        execSync(`rm ${pngPath}`)
+    }
+}
