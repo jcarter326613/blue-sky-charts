@@ -1,0 +1,23 @@
+service: version-authorization
+provider:
+  name: aws
+  runtime: nodejs12.x
+  memorySize: 512
+  timeout: 4
+
+functions:
+  appVersion:
+    handler: src/main/index.appVersion
+    events:
+      - http: GET appVersion
+
+package:
+  exclude:
+    - src/*.ts
+    - src/test
+    - package.json
+    - package-lock.json
+    - README.md
+    - tsconfig.json
+    - compile
+    - deploy
